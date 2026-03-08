@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>srbot</title>
+  <link rel="stylesheet" href="/static/css/style.css?v=2">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+
+<!-- ── Home ── -->
+<div id="screen-home" class="screen active">
+  <div class="header" style="padding: 16px var(--gap) 20px;">
+    <div class="header-title">🤖 SRbot Mini App</div>
+  </div>
+
+  <div style="padding: 0 var(--gap);">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div style="font-size:18px; margin-bottom:4px">🧠</div>
+        <div class="stat-val" id="stat-due">—</div>
+        <div class="stat-label">to review</div>
+      </div>
+      <div class="stat-card">
+        <div style="font-size:18px; margin-bottom:4px">🌱</div>
+        <div class="stat-val" id="stat-new">—</div>
+        <div class="stat-label">new words</div>
+      </div>
+    </div>
+
+    <div class="card" style="padding: 12px 16px;">
+        <div class="progress-label" style="margin-top:0; margin-bottom:8px;">
+            <span id="home-learned" style="font-weight: 600; color: var(--text);">0 learned</span>
+            <span id="home-pct">0%</span>
+        </div>
+        <div class="progress-track" style="height: 8px;">
+            <div class="progress-fill" id="home-progress" style="width:0%"></div>
+        </div>
+    </div>
+
+    <button class="btn" onclick="startPractice()" id="btn-practice">Practice</button>
+  </div>
+</div>
+
+<!-- ── Practice ── -->
+<div id="screen-practice" class="screen">
+  <div style="padding: var(--gap);">
+    <div class="practice-header">
+      <span id="practice-progress">0 / 0</span>
+      <span id="practice-type" class="practice-badge"></span>
+    </div>
+    <div class="progress-wrap" style="margin-bottom:var(--gap)">
+      <div class="progress-track">
+        <div class="progress-fill" id="practice-bar" style="width:0%"></div>
+      </div>
+    </div>
+    <div class="word-card">
+      <div class="word-inner">
+        <div class="word-face word-front">
+          <div class="word-main" id="word-front"></div>
+        </div>
+        <div class="word-face word-back" id="word-back">
+          <div class="word-trans" id="word-translation"></div>
+          <div class="word-example" id="word-ex"></div>
+        </div>
+      </div>
+    </div>
+    <button class="btn" id="btn-show" onclick="showAnswer()">Show answer</button>
+    <div class="grade-row" id="grade-row" style="display:none">
+      <button class="grade-btn grade-again" onclick="grade(1)">Again</button>
+      <button class="grade-btn grade-hard"  onclick="grade(3)">Hard</button>
+      <button class="grade-btn grade-good"  onclick="grade(5)">Good</button>
+    </div>
+    <button class="btn secondary" onclick="exitPractice()">Exit</button>
+  </div>
+</div>
+
+<!-- ── Practice summary ── -->
+<div id="screen-summary" class="screen">
+  <div style="padding: var(--gap);">
+    <div class="header-title" style="margin-bottom:20px; text-align:center">Session complete!</div>
+    
+    <div class="card" style="text-align:center; padding: 24px 16px;">
+        <div style="font-size:40px; margin-bottom:12px;">🏆</div>
+        <div style="font-size:18px; font-weight:700;" id="sum-total-msg">You reviewed 0 words</div>
+    </div>
+
+    <div class="stats-grid" style="grid-template-columns: 1fr 1fr 1fr; margin-bottom: 20px;">
+        <div class="stat-card" style="padding: 10px;">
+            <div class="stat-val" style="font-size:18px; color:#30d158" id="sum-good">0</div>
+            <div class="stat-label">Good</div>
+        </div>
+        <div class="stat-card" style="padding: 10px;">
+            <div class="stat-val" style="font-size:18px; color:#ffd60a" id="sum-hard">0</div>
+            <div class="stat-label">Hard</div>
+        </div>
+        <div class="stat-card" style="padding: 10px;">
+            <div class="stat-val" style="font-size:18px; color:#ff453a" id="sum-again">0</div>
+            <div class="stat-label">Again</div>
+        </div>
+    </div>
+
+    <button class="btn" onclick="showScreen('home'); loadHome()">Done</button>
+  </div>
+</div>
+
+<!-- ── Add ── -->
+<div id="screen-add" class="screen">
+  <div style="padding: var(--gap);">
+    <div class="header-title" style="margin-bottom:4px">➕ Add words</div>
+    <textarea id="add-input" placeholder="word,translate,example"></textarea>
+    
+    <button class="btn" onclick="submitWords()">Add</button>
+
+    <label class="file-input-label" for="file-input">📎 Upload CSV file</label>
+    <input type="file" id="file-input" accept=".csv" onchange="handleFileUpload(this)">
+
+  </div>
+</div>
+
+<!-- ── Search ── -->
+<div id="screen-search" class="screen">
+  <div style="padding: var(--gap);">
+    <div class="header-title" style="margin-bottom:16px">🔍 Search</div>
+    <div class="search-input-wrap">
+      <input class="search-input" id="search-input" type="text"
+             placeholder="Search words..." oninput="onSearchInput(this.value)">
+    </div>
+    <div id="search-results"></div>
+  </div>
+</div>
+
+<!-- ── Settings ── -->
+<div id="screen-settings" class="screen">
+  <div style="padding: var(--gap);">
+    <div class="header-title" style="margin-bottom:16px">⚙️ Settings</div>
+    
+    <div class="card">
+      <div class="card-title">Practice</div>
+      <div class="settings-row">
+        <span class="settings-label">New words per session</span>
+        <input type="number" id="set-limit" min="5" max="50"
+               onchange="saveSetting('daily_limit', this.value)">
+      </div>
+      <div class="settings-row">
+        <span class="settings-label">Practice direction</span>
+        <div class="practice-switch">
+          <button type="button" class="practice-opt active" id="mode-word" data-mode="word_to_translation" onclick="setPracticeMode('word_to_translation')">DE</button>
+          <button type="button" class="practice-opt" id="mode-trans" data-mode="translation_to_word" onclick="setPracticeMode('translation_to_word')">RU</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Notifications</div>
+      <div class="settings-row">
+        <span class="settings-label">Interval in minutes</span>
+        <input type="number" id="set-notify-interval" min="1" max="480"
+               onchange="saveSetting('notification_interval_minutes', parseInt(this.value))">
+      </div>
+      <div class="settings-row">
+        <span class="settings-label">Do Not Disturb</span>
+        <div class="time-wrap">
+            <input type="time" id="set-quiet-start" onchange="saveSetting('quiet_start', this.value)">
+            <span style="color:var(--hint)">—</span>
+            <input type="time" id="set-quiet-end" onchange="saveSetting('quiet_end', this.value)">
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Data</div>
+      <button type="button" class="btn-share" onclick="shareWords()">Share</button>
+    </div>
+
+    <div class="info-footer">
+        <div id="info-tz">Timezone: Europe/Berlin</div>
+        <div id="info-words">Words in dictionary: —</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Nav bar ── -->
+<nav class="nav">
+  <button class="nav-btn active" id="nav-home" onclick="showScreen('home'); loadHome()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+      <polyline points="9 22 9 12 15 12 15 22"/>
+    </svg>
+    Home
+  </button>
+  <button class="nav-btn" id="nav-add" onclick="showScreen('add')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="10"/>
+      <line x1="12" x2="12" y1="8" y2="16"/>
+      <line x1="8" x2="16" y1="12" y2="12"/>
+    </svg>
+    Add
+  </button>
+  <button class="nav-btn" id="nav-search" onclick="showScreen('search'); loadSearch('')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="11" cy="11" r="8"/>
+      <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+    </svg>
+    Search
+  </button>
+  <button class="nav-btn" id="nav-settings" onclick="showScreen('settings'); loadSettings()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="3"/>
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+    </svg>
+    Settings
+  </button>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<script src="/static/js/app.js?v=2"></script>
+</body>
+</html>

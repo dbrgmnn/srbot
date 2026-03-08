@@ -1,0 +1,102 @@
+from aiohttp import web
+import aiosqlite
+from db.repository import UserRepo, WordRepo
+from core.scheduler import reschedule
+
+
+def setup_routes_settings(app: web.Application, db: aiosqlite.Connection):
+
+    async def get_settings(request: web.Request) -> web.Response:
+        telegram_id = request["telegram_id"]
+        user_repo = UserRepo(db)
+        word_repo = WordRepo(db)
+        user_id = await user_repo.get_or_create(telegram_id)
+        settings = await user_repo.get_user_settings(telegram_id)
+        total_count = await word_repo.get_word_count(user_id, 'de')
+        config = request.app["config"]
+        return web.json_response({
+            **settings,
+            "total_words": total_count,
+            "timezone": config.timezone,
+        })
+
+    async def update_settings(request: web.Request) -> web.Response:
+        telegram_id = request["telegram_id"]
+        body = await request.json()
+        user_repo = UserRepo(db)
+
+        if "daily_limit" in body:
+            try:
+                limit = int(body["daily_limit"])
+            except (TypeError, ValueError):
+                return web.json_response(
+                    {"error": "invalid_number", "msg": "daily_limit must be an integer"},
+                    status=400,
+                )
+            if 5 <= limit <= 50:
+                await user_repo.update_daily_limit(telegram_id, limit)
+            else:
+                return web.json_response({"error": "limit_out_of_range", "msg": "Limit must be between 5 and 50"}, status=400)
+
+        if "notification_interval_minutes" in body:
+            try:
+                interval = int(body["notification_interval_minutes"])
+            except (TypeError, ValueError):
+                return web.json_response(
+                    {"error": "invalid_number", "msg": "notification_interval_minutes must be an integer"},
+                    status=400,
+                )
+            if 1 <= interval <= 480:
+                await user_repo.update_notification_interval(telegram_id, interval)
+                scheduler = request.app["scheduler"]
+                if scheduler:
+                    await reschedule(scheduler, db)
+            else:
+                return web.json_response({"error": "interval_out_of_range", "msg": "Interval must be between 1 and 480"}, status=400)
+
+        def _is_valid_time(value: str) -> bool:
+            try:
+                parts = value.split(":")
+                if len(parts) != 2:
+                    return False
+                h, m = map(int, parts)
+                return 0 <= h <= 23 and 0 <= m <= 59
+            except (TypeError, ValueError):
+                return False
+
+        if "practice_mode" in body:
+            mode = body.get("practice_mode")
+            allowed = {"word_to_translation", "translation_to_word"}
+            if mode not in allowed:
+                return web.json_response(
+                    {"error": "invalid_mode", "msg": "practice_mode must be one of: word_to_translation, translation_to_word"},
+                    status=400,
+                )
+            await user_repo.update_practice_mode(telegram_id, mode)
+
+        if "quiet_start" in body or "quiet_end" in body:
+            quiet_start = body.get("quiet_start")
+            quiet_end = body.get("quiet_end")
+
+            if quiet_start is not None and not _is_valid_time(quiet_start):
+                return web.json_response(
+                    {"error": "invalid_time_format", "msg": "quiet_start must be in HH:MM format"},
+                    status=400,
+                )
+            if quiet_end is not None and not _is_valid_time(quiet_end):
+                return web.json_response(
+                    {"error": "invalid_time_format", "msg": "quiet_end must be in HH:MM format"},
+                    status=400,
+                )
+
+            await user_repo.update_quiet_hours(
+                telegram_id,
+                quiet_start=quiet_start,
+                quiet_end=quiet_end,
+            )
+
+        settings = await user_repo.get_user_settings(telegram_id)
+        return web.json_response(settings)
+
+    app.router.add_get("/api/settings", get_settings)
+    app.router.add_post("/api/settings", update_settings)
