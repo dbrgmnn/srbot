@@ -177,5 +177,5 @@ BOT_TOKEN=         # from @BotFather
 ALLOWED_USERS=     # comma-separated Telegram user IDs
 DB_PATH=srbot.db
 TIMEZONE=Europe/Berlin
-API_PORT=8080
+API_PORT=8081
 ```
