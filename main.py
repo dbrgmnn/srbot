@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import signal
 
 from aiogram import Bot
 
@@ -38,10 +39,18 @@ async def main():
 
     await notify_all(bot, config.allowed_users, "🟢 srbot started")
     logger.info("Starting...")
+
+    stop_event = asyncio.Event()
+
+    def handle_signal():
+        stop_event.set()
+
+    loop = asyncio.get_running_loop()
+    loop.add_signal_handler(signal.SIGTERM, handle_signal)
+    loop.add_signal_handler(signal.SIGINT, handle_signal)
+
     try:
-        await asyncio.Event().wait()
-    except (asyncio.CancelledError, KeyboardInterrupt):
-        pass
+        await stop_event.wait()
     finally:
         await notify_all(bot, config.allowed_users, "🔴 srbot stopped")
         scheduler.shutdown()
