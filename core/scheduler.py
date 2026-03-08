@@ -18,8 +18,12 @@ JOB_ID = "check_notifications"
 # ── Notification texts ────────────────────────────────────────────────────
 
 def build_notification_text(due: int, new: int) -> str:
-    total = due + new
-    return f"🇩🇪 Есть слова для повторения. — {total}"
+    parts = []
+    if due > 0:
+        parts.append(f"{due} to review")
+    if new > 0:
+        parts.append(f"{new} new words")
+    return "🇩🇪 " + " · ".join(parts)
 
 
 # ── Quiet hours ───────────────────────────────────────────────────────────

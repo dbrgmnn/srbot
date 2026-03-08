@@ -15,6 +15,14 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+async def notify_all(bot: Bot, allowed_users: set, text: str):
+    for uid in allowed_users:
+        try:
+            await bot.send_message(chat_id=uid, text=text)
+        except Exception as e:
+            logger.warning(f"Failed to notify {uid}: {e}")
+
+
 async def main():
     config = load_config()
 
@@ -28,12 +36,14 @@ async def main():
     api_runner = await start_api_server(config, db, scheduler)
     logger.info(f"Scheduler started — timezone: {config.timezone}")
 
+    await notify_all(bot, config.allowed_users, "🟢 srbot started")
     logger.info("Starting...")
     try:
         await asyncio.Event().wait()
     except (asyncio.CancelledError, KeyboardInterrupt):
         pass
     finally:
+        await notify_all(bot, config.allowed_users, "🔴 srbot stopped")
         scheduler.shutdown()
         await api_runner.cleanup()
         await db.close()
