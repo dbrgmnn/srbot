@@ -300,11 +300,30 @@ function onSearchInput(val) {
   searchTimer = setTimeout(() => loadSearch(val), 300);
 }
 
+function highlight(text, query) {
+  if (!query || query.length < 2) return esc(text);
+  const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const parts = text.split(new RegExp(`(${escapedQuery})`, 'gi'));
+  return parts.map(p => {
+    return p.toLowerCase() === query.toLowerCase()
+      ? `<mark>${esc(p)}</mark>`
+      : esc(p);
+  }).join('');
+}
+
 async function loadSearch(query) {
+  const el = document.getElementById('search-results');
+  if (!el) return;
+
+  const q = (query || '').trim();
+
+  if (q.length < 2) {
+    el.innerHTML = '';
+    return;
+  }
+
   try {
-    const data = await GET(`/api/words/search?q=${encodeURIComponent(query)}`);
-    const el   = document.getElementById('search-results');
-    if (!el) return;
+    const data = await GET(`/api/words/search?q=${encodeURIComponent(q)}`);
     if (!data.words || data.words.length === 0) {
       el.innerHTML = `<div class="no-results">No results</div>`;
       return;
@@ -312,8 +331,8 @@ async function loadSearch(query) {
     el.innerHTML = data.words.map(w => `
       <div class="word-row" id="wr-${w.id}">
         <div class="word-row-content" onclick='openEdit(${JSON.stringify(w)})'>
-          <div class="word-row-text">${esc(w.word)}</div>
-          <div class="word-row-trans">${esc(w.translation)}</div>
+          <div class="word-row-text">${highlight(w.word, query)}</div>
+          <div class="word-row-trans">${highlight(w.translation, query)}</div>
         </div>
         <button class="del-btn" onclick="deleteWord(${w.id})">✕</button>
       </div>

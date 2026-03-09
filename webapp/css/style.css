@@ -328,6 +328,13 @@ input[type="number"] { text-align: right; width: 60px; background: var(--bg); pa
 .text-hint { color: var(--hint); }
 .text-accent { color: var(--accent); }
 
+mark {
+  background: rgba(10, 132, 255, 0.25);
+  color: var(--accent);
+  border-radius: 2px;
+  padding: 0 2px;
+}
+
 /* ── Utility ── */
 .mt-8 { margin-top: 8px; }
 .p-gap { padding: var(--gap); }
