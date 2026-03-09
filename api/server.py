@@ -59,9 +59,19 @@ async def create_app(config: Config, db: aiosqlite.Connection, scheduler=None) -
     async def index(request: web.Request) -> web.Response:
         return web.FileResponse(WEBAPP_DIR / "index.html")
 
+    async def static_handler(request: web.Request) -> web.Response:
+        # serve static files with no-cache so browser always gets fresh version
+        rel = request.match_info["path"]
+        file_path = WEBAPP_DIR / rel
+        if not file_path.exists() or not file_path.is_file():
+            raise web.HTTPNotFound()
+        response = web.FileResponse(file_path)
+        response.headers["Cache-Control"] = "no-cache"
+        return response
+
     if WEBAPP_DIR.exists():
         app.router.add_get("/", index)
-        app.router.add_static("/static", WEBAPP_DIR, name="webapp")
+        app.router.add_get("/static/{path:.*}", static_handler)
 
     return app
 
