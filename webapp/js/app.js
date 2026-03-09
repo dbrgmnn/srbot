@@ -144,33 +144,44 @@ function renderWord() {
   const typeEl  = document.getElementById('practice-type');
   const barEl   = document.getElementById('practice-bar');
   const frontEl = document.getElementById('word-front');
-  const showBtn = document.getElementById('btn-show');
-  const gradeRow = document.getElementById('grade-row');
 
-  if (progEl)   progEl.textContent   = `${sessionIdx + 1} / ${total}`;
+  if (progEl) progEl.textContent = `${sessionIdx + 1} / ${total}`;
   if (typeEl) {
     const isReview = Number(word.repetitions) > 0;
     typeEl.textContent = isReview ? 'Review' : 'New';
     typeEl.className = 'practice-badge ' + (isReview ? 'practice-badge-review' : 'practice-badge-new');
   }
-  if (barEl)    barEl.style.width    = `${pct}%`;
+  if (barEl) barEl.style.width = `${pct}%`;
   if (frontEl) {
     frontEl.textContent = (practiceMode === 'translation_to_word')
       ? word.translation
       : word.word;
   }
+
+  // reset card
   const card = document.querySelector('.word-card');
-  if (card) card.classList.remove('flipped');
-  if (showBtn)  showBtn.style.display = 'block';
-  if (gradeRow) gradeRow.style.display = 'none';
+  if (card) {
+    card.classList.remove('flipped');
+    card.onclick = flipCard;
+  }
+
+  // lock grade buttons until flip
+  ['grade-again', 'grade-hard', 'grade-good'].forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) btn.disabled = true;
+  });
+}
+
+function flipCard() {
+  const card = document.querySelector('.word-card');
+  if (!card || card.classList.contains('flipped')) return;
+  showAnswer();
 }
 
 function showAnswer() {
   const word    = sessionWords[sessionIdx];
   const transEl = document.getElementById('word-translation');
   const exEl    = document.getElementById('word-ex');
-  const showBtn = document.getElementById('btn-show');
-  const gradeRow = document.getElementById('grade-row');
 
   if (transEl) {
     transEl.textContent = (practiceMode === 'translation_to_word')
@@ -179,16 +190,22 @@ function showAnswer() {
   }
   if (exEl) {
     if (word.example) {
-      exEl.textContent  = word.example;
+      exEl.textContent   = word.example;
       exEl.style.display = 'block';
     } else {
       exEl.style.display = 'none';
     }
   }
-  if (showBtn)  showBtn.style.display = 'none';
-  if (gradeRow) gradeRow.style.display = 'grid';
+
   const card = document.querySelector('.word-card');
   if (card) card.classList.add('flipped');
+
+  // unlock grade buttons after flip
+  ['grade-again', 'grade-hard', 'grade-good'].forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) btn.disabled = false;
+  });
+
   tg.HapticFeedback.impactOccurred('light');
 }
 
@@ -416,7 +433,7 @@ function setPracticeMode(mode) {
   saveSetting('practice_mode', mode);
 }
 
-// ── Derete all words ─────────────────────────────────────────────────────
+// ── Delete all words ─────────────────────────────────────────────────────
 
 function clearAllWords() {
   tg.showConfirm('Delete all words?', async (confirmed) => {

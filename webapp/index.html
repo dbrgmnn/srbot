@@ -66,11 +66,10 @@
         </div>
       </div>
     </div>
-    <button class="btn" id="btn-show" onclick="showAnswer()">Show answer</button>
-    <div class="grade-row" id="grade-row" style="display:none">
-      <button class="grade-btn grade-again" onclick="grade(1)">Again</button>
-      <button class="grade-btn grade-hard"  onclick="grade(3)">Hard</button>
-      <button class="grade-btn grade-good"  onclick="grade(5)">Good</button>
+    <div class="grade-row" id="grade-row">
+      <button class="grade-btn grade-again" id="grade-again" onclick="grade(1)" disabled>Again</button>
+      <button class="grade-btn grade-hard"  id="grade-hard"  onclick="grade(3)" disabled>Hard</button>
+      <button class="grade-btn grade-good"  id="grade-good"  onclick="grade(5)" disabled>Good</button>
     </div>
     <button class="btn secondary" onclick="exitPractice()">Exit</button>
   </div>

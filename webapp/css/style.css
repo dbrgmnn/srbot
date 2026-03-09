@@ -179,15 +179,18 @@ body {
   align-items: center;
   justify-content: center;
   position: relative;
-  perspective: 1000px;
+  perspective: 1200px;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 .word-inner {
   width: 100%;
   max-width: 260px;
-  height: 100%;
+  min-height: 120px;
   position: relative;
   transform-style: preserve-3d;
-  transition: transform .35s ease;
+  transition: transform .55s cubic-bezier(0.4, 0.2, 0.2, 1);
 }
 .word-card.flipped .word-inner {
   transform: rotateY(180deg);
@@ -224,8 +227,14 @@ body {
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
+  transition: opacity .2s;
 }
-.grade-btn:active { opacity: .8; }
+.grade-btn:active { opacity: .7; }
+.grade-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  pointer-events: none;
+}
 .grade-again  { background: rgba(255,69,58,.18);  color: #ff453a; }
 .grade-hard   { background: rgba(255,214,10,.18); color: #ffd60a; }
 .grade-good   { background: rgba(48,209,88,.18);  color: #30d158; }
