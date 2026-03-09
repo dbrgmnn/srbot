@@ -25,6 +25,14 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         added_count = await word_repo.add_words_batch(user_id, 'de', words)
         return web.json_response({"added": added_count})
 
+    async def delete_all_words(request: web.Request) -> web.Response:
+        telegram_id = request["telegram_id"]
+        user_repo = UserRepo(db)
+        word_repo = WordRepo(db)
+        user_id = await user_repo.get_or_create(telegram_id)
+        await word_repo.delete_all_words(user_id)
+        return web.json_response({"ok": True})
+
     async def delete_word(request: web.Request) -> web.Response:
         telegram_id = request["telegram_id"]
         try:
@@ -66,5 +74,6 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
     app.router.add_get("/api/words", list_words)
     app.router.add_post("/api/words", add_words)
     app.router.add_get("/api/words/search", search_words)
+    app.router.add_delete("/api/words/all", delete_all_words)
     app.router.add_delete("/api/words/{word_id}", delete_word)
     app.router.add_get("/api/words/export", export_words)

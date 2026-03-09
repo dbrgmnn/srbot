@@ -379,6 +379,13 @@ input[type="number"] { text-align: right; width: 60px; background: var(--bg); pa
   transition: opacity .15s;
 }
 .btn-share:active { opacity: .8; }
+.btn-danger { color: #ff453a; }
+
+.btn-row {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
 
 .info-footer {
     margin-top: 20px;

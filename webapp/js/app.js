@@ -372,6 +372,20 @@ function setPracticeMode(mode) {
 
 // ── Share words as text ─────────────────────────────────────────────────────
 
+function clearAllWords() {
+  tg.showConfirm('Delete all words?', async (confirmed) => {
+    if (!confirmed) return;
+    try {
+      await DEL('/api/words/all');
+      toast('All words deleted');
+      tg.HapticFeedback.notificationOccurred('success');
+      loadHome();
+    } catch (e) {
+      toast('Failed to delete words');
+    }
+  });
+}
+
 async function shareWords() {
   try {
     const res = await fetch('/api/words/export', {
