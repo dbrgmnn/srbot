@@ -11,31 +11,31 @@
 
 <!-- ── Home ── -->
 <div id="screen-home" class="screen active">
-  <div class="header" style="padding: 16px var(--gap) 20px;">
+  <div class="header">
     <div class="header-title">🤖 SRbot Mini App</div>
   </div>
 
-  <div style="padding: 0 var(--gap);">
+  <div class="p-0-gap">
     <div class="stats-grid">
       <div class="stat-card">
-        <div style="font-size:18px; margin-bottom:4px">🧠</div>
+        <div class="stat-icon">🧠</div>
         <div class="stat-val" id="stat-due">—</div>
         <div class="stat-label">to review</div>
       </div>
       <div class="stat-card">
-        <div style="font-size:18px; margin-bottom:4px">🌱</div>
+        <div class="stat-icon">🌱</div>
         <div class="stat-val" id="stat-new">—</div>
         <div class="stat-label">new words</div>
       </div>
     </div>
 
-    <div class="card" style="padding: 12px 16px;">
-        <div class="progress-label" style="margin-top:0; margin-bottom:8px;">
-            <span id="home-learned" style="font-weight: 600; color: var(--text);">0 learned</span>
+    <div class="card card-home">
+        <div class="progress-label progress-label-home">
+            <span id="home-learned" class="progress-learned">0 learned</span>
             <span id="home-pct">0%</span>
         </div>
-        <div class="progress-track" style="height: 8px;">
-            <div class="progress-fill" id="home-progress" style="width:0%"></div>
+        <div class="progress-track progress-track-home">
+            <div class="progress-fill" id="home-progress"></div>
         </div>
     </div>
 
@@ -45,14 +45,14 @@
 
 <!-- ── Practice ── -->
 <div id="screen-practice" class="screen">
-  <div style="padding: var(--gap);">
+  <div class="p-gap">
     <div class="practice-header">
       <span id="practice-progress">0 / 0</span>
       <span id="practice-type" class="practice-badge"></span>
     </div>
-    <div class="progress-wrap" style="margin-bottom:var(--gap)">
+    <div class="progress-wrap">
       <div class="progress-track">
-        <div class="progress-fill" id="practice-bar" style="width:0%"></div>
+        <div class="progress-fill" id="practice-bar"></div>
       </div>
     </div>
     <div class="word-card">
@@ -77,25 +77,25 @@
 
 <!-- ── Practice summary ── -->
 <div id="screen-summary" class="screen">
-  <div style="padding: var(--gap);">
-    <div class="header-title" style="margin-bottom:20px; text-align:center">Session complete!</div>
+  <div class="p-gap">
+    <div class="header-title header-title-summary">Session complete!</div>
     
-    <div class="card" style="text-align:center; padding: 24px 16px;">
-        <div style="font-size:40px; margin-bottom:12px;">🏆</div>
-        <div style="font-size:18px; font-weight:700;" id="sum-total-msg">You reviewed 0 words</div>
+    <div class="card card-summary">
+        <div class="summary-icon">🏆</div>
+        <div class="summary-msg" id="sum-total-msg">You reviewed 0 words</div>
     </div>
 
-    <div class="stats-grid" style="grid-template-columns: 1fr 1fr 1fr; margin-bottom: 20px;">
-        <div class="stat-card" style="padding: 10px;">
-            <div class="stat-val" style="font-size:18px; color:#30d158" id="sum-good">0</div>
+    <div class="stats-grid stats-grid-3col">
+        <div class="stat-card stat-card-small">
+            <div class="stat-val stat-val-small text-good" id="sum-good">0</div>
             <div class="stat-label">Good</div>
         </div>
-        <div class="stat-card" style="padding: 10px;">
-            <div class="stat-val" style="font-size:18px; color:#ffd60a" id="sum-hard">0</div>
+        <div class="stat-card stat-card-small">
+            <div class="stat-val stat-val-small text-hard" id="sum-hard">0</div>
             <div class="stat-label">Hard</div>
         </div>
-        <div class="stat-card" style="padding: 10px;">
-            <div class="stat-val" style="font-size:18px; color:#ff453a" id="sum-again">0</div>
+        <div class="stat-card stat-card-small">
+            <div class="stat-val stat-val-small text-again" id="sum-again">0</div>
             <div class="stat-label">Again</div>
         </div>
     </div>
@@ -106,8 +106,8 @@
 
 <!-- ── Add ── -->
 <div id="screen-add" class="screen">
-  <div style="padding: var(--gap);">
-    <div class="header-title" style="margin-bottom:4px">➕ Add words</div>
+  <div class="p-gap">
+    <div class="header-title header-title-compact">➕ Add words</div>
     <textarea id="add-input" placeholder="word;translate;example"></textarea>
     
     <button class="btn" onclick="submitWords()">Add</button>
@@ -120,8 +120,8 @@
 
 <!-- ── Search ── -->
 <div id="screen-search" class="screen">
-  <div style="padding: var(--gap);">
-    <div class="header-title" style="margin-bottom:16px">🔍 Search</div>
+  <div class="p-gap">
+    <div class="header-title header-title-spaced">🔍 Search</div>
     <div class="search-input-wrap">
       <input class="search-input" id="search-input" type="text"
              placeholder="Search words..." oninput="onSearchInput(this.value)">
@@ -132,8 +132,8 @@
 
 <!-- ── Settings ── -->
 <div id="screen-settings" class="screen">
-  <div style="padding: var(--gap);">
-    <div class="header-title" style="margin-bottom:16px">⚙️ Settings</div>
+  <div class="p-gap">
+    <div class="header-title header-title-spaced">⚙️ Settings</div>
     
     <div class="card">
       <div class="card-title">Practice</div>
@@ -162,7 +162,7 @@
         <span class="settings-label">Do Not Disturb</span>
         <div class="time-wrap">
             <input type="time" id="set-quiet-start" onchange="saveSetting('quiet_start', this.value)">
-            <span style="color:var(--hint)">—</span>
+            <span class="text-hint">—</span>
             <input type="time" id="set-quiet-end" onchange="saveSetting('quiet_end', this.value)">
         </div>
       </div>
@@ -223,9 +223,9 @@
   <input id="edit-word" class="edit-input" type="text" placeholder="Word">
   <input id="edit-translation" class="edit-input" type="text" placeholder="Translation">
   <input id="edit-example" class="edit-input" type="text" placeholder="Example (optional)">
-  <div class="btn-row" style="margin-top:8px">
+  <div class="btn-row mt-8">
     <button type="button" class="btn-share" onclick="closeEdit()">Cancel</button>
-    <button type="button" id="edit-save-btn" class="btn-share" style="color:var(--accent)" onclick="saveEdit()">Save</button>
+    <button type="button" id="edit-save-btn" class="btn-share text-accent" onclick="saveEdit()">Save</button>
   </div>
 </div>
 

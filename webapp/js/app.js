@@ -32,11 +32,6 @@ const POST  = (path, body) => api('POST',   path, body);
 const DEL   = (path)       => api('DELETE', path);
 const PATCH = (path, body) => api('PATCH',  path, body);
 
-// Use 24-hour format for any time display (e.g. formatTime24(new Date()))
-function formatTime24(date) {
-  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
-}
-
 // ── Toast ─────────────────────────────────────────────────────────────────
 
 function toast(msg) {
@@ -104,11 +99,9 @@ async function loadHome(data) {
     if (btn) {
       if (sessionTotal === 0) {
         btn.textContent  = 'Nothing to practice';
-        btn.style.opacity = '0.5';
         btn.disabled = true;
       } else {
         btn.textContent  = 'Practice';
-        btn.style.opacity = '1';
         btn.disabled = false;
       }
     }
@@ -313,12 +306,12 @@ async function loadSearch(query) {
     const el   = document.getElementById('search-results');
     if (!el) return;
     if (!data.words || data.words.length === 0) {
-      el.innerHTML = `<div style="text-align:center; padding:20px; color:var(--hint)">No results</div>`;
+      el.innerHTML = `<div class="no-results">No results</div>`;
       return;
     }
     el.innerHTML = data.words.map(w => `
       <div class="word-row" id="wr-${w.id}">
-        <div style="cursor:pointer;flex:1" onclick='openEdit(${JSON.stringify(w)})'>
+        <div class="word-row-content" onclick='openEdit(${JSON.stringify(w)})'>
           <div class="word-row-text">${esc(w.word)}</div>
           <div class="word-row-trans">${esc(w.translation)}</div>
         </div>
