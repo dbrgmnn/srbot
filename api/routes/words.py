@@ -65,9 +65,9 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         for w in words:
             ex = (w.get("example") or "").strip()
             if ex:
-                lines.append(f"{w['word']} — {w['translation']} ({ex})")
+                lines.append(f"{w['word']};{w['translation']};{ex}")
             else:
-                lines.append(f"{w['word']} — {w['translation']}")
+                lines.append(f"{w['word']};{w['translation']}")
         text = "\n".join(lines)
         return web.Response(text=text, content_type="text/plain")
 

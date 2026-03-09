@@ -370,7 +370,7 @@ function setPracticeMode(mode) {
   saveSetting('practice_mode', mode);
 }
 
-// ── Share words as text ─────────────────────────────────────────────────────
+// ── Derete all words ─────────────────────────────────────────────────────
 
 function clearAllWords() {
   tg.showConfirm('Delete all words?', async (confirmed) => {
@@ -385,6 +385,8 @@ function clearAllWords() {
     }
   });
 }
+
+// ── Share words as text ─────────────────────────────────────────────────────
 
 async function shareWords() {
   try {
