@@ -229,14 +229,17 @@ class WordRepo:
                     SUM(CASE WHEN repetitions > 0 THEN 1 ELSE 0 END) as learned,
                     SUM(CASE WHEN repetitions = 0 THEN 1 ELSE 0 END) as new,
                     SUM(CASE WHEN repetitions > 0 AND next_review <= ? THEN 1 ELSE 0 END) as due,
-                    MIN(CASE WHEN next_review > ? THEN next_review END) as next_review_at
+                    COUNT(CASE WHEN repetitions = 0 THEN 1 END) as g_seeds,
+                    COUNT(CASE WHEN repetitions > 0 AND interval < 5 THEN 1 END) as g_sprouts,
+                    COUNT(CASE WHEN interval >= 5 AND interval < 30 THEN 1 END) as g_trees,
+                    COUNT(CASE WHEN interval >= 30 THEN 1 END) as g_diamonds
                 FROM words WHERE user_id = ? AND language = ?""",
-            (now, now, user_id, language),
+            (now, user_id, language),
         )
         row = await cursor.fetchone()
         res = dict(row) if row else {}
         # Fill None with 0
-        for key in ["total", "learned", "new", "due"]:
+        for key in ["total", "learned", "new", "due", "g_seeds", "g_sprouts", "g_trees", "g_diamonds"]:
             if res.get(key) is None:
                 res[key] = 0
         return res

@@ -78,85 +78,33 @@ body {
   padding: 16px;
   margin-bottom: var(--gap);
 }
-.card-home { padding: 12px 16px; }
-.card-summary { text-align: center; padding: 24px 16px; }
-.card-title {
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: .06em;
-  color: var(--hint);
-  margin-bottom: 10px;
-}
-
-/* ── Button ── */
-.btn {
-  width: 100%;
-  padding: 14px;
-  border-radius: var(--radius);
-  border: none;
-  background: var(--accent);
-  color: var(--btn-text);
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  margin-bottom: var(--gap);
-  transition: opacity .15s;
-}
-.btn:active { opacity: .8; }
-.btn:disabled { opacity: 0.5; cursor: not-allowed; }
-.btn.secondary {
-  background: var(--bg2);
+.garden-card { padding: 16px; }
+.garden-item { margin-bottom: 12px; }
+.garden-item:last-child { margin-bottom: 0; }
+.garden-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  margin-bottom: 6px;
   color: var(--text);
 }
-
-/* ── Stats row ── */
-.stats-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--gap);
-  margin-bottom: var(--gap);
-}
-.stats-grid-3col {
-  grid-template-columns: 1fr 1fr 1fr;
-  margin-bottom: 20px;
-}
-.stat-card {
-  background: var(--bg2);
-  border-radius: var(--radius);
-  padding: 14px;
-  text-align: center;
-}
-.stat-card-small { padding: 10px; }
-.stat-icon { font-size: 18px; margin-bottom: 4px; }
-.stat-val { font-size: 28px; font-weight: 700; }
-.stat-val-small { font-size: 18px; }
-.stat-label { font-size: 12px; color: var(--hint); margin-top: 2px; }
-
-/* ── Progress bar ── */
-.progress-wrap { margin-bottom: var(--gap); }
-.progress-track {
+.garden-bar {
   height: 6px;
-  background: var(--bg2);
+  background: var(--bg);
   border-radius: 3px;
   overflow: hidden;
 }
-.progress-track-home { height: 8px; }
-.progress-fill {
+.garden-fill {
   height: 100%;
-  background: var(--accent);
-  border-radius: 3px;
-  transition: width .4s ease;
   width: 0%;
+  transition: width 0.6s ease;
 }
-.progress-label {
-  display: flex;
-  justify-content: space-between;
-  font-size: 12px;
-  color: var(--hint);
-  margin-top: 5px;
-}
-.progress-label-home { margin-top: 0; margin-bottom: 8px; }
-.progress-learned { font-weight: 600; color: var(--text); }
+.seeds { background: #8e8e93; }
+.sprouts { background: #ff9500; }
+.trees { background: #34c759; }
+.diamonds { background: #5856d6; }
+
+.card-summary { text-align: center; padding: 24px 16px; }
 
 /* ── Practice ── */
 .practice-header {

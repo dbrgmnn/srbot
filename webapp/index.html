@@ -29,14 +29,40 @@
       </div>
     </div>
 
-    <div class="card card-home">
-        <div class="progress-label progress-label-home">
-            <span id="home-learned" class="progress-learned">0 learned</span>
-            <span id="home-pct">0%</span>
+    <div class="card garden-card">
+      <div class="card-title">Knowledge Garden</div>
+      
+      <div class="garden-item">
+        <div class="garden-info">
+          <span>🌱 Seeds</span>
+          <span id="count-seeds">0</span>
         </div>
-        <div class="progress-track progress-track-home">
-            <div class="progress-fill" id="home-progress"></div>
+        <div class="garden-bar"><div id="bar-seeds" class="garden-fill seeds"></div></div>
+      </div>
+
+      <div class="garden-item">
+        <div class="garden-info">
+          <span>🌿 Sprouts</span>
+          <span id="count-sprouts">0</span>
         </div>
+        <div class="garden-bar"><div id="bar-sprouts" class="garden-fill sprouts"></div></div>
+      </div>
+
+      <div class="garden-item">
+        <div class="garden-info">
+          <span>🌳 Trees</span>
+          <span id="count-trees">0</span>
+        </div>
+        <div class="garden-bar"><div id="bar-trees" class="garden-fill trees"></div></div>
+      </div>
+
+      <div class="garden-item">
+        <div class="garden-info">
+          <span>💎 Diamonds</span>
+          <span id="count-diamonds">0</span>
+        </div>
+        <div class="garden-bar"><div id="bar-diamonds" class="garden-fill diamonds"></div></div>
+      </div>
     </div>
 
     <button class="btn" onclick="startPractice()" id="btn-practice">Practice</button>

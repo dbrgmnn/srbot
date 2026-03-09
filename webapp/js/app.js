@@ -81,19 +81,19 @@ async function loadHome(data) {
     const sessionNew   = Math.min(newW, Math.max(0, limit - sessionDue));
     const sessionTotal = sessionDue + sessionNew;
 
-    const statDueEl  = document.getElementById('stat-due');
-    const statNewEl  = document.getElementById('stat-new');
-    const learnedEl  = document.getElementById('home-learned');
-    const pctEl      = document.getElementById('home-pct');
-    const progressEl = document.getElementById('home-progress');
+    if (document.getElementById('stat-due')) document.getElementById('stat-due').textContent = due;
+    if (document.getElementById('stat-new')) document.getElementById('stat-new').textContent = sessionNew;
 
-    if (statDueEl)  statDueEl.textContent  = due;
-    if (statNewEl)  statNewEl.textContent  = sessionNew;
-    if (learnedEl)  learnedEl.textContent  = `${learned} of ${total} learned`;
-
-    const pct = total > 0 ? Math.round(learned / total * 100) : 0;
-    if (pctEl)      pctEl.textContent      = `${pct}%`;
-    if (progressEl) progressEl.style.width = `${pct}%`;
+    // Garden stats
+    const totalWords = stats.total || 1; // avoid div by 0
+    const categories = ['seeds', 'sprouts', 'trees', 'diamonds'];
+    categories.forEach(cat => {
+      const val = stats[`g_${cat}`] || 0;
+      const countEl = document.getElementById(`count-${cat}`);
+      const barEl   = document.getElementById(`bar-${cat}`);
+      if (countEl) countEl.textContent = val;
+      if (barEl)   barEl.style.width = `${Math.round((val / stats.total) * 100)}%`;
+    });
 
     const btn = document.getElementById('btn-practice');
     if (btn) {
