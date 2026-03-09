@@ -19,6 +19,7 @@ async function api(method, path, body) {
   if (body) opts.body = JSON.stringify(body);
   const res = await fetch(path, opts);
   if (res.status === 401 || res.status === 403) throw new Error('Unauthorized');
+  if (res.status === 409) throw new Error('409');
   if (res.status === 400) {
     const error = await res.json();
     throw new Error(error.msg || 'Bad request');
@@ -26,9 +27,10 @@ async function api(method, path, body) {
   return res.json();
 }
 
-const GET  = (path)       => api('GET',  path);
-const POST = (path, body) => api('POST', path, body);
-const DEL  = (path)       => api('DELETE', path);
+const GET   = (path)       => api('GET',    path);
+const POST  = (path, body) => api('POST',   path, body);
+const DEL   = (path)       => api('DELETE', path);
+const PATCH = (path, body) => api('PATCH',  path, body);
 
 // Use 24-hour format for any time display (e.g. formatTime24(new Date()))
 function formatTime24(date) {
@@ -299,7 +301,7 @@ async function loadSearch(query) {
     }
     el.innerHTML = data.words.map(w => `
       <div class="word-row" id="wr-${w.id}">
-        <div>
+        <div style="cursor:pointer;flex:1" onclick='openEdit(${JSON.stringify(w)})'>
           <div class="word-row-text">${esc(w.word)}</div>
           <div class="word-row-trans">${esc(w.translation)}</div>
         </div>
@@ -319,6 +321,50 @@ async function deleteWord(id) {
     tg.HapticFeedback.impactOccurred('medium');
   } catch (e) {
     toast('Delete failed');
+  }
+}
+
+// ── Edit word ────────────────────────────────────────────────────────────
+
+let editWordId = null;
+
+function openEdit(w) {
+  editWordId = w.id;
+  document.getElementById('edit-word').value        = w.word        || '';
+  document.getElementById('edit-translation').value = w.translation || '';
+  document.getElementById('edit-example').value     = w.example     || '';
+  document.getElementById('edit-overlay').classList.add('open');
+  document.getElementById('edit-sheet').classList.add('open');
+  tg.HapticFeedback.impactOccurred('light');
+}
+
+function closeEdit() {
+  document.getElementById('edit-overlay').classList.remove('open');
+  document.getElementById('edit-sheet').classList.remove('open');
+  editWordId = null;
+}
+
+async function saveEdit() {
+  const word        = document.getElementById('edit-word').value.trim();
+  const translation = document.getElementById('edit-translation').value.trim();
+  const example     = document.getElementById('edit-example').value.trim();
+  if (!word || !translation) { toast('Word and translation required'); return; }
+  const btn = document.getElementById('edit-save-btn');
+  btn.disabled = true;
+  try {
+    await PATCH(`/api/words/${editWordId}`, { word, translation, example });
+    const row = document.getElementById(`wr-${editWordId}`);
+    if (row) {
+      row.querySelector('.word-row-text').textContent  = word;
+      row.querySelector('.word-row-trans').textContent = translation;
+    }
+    closeEdit();
+    toast('Saved');
+    tg.HapticFeedback.notificationOccurred('success');
+  } catch (e) {
+    toast(e.message === '409' ? 'Word already exists' : 'Failed to save');
+  } finally {
+    btn.disabled = false;
   }
 }
 

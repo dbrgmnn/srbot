@@ -241,6 +241,14 @@ class WordRepo:
                 res[key] = 0
         return res
 
+    async def update_word_text(self, word_id: int, user_id: int, word: str, translation: str, example: str | None):
+        await self.db.execute(
+            """UPDATE words SET word = ?, translation = ?, example = ?
+               WHERE id = ? AND user_id = ?""",
+            (word, translation, example or None, word_id, user_id),
+        )
+        await self.db.commit()
+
     async def delete_all_words(self, user_id: int):
         await self.db.execute("DELETE FROM words WHERE user_id = ?", (user_id,))
         await self.db.commit()

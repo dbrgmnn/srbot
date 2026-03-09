@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>srbot</title>
-  <link rel="stylesheet" href="/static/css/style.css?v=3">
+  <link rel="stylesheet" href="/static/css/style.css?v=4">
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
@@ -217,8 +217,21 @@
   </button>
 </nav>
 
+<!-- ── Edit sheet ── -->
+<div id="edit-overlay" class="edit-overlay" onclick="closeEdit()"></div>
+<div id="edit-sheet" class="edit-sheet">
+  <div class="edit-sheet-title">Edit word</div>
+  <input id="edit-word" class="edit-input" type="text" placeholder="Word">
+  <input id="edit-translation" class="edit-input" type="text" placeholder="Translation">
+  <input id="edit-example" class="edit-input" type="text" placeholder="Example (optional)">
+  <div class="btn-row" style="margin-top:8px">
+    <button type="button" class="btn-share" onclick="closeEdit()">Cancel</button>
+    <button type="button" id="edit-save-btn" class="btn-share" style="color:var(--accent)" onclick="saveEdit()">Save</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
-<script src="/static/js/app.js?v=3"></script>
+<script src="/static/js/app.js?v=4"></script>
 </body>
 </html>

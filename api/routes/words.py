@@ -25,6 +25,27 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         added_count = await word_repo.add_words_batch(user_id, 'de', words)
         return web.json_response({"added": added_count})
 
+    async def patch_word(request: web.Request) -> web.Response:
+        telegram_id = request["telegram_id"]
+        try:
+            word_id = int(request.match_info["word_id"])
+        except ValueError:
+            return web.json_response({"error": "invalid word_id"}, status=400)
+        body = await request.json()
+        word = (body.get("word") or "").strip()
+        translation = (body.get("translation") or "").strip()
+        if not word or not translation:
+            return web.json_response({"error": "word and translation required"}, status=400)
+        example = (body.get("example") or "").strip() or None
+        user_repo = UserRepo(db)
+        word_repo = WordRepo(db)
+        user_id = await user_repo.get_or_create(telegram_id)
+        try:
+            await word_repo.update_word_text(word_id, user_id, word, translation, example)
+        except Exception:
+            return web.json_response({"error": "duplicate"}, status=409)
+        return web.json_response({"ok": True})
+
     async def delete_all_words(request: web.Request) -> web.Response:
         telegram_id = request["telegram_id"]
         user_repo = UserRepo(db)
@@ -74,6 +95,7 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
     app.router.add_get("/api/words", list_words)
     app.router.add_post("/api/words", add_words)
     app.router.add_get("/api/words/search", search_words)
+    app.router.add_patch("/api/words/{word_id}", patch_word)
     app.router.add_delete("/api/words/all", delete_all_words)
     app.router.add_delete("/api/words/{word_id}", delete_word)
     app.router.add_get("/api/words/export", export_words)
