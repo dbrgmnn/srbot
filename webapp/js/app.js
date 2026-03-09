@@ -92,7 +92,7 @@ async function loadHome(data) {
       const countEl = document.getElementById(`count-${cat}`);
       const barEl   = document.getElementById(`bar-${cat}`);
       if (countEl) countEl.textContent = val;
-      if (barEl)   barEl.style.width = `${Math.round((val / stats.total) * 100)}%`;
+      if (barEl)   barEl.style.width = `${Math.round((val / totalWords) * 100)}%`;
     });
 
     const btn = document.getElementById('btn-practice');
