@@ -84,6 +84,13 @@ async function loadHome(data) {
     if (document.getElementById('stat-due')) document.getElementById('stat-due').textContent = due;
     if (document.getElementById('stat-new')) document.getElementById('stat-new').textContent = sessionNew;
 
+    // Greeting
+    const user = tg.initDataUnsafe?.user;
+    const greetingEl = document.getElementById('user-greeting');
+    if (greetingEl) {
+      greetingEl.textContent = user?.first_name ? `Hello, ${user.first_name}!` : 'Welcome back!';
+    }
+
     // Garden stats
     const totalWords = stats.total || 1; 
     const categories = ['seeds', 'sprouts', 'trees', 'diamonds'];

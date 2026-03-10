@@ -12,7 +12,7 @@
 <!-- ── Home ── -->
 <div id="screen-home" class="screen active">
   <div class="header">
-    <div class="header-title">🤖 SRbot Mini App</div>
+    <div class="header-title" id="user-greeting">Welcome back!</div>
   </div>
 
   <div class="p-0-gap">
@@ -23,9 +23,9 @@
         <div class="stat-label">to review</div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon">🌱</div>
+        <div class="stat-icon">🎯</div>
         <div class="stat-val" id="stat-new">—</div>
-        <div class="stat-label">new words</div>
+        <div class="stat-label">today's goal</div>
       </div>
     </div>
 
@@ -71,7 +71,7 @@
 <div id="screen-practice" class="screen">
   <div class="practice-screen-content">
     <div class="practice-header">
-      <span id="practice-progress">0 / 0</span>
+      <div id="practice-progress" class="prog-pill">0 / 0</div>
       <span id="practice-type" class="practice-badge"></span>
     </div>
     
@@ -94,7 +94,7 @@
     </div>
 
     <div class="practice-footer">
-      <button class="btn secondary" onclick="exitPractice()">Exit</button>
+      <button class="btn secondary btn-exit" onclick="exitPractice()">Exit</button>
     </div>
   </div>
 </div>
@@ -131,7 +131,7 @@
 <!-- ── Add ── -->
 <div id="screen-add" class="screen">
   <div class="p-gap">
-    <div class="header-title header-title-compact">➕ Add words</div>
+    <div class="header-title header-title-add">➕ Add words</div>
     <textarea id="add-input" placeholder="word;translate;example"></textarea>
     
     <button class="btn" onclick="submitWords()">Add</button>
