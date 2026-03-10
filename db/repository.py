@@ -208,6 +208,16 @@ class WordRepo:
         )
         await self.db.commit()
 
+    async def get_word_count(self, user_id: int, language: str = None) -> int:
+        query = "SELECT COUNT(*) as count FROM words WHERE user_id = ?"
+        params = [user_id]
+        if language:
+            query += " AND language = ?"
+            params.append(language)
+        cursor = await self.db.execute(query, tuple(params))
+        row = await cursor.fetchone()
+        return row['count'] if row else 0
+
     async def get_full_stats(self, user_id: int, language: str, tz_offset_minutes: int = 0) -> dict:
         now_utc = datetime.now(tz=timezone.utc)
         today_start_local = (now_utc + timedelta(minutes=tz_offset_minutes)).replace(hour=0, minute=0, second=0, microsecond=0)
@@ -229,7 +239,6 @@ class WordRepo:
         )
         row = await cursor.fetchone()
         
-        # Safe result merging with default zeros
         defaults = {
             "total": 0, "learned": 0, "new": 0, "due": 0, "today_new": 0,
             "g_seeds": 0, "g_sprouts": 0, "g_trees": 0, "g_diamonds": 0
