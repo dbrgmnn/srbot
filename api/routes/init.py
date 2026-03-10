@@ -7,12 +7,19 @@ def setup_routes_init(app: web.Application, db: aiosqlite.Connection):
 
     async def init_user(request: web.Request) -> web.Response:
         telegram_id = request["telegram_id"]
+        # Try to get tz from body or query, default to 0
+        try:
+            body = await request.json()
+            tz_offset = int(body.get("tz", 0))
+        except:
+            tz_offset = 0
+
         user_repo = UserRepo(db)
         word_repo = WordRepo(db)
         await word_repo._migrate()
         user_id = await user_repo.get_or_create(telegram_id)
         settings = await user_repo.get_user_settings(telegram_id)
-        stats = await word_repo.get_full_stats(user_id, 'de')
+        stats = await word_repo.get_full_stats(user_id, 'de', tz_offset_minutes=tz_offset)
         config = request.app["config"]
         return web.json_response({
             "user_id": user_id,
