@@ -9,6 +9,7 @@ def setup_routes_init(app: web.Application, db: aiosqlite.Connection):
         telegram_id = request["telegram_id"]
         user_repo = UserRepo(db)
         word_repo = WordRepo(db)
+        await word_repo._migrate()
         user_id = await user_repo.get_or_create(telegram_id)
         settings = await user_repo.get_user_settings(telegram_id)
         stats = await word_repo.get_full_stats(user_id, 'de')

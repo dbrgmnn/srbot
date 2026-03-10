@@ -71,18 +71,29 @@ async function loadHome(data) {
 
     practiceMode = settings.practice_mode || 'word_to_translation';
 
-    const due     = stats.due     || 0;
-    const newW    = stats.new     || 0;
-    const learned = stats.learned || 0;
-    const total   = stats.total   || 0;
-    const limit   = settings.daily_limit || 20;
+    const due       = stats.due       || 0;
+    const newWords  = stats.new       || 0;
+    const todayDone = stats.today_new || 0;
+    const limit     = settings.daily_limit || 20;
 
-    const sessionDue   = Math.min(due, limit);
-    const sessionNew   = Math.min(newW, Math.max(0, limit - sessionDue));
-    const sessionTotal = sessionDue + sessionNew;
+    const remainingLimit = Math.max(0, limit - todayDone);
+    const sessionNew     = Math.min(newWords, remainingLimit);
+    const sessionTotal   = due + sessionNew;
 
     if (document.getElementById('stat-due')) document.getElementById('stat-due').textContent = due;
-    if (document.getElementById('stat-new')) document.getElementById('stat-new').textContent = sessionNew;
+    if (document.getElementById('stat-new')) {
+      document.getElementById('stat-new').textContent = `${todayDone} / ${limit}`;
+      const label = document.getElementById('stat-new-label');
+      if (label) {
+        if (todayDone >= limit) {
+          label.textContent = "goal smashed! ✨";
+          label.style.color = "#30d158";
+        } else {
+          label.textContent = "today's goal";
+          label.style.color = "";
+        }
+      }
+    }
 
     // Greeting
     const user = tg.initDataUnsafe?.user;
@@ -105,7 +116,7 @@ async function loadHome(data) {
     const btn = document.getElementById('btn-practice');
     if (btn) {
       if (sessionTotal === 0) {
-        btn.textContent  = 'Nothing to practice';
+        btn.textContent  = todayDone >= limit ? 'Goal achieved! ✨' : 'Nothing to practice';
         btn.disabled = true;
       } else {
         btn.textContent  = 'Practice';
