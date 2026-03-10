@@ -7,7 +7,13 @@ def setup_routes_stats(app: web.Application, db: aiosqlite.Connection):
 
     async def get_stats(request: web.Request) -> web.Response:
         telegram_id = request["telegram_id"]
-        tz_offset = int(request.query.get("tz", 0))
+        
+        # Safe TZ extraction from query
+        try:
+            tz_offset = int(request.query.get("tz", 0))
+        except:
+            tz_offset = 0
+
         user_repo = UserRepo(db)
         word_repo = WordRepo(db)
         user_id = await user_repo.get_or_create(telegram_id)

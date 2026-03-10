@@ -555,7 +555,7 @@ function esc(str) {
 
 async function init() {
   try {
-    const data = await POST('/api/init', {});
+    const data = await POST('/api/init', { tz: getTzOffset() });
     await loadHome(data);
   } catch (e) {
     if (e.message === 'Unauthorized') toast('Please open the app from Telegram');
