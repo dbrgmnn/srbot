@@ -198,7 +198,6 @@ class WordRepo:
         next_review: datetime,
     ):
         now = datetime.now(tz=timezone.utc).isoformat()
-        # Set started_at only if it was never set before
         await self.db.execute(
             """UPDATE words
                 SET repetitions = ?, easiness = ?, interval = ?, next_review = ?, 
@@ -229,10 +228,18 @@ class WordRepo:
             (now_utc.isoformat(), today_start_utc, user_id, language),
         )
         row = await cursor.fetchone()
-        res = dict(row) if row else {}
-        for key in ["total", "learned", "new", "due", "today_new", "g_seeds", "g_sprouts", "g_trees", "g_diamonds"]:
-            if res.get(key) is None: res[key] = 0
-        return res
+        
+        # Safe result merging with default zeros
+        defaults = {
+            "total": 0, "learned": 0, "new": 0, "due": 0, "today_new": 0,
+            "g_seeds": 0, "g_sprouts": 0, "g_trees": 0, "g_diamonds": 0
+        }
+        if row:
+            res = dict(row)
+            for k, v in res.items():
+                if v is None: res[k] = 0
+            return res
+        return defaults
 
     async def update_word_text(self, word_id: int, user_id: int, word: str, translation: str, example: str | None):
         await self.db.execute(

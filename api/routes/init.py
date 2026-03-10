@@ -8,11 +8,12 @@ def setup_routes_init(app: web.Application, db: aiosqlite.Connection):
     async def init_user(request: web.Request) -> web.Response:
         telegram_id = request["telegram_id"]
         
-        # Safe TZ extraction
         tz_offset = 0
         try:
-            body = await request.json()
-            tz_offset = int(body.get("tz", 0))
+            # POST request might have a JSON body
+            if request.has_body:
+                body = await request.json()
+                tz_offset = int(body.get("tz", 0))
         except:
             pass
 
