@@ -49,14 +49,6 @@ async def init_db(db_path: str = "srbot.db") -> aiosqlite.Connection:
         )
     """)
 
-    # Migrations for existing databases
-    try:
-        await db.execute("ALTER TABLE words ADD COLUMN last_reviewed_at DATETIME")
-    except: pass
-    try:
-        await db.execute("ALTER TABLE words ADD COLUMN started_at DATETIME")
-    except: pass
-
     # indexes for common queries
     await db.execute("CREATE INDEX IF NOT EXISTS idx_words_user_lang_review ON words (user_id, language, next_review)")
     await db.execute("CREATE INDEX IF NOT EXISTS idx_words_user_lang_rep ON words (user_id, language, repetitions)")
