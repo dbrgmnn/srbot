@@ -9,6 +9,11 @@ let sessionStats = { reviewed: 0, new: 0, good: 0, hard: 0, again: 0 };
 let searchTimer = null;
 let practiceMode = 'word_to_translation';
 
+// Helper to get local timezone offset in minutes (e.g. -120)
+function getTzOffset() {
+  return -new Date().getTimezoneOffset();
+}
+
 // ── API ────────────────────────────────────────────────────────────────────
 
 async function api(method, path, body) {
@@ -61,10 +66,11 @@ async function loadHome(data) {
     let stats, settings;
     if (data) {
       stats    = data.stats;
-      settings = { ...data.settings, timezone: data.timezone };
+      settings = data.settings;
     } else {
+      // Pass timezone offset to get correct today_new count
       [stats, settings] = await Promise.all([
-        GET('/api/stats'),
+        GET(`/api/stats?tz=${getTzOffset()}`),
         GET('/api/settings'),
       ]);
     }
@@ -85,13 +91,8 @@ async function loadHome(data) {
       document.getElementById('stat-new').textContent = `${todayDone} / ${limit}`;
       const label = document.getElementById('stat-new-label');
       if (label) {
-        if (todayDone >= limit) {
-          label.textContent = "goal smashed! ✨";
-          label.style.color = "#30d158";
-        } else {
-          label.textContent = "today's goal";
-          label.style.color = "";
-        }
+        label.textContent = "today's goal";
+        label.style.color = todayDone >= limit ? "#30d158" : "";
       }
     }
 
@@ -116,7 +117,7 @@ async function loadHome(data) {
     const btn = document.getElementById('btn-practice');
     if (btn) {
       if (sessionTotal === 0) {
-        btn.textContent  = todayDone >= limit ? 'Goal achieved! ✨' : 'Nothing to practice';
+        btn.textContent  = 'Nothing to practice';
         btn.disabled = true;
       } else {
         btn.textContent  = 'Practice';
@@ -133,7 +134,7 @@ async function loadHome(data) {
 
 async function startPractice() {
   try {
-    const data = await GET('/api/session');
+    const data = await GET(`/api/session?tz=${getTzOffset()}`);
     if (!data.words || data.words.length === 0) {
       toast('Nothing to practice right now.');
       return;

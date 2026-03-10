@@ -1,5 +1,5 @@
 import aiosqlite
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 
 class UserRepo:
@@ -7,7 +7,6 @@ class UserRepo:
         self.db = db
 
     async def get_or_create(self, telegram_id: int) -> int:
-        # check first to avoid unnecessary writes
         cursor = await self.db.execute(
             "SELECT id FROM users WHERE telegram_id = ?", (telegram_id,)
         )
@@ -52,7 +51,6 @@ class UserRepo:
         row = await cursor.fetchone()
         if row:
             data = dict(row)
-            # backfill default practice_mode if column exists but value is NULL
             if data.get("practice_mode") is None:
                 data["practice_mode"] = "word_to_translation"
             return data
@@ -124,7 +122,6 @@ class UserRepo:
         await self.db.commit()
 
     async def get_min_notification_interval(self) -> float:
-        # minimum interval across all users — used as scheduler polling interval
         cursor = await self.db.execute(
             "SELECT MIN(notification_interval_minutes) as min_interval FROM user_settings"
         )
@@ -155,12 +152,13 @@ class WordRepo:
         self.db = db
 
     async def _migrate(self):
-        # Simple migration to add last_reviewed_at if it doesn't exist
         try:
             await self.db.execute("ALTER TABLE words ADD COLUMN last_reviewed_at DATETIME")
-            await self.db.commit()
-        except:
-            pass
+        except: pass
+        try:
+            await self.db.execute("ALTER TABLE words ADD COLUMN started_at DATETIME")
+        except: pass
+        await self.db.commit()
 
     async def add_words_batch(self, user_id: int, language: str, words: list[dict]) -> int:
         now = datetime.now(tz=timezone.utc).isoformat()
@@ -179,8 +177,6 @@ class WordRepo:
 
     async def get_session_words(self, user_id: int, language: str, new_limit: int) -> list[dict]:
         now = datetime.now(tz=timezone.utc).isoformat()
-
-        # all due words, no cap
         cursor = await self.db.execute(
             """SELECT * FROM words
                 WHERE user_id = ? AND language = ? AND repetitions > 0 AND next_review <= ?
@@ -189,7 +185,6 @@ class WordRepo:
         )
         due = [dict(row) for row in await cursor.fetchall()]
 
-        # new words capped by daily_limit
         new_words = []
         if new_limit > 0:
             cursor = await self.db.execute(
@@ -212,34 +207,21 @@ class WordRepo:
         next_review: datetime,
     ):
         now = datetime.now(tz=timezone.utc).isoformat()
+        # Set started_at only if it was never set before
         await self.db.execute(
             """UPDATE words
-                SET repetitions = ?, easiness = ?, interval = ?, next_review = ?, last_reviewed_at = ?
+                SET repetitions = ?, easiness = ?, interval = ?, next_review = ?, 
+                    last_reviewed_at = ?,
+                    started_at = COALESCE(started_at, ?)
                 WHERE id = ?""",
-            (repetitions, easiness, interval, next_review.isoformat(), now, word_id),
+            (repetitions, easiness, interval, next_review.isoformat(), now, now, word_id),
         )
         await self.db.commit()
 
-    async def get_word_count(self, user_id: int, language: str = None) -> int:
-        query = "SELECT COUNT(*) as count FROM words WHERE user_id = ?"
-        params = [user_id]
-        if language:
-            query += " AND language = ?"
-            params.append(language)
-        cursor = await self.db.execute(query, tuple(params))
-        row = await cursor.fetchone()
-        return row['count'] if row else 0
-
     async def get_full_stats(self, user_id: int, language: str, tz_offset_minutes: int = 0) -> dict:
         now_utc = datetime.now(tz=timezone.utc)
-        now_iso = now_utc.isoformat()
-        
-        # Calculate local "today" start in UTC
-        # This is a simplified approach: we find the ISO string for the start of the day in user's TZ
-        import datetime as dt
-        user_now = now_utc + dt.timedelta(minutes=tz_offset_minutes)
-        today_start_local = user_now.replace(hour=0, minute=0, second=0, microsecond=0)
-        today_start_utc = (today_start_local - dt.timedelta(minutes=tz_offset_minutes)).isoformat()
+        today_start_local = (now_utc + timedelta(minutes=tz_offset_minutes)).replace(hour=0, minute=0, second=0, microsecond=0)
+        today_start_utc = (today_start_local - timedelta(minutes=tz_offset_minutes)).isoformat()
 
         cursor = await self.db.execute(
             """SELECT
@@ -247,19 +229,18 @@ class WordRepo:
                     SUM(CASE WHEN repetitions > 0 THEN 1 ELSE 0 END) as learned,
                     SUM(CASE WHEN repetitions = 0 THEN 1 ELSE 0 END) as new,
                     SUM(CASE WHEN repetitions > 0 AND next_review <= ? THEN 1 ELSE 0 END) as due,
-                    COUNT(CASE WHEN repetitions = 1 AND last_reviewed_at >= ? THEN 1 END) as today_new,
+                    COUNT(CASE WHEN started_at >= ? THEN 1 END) as today_new,
                     COUNT(CASE WHEN repetitions = 0 THEN 1 END) as g_seeds,
                     COUNT(CASE WHEN repetitions > 0 AND interval < 5 THEN 1 END) as g_sprouts,
                     COUNT(CASE WHEN interval >= 5 AND interval < 30 THEN 1 END) as g_trees,
                     COUNT(CASE WHEN interval >= 30 THEN 1 END) as g_diamonds
                 FROM words WHERE user_id = ? AND language = ?""",
-            (now_iso, today_start_utc, user_id, language),
+            (now_utc.isoformat(), today_start_utc, user_id, language),
         )
         row = await cursor.fetchone()
         res = dict(row) if row else {}
         for key in ["total", "learned", "new", "due", "today_new", "g_seeds", "g_sprouts", "g_trees", "g_diamonds"]:
-            if res.get(key) is None:
-                res[key] = 0
+            if res.get(key) is None: res[key] = 0
         return res
 
     async def update_word_text(self, word_id: int, user_id: int, word: str, translation: str, example: str | None):
