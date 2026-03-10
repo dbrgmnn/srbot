@@ -70,6 +70,7 @@ body {
 .header-title { font-size: 20px; font-weight: 700; color: var(--text); opacity: 0.9; }
 .header-title-add { margin-bottom: 24px; }
 .header-title-summary { margin-bottom: 20px; text-align: center; }
+.header-title-spaced { margin-bottom: 24px; display: block; }
 .header-sub { font-size: 14px; color: var(--hint); }
 
 /* ── Card ── */
@@ -190,10 +191,9 @@ body {
   font-weight: 800;
   font-size: 10px;
   letter-spacing: 0.05em;
-  color: #fff;
 }
-.practice-badge-new { background: #30d158; box-shadow: 0 4px 12px rgba(48, 209, 88, 0.3); }
-.practice-badge-review { background: var(--accent); box-shadow: 0 4px 12px rgba(10, 132, 255, 0.3); }
+.practice-badge-new { background: rgba(48, 209, 88, 0.15); color: #30d158; }
+.practice-badge-review { background: rgba(10, 132, 255, 0.15); color: var(--accent); }
 
 .word-card-container {
   flex: 1;
@@ -218,7 +218,7 @@ body {
   box-shadow: 0 12px 40px rgba(0,0,0,0.3);
   border: 2px solid transparent;
 }
-.word-card.swiping { transition: none; }
+.word-card.swiping { transition: none !important; }
 .word-card.flipped { transform: rotateY(180deg); }
 
 .word-face {
@@ -236,45 +236,31 @@ body {
 .word-back { transform: rotateY(180deg); }
 
 .word-main { 
-  font-size: 42px; 
-  font-weight: 900; 
+  font-size: 32px; 
+  font-weight: 800; 
   margin-bottom: 12px; 
-  letter-spacing: -0.03em;
-  background: linear-gradient(180deg, #FFFFFF 0%, rgba(255,255,255,0.7) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  letter-spacing: -0.02em;
+  color: var(--text);
 }
 .word-trans { 
   font-size: 28px; 
   color: var(--accent); 
   font-weight: 700;
   letter-spacing: -0.01em;
-  padding: 4px 16px;
-  background: rgba(10, 132, 255, 0.1);
-  border-radius: 12px;
 }
 .word-example { 
   font-size: 16px; 
   color: var(--text);
-  opacity: 0.6;
-  margin-top: 32px; 
-  line-height: 1.6;
-  border-top: 1px solid rgba(255,255,255,0.08);
-  padding-top: 24px;
+  opacity: 0.5;
+  margin-top: 24px; 
+  line-height: 1.5;
   width: 100%;
-  position: relative;
 }
-.word-example::before {
-  content: "“";
-  position: absolute;
-  top: 4px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 32px;
-  color: var(--accent);
-  opacity: 0.4;
-  font-family: serif;
-}
+
+/* Swipe accent colors - Forced visibility */
+.word-card.swipe-left { background-color: rgba(255, 69, 58, 0.25) !important; border-color: #ff453a !important; }
+.word-card.swipe-right { background-color: rgba(48, 209, 88, 0.25) !important; border-color: #30d158 !important; }
+.word-card.swipe-up { background-color: rgba(255, 214, 10, 0.25) !important; border-color: #ffd60a !important; }
 
 .btn-exit {
   width: auto;
