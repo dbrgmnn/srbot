@@ -85,7 +85,7 @@ async function loadHome(data) {
     if (document.getElementById('stat-new')) document.getElementById('stat-new').textContent = sessionNew;
 
     // Garden stats
-    const totalWords = stats.total || 1; // avoid div by 0
+    const totalWords = stats.total || 1; 
     const categories = ['seeds', 'sprouts', 'trees', 'diamonds'];
     categories.forEach(cat => {
       const val = stats[`g_${cat}`] || 0;
@@ -125,6 +125,8 @@ async function startPractice() {
     sessionStats = { reviewed: 0, new: 0, good: 0, hard: 0, again: 0 };
     showScreen('practice');
     renderWord();
+    
+    if (tg.disableVerticalSwipes) tg.disableVerticalSwipes();
   } catch(e) { toast(e.message); }
 }
 
@@ -167,15 +169,14 @@ function renderWord() {
     }
   }
 
-  // reset card
   const card = document.getElementById('word-card');
   if (card) {
     card.classList.remove('flipped', 'swipe-left', 'swipe-right', 'swipe-up');
     card.style.transform = '';
+    card.lastDir = null;
   }
 }
 
-// Swipe & Flip Logic
 let touchStartX = 0;
 let touchStartY = 0;
 let isSwiping = false;
@@ -200,19 +201,28 @@ function initSwipe() {
     if (Math.abs(deltaX) > 10 || Math.abs(deltaY) > 10) isSwiping = true;
 
     if (isSwiping) {
-      const rotation = deltaX * 0.1;
       const isFlipped = card.classList.contains('flipped');
       const baseRotation = isFlipped ? 180 : 0;
       
+      let swipeDir = null;
+      if (Math.abs(deltaY) > Math.abs(deltaX) * 1.5) {
+        if (deltaY < -50) swipeDir = 'up';
+      } else if (Math.abs(deltaX) > Math.abs(deltaY) * 1.2) {
+        if (deltaX < -60) swipeDir = 'left';
+        else if (deltaX > 60) swipeDir = 'right';
+      }
+
+      const rotation = deltaX * 0.08;
       card.style.transform = `translate(${deltaX}px, ${deltaY}px) rotateY(${baseRotation}deg) rotateZ(${rotation}deg)`;
       
-      card.classList.toggle('swipe-left', deltaX < -50);
-      card.classList.toggle('swipe-right', deltaX > 50);
-      card.classList.toggle('swipe-up', deltaY < -50 && Math.abs(deltaX) < 50);
+      card.classList.toggle('swipe-left', swipeDir === 'left');
+      card.classList.toggle('swipe-right', swipeDir === 'right');
+      card.classList.toggle('swipe-up', swipeDir === 'up');
 
-      if (Math.abs(deltaX) === 51 || Math.abs(deltaY) === 51) {
+      if (swipeDir && card.lastDir !== swipeDir) {
         tg.HapticFeedback.impactOccurred('light');
       }
+      card.lastDir = swipeDir;
     }
   });
 
@@ -222,23 +232,29 @@ function initSwipe() {
     const touchEndY = e.changedTouches[0].clientY;
     const deltaX = touchEndX - touchStartX;
     const deltaY = touchEndY - touchStartY;
+    
+    const cardEl = document.getElementById('word-card');
+    const lastDir = cardEl.lastDir;
+    cardEl.lastDir = null;
 
     if (!isSwiping) {
-      card.classList.toggle('flipped');
+      cardEl.classList.toggle('flipped');
       tg.HapticFeedback.impactOccurred('light');
-      card.style.transform = card.classList.contains('flipped') ? 'rotateY(180deg)' : 'rotateY(0deg)';
+      cardEl.style.transform = cardEl.classList.contains('flipped') ? 'rotateY(180deg)' : 'rotateY(0deg)';
     } else {
-      const threshold = 100;
-      if (deltaX < -threshold) {
-        grade(1); // Again
-      } else if (deltaX > threshold) {
-        grade(5); // Good
-      } else if (deltaY < -threshold && Math.abs(deltaX) < threshold) {
-        grade(3); // Hard
+      const hThreshold = 120;
+      const vThreshold = 100;
+
+      if (deltaX < -hThreshold && Math.abs(deltaX) > Math.abs(deltaY) * 1.2) {
+        grade(1); 
+      } else if (deltaX > hThreshold && Math.abs(deltaX) > Math.abs(deltaY) * 1.2) {
+        grade(5); 
+      } else if (deltaY < -vThreshold && Math.abs(deltaY) > Math.abs(deltaX) * 1.5) {
+        grade(3); 
       } else {
-        card.classList.remove('swipe-left', 'swipe-right', 'swipe-up');
-        const isFlipped = card.classList.contains('flipped');
-        card.style.transform = isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)';
+        cardEl.classList.remove('swipe-left', 'swipe-right', 'swipe-up');
+        const isFlipped = cardEl.classList.contains('flipped');
+        cardEl.style.transform = isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)';
       }
     }
   });
@@ -263,7 +279,6 @@ async function grade(quality) {
   }
 
   tg.HapticFeedback.notificationOccurred('success');
-  
   await POST('/api/grade', { word_id: word.id, quality, word });
 
   sessionIdx++;
@@ -290,11 +305,12 @@ function showSummary() {
 }
 
 function exitPractice() {
+  if (tg.enableVerticalSwipes) tg.enableVerticalSwipes();
   showScreen('home');
   loadHome();
 }
 
-// ── Add words ─────────────────────────────────────────────────────────────
+// ── Add/Search/Edit Logic ──────────────────────────────────────────────────
 
 async function submitWords() {
   const inputEl = document.getElementById('add-input');
@@ -313,9 +329,7 @@ async function submitWords() {
     } else {
       toast('No new words added');
     }
-  } catch (e) {
-    toast('Failed to add words');
-  }
+  } catch (e) { toast('Failed to add words'); }
 }
 
 function handleFileUpload(input) {
@@ -347,8 +361,6 @@ function parseText(text) {
   return words;
 }
 
-// ── Search ────────────────────────────────────────────────────────────────
-
 function onSearchInput(val) {
   clearTimeout(searchTimer);
   searchTimer = setTimeout(() => loadSearch(val), 300);
@@ -360,22 +372,15 @@ function highlight(text, query) {
   const parts = text.split(new RegExp(`(${escapedQuery})`, 'gi'));
   return parts.map(p => {
     return p.toLowerCase() === query.toLowerCase()
-      ? `<mark>${esc(p)}</mark>`
-      : esc(p);
+      ? `<mark>${esc(p)}</mark>` : esc(p);
   }).join('');
 }
 
 async function loadSearch(query) {
   const el = document.getElementById('search-results');
   if (!el) return;
-
   const q = (query || '').trim();
-
-  if (q.length < 2) {
-    el.innerHTML = '';
-    return;
-  }
-
+  if (q.length < 2) { el.innerHTML = ''; return; }
   try {
     const data = await GET(`/api/words/search?q=${encodeURIComponent(q)}`);
     if (!data.words || data.words.length === 0) {
@@ -384,16 +389,14 @@ async function loadSearch(query) {
     }
     el.innerHTML = data.words.map(w => `
       <div class="word-row" id="wr-${w.id}">
-        <div class="word-row-content" onclick='openEdit(${JSON.stringify(w)})'>
+        <div class="word-row-content" onclick="openEdit(${JSON.stringify(w).replace(/"/g, '&quot;')})">
           <div class="word-row-text">${highlight(w.word, q)}</div>
           <div class="word-row-trans">${highlight(w.translation, q)}</div>
         </div>
         <button class="del-btn" onclick="deleteWord(${w.id})">✕</button>
       </div>
     `).join('');
-  } catch (e) {
-    console.error(e);
-  }
+  } catch (e) { console.error(e); }
 }
 
 async function deleteWord(id) {
@@ -402,15 +405,10 @@ async function deleteWord(id) {
     document.getElementById(`wr-${id}`)?.remove();
     toast('Deleted');
     tg.HapticFeedback.impactOccurred('medium');
-  } catch (e) {
-    toast('Delete failed');
-  }
+  } catch (e) { toast('Delete failed'); }
 }
 
-// ── Edit word ────────────────────────────────────────────────────────────
-
 let editWordId = null;
-
 function openEdit(w) {
   editWordId = w.id;
   document.getElementById('edit-word').value        = w.word        || '';
@@ -446,9 +444,7 @@ async function saveEdit() {
     tg.HapticFeedback.notificationOccurred('success');
   } catch (e) {
     toast(e.message === '409' ? 'Word already exists' : 'Failed to save');
-  } finally {
-    btn.disabled = false;
-  }
+  } finally { btn.disabled = false; }
 }
 
 // ── Settings ──────────────────────────────────────────────────────────────
@@ -461,7 +457,7 @@ async function loadSettings() {
     const limit  = document.getElementById('set-limit');
     const tzEl   = document.getElementById('info-tz');
     const wordEl = document.getElementById('info-words');
-    const intEl = document.getElementById('set-notify-interval');
+    const intEl  = document.getElementById('set-notify-interval');
 
     if (qStart) qStart.value = s.quiet_start || '23:00';
     if (qEnd)   qEnd.value   = s.quiet_end   || '08:00';
@@ -473,11 +469,9 @@ async function loadSettings() {
       btn.classList.toggle('active', btn.dataset.mode === mode);
     });
 
-    if (tzEl)   tzEl.textContent  = `Timezone: ${s.timezone || 'UTC'}`;
+    if (tzEl)   tzEl.textContent   = `Timezone: ${s.timezone || 'UTC'}`;
     if (wordEl) wordEl.textContent = `Dictionary: ${s.total_words || 0} words`;
-  } catch (e) {
-    console.error(e);
-  }
+  } catch (e) { console.error(e); }
 }
 
 async function saveSetting(key, value) {
@@ -486,10 +480,7 @@ async function saveSetting(key, value) {
     toast('Settings saved');
     tg.HapticFeedback.impactOccurred('light');
     loadHome();
-  } catch(e) {
-    toast(e.message);
-    loadSettings();
-  }
+  } catch(e) { toast(e.message); loadSettings(); }
 }
 
 function setPracticeMode(mode) {
@@ -499,8 +490,6 @@ function setPracticeMode(mode) {
   saveSetting('practice_mode', mode);
 }
 
-// ── Delete all words ─────────────────────────────────────────────────────
-
 function clearAllWords() {
   tg.showConfirm('Delete all words?', async (confirmed) => {
     if (!confirmed) return;
@@ -509,13 +498,9 @@ function clearAllWords() {
       toast('All words deleted');
       tg.HapticFeedback.notificationOccurred('success');
       loadHome();
-    } catch (e) {
-      toast('Failed to delete words');
-    }
+    } catch (e) { toast('Failed to delete words'); }
   });
 }
-
-// ── Share words as text ─────────────────────────────────────────────────────
 
 async function shareWords() {
   try {
@@ -523,15 +508,9 @@ async function shareWords() {
       method: 'GET',
       headers: { 'X-Init-Data': INIT_DATA },
     });
-    if (!res.ok) {
-      toast('Failed to load words');
-      return;
-    }
+    if (!res.ok) { toast('Failed to load words'); return; }
     const text = await res.text();
-    if (!text.trim()) {
-      toast('No words to share');
-      return;
-    }
+    if (!text.trim()) { toast('No words to share'); return; }
     try {
       if (typeof navigator.share === 'function') {
         await navigator.share({ title: 'SRbot dictionary', text });
@@ -540,16 +519,13 @@ async function shareWords() {
         await navigator.clipboard.writeText(text);
         toast('Copied to clipboard');
       }
-      if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+      tg.HapticFeedback.notificationOccurred('success');
     } catch (e) {
       if (e.name === 'AbortError') return;
       await navigator.clipboard.writeText(text);
       toast('Copied to clipboard');
     }
-  } catch (e) {
-    console.error(e);
-    toast('Share failed');
-  }
+  } catch (e) { toast('Share failed'); }
 }
 
 function esc(str) {
@@ -557,8 +533,6 @@ function esc(str) {
     .replace(/&/g, '&amp;').replace(/</g, '&lt;')
     .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
-
-// ── Init ──────────────────────────────────────────────────────────────────
 
 async function init() {
   try {
