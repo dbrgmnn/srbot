@@ -151,15 +151,6 @@ class WordRepo:
     def __init__(self, db: aiosqlite.Connection):
         self.db = db
 
-    async def _migrate(self):
-        try:
-            await self.db.execute("ALTER TABLE words ADD COLUMN last_reviewed_at DATETIME")
-        except: pass
-        try:
-            await self.db.execute("ALTER TABLE words ADD COLUMN started_at DATETIME")
-        except: pass
-        await self.db.commit()
-
     async def add_words_batch(self, user_id: int, language: str, words: list[dict]) -> int:
         now = datetime.now(tz=timezone.utc).isoformat()
         data = [
