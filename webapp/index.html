@@ -69,33 +69,33 @@
 
 <!-- ── Practice ── -->
 <div id="screen-practice" class="screen">
-  <div class="p-gap">
+  <div class="practice-screen-content">
     <div class="practice-header">
       <span id="practice-progress">0 / 0</span>
       <span id="practice-type" class="practice-badge"></span>
     </div>
+    
     <div class="progress-wrap">
       <div class="progress-track">
         <div class="progress-fill" id="practice-bar"></div>
       </div>
     </div>
-    <div class="word-card">
-      <div class="word-inner">
+
+    <div class="word-card-container">
+      <div class="word-card" id="word-card">
         <div class="word-face word-front">
           <div class="word-main" id="word-front"></div>
         </div>
-        <div class="word-face word-back" id="word-back">
+        <div class="word-face word-back">
           <div class="word-trans" id="word-translation"></div>
           <div class="word-example" id="word-ex"></div>
         </div>
       </div>
     </div>
-    <div class="grade-row" id="grade-row">
-      <button class="grade-btn grade-again" id="grade-again" onclick="grade(1)" disabled>Again</button>
-      <button class="grade-btn grade-hard"  id="grade-hard"  onclick="grade(3)" disabled>Hard</button>
-      <button class="grade-btn grade-good"  id="grade-good"  onclick="grade(5)" disabled>Good</button>
+
+    <div class="practice-footer">
+      <button class="btn secondary" onclick="exitPractice()">Exit</button>
     </div>
-    <button class="btn secondary" onclick="exitPractice()">Exit</button>
   </div>
 </div>
 

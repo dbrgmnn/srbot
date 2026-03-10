@@ -137,6 +137,8 @@ function renderWord() {
   const typeEl  = document.getElementById('practice-type');
   const barEl   = document.getElementById('practice-bar');
   const frontEl = document.getElementById('word-front');
+  const transEl = document.getElementById('word-translation');
+  const exEl    = document.getElementById('word-ex');
 
   if (progEl) progEl.textContent = `${sessionIdx + 1} / ${total}`;
   if (typeEl) {
@@ -145,37 +147,12 @@ function renderWord() {
     typeEl.className = 'practice-badge ' + (isReview ? 'practice-badge-review' : 'practice-badge-new');
   }
   if (barEl) barEl.style.width = `${pct}%`;
+  
   if (frontEl) {
     frontEl.textContent = (practiceMode === 'translation_to_word')
       ? word.translation
       : word.word;
   }
-
-  // reset card
-  const card = document.querySelector('.word-card');
-  if (card) {
-    card.classList.remove('flipped');
-    card.onclick = flipCard;
-  }
-
-  // lock grade buttons until flip
-  ['grade-again', 'grade-hard', 'grade-good'].forEach(id => {
-    const btn = document.getElementById(id);
-    if (btn) btn.disabled = true;
-  });
-}
-
-function flipCard() {
-  const card = document.querySelector('.word-card');
-  if (!card || card.classList.contains('flipped')) return;
-  showAnswer();
-}
-
-function showAnswer() {
-  const word    = sessionWords[sessionIdx];
-  const transEl = document.getElementById('word-translation');
-  const exEl    = document.getElementById('word-ex');
-
   if (transEl) {
     transEl.textContent = (practiceMode === 'translation_to_word')
       ? word.word
@@ -190,16 +167,81 @@ function showAnswer() {
     }
   }
 
-  const card = document.querySelector('.word-card');
-  if (card) card.classList.add('flipped');
+  // reset card
+  const card = document.getElementById('word-card');
+  if (card) {
+    card.classList.remove('flipped', 'swipe-left', 'swipe-right', 'swipe-up');
+    card.style.transform = '';
+  }
+}
 
-  // unlock grade buttons after flip
-  ['grade-again', 'grade-hard', 'grade-good'].forEach(id => {
-    const btn = document.getElementById(id);
-    if (btn) btn.disabled = false;
+// Swipe & Flip Logic
+let touchStartX = 0;
+let touchStartY = 0;
+let isSwiping = false;
+
+function initSwipe() {
+  const card = document.getElementById('word-card');
+  if (!card) return;
+
+  card.addEventListener('touchstart', (e) => {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+    isSwiping = false;
+    card.classList.add('swiping');
   });
 
-  tg.HapticFeedback.impactOccurred('light');
+  card.addEventListener('touchmove', (e) => {
+    const touchX = e.touches[0].clientX;
+    const touchY = e.touches[0].clientY;
+    const deltaX = touchX - touchStartX;
+    const deltaY = touchY - touchStartY;
+
+    if (Math.abs(deltaX) > 10 || Math.abs(deltaY) > 10) isSwiping = true;
+
+    if (isSwiping) {
+      const rotation = deltaX * 0.1;
+      const isFlipped = card.classList.contains('flipped');
+      const baseRotation = isFlipped ? 180 : 0;
+      
+      card.style.transform = `translate(${deltaX}px, ${deltaY}px) rotateY(${baseRotation}deg) rotateZ(${rotation}deg)`;
+      
+      card.classList.toggle('swipe-left', deltaX < -50);
+      card.classList.toggle('swipe-right', deltaX > 50);
+      card.classList.toggle('swipe-up', deltaY < -50 && Math.abs(deltaX) < 50);
+
+      if (Math.abs(deltaX) === 51 || Math.abs(deltaY) === 51) {
+        tg.HapticFeedback.impactOccurred('light');
+      }
+    }
+  });
+
+  card.addEventListener('touchend', (e) => {
+    card.classList.remove('swiping');
+    const touchEndX = e.changedTouches[0].clientX;
+    const touchEndY = e.changedTouches[0].clientY;
+    const deltaX = touchEndX - touchStartX;
+    const deltaY = touchEndY - touchStartY;
+
+    if (!isSwiping) {
+      card.classList.toggle('flipped');
+      tg.HapticFeedback.impactOccurred('light');
+      card.style.transform = card.classList.contains('flipped') ? 'rotateY(180deg)' : 'rotateY(0deg)';
+    } else {
+      const threshold = 100;
+      if (deltaX < -threshold) {
+        grade(1); // Again
+      } else if (deltaX > threshold) {
+        grade(5); // Good
+      } else if (deltaY < -threshold && Math.abs(deltaX) < threshold) {
+        grade(3); // Hard
+      } else {
+        card.classList.remove('swipe-left', 'swipe-right', 'swipe-up');
+        const isFlipped = card.classList.contains('flipped');
+        card.style.transform = isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)';
+      }
+    }
+  });
 }
 
 async function grade(quality) {
@@ -211,12 +253,24 @@ async function grade(quality) {
   else if (quality === 3) sessionStats.hard++;
   else sessionStats.again++;
 
+  const card = document.getElementById('word-card');
+  if (card) {
+    const isFlipped = card.classList.contains('flipped');
+    const rot = isFlipped ? 180 : 0;
+    if (quality === 1) card.style.transform = `translate(-500px, 0) rotateY(${rot}deg) rotateZ(-30deg)`;
+    else if (quality === 5) card.style.transform = `translate(500px, 0) rotateY(${rot}deg) rotateZ(30deg)`;
+    else if (quality === 3) card.style.transform = `translate(0, -500px) rotateY(${rot}deg) scale(0.5)`;
+  }
+
+  tg.HapticFeedback.notificationOccurred('success');
+  
   await POST('/api/grade', { word_id: word.id, quality, word });
-  tg.HapticFeedback.impactOccurred('light');
 
   sessionIdx++;
-  if (sessionIdx >= sessionWords.length) showSummary();
-  else renderWord();
+  setTimeout(() => {
+    if (sessionIdx >= sessionWords.length) showSummary();
+    else renderWord();
+  }, 200);
 }
 
 function showSummary() {
@@ -331,8 +385,8 @@ async function loadSearch(query) {
     el.innerHTML = data.words.map(w => `
       <div class="word-row" id="wr-${w.id}">
         <div class="word-row-content" onclick='openEdit(${JSON.stringify(w)})'>
-          <div class="word-row-text">${highlight(w.word, query)}</div>
-          <div class="word-row-trans">${highlight(w.translation, query)}</div>
+          <div class="word-row-text">${highlight(w.word, q)}</div>
+          <div class="word-row-trans">${highlight(w.translation, q)}</div>
         </div>
         <button class="del-btn" onclick="deleteWord(${w.id})">✕</button>
       </div>
@@ -518,4 +572,5 @@ async function init() {
 
 document.addEventListener('DOMContentLoaded', () => {
   init();
+  initSwipe();
 });
