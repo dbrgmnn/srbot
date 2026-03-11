@@ -90,11 +90,6 @@ async function loadHome(data) {
     if (document.getElementById('stat-new')) {
       const remaining = Math.max(0, limit - todayDone);
       document.getElementById('stat-new').textContent = remaining;
-      const label = document.getElementById('stat-new-label');
-      if (label) {
-        label.textContent = remaining === 0 ? "goal reached" : "to go";
-        label.style.color = remaining === 0 ? "#30d158" : "";
-      }
     }
 
     // Greeting
