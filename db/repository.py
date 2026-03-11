@@ -128,20 +128,29 @@ class UserRepo:
         row = await cursor.fetchone()
         return float(row['min_interval']) if (row and row['min_interval']) else 240.0
 
-    async def get_users_with_due_words(self) -> list[dict]:
-        now = datetime.now(tz=timezone.utc).isoformat()
+    async def get_users_with_due_words(self, tz_name: str = "UTC") -> list[dict]:
+        from zoneinfo import ZoneInfo
+        now_utc = datetime.now(tz=timezone.utc)
+        tz = ZoneInfo(tz_name)
+        
+        # Get local midnight in UTC
+        local_now = now_utc.astimezone(tz)
+        today_start_local = local_now.replace(hour=0, minute=0, second=0, microsecond=0)
+        today_start_utc = today_start_local.astimezone(timezone.utc).isoformat()
+
         cursor = await self.db.execute(
             """SELECT u.id as user_id, u.telegram_id,
                         w.language,
                         s.quiet_start, s.quiet_end, s.daily_limit, s.notification_interval_minutes, s.last_notified_at,
                         SUM(CASE WHEN w.repetitions > 0 AND w.next_review <= ? THEN 1 ELSE 0 END) as due_count,
-                        SUM(CASE WHEN w.repetitions = 0 THEN 1 ELSE 0 END) as new_count
+                        SUM(CASE WHEN w.repetitions = 0 THEN 1 ELSE 0 END) as new_count,
+                        SUM(CASE WHEN w.started_at >= ? THEN 1 ELSE 0 END) as today_done
                 FROM users u
                 JOIN words w ON w.user_id = u.id
                 JOIN user_settings s ON s.user_id = u.id AND s.language = w.language
                 GROUP BY u.id, w.language
-                HAVING due_count > 0 OR new_count > 0""",
-            (now,)
+                HAVING due_count > 0 OR (new_count > 0 AND today_done < s.daily_limit)""",
+            (now_utc.isoformat(), today_start_utc)
         )
         rows = await cursor.fetchall()
         return [dict(row) for row in rows]

@@ -48,12 +48,22 @@ async def check_and_send_notifications(bot: Bot, config: Config, db: aiosqlite.C
     now = datetime.now(tz=timezone.utc)
     tz = ZoneInfo(config.timezone)
     user_repo = UserRepo(db)
-    candidates = await user_repo.get_users_with_due_words()
+    candidates = await user_repo.get_users_with_due_words(tz_name=config.timezone)
     logger.info(f"[scheduler] tick — candidates: {len(candidates)}")
 
     for row in candidates:
         telegram_id = row["telegram_id"]
-        logger.info(f"[scheduler] checking {telegram_id} — due={row['due_count']} new={row['new_count']} interval={row['notification_interval_minutes']}")
+        
+        due_count = row["due_count"]
+        # Calculate how many new words are actually left for today's goal
+        daily_remaining = max(0, row["daily_limit"] - row["today_done"])
+        new_to_show = min(row["new_count"], daily_remaining)
+
+        # If nothing to review and goal is already reached, skip this user
+        if due_count == 0 and new_to_show == 0:
+            continue
+
+        logger.info(f"[scheduler] checking {telegram_id} — due={due_count} new_left={new_to_show} interval={row['notification_interval_minutes']}")
 
         if is_quiet_time(now, row["quiet_start"], row["quiet_end"], tz):
             logger.info(f"[scheduler] {telegram_id} — quiet time, skip")
@@ -64,18 +74,12 @@ async def check_and_send_notifications(bot: Bot, config: Config, db: aiosqlite.C
             try:
                 last_notified = datetime.fromisoformat(last_notified_raw)
                 elapsed = (now - last_notified).total_seconds() / 60
-                logger.info(f"[scheduler] {telegram_id} — elapsed={elapsed:.1f}min interval={row['notification_interval_minutes']}min")
-                if elapsed < row["notification_interval_minutes"] - 0.1:  # 6sec tolerance
-                    logger.info(f"[scheduler] {telegram_id} — cooldown active, skip")
+                if elapsed < row["notification_interval_minutes"] - 0.1:
                     continue
             except ValueError:
                 pass
-        else:
-            logger.info(f"[scheduler] {telegram_id} — never notified, sending")
 
-        due_count = row["due_count"]
-        daily_new = min(row["new_count"], row["daily_limit"])
-        text = build_notification_text(due_count, daily_new)
+        text = build_notification_text(due_count, new_to_show)
 
         try:
             await bot.send_message(chat_id=telegram_id, text=text)
