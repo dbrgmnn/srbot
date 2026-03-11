@@ -421,10 +421,12 @@ function parseText(text) {
   const lines = text.split('\n').filter(l => l.trim());
   const words = [];
   for (const line of lines) {
-    const sep   = line.includes(';') ? ';' : ',';
-    const parts = line.split(sep);
-    if (parts.length >= 2 && parts[0] && parts[1]) {
-      words.push({ word: parts[0], translation: parts[1], example: parts[2] || null });
+    const parts = line.split(',');
+    const word        = (parts[0] || '').trim();
+    const translation = (parts[1] || '').trim();
+    const example     = parts.slice(2).join(',').trim() || null;
+    if (word && translation) {
+      words.push({ word, translation, example });
     }
   }
   return words;

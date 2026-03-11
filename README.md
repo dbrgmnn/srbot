@@ -39,7 +39,7 @@ srbot/
 ## 🛠 User Guide
 
 ### Word Management
-- **Adding:** Use the "Add" tab. Enter words manually (`word;translate;example`) or upload a CSV file.
+- **Adding:** Use the "Add" tab. Enter words manually (`word,translation,example`) or upload a CSV file (comma-separated). Commas inside example sentences are preserved automatically.
 - **Search:** Use the "Search" tab. Search starts from 2 characters with instant highlighting. Tap a word to edit or delete it.
 
 ### Practice Session
