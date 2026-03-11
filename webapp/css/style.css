@@ -204,6 +204,7 @@ body {
   position: relative;
   touch-action: none;
 }
+
 .word-card {
   width: 100%;
   max-width: 340px;
@@ -262,19 +263,26 @@ body {
 .word-card.swipe-right { background-color: rgba(48, 209, 88, 0.25) !important; border-color: #30d158 !important; }
 .word-card.swipe-up { background-color: rgba(255, 214, 10, 0.25) !important; border-color: #ffd60a !important; }
 
-.btn-exit {
-  width: auto;
-  min-width: 100px;
-  padding: 10px 24px;
-  font-size: 14px;
-  margin: 0 auto;
-  display: block;
-}
-
 .practice-footer {
   padding-top: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
 }
 
+.btn-practice-footer {
+  width: auto;
+  min-width: 80px;
+  height: 48px;
+  padding: 0 24px;
+  font-size: 14px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 24px;
+}
+.btn-practice-footer svg { width: 20px; height: 20px; }
 
 /* ── Add words ── */
 textarea {

@@ -293,6 +293,27 @@ function initSwipe() {
   });
 }
 
+function playAudio(e) {
+  if (e) e.stopPropagation();
+  if (isProcessing || !sessionWords.length) return;
+  
+  const word = sessionWords[sessionIdx];
+  if (!word || !word.word) return;
+
+  if (!window.speechSynthesis) {
+    toast('Audio not supported');
+    return;
+  }
+
+  window.speechSynthesis.cancel();
+  const msg = new SpeechSynthesisUtterance(word.word);
+  msg.lang = 'de-DE';
+  msg.rate = 0.85;
+  window.speechSynthesis.speak(msg);
+  
+  tg.HapticFeedback.impactOccurred('light');
+}
+
 async function grade(quality) {
   if (isProcessing) return;
   isProcessing = true;
