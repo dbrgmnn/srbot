@@ -88,11 +88,12 @@ async function loadHome(data) {
 
     if (document.getElementById('stat-due')) document.getElementById('stat-due').textContent = due;
     if (document.getElementById('stat-new')) {
-      document.getElementById('stat-new').textContent = `${todayDone} / ${limit}`;
+      const remaining = Math.max(0, limit - todayDone);
+      document.getElementById('stat-new').textContent = remaining;
       const label = document.getElementById('stat-new-label');
       if (label) {
-        label.textContent = "today's goal";
-        label.style.color = todayDone >= limit ? "#30d158" : "";
+        label.textContent = remaining === 0 ? "goal reached" : "to go";
+        label.style.color = remaining === 0 ? "#30d158" : "";
       }
     }
 
