@@ -421,11 +421,12 @@ function handleFileUpload(input) {
 function parseText(text) {
   const lines = text.split('\n').filter(l => l.trim());
   const words = [];
-  for (const line of lines) {
-    const parts = line.split(',');
+  for (let i = 0; i < lines.length; i++) {
+    const parts = lines[i].split(',');
     const word        = (parts[0] || '').trim();
     const translation = (parts[1] || '').trim();
     const example     = parts.slice(2).join(',').trim() || null;
+    if (i === 0 && word.toLowerCase() === 'term') continue;
     if (word && translation) {
       words.push({ word, translation, example });
     }
