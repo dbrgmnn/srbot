@@ -8,19 +8,15 @@ def setup_routes_practice(app: web.Application, db: aiosqlite.Connection):
 
     async def get_session(request: web.Request) -> web.Response:
         telegram_id = request["telegram_id"]
-        
-        try:
-            tz_offset = int(request.query.get("tz", 0))
-        except:
-            tz_offset = 0
+        config = request.app["config"]
 
         user_repo = UserRepo(db)
         word_repo = WordRepo(db)
         user_id = await user_repo.get_or_create(telegram_id)
         settings = await user_repo.get_user_settings(telegram_id)
         
-        # Calculate remaining limit with TZ
-        stats = await word_repo.get_full_stats(user_id, 'de', tz_offset_minutes=tz_offset)
+        # Calculate remaining limit with Server TZ
+        stats = await word_repo.get_full_stats(user_id, 'de', tz_name=config.timezone)
         today_done = stats.get("today_new", 0)
         daily_limit = settings.get("daily_limit", 20)
         remaining = max(0, daily_limit - today_done)

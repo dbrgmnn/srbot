@@ -218,10 +218,15 @@ class WordRepo:
         row = await cursor.fetchone()
         return row['count'] if row else 0
 
-    async def get_full_stats(self, user_id: int, language: str, tz_offset_minutes: int = 0) -> dict:
+    async def get_full_stats(self, user_id: int, language: str, tz_name: str = "UTC") -> dict:
+        from zoneinfo import ZoneInfo
         now_utc = datetime.now(tz=timezone.utc)
-        today_start_local = (now_utc + timedelta(minutes=tz_offset_minutes)).replace(hour=0, minute=0, second=0, microsecond=0)
-        today_start_utc = (today_start_local - timedelta(minutes=tz_offset_minutes)).isoformat()
+        tz = ZoneInfo(tz_name)
+        
+        # Get local midnight in UTC
+        local_now = now_utc.astimezone(tz)
+        today_start_local = local_now.replace(hour=0, minute=0, second=0, microsecond=0)
+        today_start_utc = today_start_local.astimezone(timezone.utc).isoformat()
 
         cursor = await self.db.execute(
             """SELECT

@@ -16,20 +16,39 @@ function getTzOffset() {
 
 // ── API ────────────────────────────────────────────────────────────────────
 
+let isProcessing = false;
+
 async function api(method, path, body) {
   const opts = {
     method,
     headers: { 'Content-Type': 'application/json', 'X-Init-Data': INIT_DATA },
   };
   if (body) opts.body = JSON.stringify(body);
-  const res = await fetch(path, opts);
-  if (res.status === 401 || res.status === 403) throw new Error('Unauthorized');
-  if (res.status === 409) throw new Error('409');
-  if (res.status === 400) {
-    const error = await res.json();
-    throw new Error(error.msg || 'Bad request');
+  
+  try {
+    const res = await fetch(path, opts);
+    
+    // Handle unauthorized/forbidden
+    if (res.status === 401 || res.status === 403) {
+      throw new Error('Please open the app from Telegram');
+    }
+
+    const contentType = res.headers.get("content-type");
+    const isJson = contentType && contentType.includes("application/json");
+    const data = isJson ? await res.json() : null;
+
+    if (!res.ok) {
+      if (res.status === 409) throw new Error('409');
+      if (data && data.msg) throw new Error(data.msg);
+      if (data && data.error) throw new Error(data.error);
+      throw new Error(`Server error (${res.status})`);
+    }
+
+    return data;
+  } catch (e) {
+    if (e.name === 'TypeError') throw new Error('Network error, check your connection');
+    throw e;
   }
-  return res.json();
 }
 
 const GET   = (path)       => api('GET',    path);
@@ -68,9 +87,8 @@ async function loadHome(data) {
       stats    = data.stats;
       settings = data.settings;
     } else {
-      // Pass timezone offset to get correct today_new count
       [stats, settings] = await Promise.all([
-        GET(`/api/stats?tz=${getTzOffset()}`),
+        GET('/api/stats'),
         GET('/api/settings'),
       ]);
     }
@@ -130,7 +148,7 @@ async function loadHome(data) {
 
 async function startPractice() {
   try {
-    const data = await GET(`/api/session?tz=${getTzOffset()}`);
+    const data = await GET('/api/session');
     if (!data.words || data.words.length === 0) {
       toast('Nothing to practice right now.');
       return;
@@ -276,6 +294,9 @@ function initSwipe() {
 }
 
 async function grade(quality) {
+  if (isProcessing) return;
+  isProcessing = true;
+
   const word = sessionWords[sessionIdx];
   if (word.repetitions > 0) sessionStats.reviewed++;
   else sessionStats.new++;
@@ -294,7 +315,14 @@ async function grade(quality) {
   }
 
   tg.HapticFeedback.notificationOccurred('success');
-  await POST('/api/grade', { word_id: word.id, quality, word });
+  
+  try {
+    await POST('/api/grade', { word_id: word.id, quality, word });
+  } catch (e) {
+    toast('Failed to save progress');
+  } finally {
+    isProcessing = false;
+  }
 
   sessionIdx++;
   setTimeout(() => {
@@ -556,7 +584,7 @@ function esc(str) {
 
 async function init() {
   try {
-    const data = await POST('/api/init', { tz: getTzOffset() });
+    const data = await POST('/api/init');
     await loadHome(data);
   } catch (e) {
     if (e.message === 'Unauthorized') toast('Please open the app from Telegram');
