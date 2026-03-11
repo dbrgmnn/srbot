@@ -400,19 +400,20 @@ function handleFileUpload(input) {
   const file = input.files[0];
   if (!file) return;
   const reader = new FileReader();
-  reader.onload = function(e) {
-    const text  = e.target.result;
-    const words = parseText(text);
-    if (words.length > 0) {
-      const inputEl = document.getElementById('add-input');
-      if (inputEl) {
-        inputEl.value = text;
-        submitWords(); // Auto-submit after parsing
+  reader.onload = async function(e) {
+    const words = parseText(e.target.result);
+    input.value = '';
+    if (words.length === 0) { toast('No words found in file'); return; }
+    try {
+      const res = await POST('/api/words', { words });
+      const count = res.added ?? 0;
+      if (count > 0) {
+        toast(`Added ${count} words`);
+        tg.HapticFeedback.notificationOccurred('success');
+      } else {
+        toast('No new words added');
       }
-    } else {
-      toast('No words found in file');
-    }
-    input.value = ''; // Reset file input
+    } catch (e) { toast('Failed to add words'); }
   };
   reader.readAsText(file);
 }
