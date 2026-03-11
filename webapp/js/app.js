@@ -360,9 +360,14 @@ function handleFileUpload(input) {
     const words = parseText(text);
     if (words.length > 0) {
       const inputEl = document.getElementById('add-input');
-      if (inputEl) inputEl.value = text;
-      toast(`Parsed ${words.length} words`);
+      if (inputEl) {
+        inputEl.value = text;
+        submitWords(); // Auto-submit after parsing
+      }
+    } else {
+      toast('No words found in file');
     }
+    input.value = ''; // Reset file input
   };
   reader.readAsText(file);
 }
