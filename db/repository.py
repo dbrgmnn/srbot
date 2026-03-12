@@ -1,5 +1,5 @@
 import aiosqlite
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
 
 
 class UserRepo:
@@ -163,13 +163,13 @@ class WordRepo:
     async def add_words_batch(self, user_id: int, language: str, words: list[dict]) -> int:
         now = datetime.now(tz=timezone.utc).isoformat()
         data = [
-            (user_id, w["word"], w["translation"], language, w.get("example"), now, now)
+            (user_id, w["word"], w["translation"], language, w.get("example"), w.get("level"), now, now)
             for w in words
         ]
         cursor = await self.db.executemany(
             """INSERT OR IGNORE INTO words
-                (user_id, word, translation, language, example, next_review, created_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?)""",
+                (user_id, word, translation, language, example, level, next_review, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
             data,
         )
         await self.db.commit()
@@ -296,7 +296,7 @@ class WordRepo:
 
     async def get_all_words(self, user_id: int, language: str) -> list[dict]:
         cursor = await self.db.execute(
-            """SELECT word, translation, example
+            """SELECT word, translation, example, level
                FROM words
                WHERE user_id = ? AND language = ?
                ORDER BY word ASC""",

@@ -37,6 +37,7 @@ async def init_db(db_path: str = "srbot.db") -> aiosqlite.Connection:
             translation TEXT NOT NULL,
             language TEXT NOT NULL DEFAULT 'de',
             example TEXT,
+            level TEXT,
             repetitions INTEGER DEFAULT 0,
             easiness REAL DEFAULT 2.5,
             interval INTEGER DEFAULT 1,

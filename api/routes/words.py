@@ -82,13 +82,22 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         user_id = await user_repo.get_or_create(telegram_id)
         words = await word_repo.get_all_words(user_id, 'de')
 
+        def csv_field(s: str) -> str:
+            s = (s or "").strip()
+            return f'"{s}"' if ',' in s else s
+
         lines = []
         for w in words:
-            ex = (w.get("example") or "").strip()
-            if ex:
-                lines.append(f"{w['word']},{w['translation']},{ex}")
+            word = csv_field(w['word'])
+            trans = csv_field(w['translation'])
+            ex = csv_field(w.get('example') or '')
+            level = (w.get('level') or '').strip()
+            if ex and level:
+                lines.append(f"{word},{trans},{ex},{level}")
+            elif ex:
+                lines.append(f"{word},{trans},{ex}")
             else:
-                lines.append(f"{w['word']},{w['translation']}")
+                lines.append(f"{word},{trans}")
         text = "\n".join(lines)
         return web.Response(text=text, content_type="text/plain")
 

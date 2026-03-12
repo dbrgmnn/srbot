@@ -418,17 +418,38 @@ function handleFileUpload(input) {
   reader.readAsText(file);
 }
 
+function parseCSVLine(line) {
+  const fields = [];
+  let current = '';
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') {
+      if (inQuotes && line[i + 1] === '"') { current += '"'; i++; } // escaped quote
+      else inQuotes = !inQuotes;
+    } else if (ch === ',' && !inQuotes) {
+      fields.push(current.trim());
+      current = '';
+    } else {
+      current += ch;
+    }
+  }
+  fields.push(current.trim());
+  return fields;
+}
+
 function parseText(text) {
   const lines = text.split('\n').filter(l => l.trim());
   const words = [];
   for (let i = 0; i < lines.length; i++) {
-    const parts = lines[i].split(',');
+    const parts = parseCSVLine(lines[i]);
     const word        = (parts[0] || '').trim();
     const translation = (parts[1] || '').trim();
-    const example     = parts.slice(2).join(',').trim() || null;
+    const example     = (parts[2] || '').trim() || null;
+    const level        = (parts[3] || '').trim() || null;
     if (i === 0 && word.toLowerCase() === 'term') continue;
     if (word && translation) {
-      words.push({ word, translation, example });
+      words.push({ word, translation, example, level });
     }
   }
   return words;
