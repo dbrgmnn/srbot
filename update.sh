@@ -1,8 +1,7 @@
 #!/bin/bash
 cd /home/pi/srbot
 git pull origin main
-rm -f srbot.db
 source venv/bin/activate
 pip install -r requirements.txt --quiet
 sudo systemctl restart srbot
-echo "Deployed and database reset at $(date)"
+echo "Deployed at $(date)"
