@@ -23,6 +23,7 @@ function getTzOffset() {
 // ── API ────────────────────────────────────────────────────────────────────
 
 let isProcessing = false;
+let isGrading = false;
 
 async function api(method, path, body) {
   const opts = {
@@ -38,7 +39,6 @@ async function api(method, path, body) {
   try {
     const res = await fetch(path, opts);
     
-    // Handle unauthorized/forbidden
     if (res.status === 401 || res.status === 403) {
       throw new Error('Please open the app from Telegram');
     }
@@ -91,14 +91,28 @@ function showScreen(name) {
 // ── Home ──────────────────────────────────────────────────────────────────
 
 async function switchLanguage(lang) {
-  if (currentLang === lang) return;
+  if (currentLang === lang || isProcessing) return;
   currentLang = lang;
   tg.HapticFeedback.impactOccurred('light');
-  await loadSettings(); // Refresh settings data for the new language
+  
+  // Show minimal visual feedback that language is changing
+  document.querySelectorAll('.lang-opt').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.lang === currentLang);
+  });
+
+  try {
+    isProcessing = true;
+    await Promise.all([loadSettings(), loadHome()]);
+  } catch (e) {
+    toast('Error switching language');
+  } finally {
+    isProcessing = false;
+  }
 }
 
 let currentLimit = 20;
 async function changeLimit(delta) {
+  if (isProcessing) return;
   const el = document.getElementById('set-limit-val');
   let val = parseInt(el.textContent) + delta;
   if (val < 5) val = 5;
@@ -171,15 +185,16 @@ async function loadHome(data) {
       }
     }
   } catch (e) {
-    if (e.message === 'Unauthorized') toast('Please open the app from Telegram');
-    else toast('Failed to load stats');
+    toast('Failed to load stats');
   }
 }
 
 // ── Practice ──────────────────────────────────────────────────────────────
 
 async function startPractice() {
+  if (isProcessing) return;
   try {
+    isProcessing = true;
     const data = await GET('/api/session');
     if (!data.words || data.words.length === 0) {
       toast('Nothing to practice right now.');
@@ -192,7 +207,11 @@ async function startPractice() {
     renderWord();
     
     if (tg.disableVerticalSwipes) tg.disableVerticalSwipes();
-  } catch(e) { toast(e.message); }
+  } catch(e) { 
+    toast(e.message); 
+  } finally {
+    isProcessing = false;
+  }
 }
 
 function renderWord() {
@@ -251,6 +270,7 @@ function initSwipe() {
   if (!card) return;
 
   card.addEventListener('touchstart', (e) => {
+    if (isGrading) return;
     touchStartX = e.touches[0].clientX;
     touchStartY = e.touches[0].clientY;
     isSwiping = false;
@@ -258,6 +278,7 @@ function initSwipe() {
   });
 
   card.addEventListener('touchmove', (e) => {
+    if (isGrading) return;
     const touchX = e.touches[0].clientX;
     const touchY = e.touches[0].clientY;
     const deltaX = touchX - touchStartX;
@@ -292,6 +313,7 @@ function initSwipe() {
   });
 
   card.addEventListener('touchend', (e) => {
+    if (isGrading) return;
     card.classList.remove('swiping');
     const touchEndX = e.changedTouches[0].clientX;
     const touchEndY = e.changedTouches[0].clientY;
@@ -327,7 +349,7 @@ function initSwipe() {
 
 function playAudio(e) {
   if (e) e.stopPropagation();
-  if (isProcessing || !sessionWords.length) return;
+  if (!sessionWords.length) return;
   
   const word = sessionWords[sessionIdx];
   if (!word || !word.word) return;
@@ -347,8 +369,8 @@ function playAudio(e) {
 }
 
 async function grade(quality) {
-  if (isProcessing) return;
-  isProcessing = true;
+  if (isGrading) return;
+  isGrading = true;
 
   const word = sessionWords[sessionIdx];
   if (word.repetitions > 0) sessionStats.reviewed++;
@@ -370,11 +392,17 @@ async function grade(quality) {
   tg.HapticFeedback.notificationOccurred('success');
   
   try {
-    await POST('/api/grade', { word_id: word.id, quality, word });
+    // Optimization: only send relevant data
+    const sm2_data = {
+      repetitions: word.repetitions,
+      easiness: word.easiness,
+      interval: word.interval
+    };
+    await POST('/api/grade', { word_id: word.id, quality, word: sm2_data });
   } catch (e) {
     toast('Failed to save progress');
   } finally {
-    isProcessing = false;
+    isGrading = false;
   }
 
   sessionIdx++;
@@ -409,26 +437,35 @@ function exitPractice() {
 // ── Add/Search/Edit Logic ──────────────────────────────────────────────────
 
 async function submitWords() {
+  if (isProcessing) return;
   const inputEl = document.getElementById('add-input');
   if (!inputEl) return;
   const raw = inputEl.value.trim();
   if (!raw) return;
   const words = parseText(raw);
   if (words.length === 0) { toast('Nothing to parse'); return; }
+  
   try {
+    isProcessing = true;
     const res = await POST('/api/words', { words });
     const count = res.added ?? 0;
     if (count > 0) {
       toast(`Added ${count} words`);
       inputEl.value = '';
       tg.HapticFeedback.notificationOccurred('success');
+      loadHome(); // refresh stats
     } else {
       toast('No new words added');
     }
-  } catch (e) { toast('Failed to add words'); }
+  } catch (e) { 
+    toast('Failed to add words'); 
+  } finally {
+    isProcessing = false;
+  }
 }
 
-function handleFileUpload(input) {
+async function handleFileUpload(input) {
+  if (isProcessing) return;
   const file = input.files[0];
   if (!file) return;
   const reader = new FileReader();
@@ -437,15 +474,21 @@ function handleFileUpload(input) {
     input.value = '';
     if (words.length === 0) { toast('No words found in file'); return; }
     try {
+      isProcessing = true;
       const res = await POST('/api/words', { words });
       const count = res.added ?? 0;
       if (count > 0) {
         toast(`Added ${count} words`);
         tg.HapticFeedback.notificationOccurred('success');
+        loadHome(); // refresh stats
       } else {
         toast('No new words added');
       }
-    } catch (e) { toast('Failed to add words'); }
+    } catch (e) { 
+      toast('Failed to add words'); 
+    } finally {
+      isProcessing = false;
+    }
   };
   reader.readAsText(file);
 }
@@ -522,7 +565,9 @@ async function loadSearch(query) {
         <button class="del-btn" onclick="deleteWord(${w.id})">✕</button>
       </div>
     `).join('');
-  } catch (e) { console.error(e); }
+  } catch (e) { 
+    toast('Search failed');
+  }
 }
 
 async function deleteWord(id) {
@@ -531,6 +576,7 @@ async function deleteWord(id) {
     document.getElementById(`wr-${id}`)?.remove();
     toast('Deleted');
     tg.HapticFeedback.impactOccurred('medium');
+    loadHome(); // refresh stats
   } catch (e) { toast('Delete failed'); }
 }
 
@@ -607,7 +653,9 @@ async function loadSettings() {
 
     if (tzEl)   tzEl.textContent   = `Timezone: ${s.timezone || 'UTC'}`;
     if (wordEl) wordEl.textContent = `Dictionary: ${s.total_words || 0} words`;
-  } catch (e) { console.error(e); }
+  } catch (e) { 
+    toast('Failed to load settings');
+  }
 }
 
 async function saveSetting(key, value) {
@@ -642,7 +690,7 @@ async function shareWords() {
   try {
     const res = await fetch('/api/words/export', {
       method: 'GET',
-      headers: { 'X-Init-Data': INIT_DATA },
+      headers: { 'X-Init-Data': INIT_DATA, 'X-Language': currentLang },
     });
     if (!res.ok) { toast('Failed to load words'); return; }
     const text = await res.text();
@@ -673,6 +721,10 @@ function esc(str) {
 async function init() {
   try {
     const data = await POST('/api/init');
+    // Sync currentLang with settings from server if needed
+    if (data.settings && data.settings.language) {
+      currentLang = data.settings.language;
+    }
     await loadHome(data);
   } catch (e) {
     if (e.message === 'Unauthorized') toast('Please open the app from Telegram');
