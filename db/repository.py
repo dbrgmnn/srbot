@@ -178,7 +178,7 @@ class WordRepo:
     async def get_session_words(self, user_id: int, language: str, new_limit: int) -> list[dict]:
         now = datetime.now(tz=timezone.utc).isoformat()
         cursor = await self.db.execute(
-            """SELECT * FROM words
+            """SELECT id, word, translation, example, repetitions FROM words
                 WHERE user_id = ? AND language = ? AND repetitions > 0 AND next_review <= ?
                 ORDER BY next_review ASC""",
             (user_id, language, now),
@@ -188,7 +188,7 @@ class WordRepo:
         new_words = []
         if new_limit > 0:
             cursor = await self.db.execute(
-                """SELECT * FROM words
+                """SELECT id, word, translation, example, repetitions FROM words
                     WHERE user_id = ? AND language = ? AND repetitions = 0
                     ORDER BY RANDOM()
                     LIMIT ?""",
@@ -282,7 +282,7 @@ class WordRepo:
     async def search_words(self, user_id: int, language: str, query: str) -> list[dict]:
         q = f"%{query}%"
         cursor = await self.db.execute(
-            """SELECT * FROM words
+            """SELECT id, word, translation, example FROM words
                 WHERE user_id = ? AND language = ? AND (word LIKE ? OR translation LIKE ?)
                 ORDER BY word ASC LIMIT 100""",
             (user_id, language, q, q),

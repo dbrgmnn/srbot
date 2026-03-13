@@ -81,6 +81,8 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         return web.json_response({"words": words})
 
     async def export_words(request: web.Request) -> web.Response:
+        import csv
+        import io
         telegram_id = request["telegram_id"]
         lang = get_language(request)
         user_repo = UserRepo(db)
@@ -88,24 +90,22 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         user_id = await user_repo.get_or_create(telegram_id)
         words = await word_repo.get_all_words(user_id, lang)
 
-        def csv_field(s: str) -> str:
-            s = (s or "").strip()
-            return f'"{s}"' if ',' in s else s
-
-        lines = []
+        output = io.StringIO()
+        writer = csv.writer(output)
+        
+        # Write only non-empty fields in a consistent way
         for w in words:
-            word = csv_field(w['word'])
-            trans = csv_field(w['translation'])
-            ex = csv_field(w.get('example') or '')
-            level = (w.get('level') or '').strip()
-            if ex and level:
-                lines.append(f"{word},{trans},{ex},{level}")
-            elif ex:
-                lines.append(f"{word},{trans},{ex}")
-            else:
-                lines.append(f"{word},{trans}")
-        text = "\n".join(lines)
-        return web.Response(text=text, content_type="text/plain")
+            row = [w['word'], w['translation']]
+            if w.get('example'):
+                row.append(w['example'])
+            if w.get('level'):
+                # Add empty example if level is present but example is not
+                if len(row) == 2:
+                    row.append("")
+                row.append(w['level'])
+            writer.writerow(row)
+
+        return web.Response(text=output.getvalue(), content_type="text/plain")
 
     app.router.add_get("/api/words", list_words)
     app.router.add_post("/api/words", add_words)
