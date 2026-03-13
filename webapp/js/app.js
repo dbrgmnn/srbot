@@ -277,6 +277,8 @@ function initSwipe() {
     card.classList.add('swiping');
   });
 
+  let rafId = null;
+
   card.addEventListener('touchmove', (e) => {
     if (isGrading) return;
     const touchX = e.touches[0].clientX;
@@ -287,37 +289,43 @@ function initSwipe() {
     if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) isSwiping = true;
 
     if (isSwiping) {
-      const isFlipped = card.classList.contains('flipped');
-      const baseRotation = isFlipped ? 180 : 0;
+      if (rafId) cancelAnimationFrame(rafId);
       
-      let swipeDir = null;
-      if (Math.abs(deltaY) > Math.abs(deltaX) * 1.5) {
-        if (deltaY < -40) swipeDir = 'up';
-      } else if (Math.abs(deltaX) > Math.abs(deltaY) * 1.2) {
-        if (deltaX < -50) swipeDir = 'left';
-        else if (deltaX > 50) swipeDir = 'right';
-      }
+      rafId = requestAnimationFrame(() => {
+        const isFlipped = card.classList.contains('flipped');
+        const baseRotation = isFlipped ? 180 : 0;
+        
+        // Thresholds for visual feedback
+        const leftThreshold = -60;
+        const rightThreshold = 100;
+        const upThreshold = -80;
 
-      // Dynamic tilt based on deltaX
-      const rotationZ = deltaX * 0.1;
-      
-      // Use requestAnimationFrame for maximum smoothness if we had more complex logic,
-      // but simple transforms are already highly optimized.
-      card.style.transform = `translate(${deltaX}px, ${deltaY}px) rotateY(${baseRotation}deg) rotateZ(${rotationZ}deg)`;
-      
-      card.classList.toggle('swipe-left', swipeDir === 'left');
-      card.classList.toggle('swipe-right', swipeDir === 'right');
-      card.classList.toggle('swipe-up', swipeDir === 'up');
+        let swipeDir = null;
+        if (Math.abs(deltaY) > Math.abs(deltaX) * 1.5) {
+          if (deltaY < upThreshold) swipeDir = 'up';
+        } else if (Math.abs(deltaX) > Math.abs(deltaY) * 1.2) {
+          if (deltaX < leftThreshold) swipeDir = 'left';
+          else if (deltaX > rightThreshold) swipeDir = 'right';
+        }
 
-      if (swipeDir && card.lastDir !== swipeDir) {
-        tg.HapticFeedback.impactOccurred('light');
-      }
-      card.lastDir = swipeDir;
+        const rotationZ = deltaX * 0.1;
+        card.style.transform = `translate(${deltaX}px, ${deltaY}px) rotateY(${baseRotation}deg) rotateZ(${rotationZ}deg)`;
+        
+        card.classList.toggle('swipe-left', swipeDir === 'left');
+        card.classList.toggle('swipe-right', swipeDir === 'right');
+        card.classList.toggle('swipe-up', swipeDir === 'up');
+
+        if (swipeDir && card.lastDir !== swipeDir) {
+          tg.HapticFeedback.impactOccurred('light');
+        }
+        card.lastDir = swipeDir;
+      });
     }
   });
 
   card.addEventListener('touchend', (e) => {
     if (isGrading) return;
+    if (rafId) cancelAnimationFrame(rafId);
     card.classList.remove('swiping');
 
     const touchEndX = e.changedTouches[0].clientX;
@@ -334,14 +342,16 @@ function initSwipe() {
       tg.HapticFeedback.impactOccurred('light');
       cardEl.style.transform = cardEl.classList.contains('flipped') ? 'rotateY(180deg)' : 'rotateY(0deg)';
     } else {
-      const hThreshold = 100;
-      const vThreshold = 80;
+      // Asymmetric thresholds for one-handed convenience
+      const leftThreshold  = -60; 
+      const rightThreshold = 100;
+      const upThreshold    = -80;
 
-      if (deltaX < -hThreshold && Math.abs(deltaX) > Math.abs(deltaY) * 1.2) {
+      if (deltaX < leftThreshold && Math.abs(deltaX) > Math.abs(deltaY) * 1.2) {
         grade(1); 
-      } else if (deltaX > hThreshold && Math.abs(deltaX) > Math.abs(deltaY) * 1.2) {
+      } else if (deltaX > rightThreshold && Math.abs(deltaX) > Math.abs(deltaY) * 1.2) {
         grade(5); 
-      } else if (deltaY < -vThreshold && Math.abs(deltaY) > Math.abs(deltaX) * 1.5) {
+      } else if (deltaY < upThreshold && Math.abs(deltaY) > Math.abs(deltaX) * 1.5) {
         grade(3); 
       } else {
         cardEl.classList.remove('swipe-left', 'swipe-right', 'swipe-up');
