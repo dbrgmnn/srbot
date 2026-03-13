@@ -31,21 +31,28 @@ def setup_routes_practice(app: web.Application, db: aiosqlite.Connection):
         body = await request.json()
         word_id = body.get("word_id")
         quality = body.get("quality")
-        word_data = body.get("word")
-        if word_id is None or quality is None or not word_data:
+        
+        if word_id is None or quality is None:
             return web.json_response({"error": "missing fields"}, status=400)
+
+        user_repo = UserRepo(db)
+        word_repo = WordRepo(db)
+        user_id = await user_repo.get_or_create(telegram_id)
+        
+        word = await word_repo.get_word(word_id, user_id)
+        if not word:
+            return web.json_response({"error": "word not found"}, status=404)
 
         try:
             result = sm2(
                 quality=int(quality),
-                repetitions=int(word_data["repetitions"]),
-                easiness=float(word_data["easiness"]),
-                interval=int(word_data["interval"]),
+                repetitions=int(word["repetitions"]),
+                easiness=float(word["easiness"]),
+                interval=int(word["interval"]),
             )
-        except (KeyError, TypeError, ValueError):
-            return web.json_response({"error": "invalid word data"}, status=400)
+        except (ValueError, TypeError):
+            return web.json_response({"error": "invalid grade"}, status=400)
 
-        word_repo = WordRepo(db)
         await word_repo.update_word_after_review(
             word_id=word_id,
             repetitions=result.repetitions,

@@ -17,20 +17,23 @@ def sm2(
     interval: int,
 ) -> ReviewResult:
     # Standard SM-2 Algorithm (Intervals in DAYS)
-    # quality: 1 = again, 3 = hard, 5 = good
+    # quality: 0-2 = fail, 3 = hard, 4 = good, 5 = perfect
     
     if quality < 3:
+        # Failure: reset learning process
         repetitions = 0
         interval = 1
     else:
-        if repetitions == 0:
+        # Success: increment repetitions and calculate next interval
+        repetitions += 1
+        if repetitions == 1:
             interval = 1
-        elif repetitions == 1:
+        elif repetitions == 2:
             interval = 6
         else:
             interval = round(interval * easiness)
-        repetitions += 1
 
+    # Update easiness factor
     easiness = easiness + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02))
     easiness = max(1.3, easiness)
 

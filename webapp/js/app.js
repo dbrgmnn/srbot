@@ -392,13 +392,7 @@ async function grade(quality) {
   tg.HapticFeedback.notificationOccurred('success');
   
   try {
-    // Optimization: only send relevant data
-    const sm2_data = {
-      repetitions: word.repetitions,
-      easiness: word.easiness,
-      interval: word.interval
-    };
-    await POST('/api/grade', { word_id: word.id, quality, word: sm2_data });
+    await POST('/api/grade', { word_id: word.id, quality });
   } catch (e) {
     toast('Failed to save progress');
   } finally {

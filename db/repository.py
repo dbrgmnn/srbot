@@ -300,3 +300,11 @@ class WordRepo:
         )
         rows = await cursor.fetchall()
         return [dict(row) for row in rows]
+
+    async def get_word(self, word_id: int, user_id: int) -> dict | None:
+        cursor = await self.db.execute(
+            "SELECT * FROM words WHERE id = ? AND user_id = ?",
+            (word_id, user_id),
+        )
+        row = await cursor.fetchone()
+        return dict(row) if row else None
