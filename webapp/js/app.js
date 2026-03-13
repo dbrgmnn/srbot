@@ -284,26 +284,47 @@ function initSwipe() {
     const deltaX = touchX - touchStartX;
     const deltaY = touchY - touchStartY;
 
-    if (Math.abs(deltaX) > 10 || Math.abs(deltaY) > 10) isSwiping = true;
+    if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) isSwiping = true;
 
     if (isSwiping) {
       const isFlipped = card.classList.contains('flipped');
       const baseRotation = isFlipped ? 180 : 0;
       
       let swipeDir = null;
+      let opacity = 0;
+      
       if (Math.abs(deltaY) > Math.abs(deltaX) * 1.5) {
-        if (deltaY < -50) swipeDir = 'up';
+        if (deltaY < -40) {
+          swipeDir = 'up';
+          opacity = Math.min(1, (Math.abs(deltaY) - 40) / 60);
+        }
       } else if (Math.abs(deltaX) > Math.abs(deltaY) * 1.2) {
-        if (deltaX < -60) swipeDir = 'left';
-        else if (deltaX > 60) swipeDir = 'right';
+        if (deltaX < -50) {
+          swipeDir = 'left';
+          opacity = Math.min(1, (Math.abs(deltaX) - 50) / 100);
+        }
+        else if (deltaX > 50) {
+          swipeDir = 'right';
+          opacity = Math.min(1, (Math.abs(deltaX) - 50) / 100);
+        }
       }
 
-      const rotation = deltaX * 0.08;
-      card.style.transform = `translate(${deltaX}px, ${deltaY}px) rotateY(${baseRotation}deg) rotateZ(${rotation}deg)`;
+      // Calculate tilt based on deltaX
+      const rotationZ = deltaX * 0.1;
+      card.style.transform = `translate(${deltaX}px, ${deltaY}px) rotateY(${baseRotation}deg) rotateZ(${rotationZ}deg)`;
       
       card.classList.toggle('swipe-left', swipeDir === 'left');
       card.classList.toggle('swipe-right', swipeDir === 'right');
       card.classList.toggle('swipe-up', swipeDir === 'up');
+
+      // Update indicators opacity and scale
+      const indAgain = card.querySelector('.indicator-again');
+      const indGood  = card.querySelector('.indicator-good');
+      const indHard  = card.querySelector('.indicator-hard');
+
+      if (indAgain) { indAgain.style.opacity = (swipeDir === 'left') ? opacity : 0; indAgain.style.transform = `rotate(-15deg) scale(${0.8 + opacity * 0.4})`; }
+      if (indGood)  { indGood.style.opacity = (swipeDir === 'right') ? opacity : 0; indGood.style.transform = `rotate(15deg) scale(${0.8 + opacity * 0.4})`; }
+      if (indHard)  { indHard.style.opacity = (swipeDir === 'up') ? opacity : 0; indHard.style.transform = `translateX(-50%) scale(${0.8 + opacity * 0.4})`; }
 
       if (swipeDir && card.lastDir !== swipeDir) {
         tg.HapticFeedback.impactOccurred('light');
@@ -315,6 +336,11 @@ function initSwipe() {
   card.addEventListener('touchend', (e) => {
     if (isGrading) return;
     card.classList.remove('swiping');
+    
+    // Reset indicators
+    const indicators = card.querySelectorAll('.swipe-indicator');
+    indicators.forEach(ind => { ind.style.opacity = 0; });
+
     const touchEndX = e.changedTouches[0].clientX;
     const touchEndY = e.changedTouches[0].clientY;
     const deltaX = touchEndX - touchStartX;
@@ -329,8 +355,8 @@ function initSwipe() {
       tg.HapticFeedback.impactOccurred('light');
       cardEl.style.transform = cardEl.classList.contains('flipped') ? 'rotateY(180deg)' : 'rotateY(0deg)';
     } else {
-      const hThreshold = 120;
-      const vThreshold = 100;
+      const hThreshold = 100;
+      const vThreshold = 80;
 
       if (deltaX < -hThreshold && Math.abs(deltaX) > Math.abs(deltaY) * 1.2) {
         grade(1); 
@@ -384,9 +410,13 @@ async function grade(quality) {
   if (card) {
     const isFlipped = card.classList.contains('flipped');
     const rot = isFlipped ? 180 : 0;
-    if (quality === 1) card.style.transform = `translate(-500px, 0) rotateY(${rot}deg) rotateZ(-30deg)`;
-    else if (quality === 5) card.style.transform = `translate(500px, 0) rotateY(${rot}deg) rotateZ(30deg)`;
-    else if (quality === 3) card.style.transform = `translate(0, -500px) rotateY(${rot}deg) scale(0.5)`;
+    
+    // Final exit animation with more oomph
+    if (quality === 1) card.style.transform = `translate(-1000px, ${Math.random() * 400 - 200}px) rotateY(${rot}deg) rotateZ(-60deg)`;
+    else if (quality === 5) card.style.transform = `translate(1000px, ${Math.random() * 400 - 200}px) rotateY(${rot}deg) rotateZ(60deg)`;
+    else if (quality === 3) card.style.transform = `translate(0, -1000px) rotateY(${rot}deg) scale(0.2)`;
+    
+    card.style.opacity = '0';
   }
 
   tg.HapticFeedback.notificationOccurred('success');
@@ -402,8 +432,14 @@ async function grade(quality) {
   sessionIdx++;
   setTimeout(() => {
     if (sessionIdx >= sessionWords.length) showSummary();
-    else renderWord();
-  }, 200);
+    else {
+      if (card) {
+        card.style.opacity = '1';
+        card.classList.remove('swipe-left', 'swipe-right', 'swipe-up');
+      }
+      renderWord();
+    }
+  }, 300);
 }
 
 function showSummary() {
