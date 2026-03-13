@@ -14,12 +14,8 @@
   <div id="screen-home" class="screen active">
     <div class="header">
       <div>
-        <div class="header-title" id="user-greeting">Hello!</div>
+        <div class="header-title" id="user-greeting">Welcome!</div>
         <div class="header-sub">Ready to learn?</div>
-      </div>
-      <div class="practice-switch">
-        <button class="lang-opt active" data-lang="de" onclick="switchLanguage('de')">DE</button>
-        <button class="lang-opt" data-lang="en" onclick="switchLanguage('en')">EN</button>
       </div>
     </div>
 
@@ -73,25 +69,14 @@
       </div>
 
       <div class="word-card-container">
-        <!-- Back card (Stack) -->
-        <div id="card-next" class="word-card card-stack-back">
+        <!-- Single card as requested -->
+        <div id="word-card" class="word-card">
           <div class="word-face word-front">
-            <div class="word-main word-front-text"></div>
+            <div class="word-main" id="word-front"></div>
           </div>
           <div class="word-face word-back">
-            <div class="word-trans word-back-text"></div>
-            <div class="word-example word-example-text"></div>
-          </div>
-        </div>
-
-        <!-- Front card -->
-        <div id="card-current" class="word-card card-stack-front">
-          <div class="word-face word-front">
-            <div class="word-main word-front-text"></div>
-          </div>
-          <div class="word-face word-back">
-            <div class="word-trans word-back-text"></div>
-            <div class="word-example word-example-text"></div>
+            <div class="word-trans" id="word-translation"></div>
+            <div class="word-example" id="word-ex"></div>
           </div>
         </div>
       </div>
@@ -160,6 +145,14 @@
     </div>
 
     <div class="card">
+      <div class="settings-row">
+        <div class="settings-label">Interface Language</div>
+        <div class="practice-switch">
+          <button class="lang-opt active" data-lang="de" onclick="switchLanguage('de')">DE</button>
+          <button class="lang-opt" data-lang="en" onclick="switchLanguage('en')">EN</button>
+        </div>
+      </div>
+
       <div class="settings-row">
         <div class="settings-label">Practice Mode</div>
         <div class="practice-switch">

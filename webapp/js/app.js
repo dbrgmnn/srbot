@@ -39,8 +39,8 @@ async function api(method, path, body) {
     const data = isJson ? await res.json() : null;
     if (!res.ok) {
       if (res.status === 409) throw new Error('409');
-      if (data && data.error) throw new Error(data.error);
-      throw new Error(`Server error (${res.status})`);
+      const msg = (data && data.msg) || (data && data.error) || `Error ${res.status}`;
+      throw new Error(msg);
     }
     return data;
   } catch (e) {
@@ -70,6 +70,7 @@ function showScreen(name) {
   if (screen) screen.classList.add('active');
   const nav = document.getElementById(`nav-${name}`);
   if (nav) nav.classList.add('active');
+  if (name === 'home') loadHome();
 }
 
 // ── Home ──────────────────────────────────────────────────────────────────
@@ -77,7 +78,7 @@ function showScreen(name) {
 async function loadHome(data) {
   try {
     let stats, settings;
-    if (data) {
+    if (data && data.stats) {
       stats = data.stats;
       settings = data.settings;
     } else {
@@ -94,6 +95,11 @@ async function loadHome(data) {
     if (document.getElementById('stat-due')) document.getElementById('stat-due').textContent = due;
     if (document.getElementById('stat-new')) document.getElementById('stat-new').textContent = Math.max(0, limit - todayDone);
 
+    // Greeting
+    const user = tg.initDataUnsafe?.user;
+    const greetingEl = document.getElementById('user-greeting');
+    if (greetingEl) greetingEl.textContent = user?.first_name ? `Hello, ${user.first_name}!` : 'Welcome back!';
+
     const btn = document.getElementById('btn-practice');
     if (btn) {
       btn.textContent = sessionTotal === 0 ? 'Nothing to practice' : 'Practice';
@@ -108,7 +114,7 @@ async function loadHome(data) {
       const count = document.getElementById(`count-${cat}`);
       if (count) count.textContent = val;
     });
-  } catch (e) { toast('Failed to load home'); }
+  } catch (e) { console.error(e); }
 }
 
 // ── Practice ──────────────────────────────────────────────────────────────
@@ -119,7 +125,7 @@ async function startPractice() {
     isProcessing = true;
     const data = await GET('/api/session');
     if (!data.words || data.words.length === 0) {
-      toast('Nothing to practice.');
+      toast('Nothing to practice right now.');
       return;
     }
     sessionWords = data.words;
@@ -135,10 +141,9 @@ let touchStartX = 0, touchStartY = 0, touchStartTime = 0;
 let isSwiping = false, rafId = null;
 
 function initSwipe() {
-  const card = document.getElementById('card-current');
+  const card = document.getElementById('word-card');
   if (!card) return;
 
-  // Use simple event attachment (don't clone to avoid ID issues)
   card.ontouchstart = (e) => {
     if (isGrading) return;
     touchStartX = e.touches[0].clientX;
@@ -208,22 +213,6 @@ function initSwipe() {
   };
 }
 
-function updateCardContent(elementId, word) {
-  const el = document.getElementById(elementId);
-  if (!el || !word) return;
-  
-  const front = el.querySelector('.word-front-text');
-  const trans = el.querySelector('.word-back-text');
-  const ex = el.querySelector('.word-example-text');
-
-  if (front) front.textContent = (practiceMode === 'translation_to_word') ? word.translation : word.word;
-  if (trans) trans.textContent = (practiceMode === 'translation_to_word') ? word.word : word.translation;
-  if (ex) {
-    ex.textContent = word.example || '';
-    ex.style.display = word.example ? 'block' : 'none';
-  }
-}
-
 function renderWord() {
   if (sessionIdx >= sessionWords.length) {
     showSummary();
@@ -231,9 +220,6 @@ function renderWord() {
   }
 
   const word = sessionWords[sessionIdx];
-  const nextWord = sessionWords[sessionIdx + 1];
-
-  // Update stats & bar
   const progEl = document.getElementById('practice-progress');
   if (progEl) progEl.textContent = `${sessionIdx + 1} / ${sessionWords.length}`;
   const barEl = document.getElementById('practice-bar');
@@ -246,21 +232,25 @@ function renderWord() {
     typeEl.className = 'practice-badge ' + (isReview ? 'practice-badge-review' : 'practice-badge-new');
   }
 
-  updateCardContent('card-current', word);
+  const card = document.getElementById('word-card');
+  card.querySelector('#word-front').textContent = (practiceMode === 'translation_to_word') ? word.translation : word.word;
+  card.querySelector('#word-translation').textContent = (practiceMode === 'translation_to_word') ? word.word : word.translation;
+  const exEl = card.querySelector('#word-ex');
+  exEl.textContent = word.example || '';
+  exEl.style.display = word.example ? 'block' : 'none';
   
-  const current = document.getElementById('card-current');
-  current.classList.remove('flipped', 'swipe-left', 'swipe-right', 'swipe-up');
-  current.style.transform = 'rotateY(0deg)';
-  current.style.opacity = '1';
-
-  const next = document.getElementById('card-next');
-  if (nextWord) {
-    updateCardContent('card-next', nextWord);
-    next.style.display = 'block';
-    next.classList.add('card-stack-back');
-  } else {
-    next.style.display = 'none';
-  }
+  card.classList.remove('flipped', 'swipe-left', 'swipe-right', 'swipe-up');
+  
+  // Appearance animation: pop up from middle
+  card.style.transition = 'none';
+  card.style.transform = 'scale(0.8) rotateY(0deg)';
+  card.style.opacity = '0';
+  
+  setTimeout(() => {
+    card.style.transition = 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1), opacity 0.3s ease';
+    card.style.transform = 'scale(1) rotateY(0deg)';
+    card.style.opacity = '1';
+  }, 10);
 
   initSwipe();
 }
@@ -277,21 +267,15 @@ async function grade(quality) {
   else if (quality === 3) sessionStats.hard++;
   else sessionStats.again++;
 
-  const current = document.getElementById('card-current');
-  const next = document.getElementById('card-next');
+  const card = document.getElementById('word-card');
+  const isFlipped = card.classList.contains('flipped');
+  const baseRot = isFlipped ? 180 : 0;
 
   // Animation out
-  const isFlipped = current.classList.contains('flipped');
-  const baseRot = isFlipped ? 180 : 0;
-  if (quality === 1) current.style.transform = `translate(-1000px, 0) rotateY(${baseRot}deg) rotateZ(-30deg)`;
-  else if (quality === 5) current.style.transform = `translate(1000px, 0) rotateY(${baseRot}deg) rotateZ(30deg)`;
-  else if (quality === 3) current.style.transform = `translate(0, -1000px) rotateY(${baseRot}deg) scale(0.5)`;
-  current.style.opacity = '0';
-
-  // Optimistic stack move
-  if (next && sessionIdx + 1 < sessionWords.length) {
-    next.classList.remove('card-stack-back');
-  }
+  if (quality === 1) card.style.transform = `translate(-1000px, 0) rotateY(${baseRot}deg) rotateZ(-30deg)`;
+  else if (quality === 5) card.style.transform = `translate(1000px, 0) rotateY(${baseRot}deg) rotateZ(30deg)`;
+  else if (quality === 3) card.style.transform = `translate(0, -1000px) rotateY(${baseRot}deg) scale(0.5)`;
+  card.style.opacity = '0';
 
   tg.HapticFeedback.notificationOccurred('success');
   POST('/api/grade', { word_id: word.id, quality }).catch(() => {});
@@ -301,6 +285,53 @@ async function grade(quality) {
     isGrading = false;
     renderWord();
   }, 300);
+}
+
+// ── Settings ──────────────────────────────────────────────────────────────
+
+async function switchLanguage(lang) {
+  if (currentLang === lang || isProcessing) return;
+  currentLang = lang;
+  tg.HapticFeedback.impactOccurred('light');
+  document.querySelectorAll('.lang-opt').forEach(btn => btn.classList.toggle('active', btn.dataset.lang === currentLang));
+  try {
+    isProcessing = true;
+    await POST('/api/settings', { language: lang });
+    await loadHome();
+  } catch (e) { toast('Error switching language'); }
+  finally { isProcessing = false; }
+}
+
+async function changeLimit(delta) {
+  const el = document.getElementById('set-limit-val');
+  let val = parseInt(el.textContent) + delta;
+  if (val < 5) val = 5; if (val > 50) val = 50;
+  el.textContent = val;
+  tg.HapticFeedback.impactOccurred('light');
+  await saveSetting('daily_limit', val);
+}
+
+async function loadSettings() {
+  try {
+    const s = await GET('/api/settings');
+    document.getElementById('set-quiet-start').value = s.quiet_start || '23:00';
+    document.getElementById('set-quiet-end').value = s.quiet_end || '08:00';
+    document.getElementById('set-limit-val').textContent = s.daily_limit || 20;
+    document.getElementById('set-notify-interval').value = s.notification_interval_minutes || 240;
+    document.querySelectorAll('.practice-opt').forEach(b => b.classList.toggle('active', b.dataset.mode === s.practice_mode));
+    document.querySelectorAll('.lang-opt').forEach(b => b.classList.toggle('active', b.dataset.lang === currentLang));
+    document.getElementById('info-tz').textContent = `Timezone: ${s.timezone || 'UTC'}`;
+    document.getElementById('info-words').textContent = `Dictionary: ${s.total_words || 0} words`;
+  } catch(e) { toast('Failed to load settings'); }
+}
+
+async function saveSetting(key, val) {
+  try { await POST('/api/settings', { [key]: val }); } catch(e) { toast('Save failed'); }
+}
+
+function setPracticeMode(mode) {
+  document.querySelectorAll('.practice-opt').forEach(btn => btn.classList.toggle('active', btn.dataset.mode === mode));
+  saveSetting('practice_mode', mode);
 }
 
 // ── Rest of app ───────────────────────────────────────────────────────────
@@ -328,14 +359,13 @@ function showSummary() {
 
 function exitPractice() {
   showScreen('home');
-  loadHome();
 }
 
 async function submitWords() {
   const input = document.getElementById('add-input');
   if (!input || !input.value.trim()) return;
   const words = parseText(input.value);
-  if (!words.length) return;
+  if (!words.length) { toast('Nothing to parse'); return; }
   try {
     const res = await POST('/api/words', { words });
     if (res.added) {
@@ -344,6 +374,21 @@ async function submitWords() {
       loadHome();
     }
   } catch (e) { toast('Add failed'); }
+}
+
+async function handleFileUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    const words = parseText(e.target.result);
+    if (!words.length) { toast('No words found'); return; }
+    try {
+      const res = await POST('/api/words', { words });
+      if (res.added) { toast(`Added ${res.added} words`); loadHome(); }
+    } catch (e) { toast('Upload failed'); }
+  };
+  reader.readAsText(file);
 }
 
 function parseCSVLine(line) {
@@ -368,6 +413,11 @@ function parseText(text) {
   }).filter(x => x);
 }
 
+function onSearchInput(val) {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => loadSearch(val), 300);
+}
+
 async function loadSearch(q) {
   const el = document.getElementById('search-results');
   if (!el || q.length < 2) { if (el) el.innerHTML = ''; return; }
@@ -382,7 +432,7 @@ async function loadSearch(q) {
         <button class="del-btn" onclick="deleteWord(${w.id})">✕</button>
       </div>
     `).join('');
-  } catch(e) {}
+  } catch(e) { toast('Search failed'); }
 }
 
 async function deleteWord(id) {
@@ -390,7 +440,7 @@ async function deleteWord(id) {
     await DEL(`/api/words/${id}`);
     document.getElementById(`wr-${id}`)?.remove();
     loadHome();
-  } catch(e) {}
+  } catch(e) { toast('Delete failed'); }
 }
 
 let editWordId = null;
@@ -417,22 +467,25 @@ async function saveEdit() {
     closeEdit();
     toast('Saved');
     loadHome();
-  } catch(e) {}
+  } catch(e) { toast('Save failed'); }
 }
 
-async function loadSettings() {
+function clearAllWords() {
+  tg.showConfirm(`Delete all ${currentLang.toUpperCase()} words?`, async (ok) => {
+    if (ok) {
+      try { await DEL('/api/words/all'); toast('Cleared'); loadHome(); }
+      catch(e) { toast('Failed'); }
+    }
+  });
+}
+
+async function shareWords() {
   try {
-    const s = await GET('/api/settings');
-    document.getElementById('set-quiet-start').value = s.quiet_start || '23:00';
-    document.getElementById('set-quiet-end').value = s.quiet_end || '08:00';
-    document.getElementById('set-limit-val').textContent = s.daily_limit || 20;
-    document.getElementById('set-notify-interval').value = s.notification_interval_minutes || 240;
-    document.querySelectorAll('.practice-opt').forEach(b => b.classList.toggle('active', b.dataset.mode === s.practice_mode));
-  } catch(e) {}
-}
-
-async function saveSetting(key, val) {
-  try { await POST('/api/settings', { [key]: val }); loadHome(); } catch(e) {}
+    const res = await fetch('/api/words/export', { headers: { 'X-Init-Data': INIT_DATA, 'X-Language': currentLang }});
+    const text = await res.text();
+    if (navigator.share) await navigator.share({ title: 'SRbot dictionary', text });
+    else { await navigator.clipboard.writeText(text); toast('Copied'); }
+  } catch (e) { toast('Export failed'); }
 }
 
 async function init() {
