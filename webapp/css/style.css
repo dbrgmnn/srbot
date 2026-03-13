@@ -99,10 +99,19 @@ body {
   width: 0%;
   transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
-.seeds { background: #8e8e93; }
-.sprouts { background: #ff9500; }
-.trees { background: #34c759; }
-.diamonds { background: #5856d6; }
+.seeds { background: linear-gradient(90deg, #8e8e93, #b0b0b5); }
+.sprouts { background: linear-gradient(90deg, #ff9500, #ffb347); }
+.trees { background: linear-gradient(90deg, #34c759, #4cd964); }
+.diamonds { background: linear-gradient(90deg, #5856d6, #7d7aff); }
+
+.card-summary { text-align: center; padding: 40px 20px; }
+.summary-icon { font-size: 64px; margin-bottom: 20px; display: block; }
+.header-sub { font-size: 15px; color: var(--hint); margin-top: 4px; }
+.mt-8 { margin-top: 32px; }
+.text-good  { color: #30d158; }
+.text-hard  { color: #ffd60a; }
+.text-again { color: #ff453a; }
+.session-stat-card { background: var(--bg); border: 1px solid rgba(255,255,255,0.05); }
 
 .card-title {
   font-size: 12px;
