@@ -214,72 +214,30 @@ async function startPractice() {
   }
 }
 
-function renderWord() {
-  const total = sessionWords.length;
-  const word  = sessionWords[sessionIdx];
-  const pct   = Math.round((sessionIdx / total) * 100);
-
-  const progEl  = document.getElementById('practice-progress');
-  const typeEl  = document.getElementById('practice-type');
-  const barEl   = document.getElementById('practice-bar');
-  const frontEl = document.getElementById('word-front');
-  const transEl = document.getElementById('word-translation');
-  const exEl    = document.getElementById('word-ex');
-
-  if (progEl) progEl.textContent = `${sessionIdx + 1} / ${total}`;
-  if (typeEl) {
-    const isReview = Number(word.repetitions) > 0;
-    typeEl.textContent = isReview ? 'Review' : 'New';
-    typeEl.className = 'practice-badge ' + (isReview ? 'practice-badge-review' : 'practice-badge-new');
-  }
-  if (barEl) barEl.style.width = `${pct}%`;
-  
-  if (frontEl) {
-    frontEl.textContent = (practiceMode === 'translation_to_word')
-      ? word.translation
-      : word.word;
-  }
-  if (transEl) {
-    transEl.textContent = (practiceMode === 'translation_to_word')
-      ? word.word
-      : word.translation;
-  }
-  if (exEl) {
-    if (word.example) {
-      exEl.textContent   = word.example;
-      exEl.style.display = 'block';
-    } else {
-      exEl.style.display = 'none';
-    }
-  }
-
-  const card = document.getElementById('word-card');
-  if (card) {
-    card.classList.remove('flipped', 'swipe-left', 'swipe-right', 'swipe-up');
-    card.style.transform = '';
-    card.lastDir = null;
-  }
-}
-
 let touchStartX = 0;
 let touchStartY = 0;
+let touchStartTime = 0;
 let isSwiping = false;
+let rafId = null;
 
 function initSwipe() {
-  const card = document.getElementById('word-card');
+  const card = document.getElementById('card-current');
   if (!card) return;
 
-  card.addEventListener('touchstart', (e) => {
+  // Cleanup old listeners if any (though standard app replaces nodes)
+  const newCard = card.cloneNode(true);
+  card.parentNode.replaceChild(newCard, card);
+
+  newCard.addEventListener('touchstart', (e) => {
     if (isGrading) return;
     touchStartX = e.touches[0].clientX;
     touchStartY = e.touches[0].clientY;
+    touchStartTime = Date.now();
     isSwiping = false;
-    card.classList.add('swiping');
+    newCard.classList.add('swiping');
   });
 
-  let rafId = null;
-
-  card.addEventListener('touchmove', (e) => {
+  newCard.addEventListener('touchmove', (e) => {
     if (isGrading) return;
     const touchX = e.touches[0].clientX;
     const touchY = e.touches[0].clientY;
@@ -292,10 +250,10 @@ function initSwipe() {
       if (rafId) cancelAnimationFrame(rafId);
       
       rafId = requestAnimationFrame(() => {
-        const isFlipped = card.classList.contains('flipped');
+        const isFlipped = newCard.classList.contains('flipped');
         const baseRotation = isFlipped ? 180 : 0;
         
-        // Thresholds for visual feedback
+        // Asymmetric thresholds
         const leftThreshold = -60;
         const rightThreshold = 100;
         const upThreshold = -80;
@@ -309,57 +267,176 @@ function initSwipe() {
         }
 
         const rotationZ = deltaX * 0.1;
-        card.style.transform = `translate(${deltaX}px, ${deltaY}px) rotateY(${baseRotation}deg) rotateZ(${rotationZ}deg)`;
+        newCard.style.transform = `translate(${deltaX}px, ${deltaY}px) rotateY(${baseRotation}deg) rotateZ(${rotationZ}deg)`;
         
-        card.classList.toggle('swipe-left', swipeDir === 'left');
-        card.classList.toggle('swipe-right', swipeDir === 'right');
-        card.classList.toggle('swipe-up', swipeDir === 'up');
+        newCard.classList.toggle('swipe-left', swipeDir === 'left');
+        newCard.classList.toggle('swipe-right', swipeDir === 'right');
+        newCard.classList.toggle('swipe-up', swipeDir === 'up');
 
-        if (swipeDir && card.lastDir !== swipeDir) {
+        if (swipeDir && newCard.lastDir !== swipeDir) {
           tg.HapticFeedback.impactOccurred('light');
         }
-        card.lastDir = swipeDir;
+        newCard.lastDir = swipeDir;
       });
     }
   });
 
-  card.addEventListener('touchend', (e) => {
+  newCard.addEventListener('touchend', (e) => {
     if (isGrading) return;
     if (rafId) cancelAnimationFrame(rafId);
-    card.classList.remove('swiping');
+    newCard.classList.remove('swiping');
 
+    const deltaTime = Date.now() - touchStartTime;
     const touchEndX = e.changedTouches[0].clientX;
     const touchEndY = e.changedTouches[0].clientY;
     const deltaX = touchEndX - touchStartX;
     const deltaY = touchEndY - touchStartY;
     
-    const cardEl = document.getElementById('word-card');
-    const lastDir = cardEl.lastDir;
-    cardEl.lastDir = null;
+    // Velocity sensing
+    const velocityX = Math.abs(deltaX) / deltaTime;
+    const velocityY = Math.abs(deltaY) / deltaTime;
+    const vThreshold = 0.5; // px/ms
+
+    const lastDir = newCard.lastDir;
+    newCard.lastDir = null;
 
     if (!isSwiping) {
-      cardEl.classList.toggle('flipped');
+      newCard.classList.toggle('flipped');
       tg.HapticFeedback.impactOccurred('light');
-      cardEl.style.transform = cardEl.classList.contains('flipped') ? 'rotateY(180deg)' : 'rotateY(0deg)';
+      newCard.style.transform = newCard.classList.contains('flipped') ? 'rotateY(180deg)' : 'rotateY(0deg)';
     } else {
-      // Asymmetric thresholds for one-handed convenience
       const leftThreshold  = -60; 
       const rightThreshold = 100;
       const upThreshold    = -80;
 
-      if (deltaX < leftThreshold && Math.abs(deltaX) > Math.abs(deltaY) * 1.2) {
+      const isFlickLeft  = (deltaX < -30 && velocityX > vThreshold);
+      const isFlickRight = (deltaX > 30 && velocityX > vThreshold);
+      const isFlickUp    = (deltaY < -30 && velocityY > vThreshold);
+
+      if ((deltaX < leftThreshold || isFlickLeft) && Math.abs(deltaX) > Math.abs(deltaY) * 1.1) {
         grade(1); 
-      } else if (deltaX > rightThreshold && Math.abs(deltaX) > Math.abs(deltaY) * 1.2) {
+      } else if ((deltaX > rightThreshold || isFlickRight) && Math.abs(deltaX) > Math.abs(deltaY) * 1.1) {
         grade(5); 
-      } else if (deltaY < upThreshold && Math.abs(deltaY) > Math.abs(deltaX) * 1.5) {
+      } else if ((deltaY < upThreshold || isFlickUp) && Math.abs(deltaY) > Math.abs(deltaX) * 1.3) {
         grade(3); 
       } else {
-        cardEl.classList.remove('swipe-left', 'swipe-right', 'swipe-up');
-        const isFlipped = cardEl.classList.contains('flipped');
-        cardEl.style.transform = isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)';
+        newCard.classList.remove('swipe-left', 'swipe-right', 'swipe-up');
+        const isFlipped = newCard.classList.contains('flipped');
+        newCard.style.transform = isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)';
       }
     }
   });
+}
+
+function renderWord() {
+  const total = sessionWords.length;
+  if (sessionIdx >= total) {
+    showSummary();
+    return;
+  }
+
+  const word = sessionWords[sessionIdx];
+  const nextWord = sessionWords[sessionIdx + 1];
+  const pct = Math.round((sessionIdx / total) * 100);
+
+  // Update Progress
+  const progEl = document.getElementById('practice-progress');
+  const typeEl = document.getElementById('practice-type');
+  const barEl = document.getElementById('practice-bar');
+  if (progEl) progEl.textContent = `${sessionIdx + 1} / ${total}`;
+  if (typeEl) {
+    const isReview = Number(word.repetitions) > 0;
+    typeEl.textContent = isReview ? 'Review' : 'New';
+    typeEl.className = 'practice-badge ' + (isReview ? 'practice-badge-review' : 'practice-badge-new');
+  }
+  if (barEl) barEl.style.width = `${pct}%`;
+
+  // Populate Current Card
+  const current = document.getElementById('card-current');
+  current.querySelector('#word-front').textContent = (practiceMode === 'translation_to_word') ? word.translation : word.word;
+  current.querySelector('#word-translation').textContent = (practiceMode === 'translation_to_word') ? word.word : word.translation;
+  const exEl = current.querySelector('#word-ex');
+  exEl.textContent = word.example || '';
+  exEl.style.display = word.example ? 'block' : 'none';
+  
+  current.classList.remove('flipped', 'swipe-left', 'swipe-right', 'swipe-up');
+  current.style.transform = '';
+  current.style.opacity = '1';
+
+  // Populate Next Card (Stack)
+  const next = document.getElementById('card-next');
+  if (nextWord) {
+    next.querySelector('.next-word-front').textContent = (practiceMode === 'translation_to_word') ? nextWord.translation : nextWord.word;
+    next.querySelector('.next-word-translation').textContent = (practiceMode === 'translation_to_word') ? nextWord.word : nextWord.translation;
+    const nExEl = next.querySelector('.next-word-ex');
+    nExEl.textContent = nextWord.example || '';
+    nExEl.style.display = nextWord.example ? 'block' : 'none';
+    next.style.display = 'block';
+    next.classList.add('card-stack-back');
+  } else {
+    next.style.display = 'none';
+  }
+
+  initSwipe();
+}
+
+async function grade(quality) {
+  if (isGrading) return;
+  isGrading = true;
+
+  const word = sessionWords[sessionIdx];
+  if (word.repetitions > 0) sessionStats.reviewed++;
+  else sessionStats.new++;
+
+  if (quality === 5) sessionStats.good++;
+  else if (quality === 3) sessionStats.hard++;
+  else sessionStats.again++;
+
+  const current = document.getElementById('card-current');
+  const next = document.getElementById('card-next');
+
+  // 1. Animate current card out
+  if (current) {
+    const isFlipped = current.classList.contains('flipped');
+    const rot = isFlipped ? 180 : 0;
+    if (quality === 1) current.style.transform = `translate(-1000px, ${Math.random() * 400 - 200}px) rotateY(${rot}deg) rotateZ(-60deg)`;
+    else if (quality === 5) current.style.transform = `translate(1000px, ${Math.random() * 400 - 200}px) rotateY(${rot}deg) rotateZ(60deg)`;
+    else if (quality === 3) current.style.transform = `translate(0, -1000px) rotateY(${rot}deg) scale(0.2)`;
+    current.style.opacity = '0';
+  }
+
+  // 2. OPTIMISTIC: Immediately bring next card forward
+  if (next && sessionIdx + 1 < sessionWords.length) {
+    next.classList.remove('card-stack-back');
+    next.classList.add('card-stack-front');
+  }
+
+  tg.HapticFeedback.notificationOccurred('success');
+
+  // 3. Background API call (Fire and forget)
+  POST('/api/grade', { word_id: word.id, quality }).catch(e => console.error("Sync error", e));
+
+  sessionIdx++;
+
+  // 4. Transition Logic
+  setTimeout(() => {
+    if (sessionIdx >= sessionWords.length) {
+      showSummary();
+    } else {
+      // Swap IDs and roles for seamless loop
+      const oldCurrent = document.getElementById('card-current');
+      const oldNext = document.getElementById('card-next');
+
+      oldCurrent.id = 'card-next';
+      oldCurrent.className = 'word-card card-stack-back';
+      
+      oldNext.id = 'card-current';
+      oldNext.className = 'word-card card-stack-front';
+
+      renderWord();
+    }
+    isGrading = false;
+  }, 300);
 }
 
 function playAudio(e) {
@@ -381,54 +458,6 @@ function playAudio(e) {
   window.speechSynthesis.speak(msg);
   
   tg.HapticFeedback.impactOccurred('light');
-}
-
-async function grade(quality) {
-  if (isGrading) return;
-  isGrading = true;
-
-  const word = sessionWords[sessionIdx];
-  if (word.repetitions > 0) sessionStats.reviewed++;
-  else sessionStats.new++;
-
-  if (quality === 5) sessionStats.good++;
-  else if (quality === 3) sessionStats.hard++;
-  else sessionStats.again++;
-
-  const card = document.getElementById('word-card');
-  if (card) {
-    const isFlipped = card.classList.contains('flipped');
-    const rot = isFlipped ? 180 : 0;
-    
-    // Final exit animation with more oomph
-    if (quality === 1) card.style.transform = `translate(-1000px, ${Math.random() * 400 - 200}px) rotateY(${rot}deg) rotateZ(-60deg)`;
-    else if (quality === 5) card.style.transform = `translate(1000px, ${Math.random() * 400 - 200}px) rotateY(${rot}deg) rotateZ(60deg)`;
-    else if (quality === 3) card.style.transform = `translate(0, -1000px) rotateY(${rot}deg) scale(0.2)`;
-    
-    card.style.opacity = '0';
-  }
-
-  tg.HapticFeedback.notificationOccurred('success');
-  
-  try {
-    await POST('/api/grade', { word_id: word.id, quality });
-  } catch (e) {
-    toast('Failed to save progress');
-  } finally {
-    isGrading = false;
-  }
-
-  sessionIdx++;
-  setTimeout(() => {
-    if (sessionIdx >= sessionWords.length) showSummary();
-    else {
-      if (card) {
-        card.style.opacity = '1';
-        card.classList.remove('swipe-left', 'swipe-right', 'swipe-up');
-      }
-      renderWord();
-    }
-  }, 300);
 }
 
 function showSummary() {
@@ -754,5 +783,4 @@ async function init() {
 
 document.addEventListener('DOMContentLoaded', () => {
   init();
-  initSwipe();
 });

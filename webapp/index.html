@@ -82,7 +82,18 @@
     </div>
 
     <div class="word-card-container">
-      <div id="word-card" class="word-card">
+      <!-- The Stack -->
+      <div id="card-next" class="word-card card-stack-back">
+        <div class="word-face word-front">
+          <div class="word-main next-word-front"></div>
+        </div>
+        <div class="word-face word-back">
+          <div class="word-trans next-word-translation"></div>
+          <div class="word-example next-word-ex"></div>
+        </div>
+      </div>
+
+      <div id="card-current" class="word-card card-stack-front">
         <div class="word-face word-front">
           <div class="word-main" id="word-front"></div>
         </div>
