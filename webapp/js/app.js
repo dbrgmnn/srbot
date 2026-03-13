@@ -124,6 +124,10 @@ async function loadHome(data) {
     const sessionNew     = Math.min(newWords, remainingLimit);
     const sessionTotal   = due + sessionNew;
 
+    document.querySelectorAll('.lang-opt').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.lang === currentLang);
+    });
+
     if (document.getElementById('stat-due')) document.getElementById('stat-due').textContent = due;
     if (document.getElementById('stat-new')) {
       const remaining = Math.max(0, limit - todayDone);

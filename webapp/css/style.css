@@ -116,6 +116,14 @@ body {
 }
 
 /* ── Button ── */
+.lang-selector-home {
+  display: flex;
+  background: var(--bg2);
+  padding: 4px;
+  border-radius: var(--radius);
+  gap: 4px;
+  margin-bottom: var(--gap);
+}
 .btn {
   width: 100%;
   padding: 14px;
