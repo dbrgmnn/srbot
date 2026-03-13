@@ -8,7 +8,7 @@ let sessionIdx = 0;
 let sessionStats = { reviewed: 0, new: 0, good: 0, hard: 0, again: 0 };
 let searchTimer = null;
 let practiceMode = 'word_to_translation';
-let currentLang = 'de';
+let currentLang = 'de'; // Default, syncs with server
 
 const langVoices = {
   'de': 'de-DE',
@@ -70,7 +70,17 @@ function showScreen(name) {
   if (screen) screen.classList.add('active');
   const nav = document.getElementById(`nav-${name}`);
   if (nav) nav.classList.add('active');
-  if (name === 'home') loadHome();
+  
+  if (name === 'home') {
+    if (tg.enableVerticalSwipes) tg.enableVerticalSwipes();
+    loadHome();
+  }
+  if (name === 'practice') {
+    if (tg.disableVerticalSwipes) tg.disableVerticalSwipes();
+  }
+  if (name === 'settings') {
+    loadSettings();
+  }
 }
 
 // ── Home ──────────────────────────────────────────────────────────────────
@@ -95,10 +105,9 @@ async function loadHome(data) {
     if (document.getElementById('stat-due')) document.getElementById('stat-due').textContent = due;
     if (document.getElementById('stat-new')) document.getElementById('stat-new').textContent = Math.max(0, limit - todayDone);
 
-    // Greeting
     const user = tg.initDataUnsafe?.user;
     const greetingEl = document.getElementById('user-greeting');
-    if (greetingEl) greetingEl.textContent = user?.first_name ? `Hello, ${user.first_name}!` : 'Welcome back!';
+    if (greetingEl) greetingEl.textContent = user?.first_name ? `Hello, ${user.first_name}!` : 'Hello!';
 
     const btn = document.getElementById('btn-practice');
     if (btn) {
@@ -106,7 +115,6 @@ async function loadHome(data) {
       btn.disabled = sessionTotal === 0;
     }
 
-    // Garden bars
     ['seeds', 'sprouts', 'trees', 'diamonds'].forEach(cat => {
       const val = stats[`g_${cat}`] || 0;
       const bar = document.getElementById(`bar-${cat}`);
@@ -114,7 +122,7 @@ async function loadHome(data) {
       const count = document.getElementById(`count-${cat}`);
       if (count) count.textContent = val;
     });
-  } catch (e) { console.error(e); }
+  } catch (e) { console.error("LoadHome failed", e); }
 }
 
 // ── Practice ──────────────────────────────────────────────────────────────
@@ -240,8 +248,6 @@ function renderWord() {
   exEl.style.display = word.example ? 'block' : 'none';
   
   card.classList.remove('flipped', 'swipe-left', 'swipe-right', 'swipe-up');
-  
-  // Appearance animation: pop up from middle
   card.style.transition = 'none';
   card.style.transform = 'scale(0.8) rotateY(0deg)';
   card.style.opacity = '0';
@@ -271,7 +277,6 @@ async function grade(quality) {
   const isFlipped = card.classList.contains('flipped');
   const baseRot = isFlipped ? 180 : 0;
 
-  // Animation out
   if (quality === 1) card.style.transform = `translate(-1000px, 0) rotateY(${baseRot}deg) rotateZ(-30deg)`;
   else if (quality === 5) card.style.transform = `translate(1000px, 0) rotateY(${baseRot}deg) rotateZ(30deg)`;
   else if (quality === 3) card.style.transform = `translate(0, -1000px) rotateY(${baseRot}deg) scale(0.5)`;
@@ -291,13 +296,18 @@ async function grade(quality) {
 
 async function switchLanguage(lang) {
   if (currentLang === lang || isProcessing) return;
-  currentLang = lang;
+  
   tg.HapticFeedback.impactOccurred('light');
-  document.querySelectorAll('.lang-opt').forEach(btn => btn.classList.toggle('active', btn.dataset.lang === currentLang));
   try {
     isProcessing = true;
+    currentLang = lang; // Change header immediately for next requests
     await POST('/api/settings', { language: lang });
+    
+    document.querySelectorAll('.lang-opt').forEach(btn => btn.classList.toggle('active', btn.dataset.lang === currentLang));
+    
+    // Refresh stats and everything for NEW language base
     await loadHome();
+    toast(`Language set to ${lang.toUpperCase()}`);
   } catch (e) { toast('Error switching language'); }
   finally { isProcessing = false; }
 }
@@ -314,19 +324,25 @@ async function changeLimit(delta) {
 async function loadSettings() {
   try {
     const s = await GET('/api/settings');
-    document.getElementById('set-quiet-start').value = s.quiet_start || '23:00';
-    document.getElementById('set-quiet-end').value = s.quiet_end || '08:00';
-    document.getElementById('set-limit-val').textContent = s.daily_limit || 20;
-    document.getElementById('set-notify-interval').value = s.notification_interval_minutes || 240;
+    if (document.getElementById('set-quiet-start')) document.getElementById('set-quiet-start').value = s.quiet_start || '23:00';
+    if (document.getElementById('set-quiet-end')) document.getElementById('set-quiet-end').value = s.quiet_end || '08:00';
+    if (document.getElementById('set-limit-val')) document.getElementById('set-limit-val').textContent = s.daily_limit || 20;
+    if (document.getElementById('set-notify-interval')) document.getElementById('set-notify-interval').value = s.notification_interval_minutes || 240;
+    
     document.querySelectorAll('.practice-opt').forEach(b => b.classList.toggle('active', b.dataset.mode === s.practice_mode));
     document.querySelectorAll('.lang-opt').forEach(b => b.classList.toggle('active', b.dataset.lang === currentLang));
-    document.getElementById('info-tz').textContent = `Timezone: ${s.timezone || 'UTC'}`;
-    document.getElementById('info-words').textContent = `Dictionary: ${s.total_words || 0} words`;
-  } catch(e) { toast('Failed to load settings'); }
+    
+    if (document.getElementById('mode-word')) document.getElementById('mode-word').textContent = currentLang.toUpperCase();
+    if (document.getElementById('info-tz')) document.getElementById('info-tz').textContent = `Timezone: ${s.timezone || 'UTC'}`;
+    if (document.getElementById('info-words')) document.getElementById('info-words').textContent = `Dictionary: ${s.total_words || 0} words`;
+  } catch(e) { console.error("LoadSettings failed", e); }
 }
 
 async function saveSetting(key, val) {
-  try { await POST('/api/settings', { [key]: val }); } catch(e) { toast('Save failed'); }
+  try { 
+    await POST('/api/settings', { [key]: val }); 
+    if (key === 'practice_mode' || key === 'daily_limit') loadHome();
+  } catch(e) { toast('Save failed'); }
 }
 
 function setPracticeMode(mode) {
@@ -368,11 +384,7 @@ async function submitWords() {
   if (!words.length) { toast('Nothing to parse'); return; }
   try {
     const res = await POST('/api/words', { words });
-    if (res.added) {
-      toast(`Added ${res.added} words`);
-      input.value = '';
-      loadHome();
-    }
+    if (res.added) { toast(`Added ${res.added} words`); input.value = ''; loadHome(); }
   } catch (e) { toast('Add failed'); }
 }
 

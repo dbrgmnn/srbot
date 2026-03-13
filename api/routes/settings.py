@@ -28,6 +28,12 @@ def setup_routes_settings(app: web.Application, db: aiosqlite.Connection):
         body = await request.json()
         user_repo = UserRepo(db)
 
+        if "language" in body:
+            new_lang = body["language"]
+            if new_lang in ["de", "en"]:
+                await user_repo.update_language(telegram_id, new_lang)
+                lang = new_lang # use new lang for the response
+
         if "daily_limit" in body:
             try:
                 limit = int(body["daily_limit"])

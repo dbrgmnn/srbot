@@ -14,8 +14,7 @@
   <div id="screen-home" class="screen active">
     <div class="header">
       <div>
-        <div class="header-title" id="user-greeting">Welcome!</div>
-        <div class="header-sub">Ready to learn?</div>
+        <div class="header-title" id="user-greeting">Hello!</div>
       </div>
     </div>
 
@@ -69,7 +68,6 @@
       </div>
 
       <div class="word-card-container">
-        <!-- Single card as requested -->
         <div id="word-card" class="word-card">
           <div class="word-face word-front">
             <div class="word-main" id="word-front"></div>
@@ -157,7 +155,7 @@
         <div class="settings-label">Practice Mode</div>
         <div class="practice-switch">
           <button class="practice-opt active" data-mode="word_to_translation" id="mode-word" onclick="setPracticeMode('word_to_translation')">DE</button>
-          <button class="practice-opt" data-mode="translation_to_word" onclick="setPracticeMode('translation_to_word')">🇷🇺</button>
+          <button class="practice-opt" data-mode="translation_to_word" onclick="setPracticeMode('translation_to_word')">RU</button>
         </div>
       </div>
 
@@ -215,7 +213,7 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
       <span>Search</span>
     </button>
-    <button id="nav-settings" class="nav-btn" onclick="showScreen('settings'); loadSettings();">
+    <button id="nav-settings" class="nav-btn" onclick="showScreen('settings')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
       <span>Settings</span>
     </button>

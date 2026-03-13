@@ -121,6 +121,19 @@ class UserRepo:
         )
         await self.db.commit()
 
+    async def update_language(self, telegram_id: int, new_language: str):
+        # Update or create default settings for the new language
+        user_id_cur = await self.db.execute("SELECT id FROM users WHERE telegram_id = ?", (telegram_id,))
+        row = await user_id_cur.fetchone()
+        if not row: return
+        user_id = row['id']
+        
+        await self.db.execute(
+            """INSERT OR IGNORE INTO user_settings (user_id, language) VALUES (?, ?)""",
+            (user_id, new_language)
+        )
+        await self.db.commit()
+
     async def get_min_notification_interval(self) -> float:
         cursor = await self.db.execute(
             "SELECT MIN(notification_interval_minutes) as min_interval FROM user_settings"
