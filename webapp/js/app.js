@@ -578,9 +578,12 @@ async function loadSettings() {
     if (limit)  limit.value  = s.daily_limit || 20;
     if (intEl)  intEl.value  = s.notification_interval_minutes || 240;
 
-    document.querySelectorAll('.lang-opt').forEach(btn => {
-      btn.classList.toggle('active', btn.dataset.lang === currentLang);
-    });
+    const langOpts = document.querySelectorAll('.lang-opt');
+    if (langOpts.length > 0) {
+      langOpts.forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.lang === currentLang);
+      });
+    }
 
     const modeBtnWord = document.getElementById('mode-word');
     if (modeBtnWord) modeBtnWord.textContent = currentLang.toUpperCase();
