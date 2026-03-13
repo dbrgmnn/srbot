@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>srbot</title>
-  <link rel="stylesheet" href="/static/css/style.css?v=2.3">
+  <link rel="stylesheet" href="/static/css/style.css?v=2.4">
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
@@ -61,11 +61,6 @@
         </div>
         <div class="garden-bar"><div id="bar-diamonds" class="garden-fill diamonds"></div></div>
       </div>
-    </div>
-
-    <div class="lang-selector-home">
-      <button class="lang-opt active" data-lang="de" onclick="switchLanguage('de')">DE</button>
-      <button class="lang-opt" data-lang="en" onclick="switchLanguage('en')">EN</button>
     </div>
 
     <button class="btn" onclick="startPractice()" id="btn-practice">Practice</button>
@@ -168,17 +163,27 @@
 <!-- ── Settings ── -->
 <div id="screen-settings" class="screen">
   <div class="p-gap">
-    <div class="header-title header-title-spaced">⚙️ Settings <small style="font-size: 10px; opacity: 0.5;">v2.3</small></div>
+    <div class="header-title header-title-spaced">⚙️ Settings <small style="font-size: 10px; opacity: 0.5;">v2.4</small></div>
     
     <div class="card">
-      <div class="card-title">Practice</div>
+      <div class="card-title">Language & Target</div>
       <div class="settings-row">
-        <span class="settings-label">New words per session</span>
-        <input type="number" id="set-limit" min="5" max="50"
-               onchange="saveSetting('daily_limit', this.value)">
+        <span class="settings-label">I am learning</span>
+        <div class="practice-switch">
+          <button type="button" class="lang-opt active" data-lang="de" onclick="switchLanguage('de')">DE</button>
+          <button type="button" class="lang-opt" data-lang="en" onclick="switchLanguage('en')">EN</button>
+        </div>
       </div>
       <div class="settings-row">
-        <span class="settings-label">Practice direction</span>
+        <span class="settings-label">New words goal</span>
+        <div class="stepper">
+          <button type="button" onclick="changeLimit(-5)">−</button>
+          <span id="set-limit-val">20</span>
+          <button type="button" onclick="changeLimit(5)">+</button>
+        </div>
+      </div>
+      <div class="settings-row">
+        <span class="settings-label">Direction</span>
         <div class="practice-switch">
           <button type="button" class="practice-opt active" id="mode-word" data-mode="word_to_translation" onclick="setPracticeMode('word_to_translation')">DE</button>
           <button type="button" class="practice-opt" id="mode-trans" data-mode="translation_to_word" onclick="setPracticeMode('translation_to_word')">RU</button>
@@ -189,12 +194,17 @@
     <div class="card">
       <div class="card-title">Notifications</div>
       <div class="settings-row">
-        <span class="settings-label">Interval in minutes</span>
-        <input type="number" id="set-notify-interval" min="1" max="480"
-               onchange="saveSetting('notification_interval_minutes', parseInt(this.value))">
+        <span class="settings-label">Remind me every</span>
+        <select id="set-notify-interval" onchange="saveSetting('notification_interval_minutes', parseInt(this.value))">
+          <option value="30">30 minutes</option>
+          <option value="60">1 hour</option>
+          <option value="120">2 hours</option>
+          <option value="240">4 hours</option>
+          <option value="480">8 hours</option>
+        </select>
       </div>
       <div class="settings-row">
-        <span class="settings-label">Do Not Disturb</span>
+        <span class="settings-label">Quiet Hours</span>
         <div class="time-wrap">
             <input type="time" id="set-quiet-start" onchange="saveSetting('quiet_start', this.value)">
             <span class="text-hint">—</span>
@@ -204,10 +214,10 @@
     </div>
 
     <div class="card">
-      <div class="card-title">Data</div>
+      <div class="card-title">Data Management</div>
       <div class="btn-row">
-        <button type="button" class="btn-share btn-danger" onclick="clearAllWords()">Delete</button>
-        <button type="button" class="btn-share" onclick="shareWords()">Share</button>
+        <button type="button" class="btn-share btn-danger" onclick="clearAllWords()">Clear All</button>
+        <button type="button" class="btn-share" onclick="shareWords()">Export</button>
       </div>
     </div>
 
@@ -266,6 +276,6 @@
 
 <div class="toast" id="toast"></div>
 
-<script src="/static/js/app.js?v=2.3"></script>
+<script src="/static/js/app.js?v=2.4"></script>
 </body>
 </html>

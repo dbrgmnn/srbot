@@ -93,11 +93,19 @@ function showScreen(name) {
 async function switchLanguage(lang) {
   if (currentLang === lang) return;
   currentLang = lang;
-  document.querySelectorAll('.lang-opt').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.lang === lang);
-  });
   tg.HapticFeedback.impactOccurred('light');
-  await loadHome();
+  await loadSettings(); // Refresh settings data for the new language
+}
+
+let currentLimit = 20;
+async function changeLimit(delta) {
+  const el = document.getElementById('set-limit-val');
+  let val = parseInt(el.textContent) + delta;
+  if (val < 5) val = 5;
+  if (val > 50) val = 50;
+  el.textContent = val;
+  tg.HapticFeedback.impactOccurred('light');
+  await saveSetting('daily_limit', val);
 }
 
 async function loadHome(data) {
@@ -572,14 +580,14 @@ async function loadSettings() {
     const s      = await GET('/api/settings');
     const qStart = document.getElementById('set-quiet-start');
     const qEnd   = document.getElementById('set-quiet-end');
-    const limit  = document.getElementById('set-limit');
+    const limitVal = document.getElementById('set-limit-val');
     const tzEl   = document.getElementById('info-tz');
     const wordEl = document.getElementById('info-words');
     const intEl  = document.getElementById('set-notify-interval');
 
     if (qStart) qStart.value = s.quiet_start || '23:00';
     if (qEnd)   qEnd.value   = s.quiet_end   || '08:00';
-    if (limit)  limit.value  = s.daily_limit || 20;
+    if (limitVal) limitVal.textContent = s.daily_limit || 20;
     if (intEl)  intEl.value  = s.notification_interval_minutes || 240;
 
     const langOpts = document.querySelectorAll('.lang-opt');

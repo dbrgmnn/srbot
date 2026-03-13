@@ -116,14 +116,6 @@ body {
 }
 
 /* ── Button ── */
-.lang-selector-home {
-  display: flex;
-  background: var(--bg2);
-  padding: 4px;
-  border-radius: var(--radius);
-  gap: 4px;
-  margin-bottom: var(--gap);
-}
 .btn {
   width: 100%;
   padding: 14px;
@@ -342,6 +334,48 @@ textarea::placeholder { color: var(--hint); }
 .practice-opt.active, .lang-opt.active {
   background: var(--accent);
   color: var(--btn-text);
+}
+
+/* ── Stepper ── */
+.stepper {
+  display: flex;
+  align-items: center;
+  background: var(--bg);
+  border-radius: 10px;
+  padding: 2px;
+}
+.stepper button {
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: none;
+  color: var(--accent);
+  font-size: 20px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.stepper span {
+  min-width: 40px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 15px;
+}
+
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  background: var(--bg);
+  color: var(--text);
+  border: none;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-family: inherit;
+  outline: none;
+  text-align: right;
 }
 
 .time-wrap {
