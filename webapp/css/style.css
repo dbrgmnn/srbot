@@ -165,14 +165,6 @@ body {
   align-items: center;
   margin-bottom: 16px;
 }
-.prog-pill {
-  background: rgba(48, 209, 88, 0.15);
-  color: #30d158;
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 800;
-}
 .practice-badge {
   padding: 4px 12px;
   border-radius: 20px;

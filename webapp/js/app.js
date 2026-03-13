@@ -4,7 +4,7 @@ tg.expand();
 
 import { POST, setLanguage } from './api.js';
 import { loadHome, showScreen, toast } from './ui.js';
-import { startPractice, playAudio, exitPractice, initSwipe } from './practice.js';
+import { startPractice, playAudio, exitPractice } from './practice.js';
 import { 
   submitWords, handleFileUpload, onSearchInput, 
   saveEdit, closeEdit, clearAllWords, shareWords 
