@@ -32,22 +32,22 @@
     </div>
 
     <div class="card garden-card">
-      <div class="card-title">Knowledge Garden</div>
+      <div class="card-title">Statistics</div>
       
       <div class="garden-item">
-        <div class="garden-info"><span>Seeds</span><span id="count-seeds">0</span></div>
+        <div class="garden-info"><span>New</span><span id="count-seeds">0</span></div>
         <div class="garden-bar"><div id="bar-seeds" class="garden-fill seeds"></div></div>
       </div>
       <div class="garden-item">
-        <div class="garden-info"><span>Sprouts</span><span id="count-sprouts">0</span></div>
+        <div class="garden-info"><span>Learning</span><span id="count-sprouts">0</span></div>
         <div class="garden-bar"><div id="bar-sprouts" class="garden-fill sprouts"></div></div>
       </div>
       <div class="garden-item">
-        <div class="garden-info"><span>Trees</span><span id="count-trees">0</span></div>
+        <div class="garden-info"><span>Known</span><span id="count-trees">0</span></div>
         <div class="garden-bar"><div id="bar-trees" class="garden-fill trees"></div></div>
       </div>
       <div class="garden-item">
-        <div class="garden-info"><span>Diamonds</span><span id="count-diamonds">0</span></div>
+        <div class="garden-info"><span>Mastered</span><span id="count-diamonds">0</span></div>
         <div class="garden-bar"><div id="bar-diamonds" class="garden-fill diamonds"></div></div>
       </div>
     </div>
@@ -93,7 +93,7 @@
     <div class="header">
       <div class="header-title header-title-add">Add Words</div>
     </div>
-    <textarea id="add-input" placeholder="word,translation,example... (one per line)"></textarea>
+    <textarea id="add-input" placeholder="word,translation,example..."></textarea>
     <button class="btn" onclick="submitWords()">Add to Dictionary</button>
     <label class="file-input-label" for="file-input">Or upload CSV file</label>
     <input type="file" id="file-input" accept=".csv,.txt" onchange="handleFileUpload(this)">
@@ -142,9 +142,11 @@
       <div class="header-title header-title-spaced">Settings</div>
     </div>
 
-    <div class="card">
+    <!-- Section: Learning -->
+    <div class="settings-section-title">Learning</div>
+    <div class="card settings-group">
       <div class="settings-row">
-        <div class="settings-label">Interface Language</div>
+        <div class="settings-label">Dictionary Language</div>
         <div class="practice-switch">
           <button class="lang-opt active" data-lang="de" onclick="switchLanguage('de')">DE</button>
           <button class="lang-opt" data-lang="en" onclick="switchLanguage('en')">EN</button>
@@ -167,30 +169,32 @@
           <button onclick="changeLimit(5)">+</button>
         </div>
       </div>
+    </div>
 
+    <!-- Section: Notifications -->
+    <div class="settings-section-title">Notifications</div>
+    <div class="card settings-group">
       <div class="settings-row">
-        <div class="settings-label">Quiet Start</div>
-        <div class="time-wrap">
-          <input type="time" id="set-quiet-start" onchange="saveSetting('quiet_start', this.value)">
-        </div>
+        <div class="settings-label">Interval (min)</div>
+        <input type="number" id="set-notify-interval" min="15" max="480" step="15" onchange="saveSetting('notification_interval_minutes', this.value)">
       </div>
 
       <div class="settings-row">
-        <div class="settings-label">Quiet End</div>
+        <div class="settings-label">Quiet Hours</div>
         <div class="time-wrap">
+          <input type="time" id="set-quiet-start" onchange="saveSetting('quiet_start', this.value)">
+          <span class="text-hint">to</span>
           <input type="time" id="set-quiet-end" onchange="saveSetting('quiet_end', this.value)">
         </div>
       </div>
-
-      <div class="settings-row">
-        <div class="settings-label">Notify every (min)</div>
-        <input type="number" id="set-notify-interval" min="15" max="480" step="15" onchange="saveSetting('notification_interval_minutes', this.value)">
-      </div>
     </div>
 
-    <div class="btn-row">
-        <button class="btn-share" onclick="shareWords()">Export Dictionary</button>
-        <button class="btn-share btn-danger" onclick="clearAllWords()">Clear All Words</button>
+    <!-- Section: Data -->
+    <div class="settings-section-title">Data</div>
+    <div class="card settings-group">
+      <button class="btn-settings-action" onclick="shareWords()">Export Dictionary (CSV)</button>
+      <div class="divider"></div>
+      <button class="btn-settings-action btn-danger" onclick="clearAllWords()">Delete All Words</button>
     </div>
 
     <div class="info-footer">

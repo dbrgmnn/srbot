@@ -8,7 +8,7 @@ let sessionIdx = 0;
 let sessionStats = { reviewed: 0, new: 0, good: 0, hard: 0, again: 0 };
 let searchTimer = null;
 let practiceMode = 'word_to_translation';
-let currentLang = 'de'; // Default, syncs with server
+let currentLang = 'de';
 
 const langVoices = {
   'de': 'de-DE',
@@ -177,8 +177,8 @@ function initSwipe() {
         let swipeDir = null;
         if (Math.abs(deltaY) > Math.abs(deltaX) * 1.5 && deltaY < -40) swipeDir = 'up';
         else if (Math.abs(deltaX) > Math.abs(deltaY) * 1.2) {
-          if (deltaX < -40) swipeDir = 'left';
-          else if (deltaX > 40) swipeDir = 'right';
+          if (deltaX < -60) swipeDir = 'left'; // Corrected threshold
+          else if (deltaX > 100) swipeDir = 'right';
         }
 
         card.style.transform = `translate(${deltaX}px, ${deltaY}px) rotateY(${baseRot}deg) rotateZ(${deltaX * 0.1}deg)`;
@@ -248,6 +248,8 @@ function renderWord() {
   exEl.style.display = word.example ? 'block' : 'none';
   
   card.classList.remove('flipped', 'swipe-left', 'swipe-right', 'swipe-up');
+  
+  // Pop up animation
   card.style.transition = 'none';
   card.style.transform = 'scale(0.8) rotateY(0deg)';
   card.style.opacity = '0';
@@ -300,14 +302,14 @@ async function switchLanguage(lang) {
   tg.HapticFeedback.impactOccurred('light');
   try {
     isProcessing = true;
-    currentLang = lang; // Change header immediately for next requests
+    currentLang = lang; // Change global lang for API headers
     await POST('/api/settings', { language: lang });
     
     document.querySelectorAll('.lang-opt').forEach(btn => btn.classList.toggle('active', btn.dataset.lang === currentLang));
+    if (document.getElementById('mode-word')) document.getElementById('mode-word').textContent = currentLang.toUpperCase();
     
-    // Refresh stats and everything for NEW language base
     await loadHome();
-    toast(`Language set to ${lang.toUpperCase()}`);
+    toast(`Switched to ${lang.toUpperCase()}`);
   } catch (e) { toast('Error switching language'); }
   finally { isProcessing = false; }
 }

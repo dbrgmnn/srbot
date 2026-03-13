@@ -49,13 +49,8 @@ class UserRepo:
             (telegram_id, language),
         )
         row = await cursor.fetchone()
-        if row:
-            data = dict(row)
-            if data.get("practice_mode") is None:
-                data["practice_mode"] = "word_to_translation"
-            return data
-
-        return {
+        
+        defaults = {
             "quiet_start": "23:00",
             "quiet_end": "08:00",
             "daily_limit": 20,
@@ -64,29 +59,30 @@ class UserRepo:
             "practice_mode": "word_to_translation",
         }
 
+        if row:
+            data = dict(row)
+            for k, v in defaults.items():
+                if data.get(k) is None:
+                    data[k] = v
+            return data
+
+        return defaults
+
     async def update_daily_limit(self, telegram_id: int, limit: int, language: str = 'de'):
-        user_id_cur = await self.db.execute("SELECT id FROM users WHERE telegram_id = ?", (telegram_id,))
-        row = await user_id_cur.fetchone()
-        if not row: return
-        user_id = row['id']
         await self.db.execute(
             """INSERT INTO user_settings (user_id, language, daily_limit)
-               VALUES (?, ?, ?)
+               VALUES ((SELECT id FROM users WHERE telegram_id = ?), ?, ?)
                ON CONFLICT(user_id, language) DO UPDATE SET daily_limit = ?""",
-            (user_id, language, limit, limit),
+            (telegram_id, language, limit, limit),
         )
         await self.db.commit()
 
     async def update_notification_interval(self, telegram_id: int, minutes: int, language: str = 'de'):
-        user_id_cur = await self.db.execute("SELECT id FROM users WHERE telegram_id = ?", (telegram_id,))
-        row = await user_id_cur.fetchone()
-        if not row: return
-        user_id = row['id']
         await self.db.execute(
             """INSERT INTO user_settings (user_id, language, notification_interval_minutes)
-               VALUES (?, ?, ?)
+               VALUES ((SELECT id FROM users WHERE telegram_id = ?), ?, ?)
                ON CONFLICT(user_id, language) DO UPDATE SET notification_interval_minutes = ?""",
-            (user_id, language, minutes, minutes),
+            (telegram_id, language, minutes, minutes),
         )
         await self.db.commit()
 
@@ -108,28 +104,21 @@ class UserRepo:
         await self.db.commit()
 
     async def update_practice_mode(self, telegram_id: int, mode: str, language: str = 'de'):
-        user_id_cur = await self.db.execute("SELECT id FROM users WHERE telegram_id = ?", (telegram_id,))
-        row = await user_id_cur.fetchone()
-        if not row:
-            return
-        user_id = row['id']
         await self.db.execute(
             """INSERT INTO user_settings (user_id, language, practice_mode)
-               VALUES (?, ?, ?)
+               VALUES ((SELECT id FROM users WHERE telegram_id = ?), ?, ?)
                ON CONFLICT(user_id, language) DO UPDATE SET practice_mode = ?""",
-            (user_id, language, mode, mode),
+            (telegram_id, language, mode, mode),
         )
         await self.db.commit()
 
     async def update_language(self, telegram_id: int, new_language: str):
-        # Update or create default settings for the new language
         user_id_cur = await self.db.execute("SELECT id FROM users WHERE telegram_id = ?", (telegram_id,))
         row = await user_id_cur.fetchone()
         if not row: return
         user_id = row['id']
-        
         await self.db.execute(
-            """INSERT OR IGNORE INTO user_settings (user_id, language) VALUES (?, ?)""",
+            "INSERT OR IGNORE INTO user_settings (user_id, language) VALUES (?, ?)",
             (user_id, new_language)
         )
         await self.db.commit()
@@ -145,8 +134,6 @@ class UserRepo:
         from zoneinfo import ZoneInfo
         now_utc = datetime.now(tz=timezone.utc)
         tz = ZoneInfo(tz_name)
-        
-        # Get local midnight in UTC
         local_now = now_utc.astimezone(tz)
         today_start_local = local_now.replace(hour=0, minute=0, second=0, microsecond=0)
         today_start_utc = today_start_local.astimezone(timezone.utc).isoformat()
@@ -234,8 +221,6 @@ class WordRepo:
         from zoneinfo import ZoneInfo
         now_utc = datetime.now(tz=timezone.utc)
         tz = ZoneInfo(tz_name)
-        
-        # Get local midnight in UTC
         local_now = now_utc.astimezone(tz)
         today_start_local = local_now.replace(hour=0, minute=0, second=0, microsecond=0)
         today_start_utc = today_start_local.astimezone(timezone.utc).isoformat()
