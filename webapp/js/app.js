@@ -11,7 +11,10 @@ import {
 } from './settings.js';
 
 // Expose functions to window for HTML onclick attributes
-window.showScreen = showScreen;
+window.showScreen = (name) => {
+  showScreen(name);
+  if (name === 'settings') loadSettings();
+};
 window.switchLanguage = switchLanguage;
 window.changeLimit = changeLimit;
 window.startPractice = startPractice;
