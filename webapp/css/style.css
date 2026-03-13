@@ -335,3 +335,25 @@ textarea {
   display: block; width: 100%; background: var(--bg); border: none; border-radius: var(--radius);
   padding: 12px; color: var(--text); font-size: 15px; outline: none; margin-bottom: 10px;
 }
+
+/* ── File Input ── */
+.file-input-label {
+    display: block;
+    text-align: center;
+    padding: 14px;
+    color: var(--accent);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 8px;
+    background: var(--bg2);
+    border-radius: var(--radius);
+}
+#file-input { display: none; }
+
+mark {
+  background: rgba(10, 132, 255, 0.25);
+  color: var(--accent);
+  border-radius: 2px;
+  padding: 0 2px;
+}

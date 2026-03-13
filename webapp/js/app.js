@@ -436,6 +436,22 @@ function onSearchInput(val) {
   searchTimer = setTimeout(() => loadSearch(val), 300);
 }
 
+function highlight(text, query) {
+  if (!query || query.length < 2) return esc(text);
+  const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const parts = text.split(new RegExp(`(${escapedQuery})`, 'gi'));
+  return parts.map(p => {
+    return p.toLowerCase() === query.toLowerCase()
+      ? `<mark>${esc(p)}</mark>` : esc(p);
+  }).join('');
+}
+
+function esc(str) {
+  return String(str)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
 async function loadSearch(q) {
   const el = document.getElementById('search-results');
   if (!el || q.length < 2) { if (el) el.innerHTML = ''; return; }
@@ -444,8 +460,8 @@ async function loadSearch(q) {
     el.innerHTML = data.words.map(w => `
       <div class="word-row" id="wr-${w.id}">
         <div class="word-row-content" onclick='openEdit(${JSON.stringify(w)})'>
-          <div class="word-row-text">${w.word}</div>
-          <div class="word-row-trans">${w.translation}</div>
+          <div class="word-row-text">${highlight(w.word, q)}</div>
+          <div class="word-row-trans">${highlight(w.translation, q)}</div>
         </div>
         <button class="del-btn" onclick="deleteWord(${w.id})">✕</button>
       </div>
