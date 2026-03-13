@@ -17,13 +17,20 @@ JOB_ID = "check_notifications"
 
 # ── Notification texts ────────────────────────────────────────────────────
 
-def build_notification_text(due: int, new: int) -> str:
+LANG_FLAGS = {
+    'de': '🇩🇪',
+    'en': '🇬🇧',
+}
+
+def build_notification_text(due: int, new: int, lang: str) -> str:
     parts = []
     if due > 0:
         parts.append(f"{due} to review")
     if new > 0:
         parts.append(f"{new} new words")
-    return "🇩🇪 " + " · ".join(parts)
+    
+    flag = LANG_FLAGS.get(lang.lower(), "🌐")
+    return f"{flag} " + " · ".join(parts)
 
 
 # ── Quiet hours ───────────────────────────────────────────────────────────
@@ -79,7 +86,7 @@ async def check_and_send_notifications(bot: Bot, config: Config, db: aiosqlite.C
             except ValueError:
                 pass
 
-        text = build_notification_text(due_count, new_to_show)
+        text = build_notification_text(due_count, new_to_show, row["language"])
 
         try:
             await bot.send_message(chat_id=telegram_id, text=text)
