@@ -291,40 +291,23 @@ function initSwipe() {
       const baseRotation = isFlipped ? 180 : 0;
       
       let swipeDir = null;
-      let opacity = 0;
-      
       if (Math.abs(deltaY) > Math.abs(deltaX) * 1.5) {
-        if (deltaY < -40) {
-          swipeDir = 'up';
-          opacity = Math.min(1, (Math.abs(deltaY) - 40) / 60);
-        }
+        if (deltaY < -40) swipeDir = 'up';
       } else if (Math.abs(deltaX) > Math.abs(deltaY) * 1.2) {
-        if (deltaX < -50) {
-          swipeDir = 'left';
-          opacity = Math.min(1, (Math.abs(deltaX) - 50) / 100);
-        }
-        else if (deltaX > 50) {
-          swipeDir = 'right';
-          opacity = Math.min(1, (Math.abs(deltaX) - 50) / 100);
-        }
+        if (deltaX < -50) swipeDir = 'left';
+        else if (deltaX > 50) swipeDir = 'right';
       }
 
-      // Calculate tilt based on deltaX
+      // Dynamic tilt based on deltaX
       const rotationZ = deltaX * 0.1;
+      
+      // Use requestAnimationFrame for maximum smoothness if we had more complex logic,
+      // but simple transforms are already highly optimized.
       card.style.transform = `translate(${deltaX}px, ${deltaY}px) rotateY(${baseRotation}deg) rotateZ(${rotationZ}deg)`;
       
       card.classList.toggle('swipe-left', swipeDir === 'left');
       card.classList.toggle('swipe-right', swipeDir === 'right');
       card.classList.toggle('swipe-up', swipeDir === 'up');
-
-      // Update indicators opacity and scale
-      const indAgain = card.querySelector('.indicator-again');
-      const indGood  = card.querySelector('.indicator-good');
-      const indHard  = card.querySelector('.indicator-hard');
-
-      if (indAgain) { indAgain.style.opacity = (swipeDir === 'left') ? opacity : 0; indAgain.style.transform = `rotate(-15deg) scale(${0.8 + opacity * 0.4})`; }
-      if (indGood)  { indGood.style.opacity = (swipeDir === 'right') ? opacity : 0; indGood.style.transform = `rotate(15deg) scale(${0.8 + opacity * 0.4})`; }
-      if (indHard)  { indHard.style.opacity = (swipeDir === 'up') ? opacity : 0; indHard.style.transform = `translateX(-50%) scale(${0.8 + opacity * 0.4})`; }
 
       if (swipeDir && card.lastDir !== swipeDir) {
         tg.HapticFeedback.impactOccurred('light');
@@ -336,10 +319,6 @@ function initSwipe() {
   card.addEventListener('touchend', (e) => {
     if (isGrading) return;
     card.classList.remove('swiping');
-    
-    // Reset indicators
-    const indicators = card.querySelectorAll('.swipe-indicator');
-    indicators.forEach(ind => { ind.style.opacity = 0; });
 
     const touchEndX = e.changedTouches[0].clientX;
     const touchEndY = e.changedTouches[0].clientY;
