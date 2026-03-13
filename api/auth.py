@@ -33,6 +33,10 @@ def verify_init_data(init_data: str, bot_token: str, expires_in: int = 3600) -> 
     return params
 
 
+def get_language(request) -> str:
+    return request.headers.get("X-Language", "de").lower()
+
+
 def get_user_id(init_data: str, bot_token: str) -> int | None:
     if not init_data:
         return None

@@ -168,6 +168,13 @@
     <div class="card">
       <div class="card-title">Practice</div>
       <div class="settings-row">
+        <span class="settings-label">Target Language</span>
+        <div class="practice-switch">
+          <button type="button" class="lang-opt active" data-lang="de" onclick="switchLanguage('de')">DE</button>
+          <button type="button" class="lang-opt" data-lang="en" onclick="switchLanguage('en')">EN</button>
+        </div>
+      </div>
+      <div class="settings-row">
         <span class="settings-label">New words per session</span>
         <input type="number" id="set-limit" min="5" max="50"
                onchange="saveSetting('daily_limit', this.value)">

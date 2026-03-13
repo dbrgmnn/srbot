@@ -31,22 +31,22 @@ class UserRepo:
         await self.db.commit()
         return user_id
 
-    async def set_last_notified_at(self, telegram_id: int):
+    async def set_last_notified_at(self, telegram_id: int, language: str = 'de'):
         now = datetime.now(tz=timezone.utc).isoformat()
         await self.db.execute(
             """UPDATE user_settings SET last_notified_at = ?
                WHERE user_id = (SELECT id FROM users WHERE telegram_id = ?)
-               AND language = 'de'""",
-            (now, telegram_id),
+               AND language = ?""",
+            (now, telegram_id, language),
         )
         await self.db.commit()
 
-    async def get_user_settings(self, telegram_id: int) -> dict:
+    async def get_user_settings(self, telegram_id: int, language: str = 'de') -> dict:
         cursor = await self.db.execute(
             """SELECT s.* FROM user_settings s
                 JOIN users u ON s.user_id = u.id
                 WHERE u.telegram_id = ? AND s.language = ?""",
-            (telegram_id, 'de'),
+            (telegram_id, language),
         )
         row = await cursor.fetchone()
         if row:
@@ -60,54 +60,54 @@ class UserRepo:
             "quiet_end": "08:00",
             "daily_limit": 20,
             "notification_interval_minutes": 240,
-            "language": "de",
+            "language": language,
             "practice_mode": "word_to_translation",
         }
 
-    async def update_daily_limit(self, telegram_id: int, limit: int):
+    async def update_daily_limit(self, telegram_id: int, limit: int, language: str = 'de'):
         user_id_cur = await self.db.execute("SELECT id FROM users WHERE telegram_id = ?", (telegram_id,))
         row = await user_id_cur.fetchone()
         if not row: return
         user_id = row['id']
         await self.db.execute(
             """INSERT INTO user_settings (user_id, language, daily_limit)
-               VALUES (?, 'de', ?)
+               VALUES (?, ?, ?)
                ON CONFLICT(user_id, language) DO UPDATE SET daily_limit = ?""",
-            (user_id, limit, limit),
+            (user_id, language, limit, limit),
         )
         await self.db.commit()
 
-    async def update_notification_interval(self, telegram_id: int, minutes: int):
+    async def update_notification_interval(self, telegram_id: int, minutes: int, language: str = 'de'):
         user_id_cur = await self.db.execute("SELECT id FROM users WHERE telegram_id = ?", (telegram_id,))
         row = await user_id_cur.fetchone()
         if not row: return
         user_id = row['id']
         await self.db.execute(
             """INSERT INTO user_settings (user_id, language, notification_interval_minutes)
-               VALUES (?, 'de', ?)
+               VALUES (?, ?, ?)
                ON CONFLICT(user_id, language) DO UPDATE SET notification_interval_minutes = ?""",
-            (user_id, minutes, minutes),
+            (user_id, language, minutes, minutes),
         )
         await self.db.commit()
 
-    async def update_quiet_hours(self, telegram_id: int, quiet_start: str = None, quiet_end: str = None):
+    async def update_quiet_hours(self, telegram_id: int, quiet_start: str = None, quiet_end: str = None, language: str = 'de'):
         user_id_cur = await self.db.execute("SELECT id FROM users WHERE telegram_id = ?", (telegram_id,))
         row = await user_id_cur.fetchone()
         if not row: return
         user_id = row['id']
         if quiet_start is not None:
             await self.db.execute(
-                "UPDATE user_settings SET quiet_start = ? WHERE user_id = ? AND language = 'de'",
-                (quiet_start, user_id),
+                "UPDATE user_settings SET quiet_start = ? WHERE user_id = ? AND language = ?",
+                (quiet_start, user_id, language),
             )
         if quiet_end is not None:
             await self.db.execute(
-                "UPDATE user_settings SET quiet_end = ? WHERE user_id = ? AND language = 'de'",
-                (quiet_end, user_id),
+                "UPDATE user_settings SET quiet_end = ? WHERE user_id = ? AND language = ?",
+                (quiet_end, user_id, language),
             )
         await self.db.commit()
 
-    async def update_practice_mode(self, telegram_id: int, mode: str):
+    async def update_practice_mode(self, telegram_id: int, mode: str, language: str = 'de'):
         user_id_cur = await self.db.execute("SELECT id FROM users WHERE telegram_id = ?", (telegram_id,))
         row = await user_id_cur.fetchone()
         if not row:
@@ -115,9 +115,9 @@ class UserRepo:
         user_id = row['id']
         await self.db.execute(
             """INSERT INTO user_settings (user_id, language, practice_mode)
-               VALUES (?, 'de', ?)
+               VALUES (?, ?, ?)
                ON CONFLICT(user_id, language) DO UPDATE SET practice_mode = ?""",
-            (user_id, mode, mode),
+            (user_id, language, mode, mode),
         )
         await self.db.commit()
 
@@ -216,16 +216,6 @@ class WordRepo:
             (repetitions, easiness, interval, next_review.isoformat(), now, now, word_id),
         )
         await self.db.commit()
-
-    async def get_word_count(self, user_id: int, language: str = None) -> int:
-        query = "SELECT COUNT(*) as count FROM words WHERE user_id = ?"
-        params = [user_id]
-        if language:
-            query += " AND language = ?"
-            params.append(language)
-        cursor = await self.db.execute(query, tuple(params))
-        row = await cursor.fetchone()
-        return row['count'] if row else 0
 
     async def get_full_stats(self, user_id: int, language: str, tz_name: str = "UTC") -> dict:
         from zoneinfo import ZoneInfo

@@ -8,6 +8,12 @@ let sessionIdx = 0;
 let sessionStats = { reviewed: 0, new: 0, good: 0, hard: 0, again: 0 };
 let searchTimer = null;
 let practiceMode = 'word_to_translation';
+let currentLang = 'de';
+
+const langVoices = {
+  'de': 'de-DE',
+  'en': 'en-US'
+};
 
 // Helper to get local timezone offset in minutes (e.g. -120)
 function getTzOffset() {
@@ -21,7 +27,11 @@ let isProcessing = false;
 async function api(method, path, body) {
   const opts = {
     method,
-    headers: { 'Content-Type': 'application/json', 'X-Init-Data': INIT_DATA },
+    headers: { 
+      'Content-Type': 'application/json', 
+      'X-Init-Data': INIT_DATA,
+      'X-Language': currentLang
+    },
   };
   if (body) opts.body = JSON.stringify(body);
   
@@ -79,6 +89,16 @@ function showScreen(name) {
 }
 
 // ── Home ──────────────────────────────────────────────────────────────────
+
+async function switchLanguage(lang) {
+  if (currentLang === lang) return;
+  currentLang = lang;
+  document.querySelectorAll('.lang-opt').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.lang === lang);
+  });
+  tg.HapticFeedback.impactOccurred('light');
+  await loadHome();
+}
 
 async function loadHome(data) {
   try {
@@ -307,7 +327,7 @@ function playAudio(e) {
 
   window.speechSynthesis.cancel();
   const msg = new SpeechSynthesisUtterance(word.word);
-  msg.lang = 'de-DE';
+  msg.lang = langVoices[currentLang] || 'de-DE';
   msg.rate = 0.85;
   window.speechSynthesis.speak(msg);
   
@@ -557,6 +577,10 @@ async function loadSettings() {
     if (qEnd)   qEnd.value   = s.quiet_end   || '08:00';
     if (limit)  limit.value  = s.daily_limit || 20;
     if (intEl)  intEl.value  = s.notification_interval_minutes || 240;
+
+    document.querySelectorAll('.lang-opt').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.lang === currentLang);
+    });
 
     const mode = s.practice_mode || 'word_to_translation';
     document.querySelectorAll('.practice-opt').forEach(btn => {

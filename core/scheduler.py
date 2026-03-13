@@ -83,8 +83,8 @@ async def check_and_send_notifications(bot: Bot, config: Config, db: aiosqlite.C
 
         try:
             await bot.send_message(chat_id=telegram_id, text=text)
-            await user_repo.set_last_notified_at(telegram_id)
-            logger.info(f"[scheduler] Notified {telegram_id}: {text!r}")
+            await user_repo.set_last_notified_at(telegram_id, language=row["language"])
+            logger.info(f"[scheduler] Notified {telegram_id} ({row['language']}): {text!r}")
         except Exception as e:
             logger.warning(f"[scheduler] Notification failed for {telegram_id}: {e}")
 

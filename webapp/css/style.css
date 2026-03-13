@@ -319,7 +319,7 @@ textarea::placeholder { color: var(--hint); }
   padding: 3px;
   gap: 0;
 }
-.practice-opt {
+.practice-opt, .lang-opt {
   flex: 1;
   padding: 8px 12px;
   border: none;
@@ -331,7 +331,7 @@ textarea::placeholder { color: var(--hint); }
   cursor: pointer;
   transition: background .15s, color .15s;
 }
-.practice-opt.active {
+.practice-opt.active, .lang-opt.active {
   background: var(--accent);
   color: var(--btn-text);
 }

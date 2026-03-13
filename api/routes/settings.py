@@ -2,26 +2,29 @@ from aiohttp import web
 import aiosqlite
 from db.repository import UserRepo, WordRepo
 from core.scheduler import reschedule
+from api.auth import get_language
 
 
 def setup_routes_settings(app: web.Application, db: aiosqlite.Connection):
 
     async def get_settings(request: web.Request) -> web.Response:
         telegram_id = request["telegram_id"]
+        lang = get_language(request)
         user_repo = UserRepo(db)
         word_repo = WordRepo(db)
         user_id = await user_repo.get_or_create(telegram_id)
-        settings = await user_repo.get_user_settings(telegram_id)
-        total_count = await word_repo.get_word_count(user_id, 'de')
+        settings = await user_repo.get_user_settings(telegram_id, lang)
+        stats = await word_repo.get_full_stats(user_id, lang)
         config = request.app["config"]
         return web.json_response({
             **settings,
-            "total_words": total_count,
+            "total_words": stats["total"],
             "timezone": config.timezone,
         })
 
     async def update_settings(request: web.Request) -> web.Response:
         telegram_id = request["telegram_id"]
+        lang = get_language(request)
         body = await request.json()
         user_repo = UserRepo(db)
 
@@ -34,7 +37,7 @@ def setup_routes_settings(app: web.Application, db: aiosqlite.Connection):
                     status=400,
                 )
             if 5 <= limit <= 50:
-                await user_repo.update_daily_limit(telegram_id, limit)
+                await user_repo.update_daily_limit(telegram_id, limit, lang)
             else:
                 return web.json_response({"error": "limit_out_of_range", "msg": "Limit must be between 5 and 50"}, status=400)
 
@@ -47,7 +50,7 @@ def setup_routes_settings(app: web.Application, db: aiosqlite.Connection):
                     status=400,
                 )
             if 1 <= interval <= 480:
-                await user_repo.update_notification_interval(telegram_id, interval)
+                await user_repo.update_notification_interval(telegram_id, interval, lang)
                 scheduler = request.app["scheduler"]
                 if scheduler:
                     await reschedule(scheduler, db)
@@ -72,7 +75,7 @@ def setup_routes_settings(app: web.Application, db: aiosqlite.Connection):
                     {"error": "invalid_mode", "msg": "practice_mode must be one of: word_to_translation, translation_to_word"},
                     status=400,
                 )
-            await user_repo.update_practice_mode(telegram_id, mode)
+            await user_repo.update_practice_mode(telegram_id, mode, lang)
 
         if "quiet_start" in body or "quiet_end" in body:
             quiet_start = body.get("quiet_start")
@@ -93,9 +96,10 @@ def setup_routes_settings(app: web.Application, db: aiosqlite.Connection):
                 telegram_id,
                 quiet_start=quiet_start,
                 quiet_end=quiet_end,
+                language=lang
             )
 
-        settings = await user_repo.get_user_settings(telegram_id)
+        settings = await user_repo.get_user_settings(telegram_id, lang)
         return web.json_response(settings)
 
     app.router.add_get("/api/settings", get_settings)

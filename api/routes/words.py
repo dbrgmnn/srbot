@@ -1,20 +1,23 @@
 from aiohttp import web
 import aiosqlite
 from db.repository import UserRepo, WordRepo
+from api.auth import get_language
 
 
 def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
 
     async def list_words(request: web.Request) -> web.Response:
         telegram_id = request["telegram_id"]
+        lang = get_language(request)
         user_repo = UserRepo(db)
         word_repo = WordRepo(db)
         user_id = await user_repo.get_or_create(telegram_id)
-        words = await word_repo.search_words(user_id, 'de', "")
+        words = await word_repo.search_words(user_id, lang, "")
         return web.json_response({"words": words})
 
     async def add_words(request: web.Request) -> web.Response:
         telegram_id = request["telegram_id"]
+        lang = get_language(request)
         body = await request.json()
         words = body.get("words", [])
         if not words:
@@ -22,7 +25,7 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         user_repo = UserRepo(db)
         word_repo = WordRepo(db)
         user_id = await user_repo.get_or_create(telegram_id)
-        added_count = await word_repo.add_words_batch(user_id, 'de', words)
+        added_count = await word_repo.add_words_batch(user_id, lang, words)
         return web.json_response({"added": added_count})
 
     async def patch_word(request: web.Request) -> web.Response:
@@ -68,19 +71,21 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
 
     async def search_words(request: web.Request) -> web.Response:
         telegram_id = request["telegram_id"]
+        lang = get_language(request)
         query = request.query.get("q", "")
         user_repo = UserRepo(db)
         word_repo = WordRepo(db)
         user_id = await user_repo.get_or_create(telegram_id)
-        words = await word_repo.search_words(user_id, 'de', query)
+        words = await word_repo.search_words(user_id, lang, query)
         return web.json_response({"words": words})
 
     async def export_words(request: web.Request) -> web.Response:
         telegram_id = request["telegram_id"]
+        lang = get_language(request)
         user_repo = UserRepo(db)
         word_repo = WordRepo(db)
         user_id = await user_repo.get_or_create(telegram_id)
-        words = await word_repo.get_all_words(user_id, 'de')
+        words = await word_repo.get_all_words(user_id, lang)
 
         def csv_field(s: str) -> str:
             s = (s or "").strip()
