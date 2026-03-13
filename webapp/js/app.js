@@ -582,6 +582,9 @@ async function loadSettings() {
       btn.classList.toggle('active', btn.dataset.lang === currentLang);
     });
 
+    const modeBtnWord = document.getElementById('mode-word');
+    if (modeBtnWord) modeBtnWord.textContent = currentLang.toUpperCase();
+
     const mode = s.practice_mode || 'word_to_translation';
     document.querySelectorAll('.practice-opt').forEach(btn => {
       btn.classList.toggle('active', btn.dataset.mode === mode);

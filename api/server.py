@@ -57,7 +57,11 @@ async def create_app(config: Config, db: aiosqlite.Connection, scheduler=None) -
 
     # serve index.html for root
     async def index(request: web.Request) -> web.Response:
-        return web.FileResponse(WEBAPP_DIR / "index.html")
+        response = web.FileResponse(WEBAPP_DIR / "index.html")
+        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+        return response
 
     async def static_handler(request: web.Request) -> web.Response:
         # serve static files with no-cache so browser always gets fresh version
