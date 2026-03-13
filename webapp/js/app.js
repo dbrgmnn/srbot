@@ -177,7 +177,7 @@ function initSwipe() {
         let swipeDir = null;
         if (Math.abs(deltaY) > Math.abs(deltaX) * 1.5 && deltaY < -40) swipeDir = 'up';
         else if (Math.abs(deltaX) > Math.abs(deltaY) * 1.2) {
-          if (deltaX < -60) swipeDir = 'left'; // Corrected threshold
+          if (deltaX < -60) swipeDir = 'left';
           else if (deltaX > 100) swipeDir = 'right';
         }
 
@@ -248,8 +248,6 @@ function renderWord() {
   exEl.style.display = word.example ? 'block' : 'none';
   
   card.classList.remove('flipped', 'swipe-left', 'swipe-right', 'swipe-up');
-  
-  // Pop up animation
   card.style.transition = 'none';
   card.style.transform = 'scale(0.8) rotateY(0deg)';
   card.style.opacity = '0';
@@ -302,13 +300,15 @@ async function switchLanguage(lang) {
   tg.HapticFeedback.impactOccurred('light');
   try {
     isProcessing = true;
-    currentLang = lang; // Change global lang for API headers
+    currentLang = lang; // Update globally for next API requests
     await POST('/api/settings', { language: lang });
     
+    // UI Visual Sync
     document.querySelectorAll('.lang-opt').forEach(btn => btn.classList.toggle('active', btn.dataset.lang === currentLang));
     if (document.getElementById('mode-word')) document.getElementById('mode-word').textContent = currentLang.toUpperCase();
     
-    await loadHome();
+    // FULL RELOAD of stats and specific settings for THIS language profile
+    await Promise.all([loadHome(), loadSettings()]);
     toast(`Switched to ${lang.toUpperCase()}`);
   } catch (e) { toast('Error switching language'); }
   finally { isProcessing = false; }
@@ -396,10 +396,14 @@ async function handleFileUpload(input) {
   const reader = new FileReader();
   reader.onload = async (e) => {
     const words = parseText(e.target.result);
+    input.value = ''; // Clean input
     if (!words.length) { toast('No words found'); return; }
     try {
       const res = await POST('/api/words', { words });
-      if (res.added) { toast(`Added ${res.added} words`); loadHome(); }
+      if (res.added) { 
+        toast(`Added ${res.added} words`); 
+        loadHome(); // REFRESH stats immediately
+      }
     } catch (e) { toast('Upload failed'); }
   };
   reader.readAsText(file);

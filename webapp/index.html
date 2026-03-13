@@ -142,11 +142,11 @@
       <div class="header-title header-title-spaced">Settings</div>
     </div>
 
-    <!-- Section: Learning -->
-    <div class="settings-section-title">Learning</div>
+    <!-- Section: Dictionary -->
+    <div class="settings-section-title">Dictionary</div>
     <div class="card settings-group">
       <div class="settings-row">
-        <div class="settings-label">Dictionary Language</div>
+        <div class="settings-label">Active Language</div>
         <div class="practice-switch">
           <button class="lang-opt active" data-lang="de" onclick="switchLanguage('de')">DE</button>
           <button class="lang-opt" data-lang="en" onclick="switchLanguage('en')">EN</button>
@@ -154,7 +154,7 @@
       </div>
 
       <div class="settings-row">
-        <div class="settings-label">Practice Mode</div>
+        <div class="settings-label">Mode</div>
         <div class="practice-switch">
           <button class="practice-opt active" data-mode="word_to_translation" id="mode-word" onclick="setPracticeMode('word_to_translation')">DE</button>
           <button class="practice-opt" data-mode="translation_to_word" onclick="setPracticeMode('translation_to_word')">RU</button>
@@ -162,7 +162,7 @@
       </div>
 
       <div class="settings-row">
-        <div class="settings-label">Daily Limit</div>
+        <div class="settings-label">New words limit</div>
         <div class="stepper">
           <button onclick="changeLimit(-5)">−</button>
           <span id="set-limit-val">20</span>
@@ -171,16 +171,16 @@
       </div>
     </div>
 
-    <!-- Section: Notifications -->
-    <div class="settings-section-title">Notifications</div>
+    <!-- Section: Reminders -->
+    <div class="settings-section-title">Reminders</div>
     <div class="card settings-group">
       <div class="settings-row">
-        <div class="settings-label">Interval (min)</div>
+        <div class="settings-label">Frequency (min)</div>
         <input type="number" id="set-notify-interval" min="15" max="480" step="15" onchange="saveSetting('notification_interval_minutes', this.value)">
       </div>
 
       <div class="settings-row">
-        <div class="settings-label">Quiet Hours</div>
+        <div class="settings-label">Quiet hours</div>
         <div class="time-wrap">
           <input type="time" id="set-quiet-start" onchange="saveSetting('quiet_start', this.value)">
           <span class="text-hint">to</span>
@@ -189,12 +189,12 @@
       </div>
     </div>
 
-    <!-- Section: Data -->
-    <div class="settings-section-title">Data</div>
+    <!-- Section: Maintenance -->
+    <div class="settings-section-title">Data Management</div>
     <div class="card settings-group">
-      <button class="btn-settings-action" onclick="shareWords()">Export Dictionary (CSV)</button>
+      <button class="btn-settings-action" onclick="shareWords()">Export current dictionary</button>
       <div class="divider"></div>
-      <button class="btn-settings-action btn-danger" onclick="clearAllWords()">Delete All Words</button>
+      <button class="btn-settings-action btn-danger" onclick="clearAllWords()">Delete all words</button>
     </div>
 
     <div class="info-footer">
