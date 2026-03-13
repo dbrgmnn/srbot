@@ -675,11 +675,12 @@ function setPracticeMode(mode) {
 }
 
 function clearAllWords() {
-  tg.showConfirm('Delete all words?', async (confirmed) => {
+  const langUpper = currentLang.toUpperCase();
+  tg.showConfirm(`Delete all ${langUpper} words?`, async (confirmed) => {
     if (!confirmed) return;
     try {
       await DEL('/api/words/all');
-      toast('All words deleted');
+      toast(`All ${langUpper} words deleted`);
       tg.HapticFeedback.notificationOccurred('success');
       loadHome();
     } catch (e) { toast('Failed to delete words'); }
