@@ -171,6 +171,13 @@ body {
   text-transform: uppercase;
   font-weight: 800;
   font-size: 10px;
+  letter-spacing: 0.05em;
+}
+.progress-fill {
+  height: 100%;
+  width: 0%;
+  background: #30d158;
+  transition: width 0.4s ease;
 }
 .practice-badge-new { background: rgba(48, 209, 88, 0.15); color: #30d158; }
 .practice-badge-review { background: rgba(10, 132, 255, 0.15); color: var(--accent); }
@@ -214,8 +221,8 @@ body {
   text-align: center;
 }
 .word-back { transform: rotateY(180deg); }
-.word-main { font-size: 38px; font-weight: 800; color: var(--text); text-shadow: 0 4px 12px rgba(0,0,0,0.2); }
-.word-trans { font-size: 34px; color: var(--accent); font-weight: 700; }
+.word-main { font-size: 30px; font-weight: 800; color: var(--text); text-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+.word-trans { font-size: 26px; color: var(--accent); font-weight: 700; }
 .word-example { font-size: 16px; color: var(--text); opacity: 0.5; margin-top: 24px; line-height: 1.5; }
 
 .word-card.swipe-left  { background-color: rgba(255, 69, 58, 0.15) !important; border-color: #ff453a !important; }
