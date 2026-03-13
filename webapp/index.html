@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>srbot</title>
-  <link rel="stylesheet" href="/static/css/style.css?v=2.2">
+  <link rel="stylesheet" href="/static/css/style.css?v=2.3">
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
@@ -52,24 +52,23 @@
           <span id="count-trees">0</span>
         </div>
         <div class="garden-bar"><div id="bar-trees" class="garden-fill trees"></div></div>
-      <div class="card garden-card">
-      ...
-        <div class="garden-item">
-          <div class="garden-info">
-            <span>💎 Mastered</span>
-            <span id="count-diamonds">0</span>
-          </div>
-          <div class="garden-bar"><div id="bar-diamonds" class="garden-fill diamonds"></div></div>
+      </div>
+
+      <div class="garden-item">
+        <div class="garden-info">
+          <span>💎 Mastered</span>
+          <span id="count-diamonds">0</span>
         </div>
+        <div class="garden-bar"><div id="bar-diamonds" class="garden-fill diamonds"></div></div>
       </div>
+    </div>
 
-      <div class="lang-selector-home">
-        <button class="lang-opt active" data-lang="de" onclick="switchLanguage('de')">DE</button>
-        <button class="lang-opt" data-lang="en" onclick="switchLanguage('en')">EN</button>
-      </div>
+    <div class="lang-selector-home">
+      <button class="lang-opt active" data-lang="de" onclick="switchLanguage('de')">DE</button>
+      <button class="lang-opt" data-lang="en" onclick="switchLanguage('en')">EN</button>
+    </div>
 
-      <button class="btn" onclick="startPractice()" id="btn-practice">Practice</button>
-
+    <button class="btn" onclick="startPractice()" id="btn-practice">Practice</button>
   </div>
 </div>
 
@@ -169,7 +168,7 @@
 <!-- ── Settings ── -->
 <div id="screen-settings" class="screen">
   <div class="p-gap">
-    <div class="header-title header-title-spaced">⚙️ Settings <small style="font-size: 10px; opacity: 0.5;">v2.2</small></div>
+    <div class="header-title header-title-spaced">⚙️ Settings <small style="font-size: 10px; opacity: 0.5;">v2.3</small></div>
     
     <div class="card">
       <div class="card-title">Practice</div>
@@ -267,6 +266,6 @@
 
 <div class="toast" id="toast"></div>
 
-<script src="/static/js/app.js?v=2.2"></script>
+<script src="/static/js/app.js?v=2.3"></script>
 </body>
 </html>
