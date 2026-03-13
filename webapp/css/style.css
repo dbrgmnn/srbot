@@ -176,11 +176,12 @@ body {
 .progress-fill {
   height: 100%;
   width: 0%;
-  background: #30d158;
+  background: var(--accent);
   transition: width 0.4s ease;
 }
 .practice-badge-new { background: rgba(48, 209, 88, 0.15); color: #30d158; }
 .practice-badge-review { background: rgba(10, 132, 255, 0.15); color: var(--accent); }
+.practice-badge-info { background: rgba(255, 255, 255, 0.08); color: var(--hint); }
 
 .word-card-container {
   flex: 1;
