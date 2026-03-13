@@ -1,6 +1,6 @@
-import { POST, state } from './api.js';
+import { POST, setLanguage } from './api.js';
 import { loadHome, showScreen, toast } from './ui.js';
-import { startPractice, playAudio, exitPractice } from './practice.js';
+import { startPractice, playAudio, exitPractice, initSwipe } from './practice.js';
 import { 
   submitWords, handleFileUpload, onSearchInput, 
   saveEdit, closeEdit, clearAllWords, shareWords 
@@ -31,7 +31,8 @@ window.loadSettings = loadSettings;
 async function init() {
   try {
     const data = await POST('/api/init');
-    state.currentLang = data.settings?.language || 'de';
+    const lang = data.settings?.language || 'de';
+    setLanguage(lang); // Sync API module
     await loadHome(data);
   } catch (e) {
     toast('Init failed');

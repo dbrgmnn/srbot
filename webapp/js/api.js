@@ -1,17 +1,20 @@
 const tg = window.Telegram.WebApp;
-const INIT_DATA = tg.initData;
 
 export let state = {
   currentLang: 'de',
   practiceMode: 'word_to_translation'
 };
 
+export function setLanguage(lang) {
+  state.currentLang = lang;
+}
+
 async function api(method, path, body) {
   const opts = {
     method,
     headers: { 
       'Content-Type': 'application/json', 
-      'X-Init-Data': INIT_DATA,
+      'X-Init-Data': tg.initData, // Get fresh initData every time
       'X-Language': state.currentLang
     },
   };
