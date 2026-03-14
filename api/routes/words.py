@@ -41,11 +41,12 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         if not word or not translation:
             return web.json_response({"error": "word and translation required"}, status=400)
         example = (body.get("example") or "").strip() or None
+        level = (body.get("level") or "").strip() or None
         user_repo = UserRepo(db)
         word_repo = WordRepo(db)
         user_id = await user_repo.get_or_create(telegram_id)
         try:
-            await word_repo.update_word_text(word_id, user_id, word, translation, example)
+            await word_repo.update_word_text(word_id, user_id, word, translation, example, level)
         except Exception:
             return web.json_response({"error": "duplicate"}, status=409)
         return web.json_response({"ok": True})
@@ -94,17 +95,16 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         output = io.StringIO()
         writer = csv.writer(output)
         
-        # Write only non-empty fields in a consistent way
+        # Add headers for consistency with load_csv_words
+        writer.writerow(['term', 'translation', 'example', 'level'])
+        
         for w in words:
-            row = [w['word'], w['translation']]
-            if w.get('example'):
-                row.append(w['example'])
-            if w.get('level'):
-                # Add empty example if level is present but example is not
-                if len(row) == 2:
-                    row.append("")
-                row.append(w['level'])
-            writer.writerow(row)
+            writer.writerow([
+                w['word'], 
+                w['translation'], 
+                w.get('example') or "", 
+                w.get('level') or ""
+            ])
 
         return web.Response(text=output.getvalue(), content_type="text/plain")
 

@@ -6,7 +6,33 @@ let searchTimer = null;
 let editWordId = null;
 
 export async function submitWords() {
-  const input = document.getElementById('add-input');
+  const wordEl = document.getElementById('add-word');
+  const transEl = document.getElementById('add-translation');
+  const exEl = document.getElementById('add-example');
+  const levelEl = document.getElementById('add-level');
+
+  const word = wordEl.value.trim();
+  const translation = transEl.value.trim();
+  const example = exEl.value.trim() || null;
+  const level = levelEl.value.trim() || null;
+
+  if (!word || !translation) {
+    toast('Word and Translation required');
+    return;
+  }
+
+  try {
+    const res = await POST('/api/words', { words: [{ word, translation, example, level }] });
+    if (res.added) {
+      toast(`Added: ${word}`);
+      wordEl.value = ''; transEl.value = ''; exEl.value = ''; levelEl.value = '';
+      loadHome();
+    }
+  } catch (e) { toast('Add failed'); }
+}
+
+export async function submitBulkWords() {
+  const input = document.getElementById('add-bulk-input');
   if (!input || !input.value.trim()) return;
   const words = parseText(input.value);
   if (!words.length) { toast('Nothing to parse'); return; }
@@ -49,7 +75,12 @@ function parseCSVLine(line) {
 function parseText(text) {
   return text.split('\n').filter(l => l.trim()).map(line => {
     const p = parseCSVLine(line);
-    return (p[0] && p[1]) ? { word: p[0], translation: p[1], example: p[2] || null } : null;
+    return (p[0] && p[1]) ? { 
+      word: p[0], 
+      translation: p[1], 
+      example: p[2] || null,
+      level: p[3] || null
+    } : null;
   }).filter(x => x);
 }
 
@@ -106,6 +137,7 @@ export function openEdit(w) {
   document.getElementById('edit-word').value = w.word;
   document.getElementById('edit-translation').value = w.translation;
   document.getElementById('edit-example').value = w.example || '';
+  document.getElementById('edit-level').value = w.level || '';
   document.getElementById('edit-overlay').classList.add('open');
   document.getElementById('edit-sheet').classList.add('open');
 }
@@ -119,8 +151,14 @@ export async function saveEdit() {
   const word = document.getElementById('edit-word').value.trim();
   const trans = document.getElementById('edit-translation').value.trim();
   const ex = document.getElementById('edit-example').value.trim();
+  const level = document.getElementById('edit-level').value.trim();
   try {
-    await PATCH(`/api/words/${editWordId}`, { word, translation: trans, example: ex });
+    await PATCH(`/api/words/${editWordId}`, { 
+      word, 
+      translation: trans, 
+      example: ex, 
+      level: level 
+    });
     closeEdit();
     toast('Saved');
     loadHome();

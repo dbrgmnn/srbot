@@ -230,6 +230,17 @@ body {
   padding: 32px;
   text-align: center;
 }
+.word-level-badge {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--hint);
+}
 .word-back { transform: rotateY(180deg); }
 .word-main { font-size: 30px; font-weight: 800; color: var(--text); text-shadow: 0 4px 12px rgba(0,0,0,0.2); }
 .word-trans { font-size: 26px; color: var(--accent); font-weight: 700; }
@@ -365,6 +376,35 @@ textarea {
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
 .info-footer { margin-top: 24px; text-align: center; color: var(--hint); font-size: 12px; }
+
+/* ── Add Form ── */
+.add-form {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 24px;
+}
+.add-form .edit-input {
+  margin-bottom: 8px;
+}
+.add-separator {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  color: var(--hint);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 16px;
+}
+.add-separator::before, .add-separator::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.add-separator span {
+  padding: 0 10px;
+}
 
 /* ── Edit sheet ── */
 .edit-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 300; }

@@ -70,9 +70,11 @@
       <div class="word-card-container">
         <div id="word-card" class="word-card">
           <div class="word-face word-front">
+            <div class="word-level-badge" id="word-front-level"></div>
             <div class="word-main" id="word-front"></div>
           </div>
           <div class="word-face word-back">
+            <div class="word-level-badge" id="word-back-level"></div>
             <div class="word-trans" id="word-translation"></div>
             <div class="word-example" id="word-ex"></div>
           </div>
@@ -89,10 +91,21 @@
   <!-- Screen: Add -->
   <div id="screen-add" class="screen">
     <div class="header">
-      <div class="header-title header-title-add">Add Words</div>
+      <div class="header-title header-title-add">Add Word</div>
     </div>
-    <textarea id="add-input" placeholder="word,translation,example"></textarea>
-    <button class="btn" onclick="submitWords()">Add</button>
+    <div class="add-form">
+      <input type="text" id="add-word" class="edit-input" placeholder="Word (e.g. Haus)">
+      <input type="text" id="add-translation" class="edit-input" placeholder="Translation (e.g. Дом)">
+      <input type="text" id="add-example" class="edit-input" placeholder="Example sentence">
+      <input type="text" id="add-level" class="edit-input" placeholder="Level (e.g. A1)">
+      <button class="btn" onclick="submitWords()">Add</button>
+    </div>
+    
+    <div class="add-separator"><span>or bulk add</span></div>
+    
+    <textarea id="add-bulk-input" placeholder="word,translation,example,level (one per line)"></textarea>
+    <button class="btn btn-secondary" onclick="submitBulkWords()">Add Bulk</button>
+
     <label class="file-input-label" for="file-input">Upload CSV</label>
     <input type="file" id="file-input" accept=".csv,.txt" onchange="handleFileUpload(this)">
   </div>
@@ -239,6 +252,7 @@
     <input type="text" id="edit-word" class="edit-input" placeholder="Word">
     <input type="text" id="edit-translation" class="edit-input" placeholder="Translation">
     <input type="text" id="edit-example" class="edit-input" placeholder="Example sentence">
+    <input type="text" id="edit-level" class="edit-input" placeholder="Level">
     <button id="edit-save-btn" class="btn" onclick="saveEdit()">Save</button>
     <button class="btn btn-secondary" onclick="closeEdit()">Cancel</button>
   </div>

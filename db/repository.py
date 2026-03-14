@@ -205,7 +205,7 @@ class WordRepo:
     async def get_session_words(self, user_id: int, language: str, new_limit: int) -> list[dict]:
         now = datetime.now(tz=timezone.utc).isoformat()
         cursor = await self.db.execute(
-            """SELECT id, word, translation, example, repetitions FROM words
+            """SELECT id, word, translation, example, level, repetitions FROM words
                 WHERE user_id = ? AND language = ? AND started_at IS NOT NULL AND next_review <= ?
                 ORDER BY next_review ASC""",
             (user_id, language, now),
@@ -215,7 +215,7 @@ class WordRepo:
         new_words = []
         if new_limit > 0:
             cursor = await self.db.execute(
-                """SELECT id, word, translation, example, repetitions FROM words
+                """SELECT id, word, translation, example, level, repetitions FROM words
                     WHERE user_id = ? AND language = ? AND started_at IS NULL
                     ORDER BY RANDOM()
                     LIMIT ?""",
@@ -278,11 +278,11 @@ class WordRepo:
             return res
         return defaults
 
-    async def update_word_text(self, word_id: int, user_id: int, word: str, translation: str, example: str | None):
+    async def update_word_text(self, word_id: int, user_id: int, word: str, translation: str, example: str | None, level: str | None):
         await self.db.execute(
-            """UPDATE words SET word = ?, translation = ?, example = ?
+            """UPDATE words SET word = ?, translation = ?, example = ?, level = ?
                WHERE id = ? AND user_id = ?""",
-            (word, translation, example or None, word_id, user_id),
+            (word, translation, example or None, level or None, word_id, user_id),
         )
         await self.db.commit()
 
@@ -306,7 +306,7 @@ class WordRepo:
     async def search_words(self, user_id: int, language: str, query: str) -> list[dict]:
         q = f"%{query}%"
         cursor = await self.db.execute(
-            """SELECT id, word, translation, example FROM words
+            """SELECT id, word, translation, example, level FROM words
                 WHERE user_id = ? AND language = ? AND (word LIKE ? OR translation LIKE ?)
                 ORDER BY word ASC LIMIT 100""",
             (user_id, language, q, q),

@@ -111,9 +111,17 @@ function renderWord() {
   const card = document.getElementById('word-card');
   card.querySelector('#word-front').textContent = (state.practiceMode === 'translation_to_word') ? word.translation : word.word;
   card.querySelector('#word-translation').textContent = (state.practiceMode === 'translation_to_word') ? word.word : word.translation;
+  
   const exEl = card.querySelector('#word-ex');
   exEl.textContent = word.example || '';
   exEl.style.display = word.example ? 'block' : 'none';
+
+  const fLvl = card.querySelector('#word-front-level');
+  const bLvl = card.querySelector('#word-back-level');
+  fLvl.textContent = word.level || '';
+  bLvl.textContent = word.level || '';
+  fLvl.style.display = word.level ? 'block' : 'none';
+  bLvl.style.display = word.level ? 'block' : 'none';
   
   card.classList.remove('flipped', 'swipe-left', 'swipe-right', 'swipe-up');
   card.style.transition = 'none';

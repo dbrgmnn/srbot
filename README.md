@@ -39,8 +39,11 @@ srbot/
 ## 🛠 User Guide
 
 ### Word Management
-- **Adding:** Use the "Add" tab. Enter words manually (`word,translation,example`) or upload a CSV file (comma-separated). Commas inside example sentences are preserved automatically.
-- **Search:** Use the "Search" tab. Search starts from 2 characters with instant highlighting. Tap a word to edit or delete it.
+- **Adding:** Use the "Add" tab. 
+  - **Single Entry:** Enter word, translation, example sentence, and level (e.g., A1, B2) into separate fields.
+  - **Bulk Entry:** Paste multiple lines in `word,translation,example,level` format.
+  - **CSV Upload:** Upload a CSV file with headers: `term,translation,example,level`.
+- **Search:** Use the "Search" tab. Search starts from 2 characters with instant highlighting. Tap a word to edit (including its level) or delete it.
 
 ### Practice Session
 - **Flip:** Tap the card to flip it and see the translation.
