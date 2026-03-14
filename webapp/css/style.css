@@ -67,6 +67,8 @@ body {
   min-height: 60px;
 }
 .header-title { font-size: 20px; font-weight: 700; color: var(--text); opacity: 0.9; }
+.text-accent { color: var(--accent); }
+#header-count { font-variant-numeric: tabular-nums; margin-left: 4px; }
 .header-title-add { margin-bottom: 24px; }
 .header-title-summary { margin-bottom: 20px; text-align: center; }
 .header-title-spaced { margin-bottom: 24px; display: block; }

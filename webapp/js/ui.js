@@ -48,9 +48,12 @@ export async function loadHome(data) {
     if (document.getElementById('stat-due')) document.getElementById('stat-due').textContent = due;
     if (document.getElementById('stat-new')) document.getElementById('stat-new').textContent = Math.max(0, limit - todayDone);
 
-    const user = tg.initDataUnsafe?.user;
-    const greetingEl = document.getElementById('user-greeting');
-    if (greetingEl) greetingEl.textContent = user?.first_name ? `Hello, ${user.first_name}!` : 'Hello!';
+    const lang = (settings.language || 'de').toUpperCase();
+    const total = stats.total || 0;
+    const langEl = document.getElementById('header-lang');
+    const countEl = document.getElementById('header-count');
+    if (langEl) langEl.textContent = lang;
+    if (countEl) countEl.textContent = total.toLocaleString();
 
     const btn = document.getElementById('btn-practice');
     if (btn) {
