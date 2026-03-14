@@ -5,10 +5,7 @@ async def init_db(db_path: str = "srbot.db") -> aiosqlite.Connection:
     # creates tables on first run and returns connection
     db = await aiosqlite.connect(db_path)
     db.row_factory = aiosqlite.Row
-
-    # Temporarily drop user_settings to recreate it with new schema
-    await db.execute("DROP TABLE IF EXISTS user_settings")
-
+    
     await db.execute("""
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY,
