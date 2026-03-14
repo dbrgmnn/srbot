@@ -366,6 +366,10 @@ textarea {
   display: flex; justify-content: space-between; align-items: center; padding: 12px 0;
   border-bottom: 1px solid rgba(255,255,255,0.06);
 }
+.word-row-content { flex: 1; cursor: pointer; }
+.word-row-text { font-weight: 600; font-size: 16px; margin-bottom: 2px; display: flex; align-items: center; gap: 8px; }
+.word-row-level { font-size: 10px; background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; color: var(--hint); font-weight: 700; text-transform: uppercase; }
+.word-row-trans { font-size: 14px; color: var(--hint); }
 .del-btn { background: none; border: none; color: #ff453a; font-size: 20px; padding-left: 12px; }
 
 .toast {

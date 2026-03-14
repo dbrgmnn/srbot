@@ -97,7 +97,10 @@ async function loadSearch(q) {
     el.innerHTML = data.words.map(w => `
       <div class="word-row" id="wr-${w.id}">
         <div class="word-row-content" data-word='${JSON.stringify(w).replace(/'/g, "&apos;")}'>
-          <div class="word-row-text">${highlight(w.word, q)}</div>
+          <div class="word-row-text">
+            ${highlight(w.word, q)}
+            ${w.level ? `<span class="word-row-level">${w.level}</span>` : ''}
+          </div>
           <div class="word-row-trans">${highlight(w.translation, q)}</div>
         </div>
         <button class="del-btn" data-id="${w.id}">✕</button>
