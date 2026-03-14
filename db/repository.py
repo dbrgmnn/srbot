@@ -1,7 +1,8 @@
 import csv
-from pathlib import Path
-import aiosqlite
 from datetime import datetime, timezone
+from pathlib import Path
+from zoneinfo import ZoneInfo
+import aiosqlite
 
 
 class UserRepo:
@@ -140,7 +141,7 @@ class UserRepo:
             "SELECT MIN(notification_interval_minutes) as min_interval FROM user_settings"
         )
         row = await cursor.fetchone()
-        return float(row['min_interval']) if (row and row['min_interval']) else 240.0
+        return float(row['min_interval']) if (row and row['min_interval']) else 30.0
 
     async def get_users_with_due_words(self) -> list[dict]:
         now_utc = datetime.now(tz=timezone.utc).isoformat()
@@ -244,7 +245,6 @@ class WordRepo:
         await self.db.commit()
 
     async def get_full_stats(self, user_id: int, language: str, tz_name: str = "UTC") -> dict:
-        from zoneinfo import ZoneInfo
         now_utc = datetime.now(tz=timezone.utc)
         tz = ZoneInfo(tz_name)
         local_now = now_utc.astimezone(tz)

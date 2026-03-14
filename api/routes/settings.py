@@ -5,6 +5,17 @@ from core.scheduler import reschedule
 from api.auth import get_language
 
 
+def _is_valid_time(value: str) -> bool:
+    try:
+        parts = value.split(":")
+        if len(parts) != 2:
+            return False
+        h, m = map(int, parts)
+        return 0 <= h <= 23 and 0 <= m <= 59
+    except (TypeError, ValueError):
+        return False
+
+
 def setup_routes_settings(app: web.Application, db: aiosqlite.Connection):
 
     async def get_settings(request: web.Request) -> web.Response:
@@ -63,16 +74,6 @@ def setup_routes_settings(app: web.Application, db: aiosqlite.Connection):
                     await reschedule(scheduler, db)
             else:
                 return web.json_response({"error": "interval_out_of_range", "msg": "Interval must be between 1 and 480"}, status=400)
-
-        def _is_valid_time(value: str) -> bool:
-            try:
-                parts = value.split(":")
-                if len(parts) != 2:
-                    return False
-                h, m = map(int, parts)
-                return 0 <= h <= 23 and 0 <= m <= 59
-            except (TypeError, ValueError):
-                return False
 
         if "practice_mode" in body:
             mode = body.get("practice_mode")
