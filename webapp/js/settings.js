@@ -40,9 +40,8 @@ export async function loadSettings() {
     
     // Fill timezone select if it's empty
     const tzSelect = document.getElementById('set-timezone');
-    if (tzSelect && tzSelect.options.length <= 3) {
+    if (tzSelect && tzSelect.options.length === 0) {
       const allTz = Intl.supportedValuesOf('timeZone');
-      tzSelect.innerHTML = '';
       allTz.forEach(tz => {
         const opt = document.createElement('option');
         opt.value = tz;
@@ -66,7 +65,8 @@ export async function loadSettings() {
 export async function saveSetting(key, val) {
   try { 
     await POST('/api/settings', { [key]: val }); 
-    if (key === 'practice_mode' || key === 'daily_limit') loadHome();
+    toast('Settings saved');
+    if (key === 'practice_mode' || key === 'daily_limit' || key === 'timezone') loadHome();
   } catch(e) { toast('Save failed'); }
 }
 
