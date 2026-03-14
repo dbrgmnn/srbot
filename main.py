@@ -1,5 +1,4 @@
 import asyncio
-import csv
 import logging
 import signal
 from pathlib import Path
@@ -53,11 +52,11 @@ async def main():
 
     bot = Bot(token=config.bot_token)
 
-    scheduler = await setup_scheduler(bot, config, db)
+    scheduler = await setup_scheduler(bot, db)
     scheduler.start()
 
     api_runner = await start_api_server(config, db, scheduler)
-    logger.info(f"Scheduler started — timezone: {config.timezone}")
+    logger.info("Scheduler started")
 
     await notify_all(bot, config.allowed_users[0], "🟢 srbot started")
     logger.info("Starting...")

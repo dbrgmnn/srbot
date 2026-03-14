@@ -7,19 +7,17 @@ def setup_routes_init(app: web.Application, db: aiosqlite.Connection):
 
     async def init_user(request: web.Request) -> web.Response:
         telegram_id = request["telegram_id"]
-        config = request.app["config"]
-        
+
         user_repo = UserRepo(db)
         word_repo = WordRepo(db)
         user_id = await user_repo.get_or_create(telegram_id)
         settings = await user_repo.get_user_settings(telegram_id)
-        stats = await word_repo.get_full_stats(user_id, 'de', tz_name=config.timezone)
-        
+        stats = await word_repo.get_full_stats(user_id, 'de', tz_name=settings.get("timezone", "UTC"))
+
         return web.json_response({
             "user_id": user_id,
             "settings": settings,
             "stats": stats,
-            "timezone": config.timezone,
+            "timezone": settings.get("timezone", "UTC"),
         })
-
     app.router.add_post("/api/init", init_user)

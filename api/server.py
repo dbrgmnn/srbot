@@ -44,7 +44,6 @@ async def create_app(config: Config, db: aiosqlite.Connection, scheduler=None) -
         return await handler(request)
 
     app = web.Application(middlewares=[cors_middleware, auth_middleware])
-    app["config"] = config
     app["db"] = db
     app["scheduler"] = scheduler
 

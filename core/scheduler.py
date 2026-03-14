@@ -7,7 +7,6 @@ from aiogram import Bot
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 
-from config import Config
 from db.repository import UserRepo
 
 logger = logging.getLogger(__name__)
@@ -51,7 +50,7 @@ def is_quiet_time(now: datetime, quiet_start: str, quiet_end: str, tz: ZoneInfo)
 
 # ── Main job ──────────────────────────────────────────────────────────────
 
-async def check_and_send_notifications(bot: Bot, config: Config, db: aiosqlite.Connection):
+async def check_and_send_notifications(bot: Bot, db: aiosqlite.Connection):
     now = datetime.now(tz=timezone.utc)
     user_repo = UserRepo(db)
     # We use UTC here as threshold, timezone logic is handled per candidate
@@ -109,14 +108,14 @@ async def reschedule(scheduler: AsyncIOScheduler, db: aiosqlite.Connection):
 
 # ── Setup ─────────────────────────────────────────────────────────────────
 
-async def setup_scheduler(bot: Bot, config: Config, db: aiosqlite.Connection) -> AsyncIOScheduler:
+async def setup_scheduler(bot: Bot, db: aiosqlite.Connection) -> AsyncIOScheduler:
     scheduler = AsyncIOScheduler(timezone=timezone.utc)
     user_repo = UserRepo(db)
     interval = await user_repo.get_min_notification_interval()
     scheduler.add_job(
         check_and_send_notifications,
         trigger=IntervalTrigger(minutes=interval),
-        kwargs={"bot": bot, "config": config, "db": db},
+        kwargs={"bot": bot, "db": db},
         id=JOB_ID,
         replace_existing=True,
     )
