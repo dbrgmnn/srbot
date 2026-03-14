@@ -58,7 +58,14 @@ async def main():
     api_runner = await start_api_server(config, db, scheduler)
     logger.info("Scheduler started")
 
-    await notify_all(bot, config.allowed_users[0], "🟢 srbot started")
+    # Notify only the first user from allowed_users (the owner)
+    owner_id = sorted(list(config.allowed_users))[0] if config.allowed_users else None
+    if owner_id:
+        try:
+            await bot.send_message(chat_id=owner_id, text="🟢 srbot started")
+        except Exception as e:
+            logger.warning(f"Failed to notify owner {owner_id} about start: {e}")
+
     logger.info("Starting...")
 
     stop_event = asyncio.Event()
@@ -73,13 +80,17 @@ async def main():
     try:
         await stop_event.wait()
     finally:
-        await notify_all(bot, config.allowed_users[0], "🔴 srbot stopped")
+        if owner_id:
+            try:
+                await bot.send_message(chat_id=owner_id, text="🔴 srbot stopped")
+            except Exception as e:
+                logger.warning(f"Failed to notify owner {owner_id} about stop: {e}")
+
         scheduler.shutdown()
         await api_runner.cleanup()
         await db.close()
         await bot.session.close()
         logger.info("Stopped.")
-
 
 if __name__ == "__main__":
     asyncio.run(main())
