@@ -97,15 +97,18 @@
       <input type="text" id="add-word" class="edit-input" placeholder="Word (e.g. Haus)">
       <input type="text" id="add-translation" class="edit-input" placeholder="Translation (e.g. Дом)">
       <input type="text" id="add-example" class="edit-input" placeholder="Example sentence">
-      <input type="text" id="add-level" class="edit-input" placeholder="Level (e.g. A1)">
+      <select id="add-level" class="edit-input" style="width: 100%; margin-bottom: 10px; -webkit-appearance: none; appearance: none;">
+        <option value="">Level (Optional)</option>
+        <option value="A1">A1</option>
+        <option value="A2">A2</option>
+        <option value="B1">B1</option>
+        <option value="B2">B2</option>
+        <option value="C1">C1</option>
+        <option value="C2">C2</option>
+      </select>
       <button class="btn" onclick="submitWords()">Add</button>
     </div>
     
-    <div class="add-separator"><span>or bulk add</span></div>
-    
-    <textarea id="add-bulk-input" placeholder="word,translation,example,level (one per line)"></textarea>
-    <button class="btn btn-secondary" onclick="submitBulkWords()">Add Bulk</button>
-
     <label class="file-input-label" for="file-input">Upload CSV</label>
     <input type="file" id="file-input" accept=".csv,.txt" onchange="handleFileUpload(this)">
   </div>
@@ -252,7 +255,15 @@
     <input type="text" id="edit-word" class="edit-input" placeholder="Word">
     <input type="text" id="edit-translation" class="edit-input" placeholder="Translation">
     <input type="text" id="edit-example" class="edit-input" placeholder="Example sentence">
-    <input type="text" id="edit-level" class="edit-input" placeholder="Level">
+    <select id="edit-level" class="edit-input" style="width: 100%; margin-bottom: 10px; -webkit-appearance: none; appearance: none;">
+        <option value="">Level (Optional)</option>
+        <option value="A1">A1</option>
+        <option value="A2">A2</option>
+        <option value="B1">B1</option>
+        <option value="B2">B2</option>
+        <option value="C1">C1</option>
+        <option value="C2">C2</option>
+    </select>
     <button id="edit-save-btn" class="btn" onclick="saveEdit()">Save</button>
     <button class="btn btn-secondary" onclick="closeEdit()">Cancel</button>
   </div>

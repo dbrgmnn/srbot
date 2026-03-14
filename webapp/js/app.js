@@ -6,7 +6,7 @@ import { POST, setLanguage } from './api.js';
 import { loadHome, showScreen, toast } from './ui.js';
 import { startPractice, playAudio, exitPractice } from './practice.js';
 import { 
-  submitWords, submitBulkWords, handleFileUpload, onSearchInput, 
+  submitWords, handleFileUpload, onSearchInput, 
   saveEdit, closeEdit, clearAllWords, shareWords 
 } from './dictionary.js';
 import {
@@ -26,7 +26,6 @@ window.startPractice = startPractice;
 window.playAudio = playAudio;
 window.exitPractice = exitPractice;
 window.submitWords = submitWords;
-window.submitBulkWords = submitBulkWords;
 window.handleFileUpload = handleFileUpload;
 window.onSearchInput = onSearchInput;
 window.saveEdit = saveEdit;

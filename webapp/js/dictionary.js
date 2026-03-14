@@ -31,17 +31,6 @@ export async function submitWords() {
   } catch (e) { toast('Add failed'); }
 }
 
-export async function submitBulkWords() {
-  const input = document.getElementById('add-bulk-input');
-  if (!input || !input.value.trim()) return;
-  const words = parseText(input.value);
-  if (!words.length) { toast('Nothing to parse'); return; }
-  try {
-    const res = await POST('/api/words', { words });
-    if (res.added) { toast(`Added ${res.added} words`); input.value = ''; loadHome(); }
-  } catch (e) { toast('Add failed'); }
-}
-
 export async function handleFileUpload(input) {
   const file = input.files[0];
   if (!file) return;

@@ -40,8 +40,7 @@ srbot/
 
 ### Word Management
 - **Adding:** Use the "Add" tab. 
-  - **Single Entry:** Enter word, translation, example sentence, and level (e.g., A1, B2) into separate fields.
-  - **Bulk Entry:** Paste multiple lines in `word,translation,example,level` format.
+  - **Single Entry:** Enter word, translation, example sentence, and select a level (Optional, A1-C2) into the fields.
   - **CSV Upload:** Upload a CSV file with headers: `term,translation,example,level`.
 - **Search:** Use the "Search" tab. Search starts from 2 characters with instant highlighting. Tap a word to edit (including its level) or delete it.
 
