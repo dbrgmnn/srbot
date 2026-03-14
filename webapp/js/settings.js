@@ -37,6 +37,21 @@ export async function changeInterval(delta) {
 export async function loadSettings() {
   try {
     const s = await GET('/api/settings');
+    
+    // Fill timezone select if it's empty
+    const tzSelect = document.getElementById('set-timezone');
+    if (tzSelect && tzSelect.options.length <= 3) {
+      const allTz = Intl.supportedValuesOf('timeZone');
+      tzSelect.innerHTML = '';
+      allTz.forEach(tz => {
+        const opt = document.createElement('option');
+        opt.value = tz;
+        opt.textContent = tz;
+        tzSelect.appendChild(opt);
+      });
+    }
+    if (tzSelect) tzSelect.value = s.timezone || 'Europe/Berlin';
+
     if (document.getElementById('set-quiet-start')) document.getElementById('set-quiet-start').value = s.quiet_start || '23:00';
     if (document.getElementById('set-quiet-end')) document.getElementById('set-quiet-end').value = s.quiet_end || '08:00';
     if (document.getElementById('set-limit-val')) document.getElementById('set-limit-val').textContent = s.daily_limit || 20;

@@ -56,9 +56,10 @@ class UserRepo:
             "quiet_start": "23:00",
             "quiet_end": "08:00",
             "daily_limit": 20,
-            "notification_interval_minutes": 240,
+            "notification_interval_minutes": 30,
             "language": language,
             "practice_mode": "word_to_translation",
+            "timezone": "Europe/Berlin",
         }
 
         if row:
@@ -69,6 +70,15 @@ class UserRepo:
             return data
 
         return defaults
+
+    async def update_timezone(self, telegram_id: int, tz_name: str, language: str = 'de'):
+        await self.db.execute(
+            """INSERT INTO user_settings (user_id, language, timezone)
+               VALUES ((SELECT id FROM users WHERE telegram_id = ?), ?, ?)
+               ON CONFLICT(user_id, language) DO UPDATE SET timezone = ?""",
+            (telegram_id, language, tz_name, tz_name),
+        )
+        await self.db.commit()
 
     async def update_daily_limit(self, telegram_id: int, limit: int, language: str = 'de'):
         await self.db.execute(
@@ -143,7 +153,7 @@ class UserRepo:
         cursor = await self.db.execute(
             """SELECT u.id as user_id, u.telegram_id,
                         w.language,
-                        s.quiet_start, s.quiet_end, s.daily_limit, s.notification_interval_minutes, s.last_notified_at,
+                        s.quiet_start, s.quiet_end, s.daily_limit, s.notification_interval_minutes, s.last_notified_at, s.timezone,
                         SUM(CASE WHEN w.started_at IS NOT NULL AND w.next_review <= ? THEN 1 ELSE 0 END) as due_count,
                         SUM(CASE WHEN w.started_at IS NULL THEN 1 ELSE 0 END) as new_count,
                         SUM(CASE WHEN w.started_at >= ? THEN 1 ELSE 0 END) as today_done

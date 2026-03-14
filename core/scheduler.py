@@ -53,13 +53,14 @@ def is_quiet_time(now: datetime, quiet_start: str, quiet_end: str, tz: ZoneInfo)
 
 async def check_and_send_notifications(bot: Bot, config: Config, db: aiosqlite.Connection):
     now = datetime.now(tz=timezone.utc)
-    tz = ZoneInfo(config.timezone)
     user_repo = UserRepo(db)
-    candidates = await user_repo.get_users_with_due_words(tz_name=config.timezone)
+    # We use UTC here as threshold, timezone logic is handled per candidate
+    candidates = await user_repo.get_users_with_due_words(tz_name="UTC")
     logger.info(f"[scheduler] tick — candidates: {len(candidates)}")
 
     for row in candidates:
         telegram_id = row["telegram_id"]
+        user_tz = ZoneInfo(row.get("timezone", "Europe/Berlin"))
         
         due_count = row["due_count"]
         # Calculate how many new words are actually left for today's goal
@@ -72,7 +73,7 @@ async def check_and_send_notifications(bot: Bot, config: Config, db: aiosqlite.C
 
         logger.info(f"[scheduler] checking {telegram_id} — due={due_count} new_left={new_to_show} interval={row['notification_interval_minutes']}")
 
-        if is_quiet_time(now, row["quiet_start"], row["quiet_end"], tz):
+        if is_quiet_time(now, row["quiet_start"], row["quiet_end"], user_tz):
             logger.info(f"[scheduler] {telegram_id} — quiet time, skip")
             continue
 
@@ -109,7 +110,7 @@ async def reschedule(scheduler: AsyncIOScheduler, db: aiosqlite.Connection):
 # ── Setup ─────────────────────────────────────────────────────────────────
 
 async def setup_scheduler(bot: Bot, config: Config, db: aiosqlite.Connection) -> AsyncIOScheduler:
-    scheduler = AsyncIOScheduler(timezone=ZoneInfo(config.timezone))
+    scheduler = AsyncIOScheduler(timezone=timezone.utc)
     user_repo = UserRepo(db)
     interval = await user_repo.get_min_notification_interval()
     scheduler.add_job(

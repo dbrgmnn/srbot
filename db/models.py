@@ -5,7 +5,10 @@ async def init_db(db_path: str = "srbot.db") -> aiosqlite.Connection:
     # creates tables on first run and returns connection
     db = await aiosqlite.connect(db_path)
     db.row_factory = aiosqlite.Row
-    
+
+    # Temporarily drop user_settings to recreate it with new schema
+    await db.execute("DROP TABLE IF EXISTS user_settings")
+
     await db.execute("""
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY,
@@ -21,9 +24,10 @@ async def init_db(db_path: str = "srbot.db") -> aiosqlite.Connection:
             quiet_start TEXT DEFAULT '23:00',
             quiet_end TEXT DEFAULT '08:00',
             daily_limit INTEGER DEFAULT 20,
-            notification_interval_minutes INTEGER DEFAULT 240,
+            notification_interval_minutes INTEGER DEFAULT 30,
             last_notified_at TEXT DEFAULT NULL,
             practice_mode TEXT DEFAULT 'word_to_translation',
+            timezone TEXT DEFAULT 'Europe/Berlin',
             PRIMARY KEY (user_id, language),
             FOREIGN KEY (user_id) REFERENCES users(id)
         )

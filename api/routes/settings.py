@@ -14,12 +14,10 @@ def setup_routes_settings(app: web.Application, db: aiosqlite.Connection):
         word_repo = WordRepo(db)
         user_id = await user_repo.get_or_create(telegram_id)
         settings = await user_repo.get_user_settings(telegram_id, lang)
-        stats = await word_repo.get_full_stats(user_id, lang)
-        config = request.app["config"]
+        stats = await word_repo.get_full_stats(user_id, lang, tz_name=settings.get("timezone", "UTC"))
         return web.json_response({
             **settings,
             "total_words": stats["total"],
-            "timezone": config.timezone,
         })
 
     async def update_settings(request: web.Request) -> web.Response:
@@ -27,6 +25,9 @@ def setup_routes_settings(app: web.Application, db: aiosqlite.Connection):
         lang = get_language(request)
         body = await request.json()
         user_repo = UserRepo(db)
+
+        if "timezone" in body:
+            await user_repo.update_timezone(telegram_id, body["timezone"], lang)
 
         if "language" in body:
             new_lang = body["language"]

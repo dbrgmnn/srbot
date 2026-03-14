@@ -59,7 +59,7 @@ async def main():
     api_runner = await start_api_server(config, db, scheduler)
     logger.info(f"Scheduler started — timezone: {config.timezone}")
 
-    await notify_all(bot, config.allowed_users, "🟢 srbot started")
+    await notify_all(bot, config.allowed_users[0], "🟢 srbot started")
     logger.info("Starting...")
 
     stop_event = asyncio.Event()
@@ -74,7 +74,7 @@ async def main():
     try:
         await stop_event.wait()
     finally:
-        await notify_all(bot, config.allowed_users, "🔴 srbot stopped")
+        await notify_all(bot, config.allowed_users[0], "🔴 srbot stopped")
         scheduler.shutdown()
         await api_runner.cleanup()
         await db.close()

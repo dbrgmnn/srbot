@@ -10,7 +10,6 @@ class Config:
     bot_token: str
     allowed_users: set[int]
     db_path: str
-    timezone: str
     api_port: int
 
 
@@ -26,6 +25,5 @@ def load_config() -> Config:
         bot_token=token,
         allowed_users=allowed_users,
         db_path=os.getenv("DB_PATH", "srbot.db"),
-        timezone=os.getenv("TIMEZONE", "Europe/Berlin"),
         api_port=int(os.getenv("API_PORT", "8080")),
     )
