@@ -7,7 +7,7 @@ from aiogram import Bot
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 
-from db.repository import UserRepo
+from db.repository import UserRepo, WordRepo
 
 logger = logging.getLogger(__name__)
 
@@ -53,24 +53,27 @@ def is_quiet_time(now: datetime, quiet_start: str, quiet_end: str, tz: ZoneInfo)
 async def check_and_send_notifications(bot: Bot, db: aiosqlite.Connection):
     now = datetime.now(tz=timezone.utc)
     user_repo = UserRepo(db)
-    # We use UTC here as threshold, timezone logic is handled per candidate
-    candidates = await user_repo.get_users_with_due_words(tz_name="UTC")
+    word_repo = WordRepo(db)
+    candidates = await user_repo.get_users_with_due_words()
     logger.info(f"[scheduler] tick — candidates: {len(candidates)}")
 
     for row in candidates:
         telegram_id = row["telegram_id"]
-        user_tz = ZoneInfo(row.get("timezone", "Europe/Berlin"))
-        
-        due_count = row["due_count"]
-        # Calculate how many new words are actually left for today's goal
-        daily_remaining = max(0, row["daily_limit"] - row["today_done"])
-        new_to_show = min(row["new_count"], daily_remaining)
+        user_tz_name = row.get("timezone", "Europe/Berlin")
+        user_tz = ZoneInfo(user_tz_name)
+
+        # Get real stats for this user to know exactly how many new words are left for TODAY
+        stats = await word_repo.get_full_stats(row["user_id"], row["language"], tz_name=user_tz_name)
+
+        due_count = stats["due"]
+        daily_remaining = max(0, row["daily_limit"] - stats["today_new"])
+        new_to_show = min(stats["new"], daily_remaining)
 
         # If nothing to review and goal is already reached, skip this user
         if due_count == 0 and new_to_show == 0:
             continue
 
-        logger.info(f"[scheduler] checking {telegram_id} — due={due_count} new_left={new_to_show} interval={row['notification_interval_minutes']}")
+        logger.info(f"[scheduler] checking {telegram_id} ({row['language']}) — due={due_count} new_left={new_to_show}")
 
         if is_quiet_time(now, row["quiet_start"], row["quiet_end"], user_tz):
             logger.info(f"[scheduler] {telegram_id} — quiet time, skip")
