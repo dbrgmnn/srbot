@@ -25,13 +25,22 @@ export async function changeLimit(delta) {
   await saveSetting('daily_limit', val);
 }
 
+export async function changeInterval(delta) {
+  const el = document.getElementById('set-notify-interval');
+  let val = parseInt(el.textContent) + delta;
+  if (val < 10) val = 10; if (val > 480) val = 480;
+  el.textContent = val;
+  tg.HapticFeedback.impactOccurred('light');
+  await saveSetting('notification_interval_minutes', val);
+}
+
 export async function loadSettings() {
   try {
     const s = await GET('/api/settings');
     if (document.getElementById('set-quiet-start')) document.getElementById('set-quiet-start').value = s.quiet_start || '23:00';
     if (document.getElementById('set-quiet-end')) document.getElementById('set-quiet-end').value = s.quiet_end || '08:00';
     if (document.getElementById('set-limit-val')) document.getElementById('set-limit-val').textContent = s.daily_limit || 20;
-    if (document.getElementById('set-notify-interval')) document.getElementById('set-notify-interval').value = s.notification_interval_minutes || 240;
+    if (document.getElementById('set-notify-interval')) document.getElementById('set-notify-interval').textContent = s.notification_interval_minutes || 240;
     document.querySelectorAll('.practice-opt').forEach(b => b.classList.toggle('active', b.dataset.mode === s.practice_mode));
     document.querySelectorAll('.lang-opt').forEach(b => b.classList.toggle('active', b.dataset.lang === state.currentLang));
     if (document.getElementById('mode-word')) document.getElementById('mode-word').textContent = state.currentLang.toUpperCase();

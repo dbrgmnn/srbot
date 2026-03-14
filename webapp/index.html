@@ -174,7 +174,11 @@
     <div class="card settings-group">
       <div class="settings-row">
         <div class="settings-label">Frequency (min)</div>
-        <input type="number" id="set-notify-interval" min="15" max="480" step="15" onchange="saveSetting('notification_interval_minutes', this.value)">
+        <div class="stepper">
+          <button onclick="changeInterval(-10)">−</button>
+          <span id="set-notify-interval">240</span>
+          <button onclick="changeInterval(10)">+</button>
+        </div>
       </div>
 
       <div class="settings-row">

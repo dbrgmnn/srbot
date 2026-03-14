@@ -10,7 +10,7 @@ import {
   saveEdit, closeEdit, clearAllWords, shareWords 
 } from './dictionary.js';
 import {
-  switchLanguage, changeLimit, loadSettings,
+  switchLanguage, changeLimit, changeInterval, loadSettings,
   saveSetting, setPracticeMode, preloadDefaultWords
 } from './settings.js';
 
@@ -21,6 +21,7 @@ window.showScreen = (name) => {
 };
 window.switchLanguage = switchLanguage;
 window.changeLimit = changeLimit;
+window.changeInterval = changeInterval;
 window.startPractice = startPractice;
 window.playAudio = playAudio;
 window.exitPractice = exitPractice;
