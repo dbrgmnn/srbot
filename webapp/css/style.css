@@ -319,6 +319,29 @@ input[type="number"] { width: 60px; text-align: center; }
 .btn-settings-action.btn-danger { color: #ff453a; }
 .divider { height: 1px; background: rgba(255,255,255,0.06); width: 100%; }
 
+.settings-actions-row {
+  display: flex;
+  gap: 8px;
+  padding: 12px 0;
+}
+.btn-action {
+  flex: 1;
+  background: var(--bg);
+  border: none;
+  border-radius: 10px;
+  padding: 10px 4px;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.btn-action-danger { color: #ff453a; }
+.btn-action:active { opacity: 0.7; }
+
 /* ── Other ── */
 textarea {
   width: 100%; min-height: 140px; background: var(--bg2); border: none; border-radius: var(--radius);

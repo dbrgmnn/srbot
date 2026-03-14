@@ -200,11 +200,11 @@
     <!-- Section: Maintenance -->
     <div class="settings-section-title">Data Management</div>
     <div class="card settings-group">
-      <button class="btn-settings-action" onclick="preloadDefaultWords()">Load default pack</button>
-      <div class="divider"></div>
-      <button class="btn-settings-action" onclick="shareWords()">Export dictionary</button>
-      <div class="divider"></div>
-      <button class="btn-settings-action btn-danger" onclick="clearAllWords()">Delete all words</button>
+      <div class="settings-actions-row">
+        <button class="btn-action" onclick="preloadDefaultWords()">📥 Import</button>
+        <button class="btn-action" onclick="shareWords()">📤 Export</button>
+        <button class="btn-action btn-action-danger" onclick="clearAllWords()">🗑️ Clear</button>
+      </div>
     </div>
 
     <div class="info-footer">

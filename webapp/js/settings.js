@@ -77,15 +77,18 @@ export function setPracticeMode(mode) {
 
 export async function preloadDefaultWords() {
   tg.HapticFeedback.impactOccurred('medium');
-  if (!confirm(`Import default ${state.currentLang.toUpperCase()} pack? Duplicates will be skipped.`)) return;
+  const langName = state.currentLang.toUpperCase();
   
-  try {
-    const res = await POST('/api/words/preload');
-    toast(`Added ${res.added} new words`);
-    await loadSettings();
-    await loadHome();
-  } catch (e) {
-    toast('Preload failed');
-    console.error(e);
-  }
+  tg.showConfirm(`Import default ${langName} pack? Duplicates will be skipped.`, async (ok) => {
+    if (!ok) return;
+    try {
+      const res = await POST('/api/words/preload');
+      toast(`Added ${res.added} new words`);
+      await loadSettings();
+      await loadHome();
+    } catch (e) {
+      toast('Preload failed');
+      console.error(e);
+    }
+  });
 }
