@@ -67,8 +67,19 @@ body {
   min-height: 60px;
 }
 .header-title { font-size: 20px; font-weight: 700; color: var(--text); opacity: 0.9; }
-.text-accent { color: var(--accent); }
-#header-count { font-variant-numeric: tabular-nums; margin-left: 4px; }
+.header-centered { justify-content: center; }
+.header-capsule {
+  background: var(--accent);
+  color: var(--btn-text);
+  padding: 6px 18px;
+  border-radius: 20px;
+  font-weight: 800;
+  font-size: 15px;
+  display: flex;
+  gap: 8px;
+  box-shadow: 0 4px 15px rgba(10, 132, 255, 0.25);
+  letter-spacing: 0.03em;
+}
 .header-title-add { margin-bottom: 24px; }
 .header-title-summary { margin-bottom: 20px; text-align: center; }
 .header-title-spaced { margin-bottom: 24px; display: block; }

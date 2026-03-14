@@ -52,7 +52,7 @@ srbot/
 *Tactile haptic feedback is triggered on every successful swipe.*
 
 ### Statistics
-- **Home Header:** Displays the current active dictionary and the total number of words (e.g., "Dictionary DE 555").
+- **Home Header:** Displays the current active dictionary and the total number of words in an accent capsule (e.g., "DE 555").
 - **New:** Words you haven't started learning yet.
 - **Learning:** In progress (interval < 5 days).
 - **Known:** Stable knowledge (interval 5-30 days).
