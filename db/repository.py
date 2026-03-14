@@ -144,8 +144,8 @@ class UserRepo:
             """SELECT u.id as user_id, u.telegram_id,
                         w.language,
                         s.quiet_start, s.quiet_end, s.daily_limit, s.notification_interval_minutes, s.last_notified_at,
-                        SUM(CASE WHEN w.repetitions > 0 AND w.next_review <= ? THEN 1 ELSE 0 END) as due_count,
-                        SUM(CASE WHEN w.repetitions = 0 THEN 1 ELSE 0 END) as new_count,
+                        SUM(CASE WHEN w.started_at IS NOT NULL AND w.next_review <= ? THEN 1 ELSE 0 END) as due_count,
+                        SUM(CASE WHEN w.started_at IS NULL THEN 1 ELSE 0 END) as new_count,
                         SUM(CASE WHEN w.started_at >= ? THEN 1 ELSE 0 END) as today_done
                 FROM users u
                 JOIN words w ON w.user_id = u.id
@@ -201,7 +201,7 @@ class WordRepo:
         now = datetime.now(tz=timezone.utc).isoformat()
         cursor = await self.db.execute(
             """SELECT id, word, translation, example, repetitions FROM words
-                WHERE user_id = ? AND language = ? AND repetitions > 0 AND next_review <= ?
+                WHERE user_id = ? AND language = ? AND started_at IS NOT NULL AND next_review <= ?
                 ORDER BY next_review ASC""",
             (user_id, language, now),
         )
@@ -211,7 +211,7 @@ class WordRepo:
         if new_limit > 0:
             cursor = await self.db.execute(
                 """SELECT id, word, translation, example, repetitions FROM words
-                    WHERE user_id = ? AND language = ? AND repetitions = 0
+                    WHERE user_id = ? AND language = ? AND started_at IS NULL
                     ORDER BY RANDOM()
                     LIMIT ?""",
                 (user_id, language, new_limit),
@@ -250,12 +250,12 @@ class WordRepo:
         cursor = await self.db.execute(
             """SELECT
                     COUNT(*) as total,
-                    SUM(CASE WHEN repetitions > 0 THEN 1 ELSE 0 END) as learned,
-                    SUM(CASE WHEN repetitions = 0 THEN 1 ELSE 0 END) as new,
-                    SUM(CASE WHEN repetitions > 0 AND next_review <= ? THEN 1 ELSE 0 END) as due,
+                    SUM(CASE WHEN started_at IS NOT NULL THEN 1 ELSE 0 END) as learned,
+                    SUM(CASE WHEN started_at IS NULL THEN 1 ELSE 0 END) as new,
+                    SUM(CASE WHEN started_at IS NOT NULL AND next_review <= ? THEN 1 ELSE 0 END) as due,
                     COUNT(CASE WHEN started_at >= ? THEN 1 END) as today_new,
-                    COUNT(CASE WHEN repetitions = 0 THEN 1 END) as st_new,
-                    COUNT(CASE WHEN repetitions > 0 AND interval < 5 THEN 1 END) as st_learning,
+                    COUNT(CASE WHEN started_at IS NULL THEN 1 END) as st_new,
+                    COUNT(CASE WHEN started_at IS NOT NULL AND interval < 5 THEN 1 END) as st_learning,
                     COUNT(CASE WHEN interval >= 5 AND interval < 30 THEN 1 END) as st_known,
                     COUNT(CASE WHEN interval >= 30 THEN 1 END) as st_mastered
                 FROM words WHERE user_id = ? AND language = ?""",
