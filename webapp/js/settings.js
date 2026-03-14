@@ -59,7 +59,6 @@ export async function loadSettings() {
     document.querySelectorAll('.practice-opt').forEach(b => b.classList.toggle('active', b.dataset.mode === s.practice_mode));
     document.querySelectorAll('.lang-opt').forEach(b => b.classList.toggle('active', b.dataset.lang === state.currentLang));
     if (document.getElementById('mode-word')) document.getElementById('mode-word').textContent = state.currentLang.toUpperCase();
-    if (document.getElementById('info-tz')) document.getElementById('info-tz').textContent = `Timezone: ${s.timezone || 'UTC'}`;
     if (document.getElementById('info-words')) document.getElementById('info-words').textContent = `Dictionary: ${s.total_words || 0} words`;
   } catch(e) { console.error(e); }
 }
