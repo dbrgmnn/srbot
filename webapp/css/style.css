@@ -78,31 +78,31 @@ body {
   padding: 16px;
   margin-bottom: var(--gap);
 }
-.stats-item { margin-bottom: 14px; }
-.stats-item:last-child { margin-bottom: 0; }
-.stats-info {
+.stats-summary-row {
   display: flex;
-  justify-content: space-between;
-  font-size: 14px;
-  font-weight: 500;
-  margin-bottom: 8px;
-  color: var(--text);
+  justify-content: space-around;
+  text-align: center;
+  padding: 8px 0;
 }
-.progress-track {
-  height: 6px;
-  background: var(--bg);
-  border-radius: 3px;
-  overflow: hidden;
+.stats-summary-item {
+  flex: 1;
 }
-.progress-bar {
-  height: 100%;
-  width: 0%;
-  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+.stats-num {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 4px;
 }
-.st-new { background: linear-gradient(90deg, #8e8e93, #b0b0b5); }
-.st-learning { background: linear-gradient(90deg, #ff9500, #ffb347); }
-.st-known { background: linear-gradient(90deg, #34c759, #4cd964); }
-.st-mastered { background: linear-gradient(90deg, #5856d6, #7d7aff); }
+.stats-label-sub {
+  font-size: 10px;
+  color: var(--hint);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+.text-new { color: #8e8e93; }
+.text-learning { color: #ff9500; }
+.text-known { color: #34c759; }
+.text-mastered { color: #5856d6; }
 
 .card-summary { text-align: center; padding: 40px 20px; }
 .summary-icon { font-size: 64px; margin-bottom: 20px; display: block; }

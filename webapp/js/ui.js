@@ -67,8 +67,6 @@ export async function loadHome(data) {
 
     Object.entries(cats).forEach(([cat, key]) => {
       const val = stats[key] || 0;
-      const bar = document.getElementById(`bar-${cat}`);
-      if (bar) bar.style.width = `${Math.round((val / (stats.total || 1)) * 100)}%`;
       const count = document.getElementById(`count-${cat}`);
       if (count) count.textContent = val;
     });
