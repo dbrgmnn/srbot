@@ -8,7 +8,7 @@ load_dotenv()
 @dataclass
 class Config:
     bot_token: str
-    allowed_users: set[int]
+    allowed_users: list[int]
     db_path: str
     api_port: int
 
@@ -19,7 +19,11 @@ def load_config() -> Config:
         raise ValueError("BOT_TOKEN environment variable is not set")
 
     allowed_raw = os.getenv("ALLOWED_USERS", "")
-    allowed_users = {int(uid.strip()) for uid in allowed_raw.split(",") if uid.strip().isdigit()}
+    # Keep the order from .env
+    allowed_users = [int(uid.strip()) for uid in allowed_raw.split(",") if uid.strip().isdigit()]
+
+    if not allowed_users:
+        raise ValueError("ALLOWED_USERS is not set or empty")
 
     return Config(
         bot_token=token,

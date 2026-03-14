@@ -59,7 +59,7 @@ async def main():
     logger.info("Scheduler started")
 
     # Notify only the first user from allowed_users (the owner)
-    owner_id = sorted(list(config.allowed_users))[0] if config.allowed_users else None
+    owner_id = config.allowed_users[0] if config.allowed_users else None
     if owner_id:
         try:
             await bot.send_message(chat_id=owner_id, text="🟢 srbot started")
