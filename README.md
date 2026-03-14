@@ -49,7 +49,7 @@ srbot/
 - **Swipe Up:** Mark as **"Hard"** (Recalled with difficulty).
 *Tactile haptic feedback is triggered on every successful swipe.*
 
-### Knowledge Garden (Statistics)
+### Statistics
 - **New:** Words you haven't started learning yet.
 - **Learning:** In progress (interval < 5 days).
 - **Known:** Stable knowledge (interval 5-30 days).

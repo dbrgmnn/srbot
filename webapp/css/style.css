@@ -78,9 +78,9 @@ body {
   padding: 16px;
   margin-bottom: var(--gap);
 }
-.garden-item { margin-bottom: 14px; }
-.garden-item:last-child { margin-bottom: 0; }
-.garden-info {
+.stats-item { margin-bottom: 14px; }
+.stats-item:last-child { margin-bottom: 0; }
+.stats-info {
   display: flex;
   justify-content: space-between;
   font-size: 14px;
@@ -88,21 +88,21 @@ body {
   margin-bottom: 8px;
   color: var(--text);
 }
-.garden-bar {
+.progress-track {
   height: 6px;
   background: var(--bg);
   border-radius: 3px;
   overflow: hidden;
 }
-.garden-fill {
+.progress-bar {
   height: 100%;
   width: 0%;
   transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
-.seeds { background: linear-gradient(90deg, #8e8e93, #b0b0b5); }
-.sprouts { background: linear-gradient(90deg, #ff9500, #ffb347); }
-.trees { background: linear-gradient(90deg, #34c759, #4cd964); }
-.diamonds { background: linear-gradient(90deg, #5856d6, #7d7aff); }
+.st-new { background: linear-gradient(90deg, #8e8e93, #b0b0b5); }
+.st-learning { background: linear-gradient(90deg, #ff9500, #ffb347); }
+.st-known { background: linear-gradient(90deg, #34c759, #4cd964); }
+.st-mastered { background: linear-gradient(90deg, #5856d6, #7d7aff); }
 
 .card-summary { text-align: center; padding: 40px 20px; }
 .summary-icon { font-size: 64px; margin-bottom: 20px; display: block; }

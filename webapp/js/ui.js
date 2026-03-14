@@ -58,8 +58,15 @@ export async function loadHome(data) {
       btn.disabled = sessionTotal === 0;
     }
 
-    ['seeds', 'sprouts', 'trees', 'diamonds'].forEach(cat => {
-      const val = stats[`g_${cat}`] || 0;
+    const cats = {
+      'new': 'st_new',
+      'learning': 'st_learning',
+      'known': 'st_known',
+      'mastered': 'st_mastered'
+    };
+
+    Object.entries(cats).forEach(([cat, key]) => {
+      const val = stats[key] || 0;
       const bar = document.getElementById(`bar-${cat}`);
       if (bar) bar.style.width = `${Math.round((val / (stats.total || 1)) * 100)}%`;
       const count = document.getElementById(`count-${cat}`);

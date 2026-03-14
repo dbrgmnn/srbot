@@ -254,10 +254,10 @@ class WordRepo:
                     SUM(CASE WHEN repetitions = 0 THEN 1 ELSE 0 END) as new,
                     SUM(CASE WHEN repetitions > 0 AND next_review <= ? THEN 1 ELSE 0 END) as due,
                     COUNT(CASE WHEN started_at >= ? THEN 1 END) as today_new,
-                    COUNT(CASE WHEN repetitions = 0 THEN 1 END) as g_seeds,
-                    COUNT(CASE WHEN repetitions > 0 AND interval < 5 THEN 1 END) as g_sprouts,
-                    COUNT(CASE WHEN interval >= 5 AND interval < 30 THEN 1 END) as g_trees,
-                    COUNT(CASE WHEN interval >= 30 THEN 1 END) as g_diamonds
+                    COUNT(CASE WHEN repetitions = 0 THEN 1 END) as st_new,
+                    COUNT(CASE WHEN repetitions > 0 AND interval < 5 THEN 1 END) as st_learning,
+                    COUNT(CASE WHEN interval >= 5 AND interval < 30 THEN 1 END) as st_known,
+                    COUNT(CASE WHEN interval >= 30 THEN 1 END) as st_mastered
                 FROM words WHERE user_id = ? AND language = ?""",
             (now_utc.isoformat(), today_start_utc, user_id, language),
         )
@@ -265,7 +265,7 @@ class WordRepo:
         
         defaults = {
             "total": 0, "learned": 0, "new": 0, "due": 0, "today_new": 0,
-            "g_seeds": 0, "g_sprouts": 0, "g_trees": 0, "g_diamonds": 0
+            "st_new": 0, "st_learning": 0, "st_known": 0, "st_mastered": 0
         }
         if row:
             res = dict(row)
