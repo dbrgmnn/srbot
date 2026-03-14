@@ -51,3 +51,18 @@ export function setPracticeMode(mode) {
   document.querySelectorAll('.practice-opt').forEach(btn => btn.classList.toggle('active', btn.dataset.mode === mode));
   saveSetting('practice_mode', mode);
 }
+
+export async function preloadDefaultWords() {
+  tg.HapticFeedback.impactOccurred('medium');
+  if (!confirm(`Import default ${state.currentLang.toUpperCase()} pack? Duplicates will be skipped.`)) return;
+  
+  try {
+    const res = await POST('/api/words/preload');
+    toast(`Added ${res.added} new words`);
+    await loadSettings();
+    await loadHome();
+  } catch (e) {
+    toast('Preload failed');
+    console.error(e);
+  }
+}

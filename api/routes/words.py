@@ -1,3 +1,4 @@
+from pathlib import Path
 from aiohttp import web
 import aiosqlite
 from db.repository import UserRepo, WordRepo
@@ -107,8 +108,31 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
 
         return web.Response(text=output.getvalue(), content_type="text/plain")
 
+    async def preload_words(request: web.Request) -> web.Response:
+        telegram_id = request["telegram_id"]
+        lang = get_language(request)
+        user_repo = UserRepo(db)
+        word_repo = WordRepo(db)
+        user_id = await user_repo.get_or_create(telegram_id)
+        
+        # Determine CSV path based on current language
+        # Assuming data folder is in project root: srbot/data/
+        # This file is in: srbot/api/routes/words.py
+        csv_path = Path(__file__).parent.parent.parent / "data" / f"words_{lang}.csv"
+        
+        if not csv_path.exists():
+            return web.json_response({"error": f"No words file for {lang}"}, status=404)
+        
+        words = word_repo.load_csv_words(csv_path)
+        if not words:
+            return web.json_response({"error": "Words file is empty or invalid"}, status=400)
+            
+        added_count = await word_repo.add_words_batch(user_id, lang, words)
+        return web.json_response({"added": added_count})
+
     app.router.add_get("/api/words", list_words)
     app.router.add_post("/api/words", add_words)
+    app.router.add_post("/api/words/preload", preload_words)
     app.router.add_get("/api/words/search", search_words)
     app.router.add_patch("/api/words/{word_id}", patch_word)
     app.router.add_delete("/api/words/all", delete_all_words)

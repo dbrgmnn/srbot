@@ -1,7 +1,5 @@
 .env
 *.db
-backups/
-backups.sh
 venv/
 .venv/
 __pycache__/

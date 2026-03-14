@@ -1,3 +1,5 @@
+import csv
+from pathlib import Path
 import aiosqlite
 from datetime import datetime, timezone
 
@@ -159,6 +161,26 @@ class UserRepo:
 class WordRepo:
     def __init__(self, db: aiosqlite.Connection):
         self.db = db
+
+    @staticmethod
+    def load_csv_words(path: Path) -> list[dict]:
+        words = []
+        if not path.exists():
+            return []
+        with open(path, encoding="utf-8", newline="") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                word = (row.get("term") or "").strip()
+                translation = (row.get("translation") or "").strip()
+                if not word or not translation:
+                    continue
+                words.append({
+                    "word": word,
+                    "translation": translation,
+                    "example": (row.get("example") or "").strip() or None,
+                    "level": (row.get("level") or "").strip() or None,
+                })
+        return words
 
     async def add_words_batch(self, user_id: int, language: str, words: list[dict]) -> int:
         now = datetime.now(tz=timezone.utc).isoformat()

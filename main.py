@@ -27,34 +27,18 @@ async def notify_all(bot: Bot, allowed_users: set, text: str):
             logger.warning(f"Failed to notify {uid}: {e}")
 
 
-def load_csv_words(path: Path) -> list[dict]:
-    words = []
-    with open(path, encoding="utf-8", newline="") as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            word = (row.get("term") or "").strip()
-            translation = (row.get("translation") or "").strip()
-            if not word or not translation:
-                continue
-            words.append({
-                "word": word,
-                "translation": translation,
-                "example": (row.get("example") or "").strip() or None,
-                "level": (row.get("level") or "").strip() or None,
-            })
-    return words
-
-
 async def preload_words(db, config) -> None:
-    csv_path = Path(__file__).parent / "data" / "words.csv"
-    if not csv_path.exists():
-        logger.info("No data/words.csv found, skipping preload")
-        return
-    words = load_csv_words(csv_path)
-    if not words:
-        return
-    user_repo = UserRepo(db)
+    csv_path = Path(__file__).parent / "data" / "words_de.csv"
     word_repo = WordRepo(db)
+    words = word_repo.load_csv_words(csv_path)
+    if not words:
+        if csv_path.exists():
+            logger.info("data/words_de.csv is empty, skipping preload")
+        else:
+            logger.info("No data/words_de.csv found, skipping preload")
+        return
+    
+    user_repo = UserRepo(db)
     for telegram_id in config.allowed_users:
         user_id = await user_repo.get_or_create(telegram_id)
         added = await word_repo.add_words_batch(user_id, "de", words)

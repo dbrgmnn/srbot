@@ -9,9 +9,9 @@ import {
   submitWords, handleFileUpload, onSearchInput, 
   saveEdit, closeEdit, clearAllWords, shareWords 
 } from './dictionary.js';
-import { 
-  switchLanguage, changeLimit, loadSettings, 
-  saveSetting, setPracticeMode 
+import {
+  switchLanguage, changeLimit, loadSettings,
+  saveSetting, setPracticeMode, preloadDefaultWords
 } from './settings.js';
 
 // Expose functions to window for HTML onclick attributes
@@ -34,7 +34,7 @@ window.setPracticeMode = setPracticeMode;
 window.clearAllWords = clearAllWords;
 window.shareWords = shareWords;
 window.loadSettings = loadSettings;
-
+window.preloadDefaultWords = preloadDefaultWords;
 async function init() {
   try {
     const data = await POST('/api/init');
