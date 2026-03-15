@@ -1,4 +1,5 @@
 import csv
+import secrets
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -142,6 +143,29 @@ class UserRepo:
         )
         row = await cursor.fetchone()
         return float(row['min_interval']) if (row and row['min_interval']) else 30.0
+
+    async def get_api_token(self, telegram_id: int) -> str | None:
+        cursor = await self.db.execute(
+            "SELECT api_token FROM users WHERE telegram_id = ?", (telegram_id,)
+        )
+        row = await cursor.fetchone()
+        return row['api_token'] if row else None
+
+    async def generate_api_token(self, telegram_id: int) -> str:
+        new_token = secrets.token_hex(16)
+        await self.db.execute(
+            "UPDATE users SET api_token = ? WHERE telegram_id = ?",
+            (new_token, telegram_id)
+        )
+        await self.db.commit()
+        return new_token
+
+    async def get_user_id_by_token(self, token: str) -> int | None:
+        cursor = await self.db.execute(
+            "SELECT id FROM users WHERE api_token = ?", (token,)
+        )
+        row = await cursor.fetchone()
+        return row['id'] if row else None
 
     async def get_users_with_due_words(self) -> list[dict]:
         now_utc = datetime.now(tz=timezone.utc).isoformat()

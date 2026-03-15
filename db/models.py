@@ -10,9 +10,16 @@ async def init_db(db_path: str = "srbot.db") -> aiosqlite.Connection:
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY,
             telegram_id INTEGER UNIQUE NOT NULL,
+            api_token TEXT UNIQUE,
             created_at TEXT DEFAULT (date('now'))
         )
     """)
+    
+    # Try adding api_token column if it doesn't exist (for existing databases)
+    try:
+        await db.execute("ALTER TABLE users ADD COLUMN api_token TEXT UNIQUE")
+    except aiosqlite.OperationalError:
+        pass  # Column already exists
 
     await db.execute("""
         CREATE TABLE IF NOT EXISTS user_settings (

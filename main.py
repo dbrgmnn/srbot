@@ -3,7 +3,7 @@ import logging
 import signal
 from pathlib import Path
 
-from aiogram import Bot
+from aiogram import Bot, Dispatcher, types, filters
 
 from config import load_config
 from db.models import init_db
@@ -51,12 +51,46 @@ async def main():
     await preload_words(db, config)
 
     bot = Bot(token=config.bot_token)
+    dp = Dispatcher()
+
+    user_repo = UserRepo(db)
+
+    @dp.message(filters.Command("token"))
+    async def cmd_token(message: types.Message):
+        if message.from_user.id not in config.allowed_users:
+            return
+        token = await user_repo.get_api_token(message.from_user.id)
+        if not token:
+            token = await user_repo.generate_api_token(message.from_user.id)
+        
+        msg = await message.answer(f"`{token}`", parse_mode="MarkdownV2")
+        await asyncio.sleep(30)
+        try:
+            await msg.delete()
+            await message.delete() # Also delete the command message for cleanliness
+        except Exception:
+            pass
+
+    @dp.message(filters.Command("token_new"))
+    async def cmd_token_new(message: types.Message):
+        if message.from_user.id not in config.allowed_users:
+            return
+        token = await user_repo.generate_api_token(message.from_user.id)
+        msg = await message.answer(f"`{token}`", parse_mode="MarkdownV2")
+        await asyncio.sleep(30)
+        try:
+            await msg.delete()
+            await message.delete()
+        except Exception:
+            pass
 
     scheduler = await setup_scheduler(bot, db)
     scheduler.start()
 
     api_runner = await start_api_server(config, db, scheduler)
-    logger.info("Scheduler started")
+    logger.info("Scheduler and API Server started")
+
+    polling_task = asyncio.create_task(dp.start_polling(bot))
 
     # Notify only the first user from allowed_users (the owner)
     owner_id = config.allowed_users[0] if config.allowed_users else None
@@ -86,6 +120,7 @@ async def main():
             except Exception as e:
                 logger.warning(f"Failed to notify owner {owner_id} about stop: {e}")
 
+        polling_task.cancel()
         scheduler.shutdown()
         await api_runner.cleanup()
         await db.close()
