@@ -3,12 +3,13 @@ import logging
 import signal
 from pathlib import Path
 
-from aiogram import Bot, Dispatcher, types, filters
+from aiogram import Bot, Dispatcher
 
 from config import load_config
 from db.models import init_db
 from db.repository import UserRepo, WordRepo
 from core.scheduler import setup_scheduler
+from core.bot_handlers import setup_handlers
 from api.server import start_api_server
 
 logging.basicConfig(
@@ -54,35 +55,7 @@ async def main():
     dp = Dispatcher()
 
     user_repo = UserRepo(db)
-
-    @dp.message(filters.Command("token"))
-    async def cmd_token(message: types.Message):
-        if message.from_user.id not in config.allowed_users:
-            return
-        token = await user_repo.get_api_token(message.from_user.id)
-        if not token:
-            token = await user_repo.generate_api_token(message.from_user.id)
-        
-        msg = await message.answer(f"`{token}`", parse_mode="MarkdownV2")
-        await asyncio.sleep(30)
-        try:
-            await msg.delete()
-            await message.delete() # Also delete the command message for cleanliness
-        except Exception:
-            pass
-
-    @dp.message(filters.Command("token_new"))
-    async def cmd_token_new(message: types.Message):
-        if message.from_user.id not in config.allowed_users:
-            return
-        token = await user_repo.generate_api_token(message.from_user.id)
-        msg = await message.answer(f"`{token}`", parse_mode="MarkdownV2")
-        await asyncio.sleep(30)
-        try:
-            await msg.delete()
-            await message.delete()
-        except Exception:
-            pass
+    setup_handlers(dp, user_repo, config)
 
     scheduler = await setup_scheduler(bot, db)
     scheduler.start()
@@ -91,17 +64,6 @@ async def main():
     logger.info("Scheduler and API Server started")
 
     polling_task = asyncio.create_task(dp.start_polling(bot))
-
-    # Notify only the first user from allowed_users (the owner)
-    owner_id = config.allowed_users[0] if config.allowed_users else None
-    if owner_id:
-        try:
-            start_msg = await bot.send_message(chat_id=owner_id, text="🟢 srbot started")
-            asyncio.create_task(asyncio.sleep(30)).add_done_callback(
-                lambda _: asyncio.create_task(start_msg.delete()) if not bot.session.closed else None
-            )
-        except Exception as e:
-            logger.warning(f"Failed to notify owner {owner_id} about start: {e}")
 
     logger.info("Starting...")
 

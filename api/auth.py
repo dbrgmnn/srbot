@@ -54,3 +54,15 @@ def get_user_id(init_data: str, bot_token: str) -> int | None:
         return int(user["id"])
     except (json.JSONDecodeError, KeyError, TypeError):
         return None
+
+async def verify_bearer_token(request, db) -> int | None:
+    # Extracts Bearer token and returns user_id if valid
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return None
+    
+    token = auth_header.split(" ")[1]
+    from db.repository import UserRepo
+    user_repo = UserRepo(db)
+    user_id = await user_repo.get_user_id_by_token(token)
+    return user_id
