@@ -107,9 +107,18 @@ export function initSwipe() {
   if (!card) return;
   card.style.cursor = 'grab';
 
-  card.ontouchstart = (e) => handleStart(e.touches[0].clientX, e.touches[0].clientY);
-  card.ontouchmove = (e) => handleMove(e.touches[0].clientX, e.touches[0].clientY);
-  card.ontouchend = (e) => handleEnd(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+  card.ontouchstart = (e) => {
+    if (e.cancelable) e.preventDefault();
+    handleStart(e.touches[0].clientX, e.touches[0].clientY);
+  };
+  card.ontouchmove = (e) => {
+    if (e.cancelable) e.preventDefault();
+    handleMove(e.touches[0].clientX, e.touches[0].clientY);
+  };
+  card.ontouchend = (e) => {
+    if (e.cancelable) e.preventDefault();
+    handleEnd(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+  };
 
   card.onmousedown = (e) => {
     isMouseDown = true;
