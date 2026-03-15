@@ -1,6 +1,7 @@
 from aiohttp import web
 import aiosqlite
 from db.repository import UserRepo, WordRepo
+from api.auth import get_language
 
 
 def setup_routes_init(app: web.Application, db: aiosqlite.Connection):
@@ -22,4 +23,4 @@ def setup_routes_init(app: web.Application, db: aiosqlite.Connection):
             "stats": stats,
             "timezone": settings.get("timezone", "UTC"),
         })
-    app.router.add_post("/api/init", init_user)
+    app.router.add_get("/api/init", init_user)
