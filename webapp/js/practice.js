@@ -25,73 +25,105 @@ export async function startPractice() {
   } catch(e) { console.error(e); }
 }
 
+let isMouseDown = false;
+
+function handleStart(x, y) {
+  if (isGrading) return;
+  touchStartX = x;
+  touchStartY = y;
+  touchStartTime = Date.now();
+  isSwiping = false;
+  const card = document.getElementById('word-card');
+  if (card) {
+    card.classList.add('swiping');
+    card.style.cursor = 'grabbing';
+  }
+}
+
+function handleMove(x, y) {
+  if (isGrading) return;
+  const deltaX = x - touchStartX;
+  const deltaY = y - touchStartY;
+  if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) isSwiping = true;
+
+  if (isSwiping) {
+    const card = document.getElementById('word-card');
+    if (!card) return;
+    if (rafId) cancelAnimationFrame(rafId);
+    rafId = requestAnimationFrame(() => {
+      const isFlipped = card.classList.contains('flipped');
+      const baseRot = isFlipped ? 180 : 0;
+      let swipeDir = null;
+      if (Math.abs(deltaY) > Math.abs(deltaX) * 1.5 && deltaY < -40) swipeDir = 'up';
+      else if (Math.abs(deltaX) > Math.abs(deltaY) * 1.2) {
+        if (deltaX < -60) swipeDir = 'left';
+        else if (deltaX > 100) swipeDir = 'right';
+      }
+      card.style.transform = `translate(${deltaX}px, ${deltaY}px) rotateY(${baseRot}deg) rotateZ(${deltaX * 0.1}deg)`;
+      card.classList.toggle('swipe-left', swipeDir === 'left');
+      card.classList.toggle('swipe-right', swipeDir === 'right');
+      card.classList.toggle('swipe-up', swipeDir === 'up');
+      if (swipeDir && card.dataset.lastDir !== swipeDir) tg.HapticFeedback.impactOccurred('light');
+      card.dataset.lastDir = swipeDir || '';
+    });
+  }
+}
+
+function handleEnd(x, y) {
+  if (isGrading) return;
+  if (rafId) cancelAnimationFrame(rafId);
+  const card = document.getElementById('word-card');
+  if (!card) return;
+  card.classList.remove('swiping');
+  card.style.cursor = 'grab';
+  const deltaTime = Date.now() - touchStartTime;
+  const deltaX = x - touchStartX;
+  const deltaY = y - touchStartY;
+  const velocity = Math.abs(deltaX) / (deltaTime || 1);
+
+  if (!isSwiping) {
+    card.classList.toggle('flipped');
+    tg.HapticFeedback.impactOccurred('light');
+    const rot = card.classList.contains('flipped') ? 180 : 0;
+    card.style.transform = `rotateY(${rot}deg)`;
+  } else {
+    const isFlick = velocity > 0.5;
+    if ((deltaX < -60 || (deltaX < -30 && isFlick)) && Math.abs(deltaX) > Math.abs(deltaY) * 1.1) grade(1);
+    else if ((deltaX > 100 || (deltaX > 30 && isFlick)) && Math.abs(deltaX) > Math.abs(deltaY) * 1.1) grade(5);
+    else if ((deltaY < -80 || (deltaY < -30 && isFlick)) && Math.abs(deltaY) > Math.abs(deltaX) * 1.3) grade(3);
+    else {
+      card.classList.remove('swipe-left', 'swipe-right', 'swipe-up');
+      const rot = card.classList.contains('flipped') ? 180 : 0;
+      card.style.transform = `rotateY(${rot}deg)`;
+    }
+  }
+}
+
 export function initSwipe() {
   const card = document.getElementById('word-card');
   if (!card) return;
+  card.style.cursor = 'grab';
 
-  card.ontouchstart = (e) => {
-    if (isGrading) return;
-    touchStartX = e.touches[0].clientX;
-    touchStartY = e.touches[0].clientY;
-    touchStartTime = Date.now();
-    isSwiping = false;
-    card.classList.add('swiping');
-  };
+  card.ontouchstart = (e) => handleStart(e.touches[0].clientX, e.touches[0].clientY);
+  card.ontouchmove = (e) => handleMove(e.touches[0].clientX, e.touches[0].clientY);
+  card.ontouchend = (e) => handleEnd(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
 
-  card.ontouchmove = (e) => {
-    if (isGrading) return;
-    const deltaX = e.touches[0].clientX - touchStartX;
-    const deltaY = e.touches[0].clientY - touchStartY;
-    if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) isSwiping = true;
-
-    if (isSwiping) {
-      if (rafId) cancelAnimationFrame(rafId);
-      rafId = requestAnimationFrame(() => {
-        const isFlipped = card.classList.contains('flipped');
-        const baseRot = isFlipped ? 180 : 0;
-        let swipeDir = null;
-        if (Math.abs(deltaY) > Math.abs(deltaX) * 1.5 && deltaY < -40) swipeDir = 'up';
-        else if (Math.abs(deltaX) > Math.abs(deltaY) * 1.2) {
-          if (deltaX < -60) swipeDir = 'left';
-          else if (deltaX > 100) swipeDir = 'right';
-        }
-        card.style.transform = `translate(${deltaX}px, ${deltaY}px) rotateY(${baseRot}deg) rotateZ(${deltaX * 0.1}deg)`;
-        card.classList.toggle('swipe-left', swipeDir === 'left');
-        card.classList.toggle('swipe-right', swipeDir === 'right');
-        card.classList.toggle('swipe-up', swipeDir === 'up');
-        if (swipeDir && card.dataset.lastDir !== swipeDir) tg.HapticFeedback.impactOccurred('light');
-        card.dataset.lastDir = swipeDir || '';
-      });
-    }
-  };
-
-  card.ontouchend = (e) => {
-    if (isGrading) return;
-    if (rafId) cancelAnimationFrame(rafId);
-    card.classList.remove('swiping');
-    const deltaTime = Date.now() - touchStartTime;
-    const deltaX = e.changedTouches[0].clientX - touchStartX;
-    const deltaY = e.changedTouches[0].clientY - touchStartY;
-    const velocity = Math.abs(deltaX) / (deltaTime || 1);
-
-    if (!isSwiping) {
-      card.classList.toggle('flipped');
-      tg.HapticFeedback.impactOccurred('light');
-      const rot = card.classList.contains('flipped') ? 180 : 0;
-      card.style.transform = `rotateY(${rot}deg)`;
-    } else {
-      const isFlick = velocity > 0.5;
-      if ((deltaX < -60 || (deltaX < -30 && isFlick)) && Math.abs(deltaX) > Math.abs(deltaY) * 1.1) grade(1);
-      else if ((deltaX > 100 || (deltaX > 30 && isFlick)) && Math.abs(deltaX) > Math.abs(deltaY) * 1.1) grade(5);
-      else if ((deltaY < -80 || (deltaY < -30 && isFlick)) && Math.abs(deltaY) > Math.abs(deltaX) * 1.3) grade(3);
-      else {
-        card.classList.remove('swipe-left', 'swipe-right', 'swipe-up');
-        const rot = card.classList.contains('flipped') ? 180 : 0;
-        card.style.transform = `rotateY(${rot}deg)`;
-      }
-    }
+  card.onmousedown = (e) => {
+    isMouseDown = true;
+    handleStart(e.clientX, e.clientY);
   };
 }
+
+// Global mouse listeners to handle swipes outside the card
+window.onmousemove = (e) => {
+  if (!isMouseDown) return;
+  handleMove(e.clientX, e.clientY);
+};
+window.onmouseup = (e) => {
+  if (!isMouseDown) return;
+  isMouseDown = false;
+  handleEnd(e.clientX, e.clientY);
+};
 
 function renderWord() {
   if (sessionIdx >= sessionWords.length) { showSummary(); return; }

@@ -216,8 +216,8 @@ body {
 }
 .word-card {
   width: 100%;
-  max-width: 340px;
-  height: 440px;
+  max-width: 320px;
+  height: 380px;
   background: var(--bg2);
   border-radius: 32px;
   position: relative;
