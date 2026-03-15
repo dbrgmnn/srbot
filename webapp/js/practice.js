@@ -59,7 +59,10 @@ function handleMove(x, y) {
         if (deltaX < -60) swipeDir = 'left';
         else if (deltaX > 100) swipeDir = 'right';
       }
-      card.style.transform = `translate(${deltaX}px, ${deltaY}px) rotateY(${baseRot}deg) rotateZ(${deltaX * 0.1}deg)`;
+      
+      // If flipped, deltaX rotation should be inverted to look natural
+      const tilt = isFlipped ? -deltaX * 0.1 : deltaX * 0.1;
+      card.style.transform = `translate(${deltaX}px, ${deltaY}px) rotateY(${baseRot}deg) rotateZ(${tilt}deg)`;
       card.classList.toggle('swipe-left', swipeDir === 'left');
       card.classList.toggle('swipe-right', swipeDir === 'right');
       card.classList.toggle('swipe-up', swipeDir === 'up');
