@@ -11,6 +11,8 @@ from api.routes.practice import setup_routes_practice
 from api.routes.stats import setup_routes_stats
 from api.routes.settings import setup_routes_settings
 
+logger = logging.getLogger(__name__)
+
 WEBAPP_DIR = Path(__file__).parent.parent / "webapp"
 
 
