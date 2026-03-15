@@ -8,12 +8,12 @@ from api.auth import get_language
 def setup_routes_practice(app: web.Application, db: aiosqlite.Connection):
 
     async def get_session(request: web.Request) -> web.Response:
+        user_id = request["user_id"]
         telegram_id = request["telegram_id"]
         lang = get_language(request)
 
         user_repo = UserRepo(db)
         word_repo = WordRepo(db)
-        user_id = await user_repo.get_or_create(telegram_id)
         settings = await user_repo.get_user_settings(telegram_id, lang)
         
         # Calculate remaining limit with User's TZ
@@ -26,7 +26,7 @@ def setup_routes_practice(app: web.Application, db: aiosqlite.Connection):
         return web.json_response({"words": words})
 
     async def grade_word(request: web.Request) -> web.Response:
-        telegram_id = request["telegram_id"]
+        user_id = request["user_id"]
         body = await request.json()
         word_id = body.get("word_id")
         quality = body.get("quality")
@@ -34,10 +34,7 @@ def setup_routes_practice(app: web.Application, db: aiosqlite.Connection):
         if word_id is None or quality is None:
             return web.json_response({"error": "missing fields"}, status=400)
 
-        user_repo = UserRepo(db)
         word_repo = WordRepo(db)
-        user_id = await user_repo.get_or_create(telegram_id)
-        
         word = await word_repo.get_word(word_id, user_id)
         if not word:
             return web.json_response({"error": "word not found"}, status=404)

@@ -80,7 +80,9 @@ export async function loadHome(data) {
       stats = data.stats;
       settings = data.settings;
     } else {
-      [stats, settings] = await Promise.all([GET('/api/stats'), GET('/api/settings')]);
+      const init = await GET('/api/init');
+      stats = init.stats;
+      settings = init.settings;
     }
 
     state.currentStats = stats;

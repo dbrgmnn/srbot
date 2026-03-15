@@ -89,16 +89,14 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         })
 
     async def list_words(request: web.Request) -> web.Response:
-        telegram_id = request["telegram_id"]
+        user_id = request["user_id"]
         lang = get_language(request)
-        user_repo = UserRepo(db)
         word_repo = WordRepo(db)
-        user_id = await user_repo.get_or_create(telegram_id)
         words = await word_repo.search_words(user_id, lang, "")
         return web.json_response({"words": words})
 
     async def add_words(request: web.Request) -> web.Response:
-        telegram_id = request["telegram_id"]
+        user_id = request["user_id"]
         lang = get_language(request)
         body = await request.json()
         raw_words = body.get("words", [])
@@ -119,14 +117,12 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         if not words_data:
             return web.json_response({"error": "no valid words provided"}, status=400)
             
-        user_repo = UserRepo(db)
         word_repo = WordRepo(db)
-        user_id = await user_repo.get_or_create(telegram_id)
         added_count = await word_repo.add_words_batch(user_id, lang, words_data)
         return web.json_response({"added": added_count})
 
     async def patch_word(request: web.Request) -> web.Response:
-        telegram_id = request["telegram_id"]
+        user_id = request["user_id"]
         try:
             word_id = int(request.match_info["word_id"])
         except ValueError:
@@ -138,9 +134,7 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
             return web.json_response({"error": "word and translation required"}, status=400)
         example = (body.get("example") or "").strip() or None
         level = (body.get("level") or "").strip() or None
-        user_repo = UserRepo(db)
         word_repo = WordRepo(db)
-        user_id = await user_repo.get_or_create(telegram_id)
         try:
             await word_repo.update_word_text(word_id, user_id, word, translation, example, level)
         except Exception:
@@ -148,44 +142,36 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         return web.json_response({"ok": True})
 
     async def delete_all_words(request: web.Request) -> web.Response:
-        telegram_id = request["telegram_id"]
+        user_id = request["user_id"]
         lang = get_language(request)
-        user_repo = UserRepo(db)
         word_repo = WordRepo(db)
-        user_id = await user_repo.get_or_create(telegram_id)
         await word_repo.delete_all_words(user_id, lang)
         return web.json_response({"ok": True})
 
     async def delete_word(request: web.Request) -> web.Response:
-        telegram_id = request["telegram_id"]
+        user_id = request["user_id"]
         try:
             word_id = int(request.match_info["word_id"])
         except ValueError:
             return web.json_response({"error": "invalid word_id"}, status=400)
-        user_repo = UserRepo(db)
         word_repo = WordRepo(db)
-        user_id = await user_repo.get_or_create(telegram_id)
         await word_repo.delete_word(word_id, user_id)
         return web.json_response({"ok": True})
 
     async def search_words(request: web.Request) -> web.Response:
-        telegram_id = request["telegram_id"]
+        user_id = request["user_id"]
         lang = get_language(request)
         query = request.query.get("q", "")
-        user_repo = UserRepo(db)
         word_repo = WordRepo(db)
-        user_id = await user_repo.get_or_create(telegram_id)
         words = await word_repo.search_words(user_id, lang, query)
         return web.json_response({"words": words})
 
     async def export_words(request: web.Request) -> web.Response:
         import csv
         import io
-        telegram_id = request["telegram_id"]
+        user_id = request["user_id"]
         lang = get_language(request)
-        user_repo = UserRepo(db)
         word_repo = WordRepo(db)
-        user_id = await user_repo.get_or_create(telegram_id)
         words = await word_repo.get_all_words(user_id, lang)
 
         output = io.StringIO()
@@ -205,11 +191,9 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         return web.Response(text=output.getvalue(), content_type="text/plain")
 
     async def preload_words(request: web.Request) -> web.Response:
-        telegram_id = request["telegram_id"]
+        user_id = request["user_id"]
         lang = get_language(request)
-        user_repo = UserRepo(db)
         word_repo = WordRepo(db)
-        user_id = await user_repo.get_or_create(telegram_id)
         
         csv_path = Path(__file__).parent.parent.parent / "data" / f"words_{lang}.csv"
         
@@ -222,6 +206,7 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
             
         added_count = await word_repo.add_words_batch(user_id, lang, words)
         return web.json_response({"added": added_count})
+
 
     app.router.add_get("/api/words", list_words)
     app.router.add_post("/api/words", add_words)

@@ -27,15 +27,10 @@ class UserRepo:
         row = await cursor.fetchone()
         user_id = row['id']
 
-        await self.db.execute(
-            "INSERT OR IGNORE INTO user_settings (user_id, language) VALUES (?, ?)",
-            (user_id, 'de')
-        )
-
         await self.db.commit()
         return user_id
 
-    async def set_last_notified_at(self, telegram_id: int, language: str = 'de'):
+    async def set_last_notified_at(self, telegram_id: int, language: str):
         now = datetime.now(tz=timezone.utc).isoformat()
         await self.db.execute(
             """UPDATE user_settings SET last_notified_at = ?
@@ -45,7 +40,7 @@ class UserRepo:
         )
         await self.db.commit()
 
-    async def get_user_settings(self, telegram_id: int, language: str = 'de') -> dict:
+    async def get_user_settings(self, telegram_id: int, language: str) -> dict:
         cursor = await self.db.execute(
             """SELECT s.* FROM user_settings s
                 JOIN users u ON s.user_id = u.id
@@ -66,6 +61,7 @@ class UserRepo:
 
         if row:
             data = dict(row)
+            # Ensure None values from DB are replaced with defaults
             for k, v in defaults.items():
                 if data.get(k) is None:
                     data[k] = v
@@ -73,7 +69,7 @@ class UserRepo:
 
         return defaults
 
-    async def update_timezone(self, telegram_id: int, tz_name: str, language: str = 'de'):
+    async def update_timezone(self, telegram_id: int, tz_name: str, language: str):
         await self.db.execute(
             """INSERT INTO user_settings (user_id, language, timezone)
                VALUES ((SELECT id FROM users WHERE telegram_id = ?), ?, ?)
@@ -82,7 +78,7 @@ class UserRepo:
         )
         await self.db.commit()
 
-    async def update_daily_limit(self, telegram_id: int, limit: int, language: str = 'de'):
+    async def update_daily_limit(self, telegram_id: int, limit: int, language: str):
         await self.db.execute(
             """INSERT INTO user_settings (user_id, language, daily_limit)
                VALUES ((SELECT id FROM users WHERE telegram_id = ?), ?, ?)
@@ -91,7 +87,7 @@ class UserRepo:
         )
         await self.db.commit()
 
-    async def update_notification_interval(self, telegram_id: int, minutes: int, language: str = 'de'):
+    async def update_notification_interval(self, telegram_id: int, minutes: int, language: str):
         await self.db.execute(
             """INSERT INTO user_settings (user_id, language, notification_interval_minutes)
                VALUES ((SELECT id FROM users WHERE telegram_id = ?), ?, ?)
@@ -101,10 +97,18 @@ class UserRepo:
         await self.db.commit()
 
     async def update_quiet_hours(self, telegram_id: int, quiet_start: str = None, quiet_end: str = None, language: str = 'de'):
+        # Here we keep default 'de' for safety if called from scheduler, but better to be explicit
         user_id_cur = await self.db.execute("SELECT id FROM users WHERE telegram_id = ?", (telegram_id,))
         row = await user_id_cur.fetchone()
         if not row: return
         user_id = row['id']
+        
+        # Ensure record exists
+        await self.db.execute(
+            "INSERT OR IGNORE INTO user_settings (user_id, language) VALUES (?, ?)",
+            (user_id, language)
+        )
+        
         if quiet_start is not None:
             await self.db.execute(
                 "UPDATE user_settings SET quiet_start = ? WHERE user_id = ? AND language = ?",
@@ -117,7 +121,7 @@ class UserRepo:
             )
         await self.db.commit()
 
-    async def update_practice_mode(self, telegram_id: int, mode: str, language: str = 'de'):
+    async def update_practice_mode(self, telegram_id: int, mode: str, language: str):
         await self.db.execute(
             """INSERT INTO user_settings (user_id, language, practice_mode)
                VALUES ((SELECT id FROM users WHERE telegram_id = ?), ?, ?)
@@ -131,11 +135,13 @@ class UserRepo:
         row = await user_id_cur.fetchone()
         if not row: return
         user_id = row['id']
+        # Simply ensure settings exist for the new language
         await self.db.execute(
             "INSERT OR IGNORE INTO user_settings (user_id, language) VALUES (?, ?)",
             (user_id, new_language)
         )
         await self.db.commit()
+
 
     async def get_min_notification_interval(self) -> float:
         cursor = await self.db.execute(

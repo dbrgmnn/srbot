@@ -8,7 +8,6 @@ from api.auth import get_user_id
 from api.routes.init import setup_routes_init
 from api.routes.words import setup_routes_words
 from api.routes.practice import setup_routes_practice
-from api.routes.stats import setup_routes_stats
 from api.routes.settings import setup_routes_settings
 
 logger = logging.getLogger(__name__)
@@ -37,10 +36,17 @@ async def create_app(config: Config, db: aiosqlite.Connection, scheduler=None) -
         # skip auth for static files, root, and external api
         if not request.path.startswith("/api/") or request.path.startswith("/api/external/"):
             return await handler(request)
+        
         telegram_id = get_user_id(request.headers.get("X-Init-Data", ""), config.bot_token)
         if not telegram_id or telegram_id not in config.allowed_users:
             return web.json_response({"error": "unauthorized"}, status=401)
+        
+        from db.repository import UserRepo
+        user_repo = UserRepo(db)
+        user_id = await user_repo.get_or_create(telegram_id)
+        
         request["telegram_id"] = telegram_id
+        request["user_id"] = user_id
         return await handler(request)
 
     app = web.Application(middlewares=[cors_middleware, auth_middleware])
@@ -51,7 +57,6 @@ async def create_app(config: Config, db: aiosqlite.Connection, scheduler=None) -
     setup_routes_init(app, db)
     setup_routes_words(app, db)
     setup_routes_practice(app, db)
-    setup_routes_stats(app, db)
     setup_routes_settings(app, db)
 
     # serve index.html for root
