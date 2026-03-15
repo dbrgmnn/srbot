@@ -161,12 +161,12 @@
     <div class="settings-section-title">Dictionary</div>
     <div class="card settings-group">
       <div class="settings-row">
-        <div class="settings-label">Active Language</div>
-        <div class="practice-switch">
-          <button class="lang-opt active" data-lang="de" onclick="switchLanguage('de')">DE</button>
-          <button class="lang-opt" data-lang="en" onclick="switchLanguage('en')">EN</button>
+        <div class="setting-item">
+          <span>Language:</span>
+          <select id="language-select" class="form-select" onchange="switchLanguage(this.value)">
+            <!-- Options will be populated from API -->
+          </select>
         </div>
-      </div>
 
       <div class="settings-row">
         <div class="settings-label">Practice Mode</div>

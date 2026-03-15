@@ -11,6 +11,7 @@ srbot/
 │   ├── server.py        # aiohttp server for the Mini App
 │   └── routes/          # API routes (words, stats, settings)
 ├── core/
+│   ├── languages.py     # Registry of 10 supported languages (EN, DE, RU, etc.)
 │   ├── srs.py           # SM-2 algorithm logic
 │   └── scheduler.py     # Notification scheduler
 ├── db/
@@ -51,6 +52,11 @@ srbot/
 - **Swipe Up:** Mark as **"Hard"** (Recalled with difficulty).
 *Tactile haptic feedback is triggered on every successful swipe.*
 
+### Multi-Language Support
+- **10 Languages:** Supports English, German, Russian, Spanish, French, Italian, Chinese, Japanese, Korean, and Portuguese.
+- **Dynamic Selection:** Switch your study language instantly in the Settings tab via a dropdown menu.
+- **Auto-Updating UI:** The interface and notifications adapt to the selected language's flag and settings.
+
 ### Bot Commands
 - `/token`: Generates or shows your unique API token for external integrations. The message auto-deletes after 30 seconds.
 - `/token_new`: Revokes the old token and generates a new one.
@@ -59,7 +65,10 @@ srbot/
 Add words from outside (e.g., Browser Extensions, iOS Shortcuts):
 - **Endpoint:** `POST /api/external/words`
 - **Auth:** `Authorization: Bearer <YOUR_TOKEN>`
-- **Payload:** `{"word": "...", "translation": "...", "example": "...", "language": "de"}`
+- **Payload:** `{"word": "...", "translation": "...", "example": "...", "language": "en"}`
+
+### Internal Settings API
+- **Endpoint:** `GET /api/settings/languages` — Returns the list of supported languages with their flags and TTS codes.
 
 ### Statistics
 - **Home Header:** Displays the current active dictionary and the total number of words in an accent capsule (e.g., "DE 555").

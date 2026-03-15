@@ -3,6 +3,7 @@ import aiosqlite
 from db.repository import UserRepo, WordRepo
 from core.scheduler import reschedule
 from api.auth import get_language
+from core.languages import LANGUAGES
 
 
 def _is_valid_time(value: str) -> bool:
@@ -17,6 +18,9 @@ def _is_valid_time(value: str) -> bool:
 
 
 def setup_routes_settings(app: web.Application, db: aiosqlite.Connection):
+
+    async def get_languages_list(request: web.Request) -> web.Response:
+        return web.json_response({"languages": LANGUAGES})
 
     async def get_settings(request: web.Request) -> web.Response:
         user_id = request["user_id"]
@@ -42,7 +46,7 @@ def setup_routes_settings(app: web.Application, db: aiosqlite.Connection):
 
         if "language" in body:
             new_lang = body["language"]
-            if new_lang in ["de", "en"]:
+            if new_lang in LANGUAGES:
                 await user_repo.update_language(telegram_id, new_lang)
                 lang = new_lang # use new lang for the response
 
@@ -110,5 +114,6 @@ def setup_routes_settings(app: web.Application, db: aiosqlite.Connection):
         settings = await user_repo.get_user_settings(telegram_id, lang)
         return web.json_response(settings)
 
+    app.router.add_get("/api/settings/languages", get_languages_list)
     app.router.add_get("/api/settings", get_settings)
     app.router.add_post("/api/settings", update_settings)

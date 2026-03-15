@@ -8,6 +8,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 
 from db.repository import UserRepo, WordRepo
+from core.languages import LANGUAGES
 
 logger = logging.getLogger(__name__)
 
@@ -16,19 +17,15 @@ JOB_ID = "check_notifications"
 
 # ── Notification texts ────────────────────────────────────────────────────
 
-LANG_FLAGS = {
-    'de': '🇩🇪',
-    'en': '🇬🇧',
-}
-
 def build_notification_text(due: int, new: int, lang: str) -> str:
     parts = []
     if due > 0:
-        parts.append(f"{due} to review")
+        parts.append(f"{due} review")
     if new > 0:
-        parts.append(f"{new} new words")
+        parts.append(f"{new} new")
     
-    flag = LANG_FLAGS.get(lang.lower(), "🌐")
+    meta = LANGUAGES.get(lang.lower(), {})
+    flag = meta.get("flag", "🌐")
     return f"{flag} " + " · ".join(parts)
 
 

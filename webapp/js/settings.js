@@ -9,8 +9,9 @@ export async function switchLanguage(lang) {
   try {
     setLanguage(lang);
     await POST('/api/settings', { language: lang });
-    document.querySelectorAll('.lang-opt').forEach(btn => btn.classList.toggle('active', btn.dataset.lang === state.currentLang));
-    if (document.getElementById('mode-word')) document.getElementById('mode-word').textContent = state.currentLang.toUpperCase();
+    const select = document.getElementById('language-select');
+    if (select) select.value = lang;
+    if (document.getElementById('mode-word')) document.getElementById('mode-word').textContent = lang.toUpperCase();
     await Promise.all([loadHome(), loadSettings()]);
     toast(`Switched to ${lang.toUpperCase()}`);
   } catch (e) { toast('Error switching language'); }
@@ -37,6 +38,19 @@ export async function changeInterval(delta) {
 export async function loadSettings() {
   try {
     const s = await GET('/api/settings');
+
+    // Load available languages from API
+    const langSelect = document.getElementById('language-select');
+    if (langSelect && langSelect.options.length === 0) {
+      const { languages } = await GET('/api/settings/languages');
+      Object.entries(languages).forEach(([code, meta]) => {
+        const opt = document.createElement('option');
+        opt.value = code;
+        opt.textContent = `${meta.flag} ${meta.name}`;
+        langSelect.appendChild(opt);
+      });
+    }
+    if (langSelect) langSelect.value = s.language || 'de';
     
     // Fill timezone select if it's empty
     const tzSelect = document.getElementById('set-timezone');
@@ -56,7 +70,6 @@ export async function loadSettings() {
     if (document.getElementById('set-limit-val')) document.getElementById('set-limit-val').textContent = s.daily_limit || 20;
     if (document.getElementById('set-notify-interval')) document.getElementById('set-notify-interval').textContent = s.notification_interval_minutes || 240;
     document.querySelectorAll('.practice-opt').forEach(b => b.classList.toggle('active', b.dataset.mode === s.practice_mode));
-    document.querySelectorAll('.lang-opt').forEach(b => b.classList.toggle('active', b.dataset.lang === state.currentLang));
     if (document.getElementById('mode-word')) document.getElementById('mode-word').textContent = state.currentLang.toUpperCase();
     if (document.getElementById('info-words')) document.getElementById('info-words').textContent = `Dictionary: ${s.total_words || 0} words`;
   } catch(e) { console.error(e); }
