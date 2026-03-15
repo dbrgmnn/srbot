@@ -45,7 +45,7 @@ async def preload_words(db, config) -> None:
 
 
 async def main():
-    # config = load_config()
+    config = load_config()
 
     db = await init_db(config.db_path)
     await preload_words(db, config)
