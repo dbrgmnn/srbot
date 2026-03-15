@@ -28,6 +28,51 @@ export function showScreen(name) {
   }
 }
 
+let countdownInterval = null;
+
+function formatTimeLeft(targetDate) {
+  if (!targetDate) return null;
+  const diff = new Date(targetDate) - new Date();
+  if (diff <= 0) return null;
+
+  const hours = Math.floor(diff / (1000 * 60 * 60));
+  const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+  if (hours > 0) {
+    return `In ${hours}h ${mins}m`;
+  }
+  return `In ${mins}m`;
+}
+
+function updateCountdowns() {
+  const stats = state.currentStats;
+  if (!stats) return;
+
+  const dueLabel = document.getElementById('label-due');
+  const newLabel = document.getElementById('label-new');
+
+  if (stats.due > 0) {
+    if (dueLabel) dueLabel.textContent = 'Review';
+  } else {
+    const time = formatTimeLeft(stats.next_due_at);
+    if (dueLabel) dueLabel.textContent = time || 'Review';
+  }
+
+  const limit = state.currentSettings?.daily_limit || 20;
+  const todayDone = stats.today_new || 0;
+  const availableNew = Math.max(0, limit - todayDone);
+
+  if (availableNew > 0 && stats.st_new > 0) {
+    if (newLabel) newLabel.textContent = 'New';
+  } else {
+    const time = formatTimeLeft(stats.next_day_start_utc);
+    if (newLabel) {
+       if (stats.st_new === 0) newLabel.textContent = 'Empty';
+       else newLabel.textContent = time || 'New';
+    }
+  }
+}
+
 export async function loadHome(data) {
   try {
     let stats, settings;
@@ -38,22 +83,31 @@ export async function loadHome(data) {
       [stats, settings] = await Promise.all([GET('/api/stats'), GET('/api/settings')]);
     }
 
+    state.currentStats = stats;
+    state.currentSettings = settings;
+
     state.practiceMode = settings.practice_mode || 'word_to_translation';
     const due = stats.due || 0;
     const newWords = stats.new || 0;
     const todayDone = stats.today_new || 0;
     const limit = settings.daily_limit || 20;
-    const sessionTotal = due + Math.min(newWords, Math.max(0, limit - todayDone));
+    const availableNew = Math.max(0, limit - todayDone);
+    const sessionTotal = due + Math.min(newWords, availableNew);
 
     if (document.getElementById('stat-due')) document.getElementById('stat-due').textContent = due;
-    if (document.getElementById('stat-new')) document.getElementById('stat-new').textContent = Math.max(0, limit - todayDone);
+    if (document.getElementById('stat-new')) document.getElementById('stat-new').textContent = availableNew;
 
     const lang = (settings.language || 'de').toUpperCase();
     const total = stats.total || 0;
     const langEl = document.getElementById('header-lang');
     const countEl = document.getElementById('header-count');
     if (langEl) langEl.textContent = lang;
-    if (countEl) countEl.textContent = total.toLocaleString();
+    if (countEl) countEl.textContent = total;
+
+    updateCountdowns();
+    if (!countdownInterval) {
+      countdownInterval = setInterval(updateCountdowns, 30000);
+    }
 
     const btn = document.getElementById('btn-practice');
     if (btn) {

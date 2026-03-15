@@ -1,5 +1,5 @@
 import csv
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 import aiosqlite
@@ -249,7 +249,8 @@ class WordRepo:
         tz = ZoneInfo(tz_name)
         local_now = now_utc.astimezone(tz)
         today_start_local = local_now.replace(hour=0, minute=0, second=0, microsecond=0)
-        today_start_utc = today_start_local.astimezone(timezone.utc).isoformat()
+        today_start_utc = today_start_local.astimezone(timezone.utc)
+        next_day_start_utc = (today_start_local + timedelta(days=1)).astimezone(timezone.utc)
 
         cursor = await self.db.execute(
             """SELECT
@@ -261,20 +262,23 @@ class WordRepo:
                     COUNT(CASE WHEN started_at IS NULL THEN 1 END) as st_new,
                     COUNT(CASE WHEN started_at IS NOT NULL AND interval < 5 THEN 1 END) as st_learning,
                     COUNT(CASE WHEN interval >= 5 AND interval < 30 THEN 1 END) as st_known,
-                    COUNT(CASE WHEN interval >= 30 THEN 1 END) as st_mastered
+                    COUNT(CASE WHEN interval >= 30 THEN 1 END) as st_mastered,
+                    MIN(CASE WHEN started_at IS NOT NULL AND next_review > ? THEN next_review END) as next_due_at
                 FROM words WHERE user_id = ? AND language = ?""",
-            (now_utc.isoformat(), today_start_utc, user_id, language),
+            (now_utc.isoformat(), today_start_utc.isoformat(), now_utc.isoformat(), user_id, language),
         )
         row = await cursor.fetchone()
         
         defaults = {
             "total": 0, "learned": 0, "new": 0, "due": 0, "today_new": 0,
-            "st_new": 0, "st_learning": 0, "st_known": 0, "st_mastered": 0
+            "st_new": 0, "st_learning": 0, "st_known": 0, "st_mastered": 0,
+            "next_due_at": None, "next_day_start_utc": next_day_start_utc.isoformat()
         }
         if row:
             res = dict(row)
             for k, v in res.items():
-                if v is None: res[k] = 0
+                if v is None and k in defaults: res[k] = defaults[k]
+            res["next_day_start_utc"] = next_day_start_utc.isoformat()
             return res
         return defaults
 
