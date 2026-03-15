@@ -10,29 +10,63 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
     async def add_external_words(request: web.Request) -> web.Response:
         user_id = await verify_bearer_token(request, db)
         if not user_id:
-            return web.json_response({"error": "unauthorized"}, status=401)
+            return web.json_response({
+                "ok": false, 
+                "error": "unauthorized", 
+                "msg": "❌ Invalid API Token"
+            }, status=401)
         
         body = await request.json()
         words_data = body.get("words")
+        single_word = None
+        
         if not words_data:
             # try single word format
-            word = body.get("word")
-            translation = body.get("translation")
+            word = (body.get("word") or "").strip()
+            translation = (body.get("translation") or "").strip()
             if word and translation:
+                single_word = word
                 words_data = [{
                     "word": word, 
                     "translation": translation, 
                     "example": body.get("example"),
-                    "level": body.get("level") # will be None if not provided
+                    "level": body.get("level")
                 }]
         
         if not words_data:
-            return web.json_response({"error": "no words provided"}, status=400)
+            return web.json_response({
+                "ok": false, 
+                "error": "no words", 
+                "msg": "⚠️ No word or translation provided"
+            }, status=400)
             
         lang = body.get("language", "de").lower()
         word_repo = WordRepo(db)
         added_count = await word_repo.add_words_batch(user_id, lang, words_data)
-        return web.json_response({"added": added_count})
+        
+        # Build response
+        if single_word:
+            if added_count > 0:
+                return web.json_response({
+                    "ok": true, 
+                    "status": "added", 
+                    "msg": f"✅ Added: {single_word}",
+                    "word": single_word
+                })
+            else:
+                return web.json_response({
+                    "ok": true, 
+                    "status": "exists", 
+                    "msg": f"ℹ️ Already exists: {single_word}",
+                    "word": single_word
+                })
+        
+        return web.json_response({
+            "ok": true, 
+            "status": "batch_completed", 
+            "msg": f"📥 Processed {len(words_data)} words, added {added_count}",
+            "added": added_count
+        })
 
     async def list_words(request: web.Request) -> web.Response:
         telegram_id = request["telegram_id"]
