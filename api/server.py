@@ -34,8 +34,8 @@ async def create_app(config: Config, db: aiosqlite.Connection, scheduler=None) -
 
     @web.middleware
     async def auth_middleware(request: web.Request, handler):
-        # skip auth for static files and root
-        if not request.path.startswith("/api/"):
+        # skip auth for static files, root, and external api
+        if not request.path.startswith("/api/") or request.path.startswith("/api/external/"):
             return await handler(request)
         telegram_id = get_user_id(request.headers.get("X-Init-Data", ""), config.bot_token)
         if not telegram_id or telegram_id not in config.allowed_users:

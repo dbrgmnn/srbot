@@ -2,10 +2,37 @@ from pathlib import Path
 from aiohttp import web
 import aiosqlite
 from db.repository import UserRepo, WordRepo
-from api.auth import get_language
+from api.auth import get_language, verify_bearer_token
 
 
 def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
+
+    async def add_external_words(request: web.Request) -> web.Response:
+        user_id = await verify_bearer_token(request, db)
+        if not user_id:
+            return web.json_response({"error": "unauthorized"}, status=401)
+        
+        body = await request.json()
+        words_data = body.get("words")
+        if not words_data:
+            # try single word format
+            word = body.get("word")
+            translation = body.get("translation")
+            if word and translation:
+                words_data = [{
+                    "word": word, 
+                    "translation": translation, 
+                    "example": body.get("example"),
+                    "level": body.get("level") # will be None if not provided
+                }]
+        
+        if not words_data:
+            return web.json_response({"error": "no words provided"}, status=400)
+            
+        lang = body.get("language", "de").lower()
+        word_repo = WordRepo(db)
+        added_count = await word_repo.add_words_batch(user_id, lang, words_data)
+        return web.json_response({"added": added_count})
 
     async def list_words(request: web.Request) -> web.Response:
         telegram_id = request["telegram_id"]
@@ -132,6 +159,7 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
 
     app.router.add_get("/api/words", list_words)
     app.router.add_post("/api/words", add_words)
+    app.router.add_post("/api/external/words", add_external_words)
     app.router.add_post("/api/words/preload", preload_words)
     app.router.add_get("/api/words/search", search_words)
     app.router.add_patch("/api/words/{word_id}", patch_word)
