@@ -88,13 +88,6 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
             "added": added_count
         })
 
-    async def list_words(request: web.Request) -> web.Response:
-        user_id = request["user_id"]
-        lang = get_language(request)
-        word_repo = WordRepo(db)
-        words = await word_repo.search_words(user_id, lang, "")
-        return web.json_response({"words": words})
-
     async def add_words(request: web.Request) -> web.Response:
         user_id = request["user_id"]
         lang = get_language(request)
@@ -208,7 +201,6 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         return web.json_response({"added": added_count})
 
 
-    app.router.add_get("/api/words", list_words)
     app.router.add_post("/api/words", add_words)
     app.router.add_post("/api/external/words", add_external_words)
     app.router.add_post("/api/words/preload", preload_words)
