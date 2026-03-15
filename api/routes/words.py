@@ -17,27 +17,46 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
             }, status=401)
         
         body = await request.json()
-        words_data = body.get("words")
-        single_word = None
+        raw_words = body.get("words")
         
-        if not words_data:
+        # Normalize to list
+        if not raw_words:
             # try single word format
             word = (body.get("word") or "").strip()
             translation = (body.get("translation") or "").strip()
             if word and translation:
-                single_word = word
-                words_data = [{
+                raw_words = [{
                     "word": word, 
                     "translation": translation, 
                     "example": body.get("example"),
                     "level": body.get("level")
                 }]
         
-        if not words_data:
+        if not raw_words or not isinstance(raw_words, list):
             return web.json_response({
                 "ok": False, 
                 "error": "no words", 
                 "msg": "⚠️ No word or translation provided"
+            }, status=400)
+
+        # Clean and validate data
+        words_data = []
+        for w in raw_words:
+            word = (w.get("word") or "").strip()
+            trans = (w.get("translation") or "").strip()
+            if word and trans:
+                words_data.append({
+                    "word": word,
+                    "translation": trans,
+                    "example": (w.get("example") or "").strip() or None,
+                    "level": (w.get("level") or "").strip() or None
+                })
+        
+        if not words_data:
+            return web.json_response({
+                "ok": False, 
+                "error": "invalid data", 
+                "msg": "⚠️ Provided data is empty after cleaning"
             }, status=400)
             
         lang = body.get("language", "de").lower()
@@ -45,7 +64,8 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         added_count = await word_repo.add_words_batch(user_id, lang, words_data)
         
         # Build response
-        if single_word:
+        if len(words_data) == 1:
+            single_word = words_data[0]["word"]
             if added_count > 0:
                 return web.json_response({
                     "ok": True, 
@@ -64,7 +84,7 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         return web.json_response({
             "ok": True, 
             "status": "batch_completed", 
-            "msg": f"📥 Processed {len(words_data)} words, added {added_count}",
+            "msg": f"📥 Processed {len(words_data)} valid words, added {added_count}",
             "added": added_count
         })
 
@@ -81,13 +101,28 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         telegram_id = request["telegram_id"]
         lang = get_language(request)
         body = await request.json()
-        words = body.get("words", [])
-        if not words:
-            return web.json_response({"error": "no words"}, status=400)
+        raw_words = body.get("words", [])
+        
+        # Clean and validate data
+        words_data = []
+        for w in raw_words:
+            word = (w.get("word") or "").strip()
+            trans = (w.get("translation") or "").strip()
+            if word and trans:
+                words_data.append({
+                    "word": word,
+                    "translation": trans,
+                    "example": (w.get("example") or "").strip() or None,
+                    "level": (w.get("level") or "").strip() or None
+                })
+
+        if not words_data:
+            return web.json_response({"error": "no valid words provided"}, status=400)
+            
         user_repo = UserRepo(db)
         word_repo = WordRepo(db)
         user_id = await user_repo.get_or_create(telegram_id)
-        added_count = await word_repo.add_words_batch(user_id, lang, words)
+        added_count = await word_repo.add_words_batch(user_id, lang, words_data)
         return web.json_response({"added": added_count})
 
     async def patch_word(request: web.Request) -> web.Response:
