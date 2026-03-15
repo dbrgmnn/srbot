@@ -51,12 +51,21 @@ srbot/
 - **Swipe Up:** Mark as **"Hard"** (Recalled with difficulty).
 *Tactile haptic feedback is triggered on every successful swipe.*
 
+### Bot Commands
+- `/token`: Generates or shows your unique API token for external integrations. The message auto-deletes after 30 seconds.
+- `/token_new`: Revokes the old token and generates a new one.
+
+### External API
+Add words from outside (e.g., Browser Extensions, iOS Shortcuts):
+- **Endpoint:** `POST /api/external/words`
+- **Auth:** `Authorization: Bearer <YOUR_TOKEN>`
+- **Payload:** `{"word": "...", "translation": "...", "example": "...", "language": "de"}`
+
 ### Statistics
 - **Home Header:** Displays the current active dictionary and the total number of words in an accent capsule (e.g., "DE 555").
-- **New:** Words you haven't started learning yet.
-- **Learning:** In progress (interval < 5 days).
-- **Known:** Stable knowledge (interval 5-30 days).
-- **Mastered:** Crystallized in long-term memory (interval > 30 days).
+- **New:** Words you haven't started learning yet. (If limit is reached, shows a countdown until reset).
+- **Review:** Words due for repetition. (If none, shows a countdown until the next word becomes due).
+- **Empty:** Shown when no more words are available in the current dictionary.
 
 ## ⚙️ Tech Stack
 - **Backend:** Python, aiohttp, aiosqlite.

@@ -19,14 +19,6 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-async def notify_all(bot: Bot, allowed_users: set, text: str):
-    for uid in allowed_users:
-        try:
-            await bot.send_message(chat_id=uid, text=text)
-        except Exception as e:
-            logger.warning(f"Failed to notify {uid}: {e}")
-
-
 async def preload_words(db, config) -> None:
     csv_path = Path(__file__).parent / "data" / "words_de.csv"
     word_repo = WordRepo(db)
