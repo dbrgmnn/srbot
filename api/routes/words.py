@@ -11,7 +11,7 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         user_id = await verify_bearer_token(request, db)
         if not user_id:
             return web.json_response({
-                "ok": false, 
+                "ok": False, 
                 "error": "unauthorized", 
                 "msg": "❌ Invalid API Token"
             }, status=401)
@@ -35,7 +35,7 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         
         if not words_data:
             return web.json_response({
-                "ok": false, 
+                "ok": False, 
                 "error": "no words", 
                 "msg": "⚠️ No word or translation provided"
             }, status=400)
@@ -48,21 +48,21 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         if single_word:
             if added_count > 0:
                 return web.json_response({
-                    "ok": true, 
+                    "ok": True, 
                     "status": "added", 
                     "msg": f"✅ Added: {single_word}",
                     "word": single_word
                 })
             else:
                 return web.json_response({
-                    "ok": true, 
+                    "ok": True, 
                     "status": "exists", 
                     "msg": f"ℹ️ Already exists: {single_word}",
                     "word": single_word
                 })
         
         return web.json_response({
-            "ok": true, 
+            "ok": True, 
             "status": "batch_completed", 
             "msg": f"📥 Processed {len(words_data)} words, added {added_count}",
             "added": added_count
@@ -176,9 +176,6 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         word_repo = WordRepo(db)
         user_id = await user_repo.get_or_create(telegram_id)
         
-        # Determine CSV path based on current language
-        # Assuming data folder is in project root: srbot/data/
-        # This file is in: srbot/api/routes/words.py
         csv_path = Path(__file__).parent.parent.parent / "data" / f"words_{lang}.csv"
         
         if not csv_path.exists():
