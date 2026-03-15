@@ -1,12 +1,13 @@
 const tg = window.Telegram.WebApp;
 
 export let state = {
-  currentLang: 'de',
+  currentLang: localStorage.getItem('currentLang') || 'de',
   practiceMode: 'word_to_translation'
 };
 
 export function setLanguage(lang) {
   state.currentLang = lang;
+  localStorage.setItem('currentLang', lang);
 }
 
 async function api(method, path, body) {

@@ -1,4 +1,4 @@
-import { GET, POST, state } from './api.js';
+import { GET, POST, setLanguage, state } from './api.js';
 import { toast, loadHome } from './ui.js';
 
 const tg = window.Telegram.WebApp;
@@ -7,7 +7,7 @@ export async function switchLanguage(lang) {
   if (state.currentLang === lang) return;
   tg.HapticFeedback.impactOccurred('light');
   try {
-    state.currentLang = lang;
+    setLanguage(lang);
     await POST('/api/settings', { language: lang });
     document.querySelectorAll('.lang-opt').forEach(btn => btn.classList.toggle('active', btn.dataset.lang === state.currentLang));
     if (document.getElementById('mode-word')) document.getElementById('mode-word').textContent = state.currentLang.toUpperCase();
