@@ -96,7 +96,10 @@ async def main():
     owner_id = config.allowed_users[0] if config.allowed_users else None
     if owner_id:
         try:
-            await bot.send_message(chat_id=owner_id, text="🟢 srbot started")
+            start_msg = await bot.send_message(chat_id=owner_id, text="🟢 srbot started")
+            asyncio.create_task(asyncio.sleep(30)).add_done_callback(
+                lambda _: asyncio.create_task(start_msg.delete()) if not bot.session.closed else None
+            )
         except Exception as e:
             logger.warning(f"Failed to notify owner {owner_id} about start: {e}")
 
@@ -114,12 +117,6 @@ async def main():
     try:
         await stop_event.wait()
     finally:
-        if owner_id:
-            try:
-                await bot.send_message(chat_id=owner_id, text="🔴 srbot stopped")
-            except Exception as e:
-                logger.warning(f"Failed to notify owner {owner_id} about stop: {e}")
-
         polling_task.cancel()
         scheduler.shutdown()
         await api_runner.cleanup()
