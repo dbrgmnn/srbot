@@ -158,6 +158,14 @@ class UserRepo:
         row = await cursor.fetchone()
         return row['id'] if row else None
 
+    async def get_words_count_per_language(self, user_id: int) -> dict:
+        cursor = await self.db.execute(
+            "SELECT language, COUNT(*) as cnt FROM words WHERE user_id = ? GROUP BY language",
+            (user_id,)
+        )
+        rows = await cursor.fetchall()
+        return {row['language']: row['cnt'] for row in rows}
+
     async def get_today_new_count(self, user_id: int, language: str, tz_name: str = "UTC") -> int:
         tz = ZoneInfo(tz_name)
         now_utc = datetime.now(tz=timezone.utc)

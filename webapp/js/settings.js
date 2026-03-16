@@ -4,15 +4,10 @@ import { toast, T } from './toast.js';
 
 const tg = window.Telegram.WebApp;
 
-// ── Cached languages from API ─────────────────────────────────────────────
-let cachedLanguages = null;
-
+// ── Languages from API ───────────────────────────────────────────────────
 async function getLanguages() {
-  if (!cachedLanguages) {
-    const resp = await GET('/api/settings/languages');
-    cachedLanguages = resp.result.languages;
-  }
-  return cachedLanguages;
+  const resp = await GET('/api/settings/languages');
+  return resp.result.languages;
 }
 
 // ── Universal Picker ──────────────────────────────────────────────────────
@@ -31,7 +26,9 @@ async function _openLanguagePicker() {
   const languages = await getLanguages();
   const options = Object.entries(languages).map(([code, meta]) => ({
     value: code,
-    label: `${meta.flag} ${meta.name}`,
+    label: meta.word_count > 0
+      ? `${meta.flag} ${meta.name}  ${meta.word_count}`
+      : `${meta.flag} ${meta.name}`,
   }));
   _showPickerSheet('Active Dictionary', options, state.currentLang, (val) => {
     switchLanguage(val);
@@ -107,7 +104,7 @@ function _openIntervalPicker() {
 
 function _openQuietStartPicker() {
   const options = Array.from({ length: 24 }, (_, i) => {
-    const h = String(i).padStart(2, '0');
+    const h = String(23 - i).padStart(2, '0');
     return { value: `${h}:00`, label: `${h}:00` };
   });
   const currentVal = document.getElementById('set-quiet-start').value;
@@ -239,7 +236,7 @@ export async function loadSettings() {
       else el.textContent = `Every ${val / 60} hours`;
     }
 
-    if (document.getElementById('info-words')) document.getElementById('info-words').textContent = `Dictionary: ${s.total_words || 0} words`;
+
   } catch(e) { console.error(e); }
 }
 

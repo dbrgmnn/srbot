@@ -19,7 +19,14 @@ def _is_valid_time(value: str) -> bool:
 def setup_routes_settings(app: web.Application, db: aiosqlite.Connection):
 
     async def get_languages_list(request: web.Request) -> web.Response:
-        return web.json_response({"ok": True, "result": {"languages": LANGUAGES}})
+        user_id = request["user_id"]
+        user_repo = UserRepo(db)
+        counts = await user_repo.get_words_count_per_language(user_id)
+        languages = {
+            code: {**meta, "word_count": counts.get(code, 0)}
+            for code, meta in LANGUAGES.items()
+        }
+        return web.json_response({"ok": True, "result": {"languages": languages}})
 
     async def get_settings(request: web.Request) -> web.Response:
         user_id = request["user_id"]
