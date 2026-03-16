@@ -1,6 +1,8 @@
 import hashlib
 import hmac
+import time
 from urllib.parse import parse_qsl
+from db.repository import UserRepo
 
 
 def verify_init_data(init_data: str, bot_token: str, expires_in: int) -> dict | None:
@@ -10,7 +12,6 @@ def verify_init_data(init_data: str, bot_token: str, expires_in: int) -> dict | 
     if not received_hash:
         return None
 
-    import time
     # Check expiration (auth_date is in seconds)
     auth_date_raw = params.get("auth_date", "0")
     try:
@@ -39,7 +40,6 @@ async def verify_bearer_token(request, db) -> int | None:
         return None
     
     token = auth_header.split(" ")[1]
-    from db.repository import UserRepo
     user_repo = UserRepo(db)
     user_id = await user_repo.get_user_id_by_token(token)
     return user_id

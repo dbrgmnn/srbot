@@ -1,13 +1,17 @@
 import logging
+import json
 from pathlib import Path
 from aiohttp import web
 import aiosqlite
 
 from config import Config
+from api.auth import verify_init_data
 from api.routes.init import setup_routes_init
 from api.routes.words import setup_routes_words
 from api.routes.practice import setup_routes_practice
 from api.routes.settings import setup_routes_settings
+from core.languages import LANGUAGES
+from db.repository import UserRepo
 
 logger = logging.getLogger(__name__)
 
@@ -36,12 +40,10 @@ async def create_app(config: Config, db: aiosqlite.Connection, scheduler=None) -
         if not request.path.startswith("/api/") or request.path.startswith("/api/external/"):
             return await handler(request)
         
-        from api.auth import verify_init_data
         params = verify_init_data(request.headers.get("X-Init-Data", ""), config.bot_token, config.token_expiry)
         if not params:
             return web.json_response({"error": "unauthorized"}, status=401)
         
-        import json
         try:
             user = json.loads(params.get("user", "{}"))
             telegram_id = int(user["id"])
@@ -53,14 +55,11 @@ async def create_app(config: Config, db: aiosqlite.Connection, scheduler=None) -
         
         # Get language and timezone from headers
         lang = request.headers.get("X-Language", config.default_lang).lower()
-        # Ensure it's in our supported list
-        from core.languages import LANGUAGES
         if lang not in LANGUAGES:
             lang = config.default_lang
 
         tz = request.headers.get("X-Timezone", config.default_timezone)
 
-        from db.repository import UserRepo
         user_repo = UserRepo(db)
         user_id = await user_repo.get_or_create(telegram_id, lang, tz, config)
         

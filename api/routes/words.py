@@ -1,7 +1,10 @@
+import csv
+import io
 from pathlib import Path
 from aiohttp import web
 import aiosqlite
 from db.repository import UserRepo, WordRepo
+from api.auth import verify_bearer_token
 
 
 def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
@@ -58,7 +61,7 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
                 "msg": "⚠️ Provided data is empty after cleaning"
             }, status=400)
             
-        lang = body.get("language", "de").lower()
+        lang = body.get("language", "en").lower()
         word_repo = WordRepo(db)
         added_count = await word_repo.add_words_batch(user_id, lang, words_data)
         
@@ -159,8 +162,6 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         return web.json_response({"words": words})
 
     async def export_words(request: web.Request) -> web.Response:
-        import csv
-        import io
         user_id = request["user_id"]
         lang = request['language']
         word_repo = WordRepo(db)

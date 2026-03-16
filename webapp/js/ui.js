@@ -22,7 +22,11 @@ export function showScreen(name) {
   if (name === 'home') {
     if (tg.enableVerticalSwipe) tg.enableVerticalSwipe();
     loadHome();
+  } else {
+    // Enable for all screens except practice
+    if (name !== 'practice' && tg.enableVerticalSwipe) tg.enableVerticalSwipe();
   }
+
   if (name === 'practice') {
     if (tg.disableVerticalSwipe) tg.disableVerticalSwipe();
   }
