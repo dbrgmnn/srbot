@@ -142,7 +142,7 @@ function renderWord() {
 
   const typeEl = document.getElementById('practice-type');
   if (typeEl) {
-    const isReview = (word.repetitions || 0) > 0;
+    const isReview = !!word.started_at;
     typeEl.textContent = isReview ? 'Review' : 'New';
     typeEl.className = 'practice-badge ' + (isReview ? 'practice-badge-review' : 'practice-badge-new');
   }

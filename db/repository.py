@@ -246,7 +246,7 @@ class WordRepo:
     async def get_session_words(self, user_id: int, language: str, new_limit: int) -> list[dict]:
         now = datetime.now(tz=timezone.utc).isoformat()
         cursor = await self.db.execute(
-            """SELECT id, word, translation, example, level, repetitions FROM words
+            """SELECT id, word, translation, example, level, repetitions, started_at FROM words
                 WHERE user_id = ? AND language = ? AND started_at IS NOT NULL AND next_review <= ?
                 ORDER BY next_review ASC""",
             (user_id, language, now),
@@ -256,7 +256,7 @@ class WordRepo:
         new_words = []
         if new_limit > 0:
             cursor = await self.db.execute(
-                """SELECT id, word, translation, example, level, repetitions FROM words
+                """SELECT id, word, translation, example, level, repetitions, started_at FROM words
                     WHERE user_id = ? AND language = ? AND started_at IS NULL
                     ORDER BY RANDOM()
                     LIMIT ?""",
