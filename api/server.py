@@ -4,7 +4,6 @@ from aiohttp import web
 import aiosqlite
 
 from config import Config
-from api.auth import get_user_id
 from api.routes.init import setup_routes_init
 from api.routes.words import setup_routes_words
 from api.routes.practice import setup_routes_practice
