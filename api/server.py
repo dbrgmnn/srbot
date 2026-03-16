@@ -37,9 +37,20 @@ async def create_app(config: Config, db: aiosqlite.Connection, scheduler=None) -
         if not request.path.startswith("/api/") or request.path.startswith("/api/external/"):
             return await handler(request)
         
-        telegram_id = get_user_id(request.headers.get("X-Init-Data", ""), config.bot_token)
-        if not telegram_id or telegram_id not in config.allowed_users:
+        from api.auth import verify_init_data
+        params = verify_init_data(request.headers.get("X-Init-Data", ""), config.bot_token, config.token_expiry)
+        if not params:
             return web.json_response({"error": "unauthorized"}, status=401)
+        
+        import json
+        try:
+            user = json.loads(params.get("user", "{}"))
+            telegram_id = int(user["id"])
+        except (json.JSONDecodeError, KeyError, TypeError):
+            return web.json_response({"error": "invalid_user"}, status=401)
+
+        if telegram_id not in config.allowed_users:
+            return web.json_response({"error": "forbidden"}, status=403)
         
         from db.repository import UserRepo
         user_repo = UserRepo(db)
@@ -50,6 +61,7 @@ async def create_app(config: Config, db: aiosqlite.Connection, scheduler=None) -
         return await handler(request)
 
     app = web.Application(middlewares=[cors_middleware, auth_middleware])
+    app["config"] = config
     app["db"] = db
     app["scheduler"] = scheduler
 

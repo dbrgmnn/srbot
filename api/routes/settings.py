@@ -58,10 +58,12 @@ def setup_routes_settings(app: web.Application, db: aiosqlite.Connection):
                     {"error": "invalid_number", "msg": "daily_limit must be an integer"},
                     status=400,
                 )
-            if 5 <= limit <= 50:
+            
+            config = request.app["config"]
+            if config.min_daily_limit <= limit <= config.max_daily_limit:
                 await user_repo.update_daily_limit(telegram_id, limit, lang)
             else:
-                return web.json_response({"error": "limit_out_of_range", "msg": "Limit must be between 5 and 50"}, status=400)
+                return web.json_response({"error": "limit_out_of_range", "msg": f"Limit must be between {config.min_daily_limit} and {config.max_daily_limit}"}, status=400)
 
         if "notification_interval_minutes" in body:
             try:
@@ -71,13 +73,15 @@ def setup_routes_settings(app: web.Application, db: aiosqlite.Connection):
                     {"error": "invalid_number", "msg": "notification_interval_minutes must be an integer"},
                     status=400,
                 )
-            if 1 <= interval <= 480:
+            
+            config = request.app["config"]
+            if config.min_notify_interval <= interval <= config.max_notify_interval:
                 await user_repo.update_notification_interval(telegram_id, interval, lang)
                 scheduler = request.app["scheduler"]
                 if scheduler:
                     await reschedule(scheduler, db)
             else:
-                return web.json_response({"error": "interval_out_of_range", "msg": "Interval must be between 1 and 480"}, status=400)
+                return web.json_response({"error": "interval_out_of_range", "msg": f"Interval must be between {config.min_notify_interval} and {config.max_notify_interval}"}, status=400)
 
         if "practice_mode" in body:
             mode = body.get("practice_mode")

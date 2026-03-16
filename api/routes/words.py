@@ -188,7 +188,8 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         lang = get_language(request)
         word_repo = WordRepo(db)
         
-        csv_path = Path(__file__).parent.parent.parent / "data" / f"words_{lang}.csv"
+        config = request.app["config"]
+        csv_path = config.data_dir / f"words_{lang}.csv"
         
         if not csv_path.exists():
             return web.json_response({"error": f"No words file for {lang}"}, status=404)

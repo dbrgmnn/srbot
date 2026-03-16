@@ -5,7 +5,7 @@ import time
 from urllib.parse import parse_qsl
 
 
-def verify_init_data(init_data: str, bot_token: str, expires_in: int = 3600) -> dict | None:
+def verify_init_data(init_data: str, bot_token: str, expires_in: int) -> dict | None:
     # verifies Telegram WebApp initData signature and expiration
     params = dict(parse_qsl(init_data, keep_blank_values=True))
     received_hash = params.pop("hash", None)

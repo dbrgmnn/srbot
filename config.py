@@ -5,12 +5,20 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
+from pathlib import Path
+
 @dataclass
 class Config:
     bot_token: str
     allowed_users: list[int]
     db_path: str
     api_port: int
+    token_expiry: int = 3600
+    data_dir: Path = Path(__file__).parent / "data"
+    min_daily_limit: int = 5
+    max_daily_limit: int = 50
+    min_notify_interval: int = 10
+    max_notify_interval: int = 480
 
 
 def load_config() -> Config:
@@ -19,7 +27,6 @@ def load_config() -> Config:
         raise ValueError("BOT_TOKEN environment variable is not set")
 
     allowed_raw = os.getenv("ALLOWED_USERS", "")
-    # Keep the order from .env
     allowed_users = [int(uid.strip()) for uid in allowed_raw.split(",") if uid.strip().isdigit()]
 
     if not allowed_users:
@@ -30,4 +37,10 @@ def load_config() -> Config:
         allowed_users=allowed_users,
         db_path=os.getenv("DB_PATH", "srbot.db"),
         api_port=int(os.getenv("API_PORT", "8080")),
+        token_expiry=int(os.getenv("TOKEN_EXPIRY", "3600")),
+        data_dir=Path(os.getenv("DATA_DIR", str(Path(__file__).parent / "data"))),
+        min_daily_limit=int(os.getenv("MIN_DAILY_LIMIT", "5")),
+        max_daily_limit=int(os.getenv("MAX_DAILY_LIMIT", "50")),
+        min_notify_interval=int(os.getenv("MIN_NOTIFY_INTERVAL", "10")),
+        max_notify_interval=int(os.getenv("MAX_NOTIFY_INTERVAL", "480")),
     )
