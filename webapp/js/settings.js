@@ -52,18 +52,12 @@ export async function loadSettings() {
     }
     if (langSelect) langSelect.value = s.language || 'de';
     
-    // Fill timezone select if it's empty
-    const tzSelect = document.getElementById('set-timezone');
-    if (tzSelect && tzSelect.options.length === 0) {
-      const allTz = Intl.supportedValuesOf('timeZone');
-      allTz.forEach(tz => {
-        const opt = document.createElement('option');
-        opt.value = tz;
-        opt.textContent = tz;
-        tzSelect.appendChild(opt);
-      });
+    // Automatic timezone detection
+    const deviceTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    if (deviceTz && s.timezone !== deviceTz) {
+      console.log(`[settings] detected timezone change: ${s.timezone} -> ${deviceTz}`);
+      await saveSetting('timezone', deviceTz, false);
     }
-    if (tzSelect) tzSelect.value = s.timezone || 'Europe/Berlin';
 
     if (document.getElementById('set-quiet-start')) document.getElementById('set-quiet-start').value = s.quiet_start || '23:00';
     if (document.getElementById('set-quiet-end')) document.getElementById('set-quiet-end').value = s.quiet_end || '08:00';
@@ -75,12 +69,12 @@ export async function loadSettings() {
   } catch(e) { console.error(e); }
 }
 
-export async function saveSetting(key, val) {
+export async function saveSetting(key, val, showToast = true) {
   try { 
     await POST('/api/settings', { [key]: val }); 
-    toast('Settings saved');
+    if (showToast) toast('Settings saved');
     if (key === 'practice_mode' || key === 'daily_limit' || key === 'timezone') loadHome();
-  } catch(e) { toast('Save failed'); }
+  } catch(e) { if (showToast) toast('Save failed'); }
 }
 
 export function setPracticeMode(mode) {

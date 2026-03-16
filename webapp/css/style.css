@@ -305,18 +305,6 @@ body {
 .stepper span { min-width: 36px; text-align: center; font-weight: 700; font-size: 15px; }
 
 .time-wrap { display: flex; align-items: center; gap: 6px; }
-.settings-select {
-  background: var(--bg);
-  border: none;
-  color: var(--text);
-  padding: 6px 10px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-family: inherit;
-  outline: none;
-  min-width: 120px;
-  cursor: pointer;
-}
 input[type="time"], input[type="number"] {
   background: var(--bg);
   border: none;
