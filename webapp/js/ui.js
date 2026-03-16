@@ -20,11 +20,11 @@ export function showScreen(name) {
   if (nav) nav.classList.add('active');
   
   if (name === 'home') {
-    if (tg.enableVerticalSwipes) tg.enableVerticalSwipes();
+    if (tg.enableVerticalSwipe) tg.enableVerticalSwipe();
     loadHome();
   }
   if (name === 'practice') {
-    if (tg.disableVerticalSwipes) tg.disableVerticalSwipes();
+    if (tg.disableVerticalSwipe) tg.disableVerticalSwipe();
   }
 }
 
@@ -99,7 +99,7 @@ export async function loadHome(data) {
     if (document.getElementById('stat-due')) document.getElementById('stat-due').textContent = due;
     if (document.getElementById('stat-new')) document.getElementById('stat-new').textContent = availableNew;
 
-    const lang = (settings.language || 'de').toUpperCase();
+    const lang = (settings.language || '').toUpperCase();
     const total = stats.total || 0;
     const langEl = document.getElementById('header-lang');
     const countEl = document.getElementById('header-count');

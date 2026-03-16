@@ -1,8 +1,4 @@
-const tg = window.Telegram.WebApp;
-tg.ready();
-tg.expand();
-
-import { GET, POST, setLanguage, state } from './api.js';
+import { setLanguage, state } from './api.js';
 import { loadHome, showScreen, toast } from './ui.js';
 import { startPractice, playAudio, exitPractice } from './practice.js';
 import { 
@@ -13,6 +9,11 @@ import {
   switchLanguage, changeLimit, changeInterval, loadSettings,
   saveSetting, setPracticeMode, preloadDefaultWords
 } from './settings.js';
+
+const tg = window.Telegram.WebApp;
+tg.ready();
+tg.expand();
+if (tg.disableVerticalSwipe) tg.disableVerticalSwipe();
 
 // Expose functions to window for HTML onclick attributes
 window.showScreen = (name) => {
@@ -36,13 +37,10 @@ window.clearAllWords = clearAllWords;
 window.shareWords = shareWords;
 window.loadSettings = loadSettings;
 window.preloadDefaultWords = preloadDefaultWords;
+
 async function init() {
   try {
-    const data = await GET('/api/init');
-    const lang = data.settings?.language || 'de';
-    state.ttsCode = data.tts_code || 'en-US';
-    setLanguage(lang); // Sync API module
-    await loadHome(data);
+    await loadHome();
   } catch (e) {
     toast('Init failed');
     console.error(e);

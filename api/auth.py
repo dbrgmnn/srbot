@@ -1,7 +1,5 @@
 import hashlib
 import hmac
-import json
-import time
 from urllib.parse import parse_qsl
 
 
@@ -12,6 +10,7 @@ def verify_init_data(init_data: str, bot_token: str, expires_in: int) -> dict | 
     if not received_hash:
         return None
 
+    import time
     # Check expiration (auth_date is in seconds)
     auth_date_raw = params.get("auth_date", "0")
     try:
