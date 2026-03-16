@@ -42,8 +42,22 @@ window.openPicker = openPicker;
 window.closePicker = closePicker;
 window.preloadDefaultWords = preloadDefaultWords;
 
+function initGlobalHaptics() {
+  // Common interactive elements selector
+  const selector = 'button, .nav-btn, .picker-item, .stat-card, .btn-action, .settings-row, .word-row-content, .del-btn, .file-input-label, .stepper button';
+  
+  document.addEventListener('click', (e) => {
+    const target = e.target.closest(selector);
+    if (target) {
+      // Light impact for regular button clicks
+      tg.HapticFeedback.impactOccurred('light');
+    }
+  }, { passive: true });
+}
+
 async function init() {
   try {
+    initGlobalHaptics();
     await loadHome();
   } catch (e) {
     toast('Init failed');

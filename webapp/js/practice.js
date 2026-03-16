@@ -84,6 +84,7 @@ function handleEnd(x, y) {
 
   if (!isSwiping) {
     card.classList.toggle('flipped');
+    // Vibration for card flip (interactive gesture)
     tg.HapticFeedback.impactOccurred('light');
     const rot = card.classList.contains('flipped') ? 180 : 0;
     card.style.transform = `rotateY(${rot}deg)`;
@@ -105,7 +106,6 @@ export function initSwipe() {
   const card = document.getElementById('word-card');
   if (!card) return;
   
-  // Use Pointer Events for universal support and no double-firing
   card.onpointerdown = (e) => {
     card.setPointerCapture(e.pointerId);
     handleStart(e.clientX, e.clientY);
@@ -204,6 +204,7 @@ async function grade(quality) {
   else if (quality === 3) card.style.transform = `translate(0, -1000px) rotateY(${baseRot}deg) scale(0.5)`;
   card.style.opacity = '0';
 
+  // Haptic Feedback for the gesture result
   tg.HapticFeedback.notificationOccurred('success');
   POST('/api/grade', { word_id: word.id, quality }).catch(() => {});
   sessionIdx++;
@@ -212,7 +213,7 @@ async function grade(quality) {
 
 export async function undo() {
   if (practiceHistory.length === 0) return;
-  isGrading = false; // Reset grading state to allow immediate interaction
+  isGrading = false;
   const last = practiceHistory.pop();
   
   try {
@@ -232,7 +233,6 @@ export async function undo() {
   sessionIdx = last.sessionIdx;
   sessionStats = last.stats;
   renderWord();
-  tg.HapticFeedback.impactOccurred('medium');
 }
 
 export function playAudio(e) {
