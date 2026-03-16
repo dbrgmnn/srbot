@@ -71,16 +71,15 @@ body {
 .header-title { font-size: 20px; font-weight: 700; color: var(--text); opacity: 0.9; }
 .header-centered { justify-content: center; }
 .header-capsule {
-  background: var(--accent);
-  color: var(--btn-text);
-  padding: 6px 18px;
-  border-radius: 20px;
-  font-weight: 800;
-  font-size: 15px;
+  background: rgba(10, 132, 255, 0.12);
+  color: var(--accent);
+  padding: 6px 14px;
+  border-radius: 16px;
+  font-weight: 700;
+  font-size: 14px;
   display: flex;
-  gap: 8px;
-  box-shadow: 0 4px 15px rgba(10, 132, 255, 0.25);
-  letter-spacing: 0.03em;
+  gap: 6px;
+  letter-spacing: 0.01em;
 }
 .header-title-add { margin-bottom: 24px; }
 .header-title-summary { margin-bottom: 20px; text-align: center; }
@@ -203,9 +202,9 @@ body {
   background: var(--accent);
   transition: width 0.4s ease;
 }
-.practice-badge-new { background: rgba(48, 209, 88, 0.15); color: #30d158; }
-.practice-badge-review { background: rgba(10, 132, 255, 0.15); color: var(--accent); }
-.practice-badge-info { background: rgba(255, 255, 255, 0.08); color: var(--hint); }
+.practice-badge-new { background: rgba(48, 209, 88, 0.1); color: #30d158; opacity: 0.9; }
+.practice-badge-review { background: rgba(10, 132, 255, 0.1); color: var(--accent); opacity: 0.9; }
+.practice-badge-info { background: rgba(255, 255, 255, 0.05); color: var(--hint); }
 
 .word-card-container {
   flex: 1;
