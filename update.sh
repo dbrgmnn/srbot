@@ -13,10 +13,10 @@ if [ -f requirements.txt ]; then
     if ! diff -q .req.tmp .req.md5 >/dev/null 2>&1; then
         echo "-> Requirements changed, installing..."
         source venv/bin/activate
-        pip install -r requirements.txt --quiet
+        pip install -r requirements.txt
         mv .req.tmp .req.md5
     else
-        echo "-> No changes in requirements.txt, skipping pip."
+        echo "-> No changes in requirements.txt"
         rm .req.tmp
     fi
 fi
