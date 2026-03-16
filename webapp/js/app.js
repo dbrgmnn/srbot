@@ -14,6 +14,7 @@ import {
 const tg = window.Telegram.WebApp;
 tg.ready();
 tg.expand();
+tg.isVerticalSwipesEnabled = false;
 
 // Expose functions to window for HTML onclick attributes
 window.showScreen = (name) => {
