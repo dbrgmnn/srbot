@@ -20,21 +20,22 @@ logger = logging.getLogger(__name__)
 
 
 async def preload_words(db, config) -> None:
-    csv_path = Path(__file__).parent / "data" / "words_de.csv"
+    csv_path = config.data_dir / f"words_{config.default_lang}.csv"
     word_repo = WordRepo(db)
+    if not csv_path.exists():
+        logger.info(f"No {csv_path} found, skipping preload")
+        return
+        
     words = word_repo.load_csv_words(csv_path)
     if not words:
-        if csv_path.exists():
-            logger.info("data/words_de.csv is empty, skipping preload")
-        else:
-            logger.info("No data/words_de.csv found, skipping preload")
+        logger.info(f"{csv_path} is empty, skipping preload")
         return
     
     user_repo = UserRepo(db)
     for telegram_id in config.allowed_users:
-        user_id = await user_repo.get_or_create(telegram_id)
-        added = await word_repo.add_words_batch(user_id, "de", words)
-        logger.info(f"Preload: user {telegram_id} — added {added} new words (skipped duplicates)")
+        user_id = await user_repo.get_or_create(telegram_id, config.default_lang, config.default_timezone, config)
+        added = await word_repo.add_words_batch(user_id, config.default_lang, words)
+        logger.info(f"Preload: user {telegram_id} ({config.default_lang}) — added {added} new words")
 
 
 async def main():
