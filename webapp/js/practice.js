@@ -9,7 +9,7 @@ let sessionStats = { reviewed: 0, new: 0, good: 0, hard: 0, again: 0 };
 let practiceHistory = [];
 let isGrading = false;
 let isSwiping = false;
-let touchStartX = 0, touchStartY = 0, touchStartTime = 0;
+let pointerStartX = 0, pointerStartY = 0, pointerStartTime = 0;
 let rafId = null;
 
 export async function startPractice() {
@@ -25,13 +25,11 @@ export async function startPractice() {
   } catch(e) { console.error(e); }
 }
 
-let isMouseDown = false;
-
 function handleStart(x, y) {
   if (isGrading) return;
-  touchStartX = x;
-  touchStartY = y;
-  touchStartTime = Date.now();
+  pointerStartX = x;
+  pointerStartY = y;
+  pointerStartTime = Date.now();
   isSwiping = false;
   const card = document.getElementById('word-card');
   if (card) {
@@ -41,9 +39,9 @@ function handleStart(x, y) {
 }
 
 function handleMove(x, y) {
-  if (isGrading) return;
-  const deltaX = x - touchStartX;
-  const deltaY = y - touchStartY;
+  if (isGrading || (pointerStartX === 0 && pointerStartY === 0)) return;
+  const deltaX = x - pointerStartX;
+  const deltaY = y - pointerStartY;
   if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) isSwiping = true;
 
   if (isSwiping) {
@@ -72,15 +70,16 @@ function handleMove(x, y) {
 }
 
 function handleEnd(x, y) {
-  if (isGrading) return;
+  if (isGrading || (pointerStartX === 0 && pointerStartY === 0)) return;
   if (rafId) cancelAnimationFrame(rafId);
   const card = document.getElementById('word-card');
   if (!card) return;
   card.classList.remove('swiping');
   card.style.cursor = 'grab';
-  const deltaTime = Date.now() - touchStartTime;
-  const deltaX = x - touchStartX;
-  const deltaY = y - touchStartY;
+
+  const deltaTime = Date.now() - pointerStartTime;
+  const deltaX = x - pointerStartX;
+  const deltaY = y - pointerStartY;
   const velocity = Math.abs(deltaX) / (deltaTime || 1);
 
   if (!isSwiping) {
@@ -99,38 +98,30 @@ function handleEnd(x, y) {
       card.style.transform = `rotateY(${rot}deg)`;
     }
   }
+  pointerStartX = 0; pointerStartY = 0;
 }
 
 export function initSwipe() {
   const card = document.getElementById('word-card');
   if (!card) return;
-  card.style.cursor = 'grab';
-
-  card.ontouchstart = (e) => {
-    handleStart(e.touches[0].clientX, e.touches[0].clientY);
-  };
-  card.ontouchmove = (e) => {
-    handleMove(e.touches[0].clientX, e.touches[0].clientY);
-  };
-  card.ontouchend = (e) => {
-    handleEnd(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
-  };
-
-  card.onmousedown = (e) => {
-    isMouseDown = true;
+  
+  // Use Pointer Events for universal support and no double-firing
+  card.onpointerdown = (e) => {
+    card.setPointerCapture(e.pointerId);
     handleStart(e.clientX, e.clientY);
   };
+  card.onpointermove = (e) => {
+    handleMove(e.clientX, e.clientY);
+  };
+  card.onpointerup = (e) => {
+    card.releasePointerCapture(e.pointerId);
+    handleEnd(e.clientX, e.clientY);
+  };
+  card.onpointercancel = (e) => {
+    card.releasePointerCapture(e.pointerId);
+    pointerStartX = 0; pointerStartY = 0;
+  };
 }
-
-window.onmousemove = (e) => {
-  if (!isMouseDown) return;
-  handleMove(e.clientX, e.clientY);
-};
-window.onmouseup = (e) => {
-  if (!isMouseDown) return;
-  isMouseDown = false;
-  handleEnd(e.clientX, e.clientY);
-};
 
 function renderWord() {
   if (sessionIdx >= sessionWords.length) { 
@@ -220,7 +211,8 @@ async function grade(quality) {
 }
 
 export async function undo() {
-  if (practiceHistory.length === 0 || isGrading) return;
+  if (practiceHistory.length === 0) return;
+  isGrading = false; // Reset grading state to allow immediate interaction
   const last = practiceHistory.pop();
   
   try {
@@ -235,11 +227,7 @@ export async function undo() {
         started_at: last.word.started_at ?? null
       }
     });
-  } catch (e) { 
-    console.error('Undo failed', e); 
-    // If undo fails on server, we might want to put it back into history 
-    // but for now we just log it as it should not happen with full fields
-  }
+  } catch (e) { console.error('Undo failed', e); }
 
   sessionIdx = last.sessionIdx;
   sessionStats = last.stats;
