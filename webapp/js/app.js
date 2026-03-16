@@ -6,7 +6,7 @@ import {
   saveEdit, closeEdit, clearAllWords, shareWords 
 } from './dictionary.js';
 import {
-  switchLanguage, changeLimit, changeInterval, loadSettings,
+  switchLanguage, loadSettings,
   saveSetting, setPracticeMode, preloadDefaultWords,
   openPicker, closePicker
 } from './settings.js';
@@ -22,8 +22,6 @@ window.showScreen = (name) => {
   if (name === 'settings') loadSettings();
 };
 window.switchLanguage = switchLanguage;
-window.changeLimit = changeLimit;
-window.changeInterval = changeInterval;
 window.startPractice = startPractice;
 window.playAudio = playAudio;
 window.exitPractice = exitPractice;

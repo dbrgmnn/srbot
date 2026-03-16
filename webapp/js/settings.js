@@ -23,6 +23,9 @@ export function openPicker(type, context = null) {
   if (type === 'language') _openLanguagePicker();
   else if (type === 'practice_mode') _openPracticeModePicker();
   else if (type === 'level') _openLevelPicker(context);
+  else if (type === 'daily_limit') _openLimitPicker();
+  else if (type === 'notification_interval_minutes') _openIntervalPicker();
+  else if (type === 'quiet_hours') _openQuietStartPicker();
 }
 
 async function _openLanguagePicker() {
@@ -60,6 +63,83 @@ function _openLevelPicker(context) {
     hiddenInput.value = val;
     displaySpan.textContent = val || 'Level';
     displaySpan.style.color = val ? 'var(--text)' : 'var(--hint)';
+  });
+}
+
+function _openLimitPicker() {
+  const options = [];
+  for (let i = state.min_daily_limit; i <= state.max_daily_limit; i += 5) {
+    options.push({ value: i.toString(), label: i.toString() });
+  }
+  
+  const currentVal = document.getElementById('set-limit-val').textContent;
+  
+  _showPickerSheet('New words limit', options, currentVal, (val) => {
+    document.getElementById('set-limit-val').textContent = val;
+    saveSetting('daily_limit', parseInt(val));
+  });
+}
+
+function _openIntervalPicker() {
+  const options = [
+    { value: '10', label: 'Every 10 min' },
+    { value: '30', label: 'Every 30 min' },
+    { value: '60', label: 'Every 1 hour' },
+    { value: '120', label: 'Every 2 hours' },
+    { value: '240', label: 'Every 4 hours' },
+    { value: '480', label: 'Every 8 hours' }
+  ];
+  
+  // Keep only options within limits
+  const filteredOptions = options.filter(o => 
+    parseInt(o.value) >= state.min_notify_interval && parseInt(o.value) <= state.max_notify_interval
+  );
+
+  const currentVal = document.getElementById('set-notify-interval').dataset.value || '240';
+  
+  _showPickerSheet('Notification frequency', filteredOptions, currentVal, (val) => {
+    const opt = filteredOptions.find(o => o.value === val);
+    const el = document.getElementById('set-notify-interval');
+    el.textContent = opt ? opt.label : `Every ${val} min`;
+    el.dataset.value = val;
+    saveSetting('notification_interval_minutes', parseInt(val));
+  });
+}
+
+function _openQuietStartPicker() {
+  const options = [
+    { value: '20:00', label: '20:00' },
+    { value: '21:00', label: '21:00' },
+    { value: '22:00', label: '22:00' },
+    { value: '23:00', label: '23:00' },
+    { value: '00:00', label: '00:00' }
+  ];
+  const currentVal = document.getElementById('set-quiet-start').value;
+  
+  _showPickerSheet('Quiet hours (Start)', options, currentVal, (val) => {
+    document.getElementById('set-quiet-start').value = val;
+    // Slight delay before opening the second picker
+    setTimeout(() => {
+      _openQuietEndPicker(val);
+    }, 100);
+  });
+}
+
+function _openQuietEndPicker(startVal) {
+  const options = [
+    { value: '06:00', label: '06:00' },
+    { value: '07:00', label: '07:00' },
+    { value: '08:00', label: '08:00' },
+    { value: '09:00', label: '09:00' },
+    { value: '10:00', label: '10:00' }
+  ];
+  const currentVal = document.getElementById('set-quiet-end').value;
+  
+  _showPickerSheet('Quiet hours (End)', options, currentVal, (val) => {
+    document.getElementById('set-quiet-end').value = val;
+    document.getElementById('quiet-hours-display').textContent = `${startVal} — ${val}`;
+    saveSetting('quiet_start', startVal, false);
+    saveSetting('quiet_end', val);
   });
 }
 
@@ -113,26 +193,6 @@ export async function switchLanguage(lang) {
   } catch (e) { toast('Error switching language'); }
 }
 
-export async function changeLimit(delta) {
-  const el = document.getElementById('set-limit-val');
-  let val = parseInt(el.textContent) + delta;
-  if (val < state.min_daily_limit) val = state.min_daily_limit; 
-  if (val > state.max_daily_limit) val = state.max_daily_limit;
-  el.textContent = val;
-  tg.HapticFeedback.impactOccurred('light');
-  await saveSetting('daily_limit', val);
-}
-
-export async function changeInterval(delta) {
-  const el = document.getElementById('set-notify-interval');
-  let val = parseInt(el.textContent) + delta;
-  if (val < state.min_notify_interval) val = state.min_notify_interval; 
-  if (val > state.max_notify_interval) val = state.max_notify_interval;
-  el.textContent = val;
-  tg.HapticFeedback.impactOccurred('light');
-  await saveSetting('notification_interval_minutes', val);
-}
-
 export async function loadSettings() {
   try {
     const resp = await GET('/api/settings');
@@ -171,8 +231,22 @@ export async function loadSettings() {
 
     if (document.getElementById('set-quiet-start')) document.getElementById('set-quiet-start').value = s.quiet_start || '23:00';
     if (document.getElementById('set-quiet-end')) document.getElementById('set-quiet-end').value = s.quiet_end || '08:00';
+    if (document.getElementById('quiet-hours-display')) {
+      const qStart = s.quiet_start || '23:00';
+      const qEnd = s.quiet_end || '08:00';
+      document.getElementById('quiet-hours-display').textContent = `${qStart} — ${qEnd}`;
+    }
+
     if (document.getElementById('set-limit-val')) document.getElementById('set-limit-val').textContent = s.daily_limit || 20;
-    if (document.getElementById('set-notify-interval')) document.getElementById('set-notify-interval').textContent = s.notification_interval_minutes || 240;
+    
+    if (document.getElementById('set-notify-interval')) {
+      const val = s.notification_interval_minutes || 240;
+      const el = document.getElementById('set-notify-interval');
+      el.dataset.value = val;
+      if (val < 60) el.textContent = `Every ${val} min`;
+      else if (val === 60) el.textContent = `Every 1 hour`;
+      else el.textContent = `Every ${val / 60} hours`;
+    }
 
     if (document.getElementById('info-words')) document.getElementById('info-words').textContent = `Dictionary: ${s.total_words || 0} words`;
   } catch(e) { console.error(e); }
