@@ -286,20 +286,6 @@ body {
 .settings-row:last-child { border-bottom: none; }
 .settings-label { font-size: 15px; }
 
-.practice-switch { display: flex; background: var(--bg); border-radius: 10px; padding: 3px; }
-.practice-opt {
-  padding: 6px 14px;
-  border: none;
-  border-radius: 8px;
-  background: none;
-  color: var(--hint);
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all .15s;
-}
-.practice-opt.active { background: var(--accent); color: var(--btn-text); }
-
 .stepper { display: flex; align-items: center; background: var(--bg); border-radius: 10px; padding: 2px; }
 .stepper button { width: 34px; height: 34px; border: none; background: none; color: var(--accent); font-size: 20px; font-weight: 600; }
 .stepper span { min-width: 36px; text-align: center; font-weight: 700; font-size: 15px; }
