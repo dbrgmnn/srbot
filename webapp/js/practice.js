@@ -227,15 +227,19 @@ export async function undo() {
     await POST('/api/undo', { 
       word_id: last.word.id, 
       old_state: {
-        repetitions: last.word.repetitions,
-        easiness: last.word.easiness,
-        interval: last.word.interval,
-        next_review: last.word.next_review,
-        last_reviewed_at: last.word.last_reviewed_at || null,
-        started_at: last.word.started_at || null
+        repetitions: last.word.repetitions ?? 0,
+        easiness: last.word.easiness ?? 2.5,
+        interval: last.word.interval ?? 0,
+        next_review: last.word.next_review ?? null,
+        last_reviewed_at: last.word.last_reviewed_at ?? null,
+        started_at: last.word.started_at ?? null
       }
     });
-  } catch (e) { console.error('Undo failed', e); }
+  } catch (e) { 
+    console.error('Undo failed', e); 
+    // If undo fails on server, we might want to put it back into history 
+    // but for now we just log it as it should not happen with full fields
+  }
 
   sessionIdx = last.sessionIdx;
   sessionStats = last.stats;

@@ -69,12 +69,12 @@ def setup_routes_practice(app: web.Application, db: aiosqlite.Connection):
         word_repo = WordRepo(db)
         await word_repo.undo_word_review(
             word_id=word_id,
-            repetitions=old_state["repetitions"],
-            easiness=old_state["easiness"],
-            interval=old_state["interval"],
-            next_review=old_state["next_review"],
-            last_reviewed_at=old_state["last_reviewed_at"],
-            started_at=old_state["started_at"],
+            repetitions=old_state.get("repetitions", 0),
+            easiness=old_state.get("easiness", 2.5),
+            interval=old_state.get("interval", 0),
+            next_review=old_state.get("next_review"),
+            last_reviewed_at=old_state.get("last_reviewed_at"),
+            started_at=old_state.get("started_at"),
         )
         return web.json_response({"ok": True})
 
