@@ -350,7 +350,7 @@ class WordRepo:
         await self.db.execute(
             """UPDATE words SET word = ?, translation = ?, example = ?, level = ?
                WHERE id = ? AND user_id = ?""",
-            (word, translation, example or None, level or None, word_id, user_id),
+            (word, translation, example, level, word_id, user_id),
         )
         await self.db.commit()
 

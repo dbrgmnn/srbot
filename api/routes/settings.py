@@ -29,11 +29,20 @@ def setup_routes_settings(app: web.Application, db: aiosqlite.Connection):
         word_repo = WordRepo(db)
         settings = await user_repo.get_user_settings(telegram_id, lang)
         stats = await word_repo.get_full_stats(user_id, lang, tz_name=settings.get("timezone", "UTC"))
+        
+        config = request.app["config"]
+        
         return web.json_response({
             "ok": True,
             "result": {
                 **settings,
                 "total_words": stats["total"],
+                "limits": {
+                    "min_daily_limit": config.min_daily_limit,
+                    "max_daily_limit": config.max_daily_limit,
+                    "min_notify_interval": config.min_notify_interval,
+                    "max_notify_interval": config.max_notify_interval,
+                }
             }
         })
 

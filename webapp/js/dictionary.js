@@ -26,6 +26,8 @@ export async function submitWords() {
     if (res.result && res.result.added) {
       toast(`Added: ${word}`);
       wordEl.value = ''; transEl.value = ''; exEl.value = ''; levelEl.value = '';
+      const levelDisp = document.getElementById('add-level-display');
+      if (levelDisp) { levelDisp.textContent = 'Level'; levelDisp.style.color = 'var(--hint)'; }
       loadHome();
     }
   } catch (e) { toast('Add failed'); }
@@ -133,7 +135,16 @@ export function openEdit(w) {
   document.getElementById('edit-word').value = w.word;
   document.getElementById('edit-translation').value = w.translation;
   document.getElementById('edit-example').value = w.example || '';
-  document.getElementById('edit-level').value = w.level || '';
+  
+  const levelVal = w.level || '';
+  const levelInput = document.getElementById('edit-level');
+  const levelDisp = document.getElementById('edit-level-display');
+  if (levelInput) levelInput.value = levelVal;
+  if (levelDisp) {
+    levelDisp.textContent = levelVal || 'Level';
+    levelDisp.style.color = levelVal ? 'var(--text)' : 'var(--hint)';
+  }
+
   document.getElementById('edit-overlay').classList.add('open');
   document.getElementById('edit-sheet').classList.add('open');
 }

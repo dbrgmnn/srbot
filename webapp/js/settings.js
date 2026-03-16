@@ -18,10 +18,11 @@ async function getLanguages() {
 
 let pickerCallback = null;
 
-export function openPicker(type) {
+export function openPicker(type, context = null) {
   tg.HapticFeedback.impactOccurred('light');
   if (type === 'language') _openLanguagePicker();
   else if (type === 'practice_mode') _openPracticeModePicker();
+  else if (type === 'level') _openLevelPicker(context);
 }
 
 async function _openLanguagePicker() {
@@ -42,6 +43,23 @@ function _openPracticeModePicker() {
   ];
   _showPickerSheet('Practice Mode', options, state.practiceMode, (val) => {
     setPracticeMode(val);
+  });
+}
+
+function _openLevelPicker(context) {
+  const levels = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
+  const options = levels.map(l => ({ value: l, label: l }));
+  // Add 'Clear' option
+  options.unshift({ value: '', label: 'None' });
+
+  const currentVal = document.getElementById(`${context}-level`).value;
+  
+  _showPickerSheet('Select Level', options, currentVal, (val) => {
+    const hiddenInput = document.getElementById(`${context}-level`);
+    const displaySpan = document.getElementById(`${context}-level-display`);
+    hiddenInput.value = val;
+    displaySpan.textContent = val || 'Level';
+    displaySpan.style.color = val ? 'var(--text)' : 'var(--hint)';
   });
 }
 
@@ -98,7 +116,8 @@ export async function switchLanguage(lang) {
 export async function changeLimit(delta) {
   const el = document.getElementById('set-limit-val');
   let val = parseInt(el.textContent) + delta;
-  if (val < 5) val = 5; if (val > 50) val = 50;
+  if (val < state.min_daily_limit) val = state.min_daily_limit; 
+  if (val > state.max_daily_limit) val = state.max_daily_limit;
   el.textContent = val;
   tg.HapticFeedback.impactOccurred('light');
   await saveSetting('daily_limit', val);
@@ -107,7 +126,8 @@ export async function changeLimit(delta) {
 export async function changeInterval(delta) {
   const el = document.getElementById('set-notify-interval');
   let val = parseInt(el.textContent) + delta;
-  if (val < 10) val = 10; if (val > 480) val = 480;
+  if (val < state.min_notify_interval) val = state.min_notify_interval; 
+  if (val > state.max_notify_interval) val = state.max_notify_interval;
   el.textContent = val;
   tg.HapticFeedback.impactOccurred('light');
   await saveSetting('notification_interval_minutes', val);
@@ -117,6 +137,14 @@ export async function loadSettings() {
   try {
     const resp = await GET('/api/settings');
     const s = resp.result;
+
+    // Update global state limits from API (source of truth)
+    if (s.limits) {
+      state.min_daily_limit = s.limits.min_daily_limit;
+      state.max_daily_limit = s.limits.max_daily_limit;
+      state.min_notify_interval = s.limits.min_notify_interval;
+      state.max_notify_interval = s.limits.max_notify_interval;
+    }
 
     // Automatic timezone detection
     const deviceTz = Intl.DateTimeFormat().resolvedOptions().timeZone;

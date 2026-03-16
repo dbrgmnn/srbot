@@ -99,15 +99,11 @@
       <input type="text" id="add-word" class="edit-input" placeholder="Word">
       <input type="text" id="add-translation" class="edit-input" placeholder="Translate">
       <input type="text" id="add-example" class="edit-input" placeholder="Example">
-      <select id="add-level" class="edit-input" style="width: 100%; margin-bottom: 10px; -webkit-appearance: none; appearance: none;">
-        <option value="">Level</option>
-        <option value="A1">A1</option>
-        <option value="A2">A2</option>
-        <option value="B1">B1</option>
-        <option value="B2">B2</option>
-        <option value="C1">C1</option>
-        <option value="C2">C2</option>
-      </select>
+      <div id="add-level-trigger" class="edit-input picker-trigger" onclick="openPicker('level', 'add')" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
+        <span id="add-level-display" style="color: var(--hint);">Level</span>
+        <span style="opacity: 0.3;">›</span>
+      </div>
+      <input type="hidden" id="add-level" value="">
       <button class="btn" onclick="submitWords()">Add</button>
     </div>
     
@@ -243,15 +239,11 @@
     <input type="text" id="edit-word" class="edit-input" placeholder="Word">
     <input type="text" id="edit-translation" class="edit-input" placeholder="Translate">
     <input type="text" id="edit-example" class="edit-input" placeholder="Example">
-    <select id="edit-level" class="edit-input" style="width: 100%; margin-bottom: 10px; -webkit-appearance: none; appearance: none;">
-        <option value="">Level</option>
-        <option value="A1">A1</option>
-        <option value="A2">A2</option>
-        <option value="B1">B1</option>
-        <option value="B2">B2</option>
-        <option value="C1">C1</option>
-        <option value="C2">C2</option>
-    </select>
+    <div id="edit-level-trigger" class="edit-input picker-trigger" onclick="openPicker('level', 'edit')" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
+        <span id="edit-level-display" style="color: var(--hint);">Level</span>
+        <span style="opacity: 0.3;">›</span>
+    </div>
+    <input type="hidden" id="edit-level" value="">
     <button id="edit-save-btn" class="btn" onclick="saveEdit()">Save</button>
     <button class="btn btn-secondary" onclick="closeEdit()">Cancel</button>
   </div>
