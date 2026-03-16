@@ -21,10 +21,13 @@ def setup_routes_init(app: web.Application, db: aiosqlite.Connection):
         tts_code = lang_meta.get("tts", "en-US")
 
         return web.json_response({
-            "user_id": user_id,
-            "settings": settings,
-            "stats": stats,
-            "timezone": settings.get("timezone", "UTC"),
-            "tts_code": tts_code
+            "ok": True,
+            "result": {
+                "user_id": user_id,
+                "settings": settings,
+                "stats": stats,
+                "timezone": settings.get("timezone", "UTC"),
+                "tts_code": tts_code
+            }
         })
     app.router.add_get("/api/init", init_user)

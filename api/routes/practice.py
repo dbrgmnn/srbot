@@ -22,7 +22,7 @@ def setup_routes_practice(app: web.Application, db: aiosqlite.Connection):
         remaining = max(0, daily_limit - today_done)
         
         words = await word_repo.get_session_words(user_id, lang, new_limit=remaining)
-        return web.json_response({"words": words})
+        return web.json_response({"ok": True, "result": {"words": words}})
 
     async def grade_word(request: web.Request) -> web.Response:
         user_id = request["user_id"]
@@ -31,12 +31,12 @@ def setup_routes_practice(app: web.Application, db: aiosqlite.Connection):
         quality = body.get("quality")
         
         if word_id is None or quality is None:
-            return web.json_response({"error": "missing fields"}, status=400)
+            return web.json_response({"ok": False, "error": "missing_fields"}, status=400)
 
         word_repo = WordRepo(db)
         word = await word_repo.get_word(word_id, user_id)
         if not word:
-            return web.json_response({"error": "word not found"}, status=404)
+            return web.json_response({"ok": False, "error": "not_found"}, status=404)
 
         try:
             result = sm2(
@@ -46,7 +46,7 @@ def setup_routes_practice(app: web.Application, db: aiosqlite.Connection):
                 interval=int(word["interval"]),
             )
         except (ValueError, TypeError):
-            return web.json_response({"error": "invalid grade"}, status=400)
+            return web.json_response({"ok": False, "error": "invalid_grade"}, status=400)
 
         await word_repo.update_word_after_review(
             word_id=word_id,
@@ -55,7 +55,7 @@ def setup_routes_practice(app: web.Application, db: aiosqlite.Connection):
             interval=result.interval,
             next_review=result.next_review,
         )
-        return web.json_response({"ok": True, "next_review": result.next_review.isoformat()})
+        return web.json_response({"ok": True, "result": {"next_review": result.next_review.isoformat()}})
 
     async def undo_grade(request: web.Request) -> web.Response:
         user_id = request["user_id"]
@@ -64,7 +64,7 @@ def setup_routes_practice(app: web.Application, db: aiosqlite.Connection):
         old_state = body.get("old_state")
         
         if word_id is None or old_state is None:
-            return web.json_response({"error": "missing fields"}, status=400)
+            return web.json_response({"ok": False, "error": "missing_fields"}, status=400)
 
         word_repo = WordRepo(db)
         await word_repo.undo_word_review(

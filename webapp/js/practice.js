@@ -15,8 +15,9 @@ let rafId = null;
 export async function startPractice() {
   try {
     const data = await GET('/api/session');
-    if (!data.words || data.words.length === 0) return;
-    sessionWords = data.words;
+    const words = data.result.words;
+    if (!words || words.length === 0) return;
+    sessionWords = words;
     sessionIdx = 0;
     sessionStats = { reviewed: 0, new: 0, good: 0, hard: 0, again: 0 };
     practiceHistory = [];

@@ -29,10 +29,15 @@ async function api(method, path, body) {
     const contentType = res.headers.get("content-type");
     const isJson = contentType && contentType.includes("application/json");
     const data = isJson ? await res.json() : null;
+    
+    if (isJson && data && data.ok === false) {
+      const msg = data.message || data.error || `Error ${res.status}`;
+      throw new Error(msg);
+    }
+
     if (!res.ok) {
       if (res.status === 409) throw new Error('409');
-      const msg = (data && data.msg) || (data && data.error) || `Error ${res.status}`;
-      throw new Error(msg);
+      throw new Error(`Error ${res.status}`);
     }
     return data;
   } catch (e) {

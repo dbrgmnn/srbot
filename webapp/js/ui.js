@@ -85,7 +85,8 @@ export async function loadHome(data) {
       settings = data.settings;
       ttsCode = data.tts_code;
     } else {
-      const init = await GET('/api/init');
+      const resp = await GET('/api/init');
+      const init = resp.result;
       stats = init.stats;
       settings = init.settings;
       ttsCode = init.tts_code;

@@ -8,8 +8,8 @@ let cachedLanguages = null;
 
 async function getLanguages() {
   if (!cachedLanguages) {
-    const { languages } = await GET('/api/settings/languages');
-    cachedLanguages = languages;
+    const resp = await GET('/api/settings/languages');
+    cachedLanguages = resp.result.languages;
   }
   return cachedLanguages;
 }
@@ -115,7 +115,8 @@ export async function changeInterval(delta) {
 
 export async function loadSettings() {
   try {
-    const s = await GET('/api/settings');
+    const resp = await GET('/api/settings');
+    const s = resp.result;
 
     // Automatic timezone detection
     const deviceTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -177,7 +178,7 @@ export async function preloadDefaultWords() {
     if (!ok) return;
     try {
       const res = await POST('/api/words/preload');
-      toast(`Added ${res.added} new words`);
+      toast(`Added ${res.result.added} new words`);
       await loadSettings();
       await loadHome();
     } catch (e) {

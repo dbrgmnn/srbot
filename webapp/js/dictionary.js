@@ -23,7 +23,7 @@ export async function submitWords() {
 
   try {
     const res = await POST('/api/words', { words: [{ word, translation, example, level }] });
-    if (res.added) {
+    if (res.result && res.result.added) {
       toast(`Added: ${word}`);
       wordEl.value = ''; transEl.value = ''; exEl.value = ''; levelEl.value = '';
       loadHome();
@@ -41,7 +41,7 @@ export async function handleFileUpload(input) {
     if (!words.length) { toast('No words found'); return; }
     try {
       const res = await POST('/api/words', { words });
-      if (res.added) { toast(`Added ${res.added} words`); loadHome(); }
+      if (res.result && res.result.added) { toast(`Added ${res.result.added} words`); loadHome(); }
     } catch (e) { toast('Upload failed'); }
   };
   reader.readAsText(file);
@@ -98,7 +98,7 @@ async function loadSearch(q) {
   if (!el || q.length < 2) { if (el) el.innerHTML = ''; return; }
   try {
     const data = await GET(`/api/words/search?q=${encodeURIComponent(q)}`);
-    el.innerHTML = data.words.map(w => `
+    el.innerHTML = data.result.words.map(w => `
       <div class="word-row" id="wr-${w.id}">
         <div class="word-row-content" data-word='${JSON.stringify(w).replace(/'/g, "&apos;")}'>
           <div class="word-row-text">

@@ -19,7 +19,7 @@ def _is_valid_time(value: str) -> bool:
 def setup_routes_settings(app: web.Application, db: aiosqlite.Connection):
 
     async def get_languages_list(request: web.Request) -> web.Response:
-        return web.json_response({"languages": LANGUAGES})
+        return web.json_response({"ok": True, "result": {"languages": LANGUAGES}})
 
     async def get_settings(request: web.Request) -> web.Response:
         user_id = request["user_id"]
@@ -30,8 +30,11 @@ def setup_routes_settings(app: web.Application, db: aiosqlite.Connection):
         settings = await user_repo.get_user_settings(telegram_id, lang)
         stats = await word_repo.get_full_stats(user_id, lang, tz_name=settings.get("timezone", "UTC"))
         return web.json_response({
-            **settings,
-            "total_words": stats["total"],
+            "ok": True,
+            "result": {
+                **settings,
+                "total_words": stats["total"],
+            }
         })
 
     async def update_settings(request: web.Request) -> web.Response:
@@ -56,7 +59,7 @@ def setup_routes_settings(app: web.Application, db: aiosqlite.Connection):
                 limit = int(body["daily_limit"])
             except (TypeError, ValueError):
                 return web.json_response(
-                    {"error": "invalid_number", "msg": "daily_limit must be an integer"},
+                    {"ok": False, "error": "invalid_number"},
                     status=400,
                 )
             
@@ -64,14 +67,14 @@ def setup_routes_settings(app: web.Application, db: aiosqlite.Connection):
             if config.min_daily_limit <= limit <= config.max_daily_limit:
                 await user_repo.update_daily_limit(telegram_id, limit, lang)
             else:
-                return web.json_response({"error": "limit_out_of_range", "msg": f"Limit must be between {config.min_daily_limit} and {config.max_daily_limit}"}, status=400)
+                return web.json_response({"ok": False, "error": "limit_out_of_range"}, status=400)
 
         if "notification_interval_minutes" in body:
             try:
                 interval = int(body["notification_interval_minutes"])
             except (TypeError, ValueError):
                 return web.json_response(
-                    {"error": "invalid_number", "msg": "notification_interval_minutes must be an integer"},
+                    {"ok": False, "error": "invalid_number"},
                     status=400,
                 )
             
@@ -82,14 +85,14 @@ def setup_routes_settings(app: web.Application, db: aiosqlite.Connection):
                 if scheduler:
                     await reschedule(scheduler, db)
             else:
-                return web.json_response({"error": "interval_out_of_range", "msg": f"Interval must be between {config.min_notify_interval} and {config.max_notify_interval}"}, status=400)
+                return web.json_response({"ok": False, "error": "interval_out_of_range"}, status=400)
 
         if "practice_mode" in body:
             mode = body.get("practice_mode")
             allowed = {"word_to_translation", "translation_to_word"}
             if mode not in allowed:
                 return web.json_response(
-                    {"error": "invalid_mode", "msg": "practice_mode must be one of: word_to_translation, translation_to_word"},
+                    {"ok": False, "error": "invalid_mode"},
                     status=400,
                 )
             await user_repo.update_practice_mode(telegram_id, mode, lang)
@@ -100,12 +103,12 @@ def setup_routes_settings(app: web.Application, db: aiosqlite.Connection):
 
             if quiet_start is not None and not _is_valid_time(quiet_start):
                 return web.json_response(
-                    {"error": "invalid_time_format", "msg": "quiet_start must be in HH:MM format"},
+                    {"ok": False, "error": "invalid_time_format"},
                     status=400,
                 )
             if quiet_end is not None and not _is_valid_time(quiet_end):
                 return web.json_response(
-                    {"error": "invalid_time_format", "msg": "quiet_end must be in HH:MM format"},
+                    {"ok": False, "error": "invalid_time_format"},
                     status=400,
                 )
 
@@ -117,7 +120,7 @@ def setup_routes_settings(app: web.Application, db: aiosqlite.Connection):
             )
 
         settings = await user_repo.get_user_settings(telegram_id, lang)
-        return web.json_response(settings)
+        return web.json_response({"ok": True, "result": settings})
 
     app.router.add_get("/api/settings/languages", get_languages_list)
     app.router.add_get("/api/settings", get_settings)

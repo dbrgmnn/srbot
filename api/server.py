@@ -42,26 +42,31 @@ async def create_app(config: Config, db: aiosqlite.Connection, scheduler=None) -
         
         params = verify_init_data(request.headers.get("X-Init-Data", ""), config.bot_token, config.token_expiry)
         if not params:
-            return web.json_response({"error": "unauthorized"}, status=401)
+            return web.json_response({"ok": False, "error": "unauthorized"}, status=401)
         
         try:
             user = json.loads(params.get("user", "{}"))
             telegram_id = int(user["id"])
         except (json.JSONDecodeError, KeyError, TypeError):
-            return web.json_response({"error": "invalid_user"}, status=401)
+            return web.json_response({"ok": False, "error": "invalid_user"}, status=401)
 
         if telegram_id not in config.allowed_users:
-            return web.json_response({"error": "forbidden"}, status=403)
+            return web.json_response({"ok": False, "error": "forbidden"}, status=403)
         
         # Get language and timezone from headers
         lang = request.headers.get("X-Language", config.default_lang).lower()
         if lang not in LANGUAGES:
             lang = config.default_lang
 
-        tz = request.headers.get("X-Timezone", config.default_timezone)
-
-        user_repo = UserRepo(db)
-        user_id = await user_repo.get_or_create(telegram_id, lang, tz, config)
+        # Optimization: Check cache first to avoid DB hit on every request
+        cache_key = (telegram_id, lang)
+        if cache_key in request.app["user_cache"]:
+            user_id = request.app["user_cache"][cache_key]
+        else:
+            tz = request.headers.get("X-Timezone", config.default_timezone)
+            user_repo = UserRepo(db)
+            user_id = await user_repo.get_or_create(telegram_id, lang, tz, config)
+            request.app["user_cache"][cache_key] = user_id
         
         request["telegram_id"] = telegram_id
         request["user_id"] = user_id
@@ -72,6 +77,7 @@ async def create_app(config: Config, db: aiosqlite.Connection, scheduler=None) -
     app["config"] = config
     app["db"] = db
     app["scheduler"] = scheduler
+    app["user_cache"] = {}  # (telegram_id, lang) -> user_id
 
     # register all api routes
     setup_routes_init(app, db)
