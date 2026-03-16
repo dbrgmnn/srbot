@@ -6,6 +6,7 @@ const tg = window.Telegram.WebApp;
 let sessionWords = [];
 let sessionIdx = 0;
 let sessionStats = { reviewed: 0, new: 0, good: 0, hard: 0, again: 0 };
+let practiceHistory = [];
 let isGrading = false;
 let isSwiping = false;
 let touchStartX = 0, touchStartY = 0, touchStartTime = 0;
@@ -18,6 +19,7 @@ export async function startPractice() {
     sessionWords = data.words;
     sessionIdx = 0;
     sessionStats = { reviewed: 0, new: 0, good: 0, hard: 0, again: 0 };
+    practiceHistory = [];
     showScreen('practice');
     renderWord();
   } catch(e) { console.error(e); }
@@ -58,7 +60,6 @@ function handleMove(x, y) {
         else if (deltaX > 100) swipeDir = 'right';
       }
       
-      // If flipped, deltaX rotation should be inverted to look natural
       const tilt = isFlipped ? -deltaX * 0.1 : deltaX * 0.1;
       card.style.transform = `translate(${deltaX}px, ${deltaY}px) rotateY(${baseRot}deg) rotateZ(${tilt}deg)`;
       card.classList.toggle('swipe-left', swipeDir === 'left');
@@ -121,7 +122,6 @@ export function initSwipe() {
   };
 }
 
-// Global mouse listeners to handle swipes outside the card
 window.onmousemove = (e) => {
   if (!isMouseDown) return;
   handleMove(e.clientX, e.clientY);
@@ -133,7 +133,24 @@ window.onmouseup = (e) => {
 };
 
 function renderWord() {
-  if (sessionIdx >= sessionWords.length) { showSummary(); return; }
+  if (sessionIdx >= sessionWords.length) { 
+    showSummary(); 
+    return; 
+  }
+
+  const btnUndo = document.getElementById('btn-undo');
+  if (btnUndo) {
+    if (practiceHistory.length > 0) {
+      btnUndo.disabled = false;
+      btnUndo.style.opacity = '1';
+      btnUndo.style.pointerEvents = 'auto';
+    } else {
+      btnUndo.disabled = true;
+      btnUndo.style.opacity = '0';
+      btnUndo.style.pointerEvents = 'none';
+    }
+  }
+
   const word = sessionWords[sessionIdx];
   const progEl = document.getElementById('practice-progress');
   if (progEl) progEl.textContent = `${sessionIdx + 1} / ${sessionWords.length}`;
@@ -178,6 +195,13 @@ async function grade(quality) {
   if (isGrading) return;
   isGrading = true;
   const word = sessionWords[sessionIdx];
+  
+  practiceHistory.push({
+    sessionIdx,
+    word: JSON.parse(JSON.stringify(word)),
+    stats: { ...sessionStats }
+  });
+
   if ((word.repetitions || 0) > 0) sessionStats.reviewed++; else sessionStats.new++;
   if (quality === 5) sessionStats.good++; else if (quality === 3) sessionStats.hard++; else sessionStats.again++;
 
@@ -193,6 +217,30 @@ async function grade(quality) {
   POST('/api/grade', { word_id: word.id, quality }).catch(() => {});
   sessionIdx++;
   setTimeout(() => { isGrading = false; renderWord(); }, 300);
+}
+
+export async function undo() {
+  if (practiceHistory.length === 0 || isGrading) return;
+  const last = practiceHistory.pop();
+  
+  try {
+    await POST('/api/undo', { 
+      word_id: last.word.id, 
+      old_state: {
+        repetitions: last.word.repetitions,
+        easiness: last.word.easiness,
+        interval: last.word.interval,
+        next_review: last.word.next_review,
+        last_reviewed_at: last.word.last_reviewed_at || null,
+        started_at: last.word.started_at || null
+      }
+    });
+  } catch (e) { console.error('Undo failed', e); }
+
+  sessionIdx = last.sessionIdx;
+  sessionStats = last.stats;
+  renderWord();
+  tg.HapticFeedback.impactOccurred('medium');
 }
 
 export function playAudio(e) {
@@ -216,4 +264,6 @@ function showSummary() {
   showScreen('summary');
 }
 
-export function exitPractice() { showScreen('home'); }
+export function exitPractice() { 
+  showScreen('home'); 
+}

@@ -285,6 +285,25 @@ class WordRepo:
         )
         await self.db.commit()
 
+    async def undo_word_review(
+        self,
+        word_id: int,
+        repetitions: int,
+        easiness: float,
+        interval: int,
+        next_review: str,
+        last_reviewed_at: str | None,
+        started_at: str | None,
+    ):
+        await self.db.execute(
+            """UPDATE words
+                SET repetitions = ?, easiness = ?, interval = ?, next_review = ?, 
+                    last_reviewed_at = ?, started_at = ?
+                WHERE id = ?""",
+            (repetitions, easiness, interval, next_review, last_reviewed_at, started_at, word_id),
+        )
+        await self.db.commit()
+
     async def get_full_stats(self, user_id: int, language: str, tz_name: str = "UTC") -> dict:
         now_utc = datetime.now(tz=timezone.utc)
         tz = ZoneInfo(tz_name)

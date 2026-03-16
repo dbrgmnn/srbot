@@ -57,5 +57,27 @@ def setup_routes_practice(app: web.Application, db: aiosqlite.Connection):
         )
         return web.json_response({"ok": True, "next_review": result.next_review.isoformat()})
 
+    async def undo_grade(request: web.Request) -> web.Response:
+        user_id = request["user_id"]
+        body = await request.json()
+        word_id = body.get("word_id")
+        old_state = body.get("old_state")
+        
+        if word_id is None or old_state is None:
+            return web.json_response({"error": "missing fields"}, status=400)
+
+        word_repo = WordRepo(db)
+        await word_repo.undo_word_review(
+            word_id=word_id,
+            repetitions=old_state["repetitions"],
+            easiness=old_state["easiness"],
+            interval=old_state["interval"],
+            next_review=old_state["next_review"],
+            last_reviewed_at=old_state["last_reviewed_at"],
+            started_at=old_state["started_at"],
+        )
+        return web.json_response({"ok": True})
+
     app.router.add_get("/api/session", get_session)
     app.router.add_post("/api/grade", grade_word)
+    app.router.add_post("/api/undo", undo_grade)

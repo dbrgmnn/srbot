@@ -1,6 +1,6 @@
 import { state } from './api.js';
 import { loadHome, showScreen, toast } from './ui.js';
-import { startPractice, playAudio, exitPractice } from './practice.js';
+import { startPractice, playAudio, exitPractice, undo } from './practice.js';
 import { 
   submitWords, handleFileUpload, onSearchInput, 
   saveEdit, closeEdit, clearAllWords, shareWords 
@@ -27,6 +27,7 @@ window.changeInterval = changeInterval;
 window.startPractice = startPractice;
 window.playAudio = playAudio;
 window.exitPractice = exitPractice;
+window.undo = undo;
 window.submitWords = submitWords;
 window.handleFileUpload = handleFileUpload;
 window.onSearchInput = onSearchInput;
