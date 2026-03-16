@@ -72,11 +72,22 @@ async def main():
     try:
         await stop_event.wait()
     finally:
+        logger.info("Stopping...")
+        try:
+            # Quick cleanup within 3 seconds, then just exit
+            await asyncio.wait_for(asyncio.gather(
+                asyncio.to_thread(scheduler.shutdown),
+                api_runner.cleanup(),
+                db.close(),
+                bot.session.close(),
+                return_exceptions=True
+            ), timeout=3.0)
+        except asyncio.TimeoutError:
+            logger.warning("Shutdown timed out, forcing exit")
+        except Exception as e:
+            logger.error(f"Error during shutdown: {e}")
+        
         polling_task.cancel()
-        scheduler.shutdown()
-        await api_runner.cleanup()
-        await db.close()
-        await bot.session.close()
         logger.info("Stopped.")
 
 if __name__ == "__main__":
