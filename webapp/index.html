@@ -190,10 +190,19 @@
     <!-- Section: Maintenance -->
     <div class="settings-section-title">Data Management</div>
     <div class="card settings-group">
-      <div class="settings-actions-row">
-        <button class="btn-action" onclick="preloadDefaultWords()">📥 Import</button>
-        <button class="btn-action" onclick="shareWords()">📤 Export</button>
-        <button class="btn-action btn-action-danger" onclick="clearAllWords()">🗑️ Clear</button>
+      <div class="settings-row" onclick="preloadDefaultWords()">
+        <div class="settings-label">Import default words</div>
+        <div class="picker-value"></div>
+      </div>
+      <div class="settings-row" onclick="shareWords()">
+        <div class="settings-label">Export dictionary</div>
+        <div class="picker-value"></div>
+      </div>
+    </div>
+
+    <div class="card settings-group">
+      <div class="settings-row settings-row-danger" onclick="clearAllWords()">
+        <div class="settings-label-danger">Clear all words</div>
       </div>
     </div>
 
