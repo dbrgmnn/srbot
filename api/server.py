@@ -66,6 +66,7 @@ async def create_app(config: Config, db: aiosqlite.Connection, scheduler=None) -
         
         request["telegram_id"] = telegram_id
         request["user_id"] = user_id
+        request["language"] = lang
         return await handler(request)
 
     app = web.Application(middlewares=[cors_middleware, auth_middleware])

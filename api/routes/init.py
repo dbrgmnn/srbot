@@ -1,7 +1,6 @@
 from aiohttp import web
 import aiosqlite
 from db.repository import UserRepo, WordRepo
-from api.auth import get_language
 
 
 def setup_routes_init(app: web.Application, db: aiosqlite.Connection):
@@ -9,7 +8,7 @@ def setup_routes_init(app: web.Application, db: aiosqlite.Connection):
     async def init_user(request: web.Request) -> web.Response:
         telegram_id = request["telegram_id"]
         user_id = request["user_id"]
-        lang = get_language(request)
+        lang = request['language']
 
         user_repo = UserRepo(db)
         word_repo = WordRepo(db)

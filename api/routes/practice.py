@@ -2,7 +2,6 @@ from aiohttp import web
 import aiosqlite
 from db.repository import UserRepo, WordRepo
 from core.srs import sm2
-from api.auth import get_language
 
 
 def setup_routes_practice(app: web.Application, db: aiosqlite.Connection):
@@ -10,7 +9,7 @@ def setup_routes_practice(app: web.Application, db: aiosqlite.Connection):
     async def get_session(request: web.Request) -> web.Response:
         user_id = request["user_id"]
         telegram_id = request["telegram_id"]
-        lang = get_language(request)
+        lang = request['language']
 
         user_repo = UserRepo(db)
         word_repo = WordRepo(db)

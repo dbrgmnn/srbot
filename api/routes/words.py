@@ -2,7 +2,6 @@ from pathlib import Path
 from aiohttp import web
 import aiosqlite
 from db.repository import UserRepo, WordRepo
-from api.auth import get_language, verify_bearer_token
 
 
 def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
@@ -90,7 +89,7 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
 
     async def add_words(request: web.Request) -> web.Response:
         user_id = request["user_id"]
-        lang = get_language(request)
+        lang = request['language']
         body = await request.json()
         raw_words = body.get("words", [])
         
@@ -136,7 +135,7 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
 
     async def delete_all_words(request: web.Request) -> web.Response:
         user_id = request["user_id"]
-        lang = get_language(request)
+        lang = request['language']
         word_repo = WordRepo(db)
         await word_repo.delete_all_words(user_id, lang)
         return web.json_response({"ok": True})
@@ -153,7 +152,7 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
 
     async def search_words(request: web.Request) -> web.Response:
         user_id = request["user_id"]
-        lang = get_language(request)
+        lang = request['language']
         query = request.query.get("q", "")
         word_repo = WordRepo(db)
         words = await word_repo.search_words(user_id, lang, query)
@@ -163,7 +162,7 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         import csv
         import io
         user_id = request["user_id"]
-        lang = get_language(request)
+        lang = request['language']
         word_repo = WordRepo(db)
         words = await word_repo.get_all_words(user_id, lang)
 
@@ -185,7 +184,7 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
 
     async def preload_words(request: web.Request) -> web.Response:
         user_id = request["user_id"]
-        lang = get_language(request)
+        lang = request['language']
         word_repo = WordRepo(db)
         
         config = request.app["config"]

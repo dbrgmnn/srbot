@@ -2,7 +2,6 @@ from aiohttp import web
 import aiosqlite
 from db.repository import UserRepo, WordRepo
 from core.scheduler import reschedule
-from api.auth import get_language
 from core.languages import LANGUAGES
 
 
@@ -25,7 +24,7 @@ def setup_routes_settings(app: web.Application, db: aiosqlite.Connection):
     async def get_settings(request: web.Request) -> web.Response:
         user_id = request["user_id"]
         telegram_id = request["telegram_id"]
-        lang = get_language(request)
+        lang = request['language']
         user_repo = UserRepo(db)
         word_repo = WordRepo(db)
         settings = await user_repo.get_user_settings(telegram_id, lang)
@@ -37,7 +36,7 @@ def setup_routes_settings(app: web.Application, db: aiosqlite.Connection):
 
     async def update_settings(request: web.Request) -> web.Response:
         telegram_id = request["telegram_id"]
-        lang = get_language(request)
+        lang = request['language']
         body = await request.json()
         user_repo = UserRepo(db)
 
