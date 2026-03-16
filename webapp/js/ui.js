@@ -77,20 +77,13 @@ function updateCountdowns() {
   }
 }
 
-export async function loadHome(data) {
+export async function loadHome() {
   try {
-    let stats, settings, ttsCode;
-    if (data && data.stats) {
-      stats = data.stats;
-      settings = data.settings;
-      ttsCode = data.tts_code;
-    } else {
-      const resp = await GET('/api/init');
-      const init = resp.result;
-      stats = init.stats;
-      settings = init.settings;
-      ttsCode = init.tts_code;
-    }
+    const resp = await GET('/api/init');
+    const init = resp.result;
+    const stats = init.stats;
+    const settings = init.settings;
+    const ttsCode = init.tts_code;
 
     state.currentStats = stats;
     state.currentSettings = settings;

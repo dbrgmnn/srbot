@@ -14,10 +14,10 @@ def setup_routes_practice(app: web.Application, db: aiosqlite.Connection):
         user_repo = UserRepo(db)
         word_repo = WordRepo(db)
         settings = await user_repo.get_user_settings(telegram_id, lang)
-        
+
         # Calculate remaining limit with User's TZ
-        stats = await word_repo.get_full_stats(user_id, lang, tz_name=settings.get("timezone", "UTC"))
-        today_done = stats.get("today_new", 0)
+        tz_name = settings.get("timezone", "UTC")
+        today_done = await user_repo.get_today_new_count(user_id, lang, tz_name)
         daily_limit = settings.get("daily_limit", 20)
         remaining = max(0, daily_limit - today_done)
         

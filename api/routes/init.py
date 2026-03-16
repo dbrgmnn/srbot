@@ -26,7 +26,6 @@ def setup_routes_init(app: web.Application, db: aiosqlite.Connection):
                 "user_id": user_id,
                 "settings": settings,
                 "stats": stats,
-                "timezone": settings.get("timezone", "UTC"),
                 "tts_code": tts_code
             }
         })

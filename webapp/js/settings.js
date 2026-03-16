@@ -16,8 +16,6 @@ async function getLanguages() {
 
 // ── Universal Picker ──────────────────────────────────────────────────────
 
-let pickerCallback = null;
-
 export function openPicker(type, context = null) {
   tg.HapticFeedback.impactOccurred('light');
   if (type === 'language') _openLanguagePicker();
@@ -163,7 +161,6 @@ function _showPickerSheet(title, options, currentValue, onSelect) {
     };
   });
 
-  pickerCallback = onSelect;
   document.getElementById('picker-overlay').classList.add('open');
   document.getElementById('picker-sheet').classList.add('open');
 
@@ -177,7 +174,6 @@ function _showPickerSheet(title, options, currentValue, onSelect) {
 export function closePicker() {
   document.getElementById('picker-overlay').classList.remove('open');
   document.getElementById('picker-sheet').classList.remove('open');
-  pickerCallback = null;
 }
 
 // ── Settings actions ──────────────────────────────────────────────────────

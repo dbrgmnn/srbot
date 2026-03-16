@@ -92,58 +92,32 @@ class UserRepo:
 
         return defaults
 
-    async def update_timezone(self, telegram_id: int, tz_name: str, language: str):
+    async def _update_setting(self, field: str, value, telegram_id: int, language: str):
         await self.db.execute(
-            """INSERT INTO user_settings (user_id, language, timezone)
+            f"""INSERT INTO user_settings (user_id, language, {field})
                VALUES ((SELECT id FROM users WHERE telegram_id = ?), ?, ?)
-               ON CONFLICT(user_id, language) DO UPDATE SET timezone = excluded.timezone""",
-            (telegram_id, language, tz_name),
+               ON CONFLICT(user_id, language) DO UPDATE SET {field} = excluded.{field}""",
+            (telegram_id, language, value),
         )
         await self.db.commit()
+
+    async def update_timezone(self, telegram_id: int, tz_name: str, language: str):
+        await self._update_setting('timezone', tz_name, telegram_id, language)
 
     async def update_daily_limit(self, telegram_id: int, limit: int, language: str):
-        await self.db.execute(
-            """INSERT INTO user_settings (user_id, language, daily_limit)
-               VALUES ((SELECT id FROM users WHERE telegram_id = ?), ?, ?)
-               ON CONFLICT(user_id, language) DO UPDATE SET daily_limit = excluded.daily_limit""",
-            (telegram_id, language, limit),
-        )
-        await self.db.commit()
+        await self._update_setting('daily_limit', limit, telegram_id, language)
 
     async def update_notification_interval(self, telegram_id: int, minutes: int, language: str):
-        await self.db.execute(
-            """INSERT INTO user_settings (user_id, language, notification_interval_minutes)
-               VALUES ((SELECT id FROM users WHERE telegram_id = ?), ?, ?)
-               ON CONFLICT(user_id, language) DO UPDATE SET notification_interval_minutes = excluded.notification_interval_minutes""",
-            (telegram_id, language, minutes),
-        )
-        await self.db.commit()
+        await self._update_setting('notification_interval_minutes', minutes, telegram_id, language)
 
     async def update_quiet_hours(self, telegram_id: int, quiet_start: str = None, quiet_end: str = None, language: str = 'de'):
         if quiet_start is not None:
-            await self.db.execute(
-                """INSERT INTO user_settings (user_id, language, quiet_start)
-                   VALUES ((SELECT id FROM users WHERE telegram_id = ?), ?, ?)
-                   ON CONFLICT(user_id, language) DO UPDATE SET quiet_start = excluded.quiet_start""",
-                (telegram_id, language, quiet_start),
-            )
+            await self._update_setting('quiet_start', quiet_start, telegram_id, language)
         if quiet_end is not None:
-            await self.db.execute(
-                """INSERT INTO user_settings (user_id, language, quiet_end)
-                   VALUES ((SELECT id FROM users WHERE telegram_id = ?), ?, ?)
-                   ON CONFLICT(user_id, language) DO UPDATE SET quiet_end = excluded.quiet_end""",
-                (telegram_id, language, quiet_end),
-            )
-        await self.db.commit()
+            await self._update_setting('quiet_end', quiet_end, telegram_id, language)
 
     async def update_practice_mode(self, telegram_id: int, mode: str, language: str):
-        await self.db.execute(
-            """INSERT INTO user_settings (user_id, language, practice_mode)
-               VALUES ((SELECT id FROM users WHERE telegram_id = ?), ?, ?)
-               ON CONFLICT(user_id, language) DO UPDATE SET practice_mode = excluded.practice_mode""",
-            (telegram_id, language, mode),
-        )
-        await self.db.commit()
+        await self._update_setting('practice_mode', mode, telegram_id, language)
 
     async def update_language(self, telegram_id: int, new_language: str):
         user_id_cur = await self.db.execute("SELECT id FROM users WHERE telegram_id = ?", (telegram_id,))
@@ -183,6 +157,18 @@ class UserRepo:
         )
         row = await cursor.fetchone()
         return row['id'] if row else None
+
+    async def get_today_new_count(self, user_id: int, language: str, tz_name: str = "UTC") -> int:
+        tz = ZoneInfo(tz_name)
+        now_utc = datetime.now(tz=timezone.utc)
+        local_now = now_utc.astimezone(tz)
+        today_start_utc = local_now.replace(hour=0, minute=0, second=0, microsecond=0).astimezone(timezone.utc)
+        cursor = await self.db.execute(
+            "SELECT COUNT(*) as cnt FROM words WHERE user_id = ? AND language = ? AND started_at >= ?",
+            (user_id, language, today_start_utc.isoformat()),
+        )
+        row = await cursor.fetchone()
+        return int(row['cnt']) if row else 0
 
     async def get_users_with_due_words(self) -> list[dict]:
         now_utc = datetime.now(tz=timezone.utc).isoformat()
