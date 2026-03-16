@@ -52,9 +52,18 @@ async def create_app(config: Config, db: aiosqlite.Connection, scheduler=None) -
         if telegram_id not in config.allowed_users:
             return web.json_response({"error": "forbidden"}, status=403)
         
+        # Get language and timezone from headers
+        lang = request.headers.get("X-Language", config.default_lang).lower()
+        # Ensure it's in our supported list
+        from core.languages import LANGUAGES
+        if lang not in LANGUAGES:
+            lang = config.default_lang
+
+        tz = request.headers.get("X-Timezone", config.default_timezone)
+
         from db.repository import UserRepo
         user_repo = UserRepo(db)
-        user_id = await user_repo.get_or_create(telegram_id)
+        user_id = await user_repo.get_or_create(telegram_id, lang, tz, config)
         
         request["telegram_id"] = telegram_id
         request["user_id"] = user_id

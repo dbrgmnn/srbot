@@ -47,7 +47,7 @@ def is_quiet_time(now: datetime, quiet_start: str, quiet_end: str, tz: ZoneInfo)
 
 # ── Main job ──────────────────────────────────────────────────────────────
 
-async def check_and_send_notifications(bot: Bot, db: aiosqlite.Connection):
+async def check_and_send_notifications(bot: Bot, db: aiosqlite.Connection, config):
     now = datetime.now(tz=timezone.utc)
     user_repo = UserRepo(db)
     word_repo = WordRepo(db)
@@ -56,7 +56,7 @@ async def check_and_send_notifications(bot: Bot, db: aiosqlite.Connection):
 
     for row in candidates:
         telegram_id = row["telegram_id"]
-        user_tz_name = row.get("timezone", "Europe/Berlin")
+        user_tz_name = row.get("timezone", config.default_timezone)
         user_tz = ZoneInfo(user_tz_name)
 
         # Get real stats for this user to know exactly how many new words are left for TODAY
@@ -108,14 +108,14 @@ async def reschedule(scheduler: AsyncIOScheduler, db: aiosqlite.Connection):
 
 # ── Setup ─────────────────────────────────────────────────────────────────
 
-async def setup_scheduler(bot: Bot, db: aiosqlite.Connection) -> AsyncIOScheduler:
+async def setup_scheduler(bot: Bot, db: aiosqlite.Connection, config) -> AsyncIOScheduler:
     scheduler = AsyncIOScheduler(timezone=timezone.utc)
     user_repo = UserRepo(db)
     interval = await user_repo.get_min_notification_interval()
     scheduler.add_job(
         check_and_send_notifications,
         trigger=IntervalTrigger(minutes=interval),
-        kwargs={"bot": bot, "db": db},
+        kwargs={"bot": bot, "db": db, "config": config},
         id=JOB_ID,
         replace_existing=True,
     )

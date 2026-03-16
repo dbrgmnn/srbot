@@ -19,6 +19,8 @@ class Config:
     max_daily_limit: int = 50
     min_notify_interval: int = 10
     max_notify_interval: int = 480
+    default_lang: str = "en"
+    default_timezone: str = "UTC"
 
 
 def load_config() -> Config:
@@ -43,4 +45,6 @@ def load_config() -> Config:
         max_daily_limit=int(os.getenv("MAX_DAILY_LIMIT", "50")),
         min_notify_interval=int(os.getenv("MIN_NOTIFY_INTERVAL", "10")),
         max_notify_interval=int(os.getenv("MAX_NOTIFY_INTERVAL", "480")),
+        default_lang=os.getenv("DEFAULT_LANG", "en"),
+        default_timezone=os.getenv("DEFAULT_TIMEZONE", "UTC"),
     )

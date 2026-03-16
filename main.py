@@ -49,7 +49,7 @@ async def main():
     user_repo = UserRepo(db)
     setup_handlers(dp, user_repo, config)
 
-    scheduler = await setup_scheduler(bot, db)
+    scheduler = await setup_scheduler(bot, db, config)
     scheduler.start()
 
     api_runner = await start_api_server(config, db, scheduler)

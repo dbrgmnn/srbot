@@ -19,13 +19,13 @@ async def init_db(db_path: str = "srbot.db") -> aiosqlite.Connection:
         CREATE TABLE IF NOT EXISTS user_settings (
             user_id INTEGER NOT NULL,
             language TEXT NOT NULL,
-            quiet_start TEXT DEFAULT '23:00',
-            quiet_end TEXT DEFAULT '08:00',
-            daily_limit INTEGER DEFAULT 20,
-            notification_interval_minutes INTEGER DEFAULT 30,
+            quiet_start TEXT NOT NULL DEFAULT '23:00',
+            quiet_end TEXT NOT NULL DEFAULT '08:00',
+            daily_limit INTEGER NOT NULL,
+            notification_interval_minutes INTEGER NOT NULL,
             last_notified_at TEXT DEFAULT NULL,
-            practice_mode TEXT DEFAULT 'word_to_translation',
-            timezone TEXT DEFAULT 'Europe/Berlin',
+            practice_mode TEXT NOT NULL DEFAULT 'word_to_translation',
+            timezone TEXT NOT NULL,
             PRIMARY KEY (user_id, language),
             FOREIGN KEY (user_id) REFERENCES users(id)
         )
@@ -37,7 +37,7 @@ async def init_db(db_path: str = "srbot.db") -> aiosqlite.Connection:
             user_id INTEGER NOT NULL,
             word TEXT NOT NULL,
             translation TEXT NOT NULL,
-            language TEXT NOT NULL DEFAULT 'de',
+            language TEXT NOT NULL,
             example TEXT,
             level TEXT,
             repetitions INTEGER DEFAULT 0,

@@ -1,7 +1,7 @@
 const tg = window.Telegram.WebApp;
 
 export let state = {
-  currentLang: localStorage.getItem('currentLang') || 'de',
+  currentLang: localStorage.getItem('currentLang') || (navigator.language || 'en').split('-')[0],
   practiceMode: 'word_to_translation'
 };
 
@@ -16,7 +16,8 @@ async function api(method, path, body) {
     headers: { 
       'Content-Type': 'application/json', 
       'X-Init-Data': tg.initData, // Get fresh initData every time
-      'X-Language': state.currentLang
+      'X-Language': state.currentLang,
+      'X-Timezone': Intl.DateTimeFormat().resolvedOptions().timeZone
     },
   };
   if (body) opts.body = JSON.stringify(body);

@@ -33,28 +33,6 @@ def verify_init_data(init_data: str, bot_token: str, expires_in: int) -> dict | 
     return params
 
 
-def get_language(request) -> str:
-    return request.headers.get("X-Language", "de").lower()
-
-
-def get_user_id(init_data: str, bot_token: str) -> int | None:
-    if not init_data:
-        return None
-    
-    params = verify_init_data(init_data, bot_token)
-    if not params:
-        return None
-        
-    user_str = params.get("user")
-    if not user_str:
-        return None
-        
-    try:
-        user = json.loads(user_str)
-        return int(user["id"])
-    except (json.JSONDecodeError, KeyError, TypeError):
-        return None
-
 async def verify_bearer_token(request, db) -> int | None:
     # Extracts Bearer token and returns user_id if valid
     auth_header = request.headers.get("Authorization")
