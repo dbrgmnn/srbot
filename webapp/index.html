@@ -119,9 +119,7 @@
     <div class="header">
       <div class="header-title header-title-spaced">Dictionary</div>
     </div>
-    <div class="search-input-wrap">
-      <input type="text" class="search-input" placeholder="Search words..." oninput="onSearchInput(this.value)">
-    </div>
+    <input type="text" class="search-input" placeholder="Search words..." oninput="onSearchInput(this.value)">
     <div id="search-results"></div>
   </div>
 
@@ -160,19 +158,14 @@
     <!-- Section: Dictionary -->
     <div class="settings-section-title">Dictionary</div>
     <div class="card settings-group">
-      <div class="settings-row">
+      <div class="settings-row" onclick="openPicker('language')">
         <div class="settings-label">Active Dictionary</div>
-        <select id="language-select" class="form-select" onchange="switchLanguage(this.value)">
-          <!-- Options will be populated from API -->
-        </select>
+        <div class="picker-value" id="language-display">—</div>
       </div>
 
-      <div class="settings-row">
+      <div class="settings-row" onclick="openPicker('practice_mode')">
         <div class="settings-label">Practice Mode</div>
-        <select id="practice-mode-select" class="form-select" onchange="setPracticeMode(this.value)">
-          <option value="word_to_translation">Word → Translation</option>
-          <option value="translation_to_word">Translation → Word</option>
-        </select>
+        <div class="picker-value" id="practice-mode-display">—</div>
       </div>
 
       <div class="settings-row">
@@ -260,6 +253,13 @@
     </select>
     <button id="edit-save-btn" class="btn" onclick="saveEdit()">Save</button>
     <button class="btn btn-secondary" onclick="closeEdit()">Cancel</button>
+  </div>
+
+  <!-- Universal Picker Sheet -->
+  <div id="picker-overlay" class="edit-overlay" onclick="closePicker()"></div>
+  <div id="picker-sheet" class="edit-sheet">
+    <div class="edit-sheet-title" id="picker-title">Select</div>
+    <div id="picker-list" class="picker-list"></div>
   </div>
 
   <script src="https://telegram.org/js/telegram-web-app.js"></script>

@@ -79,20 +79,23 @@ function updateCountdowns() {
 
 export async function loadHome(data) {
   try {
-    let stats, settings;
+    let stats, settings, ttsCode;
     if (data && data.stats) {
       stats = data.stats;
       settings = data.settings;
+      ttsCode = data.tts_code;
     } else {
       const init = await GET('/api/init');
       stats = init.stats;
       settings = init.settings;
+      ttsCode = init.tts_code;
     }
 
     state.currentStats = stats;
     state.currentSettings = settings;
 
     state.practiceMode = settings.practice_mode || 'word_to_translation';
+    if (ttsCode) state.ttsCode = ttsCode;
     const due = stats.due || 0;
     const newWords = stats.new || 0;
     const todayDone = stats.today_new || 0;

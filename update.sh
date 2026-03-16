@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 cd /home/pi/srbot
 git pull origin main
 source venv/bin/activate

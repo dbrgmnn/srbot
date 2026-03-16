@@ -62,7 +62,11 @@ function parseCSVLine(line) {
 }
 
 function parseText(text) {
-  return text.split('\n').filter(l => l.trim()).map(line => {
+  return text.split('\n').filter(l => l.trim()).filter(line => {
+    // Skip header rows like "term,translation,..." or "word,translation,..."
+    const first = line.split(',')[0].trim().toLowerCase();
+    return first !== 'term' && first !== 'word';
+  }).map(line => {
     const p = parseCSVLine(line);
     return (p[0] && p[1]) ? { 
       word: p[0], 

@@ -20,7 +20,13 @@ srbot/
 ├── webapp/              # Frontend (Mini App)
 │   ├── index.html       # Application structure
 │   ├── css/style.css    # Styles (Telegram Theme Integration)
-│   └── js/app.js        # Logic, gestures (swipes), API client
+│   └── js/
+│       ├── app.js       # Entry point, window bindings
+│       ├── api.js       # HTTP client, shared state
+│       ├── ui.js        # Screen switching, home screen rendering
+│       ├── practice.js  # Practice session logic, swipe gestures
+│       ├── dictionary.js# Word search, add, edit, delete, CSV import
+│       └── settings.js  # Settings screen, universal picker
 └── config.py            # Configuration and environment
 ```
 

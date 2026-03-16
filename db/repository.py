@@ -25,6 +25,7 @@ class UserRepo:
             )
             if not await cursor.fetchone():
                 await self._create_settings(user_id, language, timezone, config)
+                await self.db.commit()
             return user_id
 
         # New user
@@ -93,62 +94,47 @@ class UserRepo:
 
     async def update_timezone(self, telegram_id: int, tz_name: str, language: str):
         await self.db.execute(
-            """INSERT INTO user_settings (user_id, language, timezone)
-               VALUES ((SELECT id FROM users WHERE telegram_id = ?), ?, ?)
-               ON CONFLICT(user_id, language) DO UPDATE SET timezone = ?""",
-            (telegram_id, language, tz_name, tz_name),
+            """UPDATE user_settings SET timezone = ?
+               WHERE user_id = (SELECT id FROM users WHERE telegram_id = ?) AND language = ?""",
+            (tz_name, telegram_id, language),
         )
         await self.db.commit()
 
     async def update_daily_limit(self, telegram_id: int, limit: int, language: str):
         await self.db.execute(
-            """INSERT INTO user_settings (user_id, language, daily_limit)
-               VALUES ((SELECT id FROM users WHERE telegram_id = ?), ?, ?)
-               ON CONFLICT(user_id, language) DO UPDATE SET daily_limit = ?""",
-            (telegram_id, language, limit, limit),
+            """UPDATE user_settings SET daily_limit = ?
+               WHERE user_id = (SELECT id FROM users WHERE telegram_id = ?) AND language = ?""",
+            (limit, telegram_id, language),
         )
         await self.db.commit()
 
     async def update_notification_interval(self, telegram_id: int, minutes: int, language: str):
         await self.db.execute(
-            """INSERT INTO user_settings (user_id, language, notification_interval_minutes)
-               VALUES ((SELECT id FROM users WHERE telegram_id = ?), ?, ?)
-               ON CONFLICT(user_id, language) DO UPDATE SET notification_interval_minutes = ?""",
-            (telegram_id, language, minutes, minutes),
+            """UPDATE user_settings SET notification_interval_minutes = ?
+               WHERE user_id = (SELECT id FROM users WHERE telegram_id = ?) AND language = ?""",
+            (minutes, telegram_id, language),
         )
         await self.db.commit()
 
     async def update_quiet_hours(self, telegram_id: int, quiet_start: str = None, quiet_end: str = None, language: str = 'de'):
-        # Here we keep default 'de' for safety if called from scheduler, but better to be explicit
-        user_id_cur = await self.db.execute("SELECT id FROM users WHERE telegram_id = ?", (telegram_id,))
-        row = await user_id_cur.fetchone()
-        if not row: return
-        user_id = row['id']
-        
-        # Ensure record exists
-        await self.db.execute(
-            "INSERT OR IGNORE INTO user_settings (user_id, language) VALUES (?, ?)",
-            (user_id, language)
-        )
-        
+        uid_sub = "(SELECT id FROM users WHERE telegram_id = ?)"
         if quiet_start is not None:
             await self.db.execute(
-                "UPDATE user_settings SET quiet_start = ? WHERE user_id = ? AND language = ?",
-                (quiet_start, user_id, language),
+                f"UPDATE user_settings SET quiet_start = ? WHERE user_id = {uid_sub} AND language = ?",
+                (quiet_start, telegram_id, language),
             )
         if quiet_end is not None:
             await self.db.execute(
-                "UPDATE user_settings SET quiet_end = ? WHERE user_id = ? AND language = ?",
-                (quiet_end, user_id, language),
+                f"UPDATE user_settings SET quiet_end = ? WHERE user_id = {uid_sub} AND language = ?",
+                (quiet_end, telegram_id, language),
             )
         await self.db.commit()
 
     async def update_practice_mode(self, telegram_id: int, mode: str, language: str):
         await self.db.execute(
-            """INSERT INTO user_settings (user_id, language, practice_mode)
-               VALUES ((SELECT id FROM users WHERE telegram_id = ?), ?, ?)
-               ON CONFLICT(user_id, language) DO UPDATE SET practice_mode = ?""",
-            (telegram_id, language, mode, mode),
+            """UPDATE user_settings SET practice_mode = ?
+               WHERE user_id = (SELECT id FROM users WHERE telegram_id = ?) AND language = ?""",
+            (mode, telegram_id, language),
         )
         await self.db.commit()
 
@@ -156,12 +142,8 @@ class UserRepo:
         user_id_cur = await self.db.execute("SELECT id FROM users WHERE telegram_id = ?", (telegram_id,))
         row = await user_id_cur.fetchone()
         if not row: return
-        user_id = row['id']
-        # Simply ensure settings exist for the new language
-        await self.db.execute(
-            "INSERT OR IGNORE INTO user_settings (user_id, language) VALUES (?, ?)",
-            (user_id, new_language)
-        )
+        # Create settings row for the new language if it doesn't exist yet
+        await self._create_settings(row['id'], new_language, 'UTC')
         await self.db.commit()
 
 

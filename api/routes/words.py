@@ -202,11 +202,12 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         return web.json_response({"added": added_count})
 
 
+    # Static/specific routes MUST be registered before parameterized routes
     app.router.add_post("/api/words", add_words)
     app.router.add_post("/api/external/words", add_external_words)
     app.router.add_post("/api/words/preload", preload_words)
-    app.router.add_get("/api/words/search", search_words)
-    app.router.add_patch("/api/words/{word_id}", patch_word)
-    app.router.add_delete("/api/words/all", delete_all_words)
-    app.router.add_delete("/api/words/{word_id}", delete_word)
     app.router.add_get("/api/words/export", export_words)
+    app.router.add_get("/api/words/search", search_words)
+    app.router.add_delete("/api/words/all", delete_all_words)
+    app.router.add_patch("/api/words/{word_id}", patch_word)
+    app.router.add_delete("/api/words/{word_id}", delete_word)

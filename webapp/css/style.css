@@ -9,6 +9,8 @@
   --btn-text:  var(--tg-theme-button-text-color, #ffffff);
   --radius:    12px;
   --gap:       12px;
+  --bg3:       var(--tg-theme-secondary-bg-color, #3a3a3c);
+  --border:    rgba(255,255,255,0.08);
 }
 
 body {
@@ -150,7 +152,7 @@ body {
 }
 .btn:active { opacity: .8; }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-.btn.secondary {
+.btn-secondary {
   background: var(--bg2);
   color: var(--text);
 }
@@ -341,10 +343,6 @@ input[type="number"] { width: 60px; text-align: center; }
 .btn-action:active { opacity: 0.7; }
 
 /* ── Other ── */
-textarea {
-  width: 100%; min-height: 140px; background: var(--bg2); border: none; border-radius: var(--radius);
-  padding: 12px; color: var(--text); font-size: 15px; outline: none; margin-bottom: var(--gap);
-}
 .search-input {
   width: 100%; background: var(--bg2); border: none; border-radius: var(--radius);
   padding: 12px 16px; color: var(--text); font-size: 15px; outline: none; margin-bottom: var(--gap);
@@ -377,6 +375,15 @@ textarea {
 }
 .add-form .edit-input {
   margin-bottom: 8px;
+}
+
+/* ── Edit / Picker sheet ── */
+.edit-sheet-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 14px;
+  text-align: center;
 }
 
 /* ── Edit sheet ── */
@@ -415,26 +422,49 @@ mark {
   padding: 0 2px;
 }
 
-/* -- Form Select -- */
-.form-select {
-  background-color: var(--bg3);
-  color: var(--text);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 6px 32px 6px 12px;
+/* -- Picker (replaces <select>) -- */
+.picker-value {
+  color: var(--accent);
   font-size: 14px;
-  font-family: inherit;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
   cursor: pointer;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='white' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-  max-width: 180px;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
 }
-.form-select:focus {
-  outline: none;
-  border-color: var(--accent);
+.picker-value::after {
+  content: '›';
+  font-size: 18px;
+  opacity: 0.5;
+  margin-left: 2px;
+}
+.picker-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 60vh;
+  overflow-y: auto;
+  padding-bottom: 8px;
+}
+.picker-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 12px;
+  border-radius: var(--radius);
+  background: var(--bg);
+  font-size: 15px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.picker-item:active { opacity: 0.7; }
+.picker-item.selected {
+  background: rgba(10, 132, 255, 0.15);
+  color: var(--accent);
+  font-weight: 600;
+}
+.picker-item-check {
+  color: var(--accent);
+  font-size: 18px;
+  font-weight: 700;
 }

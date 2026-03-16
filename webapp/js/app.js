@@ -1,4 +1,4 @@
-import { setLanguage, state } from './api.js';
+import { state } from './api.js';
 import { loadHome, showScreen, toast } from './ui.js';
 import { startPractice, playAudio, exitPractice } from './practice.js';
 import { 
@@ -7,7 +7,8 @@ import {
 } from './dictionary.js';
 import {
   switchLanguage, changeLimit, changeInterval, loadSettings,
-  saveSetting, setPracticeMode, preloadDefaultWords
+  saveSetting, setPracticeMode, preloadDefaultWords,
+  openPicker, closePicker
 } from './settings.js';
 
 const tg = window.Telegram.WebApp;
@@ -35,6 +36,8 @@ window.setPracticeMode = setPracticeMode;
 window.clearAllWords = clearAllWords;
 window.shareWords = shareWords;
 window.loadSettings = loadSettings;
+window.openPicker = openPicker;
+window.closePicker = closePicker;
 window.preloadDefaultWords = preloadDefaultWords;
 
 async function init() {
