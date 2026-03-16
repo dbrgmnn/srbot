@@ -310,6 +310,8 @@ body {
   opacity: 0; transition: all .25s; pointer-events: none; z-index: 200;
 }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast-success { background: rgba(48, 209, 88, 0.9); }
+.toast-error   { background: rgba(255, 69, 58, 0.9); }
 
 .info-footer { margin-top: 24px; text-align: center; color: var(--hint); font-size: 12px; }
 

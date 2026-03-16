@@ -1,4 +1,5 @@
-import { loadHome, showScreen, toast } from './ui.js';
+import { loadHome, showScreen } from './ui.js';
+import { toast, T } from './toast.js';
 import { startPractice, playAudio, exitPractice, undo } from './practice.js';
 import { 
   submitWords, handleFileUpload, onSearchInput, 
@@ -53,7 +54,7 @@ async function init() {
     initGlobalHaptics();
     await loadHome();
   } catch (e) {
-    toast('Init failed');
+    toast(T.INIT_FAIL, 'error');
     console.error(e);
   }
 }

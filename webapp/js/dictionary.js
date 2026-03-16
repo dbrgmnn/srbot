@@ -1,5 +1,6 @@
 import { GET, POST, DEL, PATCH, state } from './api.js';
-import { toast, loadHome } from './ui.js';
+import { loadHome } from './ui.js';
+import { toast, T } from './toast.js';
 
 const tg = window.Telegram.WebApp;
 let searchTimer = null;
@@ -17,20 +18,20 @@ export async function submitWords() {
   const level = levelEl.value.trim() || null;
 
   if (!word || !translation) {
-    toast('Word and Translation required');
+    toast(T.WORD_REQUIRED, 'error');
     return;
   }
 
   try {
     const res = await POST('/api/words', { words: [{ word, translation, example, level }] });
     if (res.result && res.result.added) {
-      toast(`Added: ${word}`);
+      toast(T.WORD_ADDED(word), 'success');
       wordEl.value = ''; transEl.value = ''; exEl.value = ''; levelEl.value = '';
       const levelDisp = document.getElementById('add-level-display');
       if (levelDisp) { levelDisp.textContent = 'Level'; levelDisp.style.color = 'var(--hint)'; }
       loadHome();
     }
-  } catch (e) { toast('Add failed'); }
+  } catch (e) { toast(T.WORD_ADD_FAIL, 'error'); }
 }
 
 export async function handleFileUpload(input) {
@@ -40,11 +41,11 @@ export async function handleFileUpload(input) {
   reader.onload = async (e) => {
     const words = parseText(e.target.result);
     input.value = '';
-    if (!words.length) { toast('No words found'); return; }
+    if (!words.length) { toast(T.NO_WORDS_CSV, 'error'); return; }
     try {
       const res = await POST('/api/words', { words });
-      if (res.result && res.result.added) { toast(`Added ${res.result.added} words`); loadHome(); }
-    } catch (e) { toast('Upload failed'); }
+      if (res.result && res.result.added) { toast(T.CSV_ADDED(res.result.added), 'success'); loadHome(); }
+    } catch (e) { toast(T.CSV_FAIL, 'error'); }
   };
   reader.readAsText(file);
 }
@@ -119,7 +120,7 @@ async function loadSearch(q) {
     el.querySelectorAll('.del-btn').forEach(btn => {
       btn.onclick = () => deleteWord(btn.dataset.id);
     });
-  } catch(e) { toast('Search failed'); }
+  } catch(e) { toast(T.SEARCH_FAIL, 'error'); }
 }
 
 async function deleteWord(id) {
@@ -127,7 +128,7 @@ async function deleteWord(id) {
     await DEL(`/api/words/${id}`);
     document.getElementById(`wr-${id}`)?.remove();
     loadHome();
-  } catch(e) { toast('Delete failed'); }
+  } catch(e) { toast(T.DELETE_FAIL, 'error'); }
 }
 
 export function openEdit(w) {
@@ -167,16 +168,16 @@ export async function saveEdit() {
       level: level 
     });
     closeEdit();
-    toast('Saved');
+    toast(T.WORD_SAVED, 'success');
     loadHome();
-  } catch(e) { toast('Save failed'); }
+  } catch(e) { toast(T.WORD_SAVE_FAIL, 'error'); }
 }
 
 export function clearAllWords() {
   tg.showConfirm(`Delete all ${state.currentLang.toUpperCase()} words?`, async (ok) => {
     if (ok) {
-      try { await DEL('/api/words/all'); toast('Cleared'); loadHome(); }
-      catch(e) { toast('Failed'); }
+      try { await DEL('/api/words/all'); toast(T.CLEARED, 'success'); loadHome(); }
+      catch(e) { toast(T.CLEAR_FAIL, 'error'); }
     }
   });
 }
@@ -186,6 +187,6 @@ export async function shareWords() {
     const res = await fetch('/api/words/export', { headers: { 'X-Init-Data': tg.initData, 'X-Language': state.currentLang }});
     const text = await res.text();
     if (navigator.share) await navigator.share({ title: 'SRbot dictionary', text });
-    else { await navigator.clipboard.writeText(text); toast('Copied'); }
-  } catch (e) { toast('Export failed'); }
+    else { await navigator.clipboard.writeText(text); toast(T.COPIED, 'success'); }
+  } catch (e) { toast(T.EXPORT_FAIL, 'error'); }
 }

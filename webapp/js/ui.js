@@ -1,15 +1,7 @@
 import { GET, state } from './api.js';
+export { toast } from './toast.js';
 
 const tg = window.Telegram.WebApp;
-
-export function toast(msg) {
-  const el = document.getElementById('toast');
-  if (el) {
-    el.textContent = msg;
-    el.classList.add('show');
-    setTimeout(() => el.classList.remove('show'), 3000);
-  }
-}
 
 export function showScreen(name) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));

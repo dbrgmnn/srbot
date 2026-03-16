@@ -1,5 +1,6 @@
 import { GET, POST, setLanguage, state } from './api.js';
-import { toast, loadHome } from './ui.js';
+import { loadHome } from './ui.js';
+import { toast, T } from './toast.js';
 
 const tg = window.Telegram.WebApp;
 
@@ -185,8 +186,8 @@ export async function switchLanguage(lang) {
     setLanguage(lang);
     await POST('/api/settings', { language: lang });
     await Promise.all([loadHome(), loadSettings()]);
-    toast(`Switched to ${lang.toUpperCase()}`);
-  } catch (e) { toast('Error switching language'); }
+    toast(T.LANG_SWITCHED(lang.toUpperCase()), 'success');
+  } catch (e) { toast(T.LANG_FAIL, 'error'); }
 }
 
 export async function loadSettings() {
@@ -251,9 +252,9 @@ export async function loadSettings() {
 export async function saveSetting(key, val, showToast = true) {
   try {
     await POST('/api/settings', { [key]: val });
-    if (showToast) toast('Settings saved');
+    if (showToast) toast(T.SAVED, 'success');
     if (key === 'practice_mode' || key === 'daily_limit' || key === 'timezone') loadHome();
-  } catch(e) { if (showToast) toast('Save failed'); }
+  } catch(e) { if (showToast) toast(T.SAVE_FAIL, 'error'); }
 }
 
 export function setPracticeMode(mode) {
@@ -276,11 +277,11 @@ export async function preloadDefaultWords() {
     if (!ok) return;
     try {
       const res = await POST('/api/words/preload');
-      toast(`Added ${res.result.added} new words`);
+      toast(T.IMPORT_ADDED(res.result.added), 'success');
       await loadSettings();
       await loadHome();
     } catch (e) {
-      toast('Preload failed');
+      toast(T.IMPORT_FAIL, 'error');
       console.error(e);
     }
   });
