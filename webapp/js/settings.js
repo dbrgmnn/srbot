@@ -106,13 +106,10 @@ function _openIntervalPicker() {
 }
 
 function _openQuietStartPicker() {
-  const options = [
-    { value: '20:00', label: '20:00' },
-    { value: '21:00', label: '21:00' },
-    { value: '22:00', label: '22:00' },
-    { value: '23:00', label: '23:00' },
-    { value: '00:00', label: '00:00' }
-  ];
+  const options = Array.from({ length: 24 }, (_, i) => {
+    const h = String(i).padStart(2, '0');
+    return { value: `${h}:00`, label: `${h}:00` };
+  });
   const currentVal = document.getElementById('set-quiet-start').value;
   
   _showPickerSheet('Quiet hours (Start)', options, currentVal, (val) => {
@@ -125,13 +122,10 @@ function _openQuietStartPicker() {
 }
 
 function _openQuietEndPicker(startVal) {
-  const options = [
-    { value: '06:00', label: '06:00' },
-    { value: '07:00', label: '07:00' },
-    { value: '08:00', label: '08:00' },
-    { value: '09:00', label: '09:00' },
-    { value: '10:00', label: '10:00' }
-  ];
+  const options = Array.from({ length: 24 }, (_, i) => {
+    const h = String(i).padStart(2, '0');
+    return { value: `${h}:00`, label: `${h}:00` };
+  });
   const currentVal = document.getElementById('set-quiet-end').value;
   
   _showPickerSheet('Quiet hours (End)', options, currentVal, (val) => {

@@ -306,12 +306,14 @@ body {
 
 .toast {
   position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(20px);
-  background: rgba(0,0,0,.8); color: #fff; padding: 10px 20px; border-radius: 20px; font-size: 14px;
+  color: #fff; font-size: 14px; font-weight: 600;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.6);
   opacity: 0; transition: all .25s; pointer-events: none; z-index: 200;
+  white-space: nowrap;
 }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-.toast-success { background: rgba(48, 209, 88, 0.9); }
-.toast-error   { background: rgba(255, 69, 58, 0.9); }
+.toast-success { color: #30d158; }
+.toast-error   { color: #ff453a; }
 
 .info-footer { margin-top: 24px; text-align: center; color: var(--hint); font-size: 12px; }
 
