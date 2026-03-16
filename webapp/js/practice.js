@@ -11,8 +11,6 @@ let isSwiping = false;
 let touchStartX = 0, touchStartY = 0, touchStartTime = 0;
 let rafId = null;
 
-const langVoices = { 'de': 'de-DE', 'en': 'en-US' };
-
 export async function startPractice() {
   try {
     const data = await GET('/api/session');
@@ -206,7 +204,7 @@ export function playAudio(e) {
   if (!word || !window.speechSynthesis) return;
   window.speechSynthesis.cancel();
   const msg = new SpeechSynthesisUtterance(word.word);
-  msg.lang = langVoices[state.currentLang] || 'de-DE';
+  msg.lang = state.ttsCode || 'en-US';
   msg.rate = 0.85;
   window.speechSynthesis.speak(msg);
 }

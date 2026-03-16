@@ -40,6 +40,8 @@ async function init() {
   try {
     const data = await GET('/api/init');
     const lang = data.settings?.language || 'de';
+    import { state } from './api.js';
+    state.ttsCode = data.tts_code || 'en-US';
     setLanguage(lang); // Sync API module
     await loadHome(data);
   } catch (e) {

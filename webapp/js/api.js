@@ -2,7 +2,8 @@ const tg = window.Telegram.WebApp;
 
 export let state = {
   currentLang: localStorage.getItem('currentLang') || (navigator.language || 'en').split('-')[0],
-  practiceMode: 'word_to_translation'
+  practiceMode: 'word_to_translation',
+  ttsCode: 'en-US'
 };
 
 export function setLanguage(lang) {

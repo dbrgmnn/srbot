@@ -287,7 +287,7 @@ body {
 .settings-label { font-size: 15px; }
 
 .practice-switch { display: flex; background: var(--bg); border-radius: 10px; padding: 3px; }
-.practice-opt, .lang-opt {
+.practice-opt {
   padding: 6px 14px;
   border: none;
   border-radius: 8px;
@@ -298,7 +298,7 @@ body {
   cursor: pointer;
   transition: all .15s;
 }
-.practice-opt.active, .lang-opt.active { background: var(--accent); color: var(--btn-text); }
+.practice-opt.active { background: var(--accent); color: var(--btn-text); }
 
 .stepper { display: flex; align-items: center; background: var(--bg); border-radius: 10px; padding: 2px; }
 .stepper button { width: 34px; height: 34px; border: none; background: none; color: var(--accent); font-size: 20px; font-weight: 600; }
