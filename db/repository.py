@@ -94,47 +94,54 @@ class UserRepo:
 
     async def update_timezone(self, telegram_id: int, tz_name: str, language: str):
         await self.db.execute(
-            """UPDATE user_settings SET timezone = ?
-               WHERE user_id = (SELECT id FROM users WHERE telegram_id = ?) AND language = ?""",
-            (tz_name, telegram_id, language),
+            """INSERT INTO user_settings (user_id, language, timezone)
+               VALUES ((SELECT id FROM users WHERE telegram_id = ?), ?, ?)
+               ON CONFLICT(user_id, language) DO UPDATE SET timezone = excluded.timezone""",
+            (telegram_id, language, tz_name),
         )
         await self.db.commit()
 
     async def update_daily_limit(self, telegram_id: int, limit: int, language: str):
         await self.db.execute(
-            """UPDATE user_settings SET daily_limit = ?
-               WHERE user_id = (SELECT id FROM users WHERE telegram_id = ?) AND language = ?""",
-            (limit, telegram_id, language),
+            """INSERT INTO user_settings (user_id, language, daily_limit)
+               VALUES ((SELECT id FROM users WHERE telegram_id = ?), ?, ?)
+               ON CONFLICT(user_id, language) DO UPDATE SET daily_limit = excluded.daily_limit""",
+            (telegram_id, language, limit),
         )
         await self.db.commit()
 
     async def update_notification_interval(self, telegram_id: int, minutes: int, language: str):
         await self.db.execute(
-            """UPDATE user_settings SET notification_interval_minutes = ?
-               WHERE user_id = (SELECT id FROM users WHERE telegram_id = ?) AND language = ?""",
-            (minutes, telegram_id, language),
+            """INSERT INTO user_settings (user_id, language, notification_interval_minutes)
+               VALUES ((SELECT id FROM users WHERE telegram_id = ?), ?, ?)
+               ON CONFLICT(user_id, language) DO UPDATE SET notification_interval_minutes = excluded.notification_interval_minutes""",
+            (telegram_id, language, minutes),
         )
         await self.db.commit()
 
     async def update_quiet_hours(self, telegram_id: int, quiet_start: str = None, quiet_end: str = None, language: str = 'de'):
-        uid_sub = "(SELECT id FROM users WHERE telegram_id = ?)"
         if quiet_start is not None:
             await self.db.execute(
-                f"UPDATE user_settings SET quiet_start = ? WHERE user_id = {uid_sub} AND language = ?",
-                (quiet_start, telegram_id, language),
+                """INSERT INTO user_settings (user_id, language, quiet_start)
+                   VALUES ((SELECT id FROM users WHERE telegram_id = ?), ?, ?)
+                   ON CONFLICT(user_id, language) DO UPDATE SET quiet_start = excluded.quiet_start""",
+                (telegram_id, language, quiet_start),
             )
         if quiet_end is not None:
             await self.db.execute(
-                f"UPDATE user_settings SET quiet_end = ? WHERE user_id = {uid_sub} AND language = ?",
-                (quiet_end, telegram_id, language),
+                """INSERT INTO user_settings (user_id, language, quiet_end)
+                   VALUES ((SELECT id FROM users WHERE telegram_id = ?), ?, ?)
+                   ON CONFLICT(user_id, language) DO UPDATE SET quiet_end = excluded.quiet_end""",
+                (telegram_id, language, quiet_end),
             )
         await self.db.commit()
 
     async def update_practice_mode(self, telegram_id: int, mode: str, language: str):
         await self.db.execute(
-            """UPDATE user_settings SET practice_mode = ?
-               WHERE user_id = (SELECT id FROM users WHERE telegram_id = ?) AND language = ?""",
-            (mode, telegram_id, language),
+            """INSERT INTO user_settings (user_id, language, practice_mode)
+               VALUES ((SELECT id FROM users WHERE telegram_id = ?), ?, ?)
+               ON CONFLICT(user_id, language) DO UPDATE SET practice_mode = excluded.practice_mode""",
+            (telegram_id, language, mode),
         )
         await self.db.commit()
 
