@@ -1,4 +1,4 @@
-import { GET, state } from './api.js';
+import { GET, state, setLanguage } from './api.js';
 export { toast } from './toast.js';
 
 const tg = window.Telegram.WebApp;
@@ -54,7 +54,7 @@ function updateCountdowns() {
     if (dueLabel) dueLabel.textContent = time || 'Review';
   }
 
-  const limit = state.currentSettings?.daily_limit || 20;
+  const limit = state.currentSettings?.daily_limit;
   const todayDone = stats.today_new || 0;
   const availableNew = Math.max(0, limit - todayDone);
 
@@ -88,12 +88,20 @@ export async function loadHome() {
     state.currentStats = stats;
     state.currentSettings = settings;
 
-    state.practiceMode = settings.practice_mode || 'word_to_translation';
+    if (init.limits) {
+      state.min_daily_limit = init.limits.min_daily_limit;
+      state.max_daily_limit = init.limits.max_daily_limit;
+      state.min_notify_interval = init.limits.min_notify_interval;
+      state.max_notify_interval = init.limits.max_notify_interval;
+    }
+
+    state.practiceMode = settings.practice_mode;
+    if (settings.language) setLanguage(settings.language);
     if (ttsCode) state.ttsCode = ttsCode;
     const due = stats.due || 0;
     const newWords = stats.new || 0;
     const todayDone = stats.today_new || 0;
-    const limit = settings.daily_limit || 20;
+    const limit = settings.daily_limit;
     const availableNew = Math.max(0, limit - todayDone);
     const sessionTotal = due + Math.min(newWords, availableNew);
 

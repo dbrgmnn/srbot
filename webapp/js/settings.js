@@ -91,7 +91,7 @@ function _openIntervalPicker() {
     parseInt(o.value) >= state.min_notify_interval && parseInt(o.value) <= state.max_notify_interval
   );
 
-  const currentVal = document.getElementById('set-notify-interval').dataset.value || '240';
+  const currentVal = document.getElementById('set-notify-interval').dataset.value || String(Math.floor(state.max_notify_interval / 2));
   
   _showPickerSheet('Notification frequency', filteredOptions, currentVal, (val) => {
     const opt = filteredOptions.find(o => o.value === val);
@@ -205,7 +205,7 @@ export async function loadSettings() {
     const languages = await getLanguages();
     const langMeta = languages[s.language];
     const langDisplay = document.getElementById('language-display');
-    if (langDisplay) langDisplay.textContent = langMeta ? `${langMeta.flag} ${langMeta.name}` : (s.language || 'de').toUpperCase();
+    if (langDisplay) langDisplay.textContent = langMeta ? `${langMeta.flag} ${langMeta.name}` : s.language.toUpperCase();
 
     const modeLabels = {
       'word_to_translation': 'Word → Translation',
@@ -215,23 +215,21 @@ export async function loadSettings() {
     if (modeDisplay) modeDisplay.textContent = modeLabels[s.practice_mode] || s.practice_mode;
 
     // Update practiceMode in state so picker highlights current value
-    state.practiceMode = s.practice_mode || 'word_to_translation';
+    state.practiceMode = s.practice_mode;
     state.preloadAvailable = s.preload_available === true;
     const importRow = document.getElementById('import-row');
     if (importRow) importRow.style.display = state.preloadAvailable ? '' : 'none';
 
-    if (document.getElementById('set-quiet-start')) document.getElementById('set-quiet-start').value = s.quiet_start || '23:00';
-    if (document.getElementById('set-quiet-end')) document.getElementById('set-quiet-end').value = s.quiet_end || '08:00';
+    if (document.getElementById('set-quiet-start')) document.getElementById('set-quiet-start').value = s.quiet_start;
+    if (document.getElementById('set-quiet-end')) document.getElementById('set-quiet-end').value = s.quiet_end;
     if (document.getElementById('quiet-hours-display')) {
-      const qStart = s.quiet_start || '23:00';
-      const qEnd = s.quiet_end || '08:00';
-      document.getElementById('quiet-hours-display').textContent = `${qStart} — ${qEnd}`;
+      document.getElementById('quiet-hours-display').textContent = `${s.quiet_start} — ${s.quiet_end}`;
     }
 
-    if (document.getElementById('set-limit-val')) document.getElementById('set-limit-val').textContent = s.daily_limit || 20;
+    if (document.getElementById('set-limit-val')) document.getElementById('set-limit-val').textContent = s.daily_limit;
     
     if (document.getElementById('set-notify-interval')) {
-      const val = s.notification_interval_minutes || 240;
+      const val = s.notification_interval_minutes;
       const el = document.getElementById('set-notify-interval');
       el.dataset.value = val;
       if (val < 60) el.textContent = `Every ${val} min`;

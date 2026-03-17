@@ -207,8 +207,10 @@ async function grade(quality) {
     card.style.opacity = '0';
 
     tg.HapticFeedback.notificationOccurred('success');
-    POST('/api/grade', { word_id: word.id, quality }).catch(() => {});
     sessionIdx++;
+    POST('/api/grade', { word_id: word.id, quality }).catch((e) => {
+      console.error('Grade failed, word progress may not be saved:', e);
+    });
     setTimeout(() => { isGrading = false; renderWord(); }, 300);
   } catch(e) {
     console.error('Grade failed', e);
@@ -227,7 +229,7 @@ export async function undo() {
       old_state: {
         repetitions: last.word.repetitions ?? 0,
         easiness: last.word.easiness ?? 2.5,
-        interval: last.word.interval ?? 0,
+        interval: last.word.interval ?? 1,
         next_review: last.word.next_review ?? null,
         last_reviewed_at: last.word.last_reviewed_at ?? null,
         started_at: last.word.started_at ?? null

@@ -13,12 +13,13 @@ def setup_routes_practice(app: web.Application, db: aiosqlite.Connection):
 
         user_repo = UserRepo(db)
         word_repo = WordRepo(db)
-        settings = await user_repo.get_user_settings(telegram_id, lang)
+        config = request.app["config"]
+        settings = await user_repo.get_user_settings(telegram_id, lang, config)
 
         # Calculate remaining limit with User's TZ
-        tz_name = settings.get("timezone", "UTC")
+        tz_name = settings.get("timezone", config.default_timezone)
         today_done = await user_repo.get_today_new_count(user_id, lang, tz_name)
-        daily_limit = settings.get("daily_limit", 20)
+        daily_limit = settings.get("daily_limit", config.max_daily_limit // 2)
         remaining = max(0, daily_limit - today_done)
         
         words = await word_repo.get_session_words(user_id, lang, new_limit=remaining)
@@ -71,7 +72,7 @@ def setup_routes_practice(app: web.Application, db: aiosqlite.Connection):
             word_id=word_id,
             repetitions=old_state.get("repetitions", 0),
             easiness=old_state.get("easiness", 2.5),
-            interval=old_state.get("interval", 0),
+            interval=old_state.get("interval", 1),
             next_review=old_state.get("next_review"),
             last_reviewed_at=old_state.get("last_reviewed_at"),
             started_at=old_state.get("started_at"),

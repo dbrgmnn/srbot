@@ -14,7 +14,8 @@ def setup_routes_init(app: web.Application, db: aiosqlite.Connection):
         user_repo = UserRepo(db)
         word_repo = WordRepo(db)
         
-        settings = await user_repo.get_user_settings(telegram_id, lang)
+        config = request.app["config"]
+        settings = await user_repo.get_user_settings(telegram_id, lang, config)
         stats = await word_repo.get_full_stats(user_id, lang, tz_name=settings.get("timezone", "UTC"))
 
         lang_meta = LANGUAGES.get(lang, {})
@@ -29,6 +30,12 @@ def setup_routes_init(app: web.Application, db: aiosqlite.Connection):
                 "tts_code": tts_code,
                 "lang_flag": lang_meta.get("flag", ""),
                 "lang_name": lang_meta.get("name", lang.upper()),
+                "limits": {
+                    "min_daily_limit": config.min_daily_limit,
+                    "max_daily_limit": config.max_daily_limit,
+                    "min_notify_interval": config.min_notify_interval,
+                    "max_notify_interval": config.max_notify_interval,
+                },
             }
         })
     app.router.add_get("/api/init", init_user)

@@ -34,10 +34,9 @@ def setup_routes_settings(app: web.Application, db: aiosqlite.Connection):
         lang = request['language']
         user_repo = UserRepo(db)
         word_repo = WordRepo(db)
-        settings = await user_repo.get_user_settings(telegram_id, lang)
-        stats = await word_repo.get_full_stats(user_id, lang, tz_name=settings.get("timezone", "UTC"))
-        
         config = request.app["config"]
+        settings = await user_repo.get_user_settings(telegram_id, lang, config)
+        stats = await word_repo.get_full_stats(user_id, lang, tz_name=settings.get("timezone", "UTC"))
         
         preload_available = (config.data_dir / f"words_{lang}.csv").exists()
 
@@ -66,7 +65,7 @@ def setup_routes_settings(app: web.Application, db: aiosqlite.Connection):
         if "language" in body:
             new_lang = body["language"]
             if new_lang in LANGUAGES:
-                await user_repo.update_language(telegram_id, new_lang)
+                await user_repo.update_language(telegram_id, new_lang, request.app["config"])
                 lang = new_lang  # use new lang for subsequent updates in this request
                 # Invalidate user_cache so next request re-fetches user_id for new language
                 request.app["user_cache"].pop((telegram_id, new_lang), None)
@@ -104,7 +103,7 @@ def setup_routes_settings(app: web.Application, db: aiosqlite.Connection):
                 await user_repo.update_notification_interval(telegram_id, interval, lang)
                 scheduler = request.app["scheduler"]
                 if scheduler:
-                    await reschedule(scheduler, db)
+                    await reschedule(scheduler, db, config)
             else:
                 return web.json_response({"ok": False, "error": "interval_out_of_range"}, status=400)
 
@@ -140,7 +139,8 @@ def setup_routes_settings(app: web.Application, db: aiosqlite.Connection):
                 language=lang
             )
 
-        settings = await user_repo.get_user_settings(telegram_id, lang)
+        config = request.app["config"]
+        settings = await user_repo.get_user_settings(telegram_id, lang, config)
         return web.json_response({"ok": True, "result": settings})
 
     app.router.add_get("/api/settings/languages", get_languages_list)

@@ -98,10 +98,10 @@ async def check_and_send_notifications(bot: Bot, db: aiosqlite.Connection, confi
 
 # ── Reschedule ────────────────────────────────────────────────────────────
 
-async def reschedule(scheduler: AsyncIOScheduler, db: aiosqlite.Connection):
+async def reschedule(scheduler: AsyncIOScheduler, db: aiosqlite.Connection, config=None):
     # reads minimum interval across all users and reschedules the job
     user_repo = UserRepo(db)
-    interval = await user_repo.get_min_notification_interval()
+    interval = await user_repo.get_min_notification_interval(config)
     scheduler.reschedule_job(JOB_ID, trigger=IntervalTrigger(minutes=interval))
     logger.info(f"Scheduler rescheduled — interval: {interval} min")
 
@@ -111,7 +111,7 @@ async def reschedule(scheduler: AsyncIOScheduler, db: aiosqlite.Connection):
 async def setup_scheduler(bot: Bot, db: aiosqlite.Connection, config) -> AsyncIOScheduler:
     scheduler = AsyncIOScheduler(timezone=timezone.utc)
     user_repo = UserRepo(db)
-    interval = await user_repo.get_min_notification_interval()
+    interval = await user_repo.get_min_notification_interval(config)
     scheduler.add_job(
         check_and_send_notifications,
         trigger=IntervalTrigger(minutes=interval),

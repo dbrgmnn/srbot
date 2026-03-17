@@ -40,11 +40,8 @@ class UserRepo:
         return user_id
 
     async def _create_settings(self, user_id: int, language: str, timezone: str, config=None):
-        limit = 20
-        interval = 240
-        if config:
-            limit = config.max_daily_limit // 2 # reasonable default
-            interval = config.max_notify_interval // 2
+        limit = config.max_daily_limit // 2 if config else 20
+        interval = config.max_notify_interval // 2 if config else 240
 
         await self.db.execute(
             """INSERT OR IGNORE INTO user_settings 
@@ -63,7 +60,7 @@ class UserRepo:
         )
         await self.db.commit()
 
-    async def get_user_settings(self, telegram_id: int, language: str) -> dict:
+    async def get_user_settings(self, telegram_id: int, language: str, config=None) -> dict:
         cursor = await self.db.execute(
             """SELECT s.* FROM user_settings s
                 JOIN users u ON s.user_id = u.id
@@ -72,14 +69,16 @@ class UserRepo:
         )
         row = await cursor.fetchone()
         
+        default_limit = config.max_daily_limit // 2 if config else 20
+        default_interval = config.max_notify_interval // 2 if config else 240
         defaults = {
             "quiet_start": "23:00",
             "quiet_end": "08:00",
-            "daily_limit": 20,
-            "notification_interval_minutes": 30,
+            "daily_limit": default_limit,
+            "notification_interval_minutes": default_interval,
             "language": language,
             "practice_mode": "word_to_translation",
-            "timezone": "Europe/Berlin",
+            "timezone": "UTC",
         }
 
         if row:
@@ -110,7 +109,7 @@ class UserRepo:
     async def update_notification_interval(self, telegram_id: int, minutes: int, language: str):
         await self._update_setting('notification_interval_minutes', minutes, telegram_id, language)
 
-    async def update_quiet_hours(self, telegram_id: int, quiet_start: str = None, quiet_end: str = None, language: str = 'de'):
+    async def update_quiet_hours(self, telegram_id: int, quiet_start: str = None, quiet_end: str = None, language: str = None):
         if quiet_start is not None:
             await self._update_setting('quiet_start', quiet_start, telegram_id, language)
         if quiet_end is not None:
@@ -119,20 +118,21 @@ class UserRepo:
     async def update_practice_mode(self, telegram_id: int, mode: str, language: str):
         await self._update_setting('practice_mode', mode, telegram_id, language)
 
-    async def update_language(self, telegram_id: int, new_language: str):
+    async def update_language(self, telegram_id: int, new_language: str, config=None):
         user_id_cur = await self.db.execute("SELECT id FROM users WHERE telegram_id = ?", (telegram_id,))
         row = await user_id_cur.fetchone()
         if not row: return
         # Create settings row for the new language if it doesn't exist yet
-        await self._create_settings(row['id'], new_language, 'UTC')
+        await self._create_settings(row['id'], new_language, 'UTC', config)
         await self.db.commit()
 
-    async def get_min_notification_interval(self) -> float:
+    async def get_min_notification_interval(self, config=None) -> float:
         cursor = await self.db.execute(
             "SELECT MIN(notification_interval_minutes) as min_interval FROM user_settings"
         )
         row = await cursor.fetchone()
-        return float(row['min_interval']) if (row and row['min_interval']) else 30.0
+        default = float(config.max_notify_interval // 2) if config else 240.0
+        return float(row['min_interval']) if (row and row['min_interval']) else default
 
     async def get_api_token(self, telegram_id: int) -> str | None:
         cursor = await self.db.execute(
