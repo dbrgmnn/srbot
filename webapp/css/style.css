@@ -313,7 +313,7 @@ body.no-nav {
   letter-spacing: 0.04em;
 }
 .word-back  { transform: rotateY(180deg); }
-.word-main  { font-size: 26px; font-weight: 800; color: var(--text); letter-spacing: -0.5px; }
+.word-main  { font-size: 22px; font-weight: 800; color: var(--text); letter-spacing: -0.5px; }
 .word-trans { font-size: 22px; color: rgba(255,255,255,0.7); font-weight: 600; }
 .word-example { font-size: 14px; color: var(--hint); margin-top: 20px; line-height: 1.5; }
 
@@ -322,8 +322,8 @@ body.no-nav {
 .word-card.swipe-up::before    { background: rgba(255,214,10,0.12) !important; border-color: rgba(255,214,10,0.5) !important; }
 
 .practice-footer {
-  padding-top: 20px;
-  padding-bottom: calc(16px + env(safe-area-inset-bottom));
+  padding-top: 4px;
+  padding-bottom: calc(28px + env(safe-area-inset-bottom));
   display: flex;
   flex-direction: row;
   justify-content: center;
