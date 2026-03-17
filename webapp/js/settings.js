@@ -155,6 +155,7 @@ function _showPickerSheet(title, options, currentValue, onSelect) {
 
   document.getElementById('picker-overlay').classList.add('open');
   document.getElementById('picker-sheet').classList.add('open');
+  _lockScroll();
 
   // Scroll selected item into view after animation
   setTimeout(() => {
@@ -166,7 +167,27 @@ function _showPickerSheet(title, options, currentValue, onSelect) {
 export function closePicker() {
   document.getElementById('picker-overlay').classList.remove('open');
   document.getElementById('picker-sheet').classList.remove('open');
+  _unlockScroll();
 }
+
+// ── Scroll lock helpers (shared with dictionary.js via window) ────────────
+function _lockScroll() {
+  document.body.dataset.sheetCount = (parseInt(document.body.dataset.sheetCount || '0') + 1).toString();
+  document.body.style.overflow = 'hidden';
+  document.body.style.touchAction = 'none';
+}
+
+function _unlockScroll() {
+  const count = Math.max(0, parseInt(document.body.dataset.sheetCount || '0') - 1);
+  document.body.dataset.sheetCount = count.toString();
+  if (count === 0) {
+    document.body.style.overflow = '';
+    document.body.style.touchAction = '';
+  }
+}
+
+window._lockScroll = _lockScroll;
+window._unlockScroll = _unlockScroll;
 
 // ── Settings actions ──────────────────────────────────────────────────────
 

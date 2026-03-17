@@ -148,11 +148,13 @@ export function openEdit(w) {
 
   document.getElementById('edit-overlay').classList.add('open');
   document.getElementById('edit-sheet').classList.add('open');
+  window._lockScroll();
 }
 
 export function closeEdit() {
   document.getElementById('edit-overlay').classList.remove('open');
   document.getElementById('edit-sheet').classList.remove('open');
+  window._unlockScroll();
 }
 
 export async function saveEdit() {
