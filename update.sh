@@ -1,15 +1,25 @@
 #!/bin/bash
 set -e
+
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+NC='\033[0m'
+
 cd /home/pi/srbot
 
-echo "[1/3] Updating code..."
+echo -e "${GREEN}[1/3] Updating code...${NC}"
 git pull origin main
 
-echo "[2/3] Updating dependencies..."
-source venv/bin/activate
-pip install -r requirements.txt
-
-echo "[3/3] Restarting srbot service..."
+echo -e "${GREEN}[2/3] Restarting srbot service...${NC}"
 sudo systemctl restart srbot
 
-echo "Done! Deployment finished successfully."
+echo -e "${GREEN}[3/3] Waiting for srbot to start...${NC}"
+for i in {1..15}; do
+    sleep 2
+    systemctl is-active --quiet srbot && echo -e "${GREEN}Done! srbot is running.${NC}" && exit 0
+    echo -e "  attempt $i/15..."
+done
+
+echo -e "${RED}ERROR: srbot failed to start after 30s${NC}"
+systemctl status srbot --no-pager -l
+exit 1
