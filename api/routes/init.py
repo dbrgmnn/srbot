@@ -26,7 +26,9 @@ def setup_routes_init(app: web.Application, db: aiosqlite.Connection):
                 "user_id": user_id,
                 "settings": settings,
                 "stats": stats,
-                "tts_code": tts_code
+                "tts_code": tts_code,
+                "lang_flag": lang_meta.get("flag", ""),
+                "lang_name": lang_meta.get("name", lang.upper()),
             }
         })
     app.router.add_get("/api/init", init_user)

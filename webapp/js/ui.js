@@ -92,11 +92,12 @@ export async function loadHome() {
     if (document.getElementById('stat-due')) document.getElementById('stat-due').textContent = due;
     if (document.getElementById('stat-new')) document.getElementById('stat-new').textContent = availableNew;
 
-    const lang = (settings.language || '').toUpperCase();
     const total = stats.total || 0;
+    const flagEl = document.getElementById('header-flag');
     const langEl = document.getElementById('header-lang');
     const countEl = document.getElementById('header-count');
-    if (langEl) langEl.textContent = lang;
+    if (flagEl) flagEl.textContent = init.lang_flag || '';
+    if (langEl) langEl.textContent = init.lang_name || (settings.language || '').toUpperCase();
     if (countEl) countEl.textContent = total;
 
     updateCountdowns();
