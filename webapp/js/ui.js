@@ -69,6 +69,14 @@ function updateCountdowns() {
   }
 }
 
+window._refreshHome = async () => {
+  const capsule = document.getElementById('header-flag')?.closest('.header-capsule');
+  if (capsule) capsule.style.opacity = '0.5';
+  await loadHome();
+  if (capsule) capsule.style.opacity = '';
+  tg.HapticFeedback.impactOccurred('light');
+};
+
 export async function loadHome() {
   try {
     const resp = await GET('/api/init');

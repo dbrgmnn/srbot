@@ -38,7 +38,7 @@ window.preloadDefaultWords = preloadDefaultWords;
 
 function initGlobalHaptics() {
   // Common interactive elements selector
-  const selector = 'button, .nav-btn, .picker-item, .stat-card, .btn-action, .settings-row, .word-row-content, .del-btn, .file-input-label';
+  const selector = 'button, .nav-btn, .picker-item, .stat-card, .settings-row, .word-row-content, .del-btn, .file-input-label';
   
   document.addEventListener('click', (e) => {
     const target = e.target.closest(selector);
