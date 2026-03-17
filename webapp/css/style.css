@@ -100,7 +100,7 @@ body {
   -webkit-backdrop-filter: var(--blur);
 }
 .header-title-add { margin-bottom: 24px; }
-.header-title-summary { margin-bottom: 20px; text-align: center; }
+
 .header-title-spaced { margin-bottom: 24px; display: block; }
 
 /* ── Cards ── */
@@ -130,7 +130,7 @@ body {
   gap: var(--gap);
   margin-bottom: var(--gap);
 }
-.stats-grid-3col { grid-template-columns: 1fr 1fr 1fr; margin-bottom: 20px; }
+
 
 .stat-card {
   background: var(--glass);
@@ -142,10 +142,8 @@ body {
   text-align: center;
   box-shadow: 0 4px 16px rgba(0,0,0,0.15), inset 0 1px 0 var(--glass-shine);
 }
-.stat-card-small { padding: 10px; }
 .stat-icon { font-size: 20px; margin-bottom: 6px; }
 .stat-val { font-size: 30px; font-weight: 700; letter-spacing: -0.5px; }
-.stat-val-small { font-size: 20px; }
 .stat-label { font-size: 11px; color: var(--hint); margin-top: 3px; letter-spacing: 0.02em; }
 
 .stats-summary-row {
@@ -173,18 +171,9 @@ body {
 .text-learning { color: #ff9f0a; }
 .text-known    { color: #30d158; }
 .text-mastered { color: #bf5af2; }
-.text-good     { color: #30d158; }
-.text-hard     { color: #ffd60a; }
-.text-again    { color: #ff453a; }
 
-.card-summary { text-align: center; padding: 40px 20px; }
-.summary-icon { font-size: 64px; margin-bottom: 20px; display: block; }
-.header-sub { font-size: 15px; color: var(--hint); margin-top: 4px; }
-.mt-8 { margin-top: 32px; }
-.session-stat-card {
-  background: var(--glass);
-  border: 1px solid var(--glass-border);
-}
+
+
 
 /* ── Buttons ── */
 .btn {

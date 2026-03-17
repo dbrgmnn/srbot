@@ -5,7 +5,6 @@ const tg = window.Telegram.WebApp;
 
 let sessionWords = [];
 let sessionIdx = 0;
-let sessionStats = { reviewed: 0, new: 0, good: 0, hard: 0, again: 0 };
 let practiceHistory = [];
 let isGrading = false;
 let isSwiping = false;
@@ -19,7 +18,6 @@ export async function startPractice() {
     if (!words || words.length === 0) return;
     sessionWords = words;
     sessionIdx = 0;
-    sessionStats = { reviewed: 0, new: 0, good: 0, hard: 0, again: 0 };
     practiceHistory = [];
     showScreen('practice');
     renderWord();
@@ -125,9 +123,9 @@ export function initSwipe() {
 }
 
 function renderWord() {
-  if (sessionIdx >= sessionWords.length) { 
-    showSummary(); 
-    return; 
+  if (sessionIdx >= sessionWords.length) {
+    exitPractice();
+    return;
   }
 
   const btnUndo = document.getElementById('btn-undo');
@@ -191,12 +189,8 @@ async function grade(quality) {
 
     practiceHistory.push({
       sessionIdx,
-      word: JSON.parse(JSON.stringify(word)),
-      stats: { ...sessionStats }
+      word: JSON.parse(JSON.stringify(word))
     });
-
-    if ((word.repetitions || 0) > 0) sessionStats.reviewed++; else sessionStats.new++;
-    if (quality === 5) sessionStats.good++; else if (quality === 3) sessionStats.hard++; else sessionStats.again++;
 
     const card = document.getElementById('word-card');
     const isFlipped = card.classList.contains('flipped');
@@ -238,7 +232,6 @@ export async function undo() {
   } catch (e) { console.error('Undo failed', e); }
 
   sessionIdx = last.sessionIdx;
-  sessionStats = last.stats;
   renderWord();
 }
 
@@ -253,16 +246,6 @@ export function playAudio(e) {
   msg.lang = state.ttsCode || 'en-US';
   msg.rate = 0.85;
   synth.speak(msg);
-}
-
-function showSummary() {
-  const total = sessionStats.reviewed + sessionStats.new;
-  const msgEl = document.getElementById('sum-total-msg');
-  if (msgEl) msgEl.textContent = `You reviewed ${total} words`;
-  if (document.getElementById('sum-good')) document.getElementById('sum-good').textContent = sessionStats.good;
-  if (document.getElementById('sum-hard')) document.getElementById('sum-hard').textContent = sessionStats.hard;
-  if (document.getElementById('sum-again')) document.getElementById('sum-again').textContent = sessionStats.again;
-  showScreen('summary');
 }
 
 export function exitPractice() {
