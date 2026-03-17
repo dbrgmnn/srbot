@@ -186,35 +186,39 @@ function renderWord() {
 async function grade(quality) {
   if (isGrading) return;
   isGrading = true;
-  const word = sessionWords[sessionIdx];
-  
-  practiceHistory.push({
-    sessionIdx,
-    word: JSON.parse(JSON.stringify(word)),
-    stats: { ...sessionStats }
-  });
+  try {
+    const word = sessionWords[sessionIdx];
 
-  if ((word.repetitions || 0) > 0) sessionStats.reviewed++; else sessionStats.new++;
-  if (quality === 5) sessionStats.good++; else if (quality === 3) sessionStats.hard++; else sessionStats.again++;
+    practiceHistory.push({
+      sessionIdx,
+      word: JSON.parse(JSON.stringify(word)),
+      stats: { ...sessionStats }
+    });
 
-  const card = document.getElementById('word-card');
-  const isFlipped = card.classList.contains('flipped');
-  const baseRot = isFlipped ? 180 : 0;
-  if (quality === 1) card.style.transform = `translate(-1000px, 0) rotateY(${baseRot}deg) rotateZ(-30deg)`;
-  else if (quality === 5) card.style.transform = `translate(1000px, 0) rotateY(${baseRot}deg) rotateZ(30deg)`;
-  else if (quality === 3) card.style.transform = `translate(0, -1000px) rotateY(${baseRot}deg) scale(0.5)`;
-  card.style.opacity = '0';
+    if ((word.repetitions || 0) > 0) sessionStats.reviewed++; else sessionStats.new++;
+    if (quality === 5) sessionStats.good++; else if (quality === 3) sessionStats.hard++; else sessionStats.again++;
 
-  // Haptic Feedback for the gesture result
-  tg.HapticFeedback.notificationOccurred('success');
-  POST('/api/grade', { word_id: word.id, quality }).catch(() => {});
-  sessionIdx++;
-  setTimeout(() => { isGrading = false; renderWord(); }, 300);
+    const card = document.getElementById('word-card');
+    const isFlipped = card.classList.contains('flipped');
+    const baseRot = isFlipped ? 180 : 0;
+    if (quality === 1) card.style.transform = `translate(-1000px, 0) rotateY(${baseRot}deg) rotateZ(-30deg)`;
+    else if (quality === 5) card.style.transform = `translate(1000px, 0) rotateY(${baseRot}deg) rotateZ(30deg)`;
+    else if (quality === 3) card.style.transform = `translate(0, -1000px) rotateY(${baseRot}deg) scale(0.5)`;
+    card.style.opacity = '0';
+
+    tg.HapticFeedback.notificationOccurred('success');
+    POST('/api/grade', { word_id: word.id, quality }).catch(() => {});
+    sessionIdx++;
+    setTimeout(() => { isGrading = false; renderWord(); }, 300);
+  } catch(e) {
+    console.error('Grade failed', e);
+    isGrading = false;
+  }
 }
 
 export async function undo() {
+  if (isGrading) return;
   if (practiceHistory.length === 0) return;
-  isGrading = false;
   const last = practiceHistory.pop();
   
   try {
@@ -257,6 +261,7 @@ function showSummary() {
   showScreen('summary');
 }
 
-export function exitPractice() { 
-  showScreen('home'); 
+export function exitPractice() {
+  isGrading = false;
+  showScreen('home');
 }
