@@ -5,6 +5,7 @@ const tg = window.Telegram.WebApp;
 
 let sessionWords = [];
 let sessionIdx = 0;
+let sessionStats = { good: 0, hard: 0, again: 0 };
 let practiceHistory = [];
 let isGrading = false;
 let isSwiping = false;
@@ -18,6 +19,7 @@ export async function startPractice() {
     if (!words || words.length === 0) return;
     sessionWords = words;
     sessionIdx = 0;
+    sessionStats = { good: 0, hard: 0, again: 0 };
     practiceHistory = [];
     showScreen('practice');
     renderWord();
@@ -189,8 +191,13 @@ async function grade(quality) {
 
     practiceHistory.push({
       sessionIdx,
-      word: JSON.parse(JSON.stringify(word))
+      word: JSON.parse(JSON.stringify(word)),
+      stats: { ...sessionStats }
     });
+
+    if (quality === 5) sessionStats.good++;
+    else if (quality === 3) sessionStats.hard++;
+    else sessionStats.again++;
 
     const card = document.getElementById('word-card');
     const isFlipped = card.classList.contains('flipped');
@@ -232,6 +239,7 @@ export async function undo() {
   } catch (e) { console.error('Undo failed', e); }
 
   sessionIdx = last.sessionIdx;
+  sessionStats = last.stats;
   renderWord();
 }
 
@@ -248,7 +256,24 @@ export function playAudio(e) {
   synth.speak(msg);
 }
 
+function toastSession(good, hard, again) {
+  const el = document.getElementById('toast');
+  if (!el) return;
+  el.innerHTML = [
+    good  > 0 ? `<span style="color:#30d158">${good}</span>`  : null,
+    hard  > 0 ? `<span style="color:#ffd60a">${hard}</span>`  : null,
+    again > 0 ? `<span style="color:#ff453a">${again}</span>` : null,
+  ].filter(Boolean).join('<span style="opacity:0.3"> · </span>');
+  el.className = 'toast show';
+  setTimeout(() => {
+    el.classList.remove('show');
+    setTimeout(() => { el.innerHTML = ''; }, 300);
+  }, 3000);
+}
+
 export function exitPractice() {
   isGrading = false;
+  const total = sessionStats.good + sessionStats.hard + sessionStats.again;
+  if (total > 0) toastSession(sessionStats.good, sessionStats.hard, sessionStats.again);
   showScreen('home');
 }
