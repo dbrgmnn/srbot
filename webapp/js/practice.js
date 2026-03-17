@@ -247,10 +247,15 @@ export function playAudio(e) {
   if (e) e.stopPropagation();
   const word = sessionWords[sessionIdx];
   if (!word || !window.speechSynthesis) return;
+
+  const card = document.getElementById('word-card');
+  const isFlipped = card && card.classList.contains('flipped');
+  const text = (isFlipped && word.example) ? word.example : word.word;
+
   const synth = window.speechSynthesis;
   synth.cancel();
   synth.resume();
-  const msg = new SpeechSynthesisUtterance(word.word);
+  const msg = new SpeechSynthesisUtterance(text);
   msg.lang = state.ttsCode || 'en-US';
   msg.rate = 0.85;
   synth.speak(msg);
@@ -260,9 +265,9 @@ function toastSession(good, hard, again) {
   const el = document.getElementById('toast');
   if (!el) return;
   el.innerHTML = [
-    good  > 0 ? `<span style="color:#30d158">${good}</span>`  : null,
-    hard  > 0 ? `<span style="color:#ffd60a">${hard}</span>`  : null,
     again > 0 ? `<span style="color:#ff453a">${again}</span>` : null,
+    hard  > 0 ? `<span style="color:#ffd60a">${hard}</span>`  : null,
+    good  > 0 ? `<span style="color:#30d158">${good}</span>`  : null,
   ].filter(Boolean).join('<span style="opacity:0.3"> · </span>');
   el.className = 'toast show';
   setTimeout(() => {
