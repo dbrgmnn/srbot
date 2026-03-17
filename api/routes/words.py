@@ -5,6 +5,7 @@ from aiohttp import web
 import aiosqlite
 from db.repository import UserRepo, WordRepo
 from api.auth import verify_bearer_token
+from core.languages import LANGUAGES
 
 
 def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
@@ -61,7 +62,13 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
                 "message": "⚠️ Provided data is empty after cleaning"
             }, status=400)
             
-        lang = body.get("language", "en").lower()
+        lang = (body.get("language") or "").lower()
+        if not lang or lang not in LANGUAGES:
+            return web.json_response({
+                "ok": False,
+                "error": "invalid_language",
+                "message": "Language is required or not supported"
+            }, status=400)
         word_repo = WordRepo(db)
         added_count = await word_repo.add_words_batch(user_id, lang, words_data)
         
