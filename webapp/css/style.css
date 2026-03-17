@@ -325,13 +325,9 @@ body.no-nav {
   padding-top: 20px;
   padding-bottom: calc(16px + env(safe-area-inset-bottom));
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-}
-.practice-footer-row {
-  display: flex;
+  flex-direction: row;
   justify-content: center;
+  align-items: center;
   gap: 12px;
 }
 .btn-practice-footer {
@@ -343,19 +339,8 @@ body.no-nav {
   align-items: center;
   justify-content: center;
   margin: 0;
-  font-size: 18px;
-}
-.btn-practice-footer-undo {
-  height: 44px;
-  padding: 0 24px;
-  border-radius: var(--radius-xl);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
-  width: auto;
   transition: opacity .2s;
 }
 
