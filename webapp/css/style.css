@@ -260,17 +260,27 @@ body {
   width: 100%;
   max-width: 320px;
   height: 380px;
-  background: var(--glass);
-  backdrop-filter: var(--blur);
-  -webkit-backdrop-filter: var(--blur);
+  background: transparent;
   border-radius: 32px;
   position: relative;
   transform-style: preserve-3d;
   transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1), opacity 0.3s ease;
   cursor: pointer;
-  box-shadow: 0 24px 48px rgba(0,0,0,0.35), inset 0 1px 0 var(--glass-shine);
-  border: 1px solid var(--glass-border);
   will-change: transform, opacity;
+}
+/* Glass effect via ::before to avoid breaking preserve-3d */
+.word-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 32px;
+  background: var(--glass);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 24px 48px rgba(0,0,0,0.35), inset 0 1px 0 var(--glass-shine);
+  pointer-events: none;
+  z-index: 0;
 }
 .word-card.swiping { transition: none !important; }
 .word-card.flipped { transform: rotateY(180deg); }
@@ -286,6 +296,7 @@ body {
   justify-content: center;
   padding: 32px;
   text-align: center;
+  z-index: 1;
 }
 .word-level-badge {
   position: absolute;
@@ -305,9 +316,9 @@ body {
 .word-trans { font-size: 22px; color: rgba(255,255,255,0.7); font-weight: 600; }
 .word-example { font-size: 14px; color: var(--hint); margin-top: 20px; line-height: 1.5; }
 
-.word-card.swipe-left  { background: rgba(255,69,58,0.12)  !important; border-color: rgba(255,69,58,0.5)  !important; }
-.word-card.swipe-right { background: rgba(48,209,88,0.12)  !important; border-color: rgba(48,209,88,0.5)  !important; }
-.word-card.swipe-up    { background: rgba(255,214,10,0.12) !important; border-color: rgba(255,214,10,0.5) !important; }
+.word-card.swipe-left::before  { background: rgba(255,69,58,0.12)  !important; border-color: rgba(255,69,58,0.5)  !important; }
+.word-card.swipe-right::before { background: rgba(48,209,88,0.12)  !important; border-color: rgba(48,209,88,0.5)  !important; }
+.word-card.swipe-up::before    { background: rgba(255,214,10,0.12) !important; border-color: rgba(255,214,10,0.5) !important; }
 
 .practice-footer {
   padding-top: 20px;
