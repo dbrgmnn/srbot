@@ -1,11 +1,25 @@
 import csv
 import io
-from pathlib import Path
 from aiohttp import web
 import aiosqlite
 from db.repository import UserRepo, WordRepo
 from api.auth import verify_bearer_token
 from core.languages import LANGUAGES
+
+
+def _clean_words(raw: list) -> list:
+    result = []
+    for w in raw:
+        word = (w.get("word") or "").strip()
+        trans = (w.get("translation") or "").strip()
+        if word and trans:
+            result.append({
+                "word": word,
+                "translation": trans,
+                "example": (w.get("example") or "").strip() or None,
+                "level": (w.get("level") or "").strip() or None
+            })
+    return result
 
 
 def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
@@ -14,82 +28,57 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         user_id = await verify_bearer_token(request, db)
         if not user_id:
             return web.json_response({
-                "ok": False, 
-                "error": "unauthorized", 
-                "message": "❌ Invalid API Token"
+                "ok": False,
+                "error": "unauthorized"
             }, status=401)
         
-        body = await request.json()
-        raw_words = body.get("words")
-        
+        try:
+            body = await request.json()
+        except Exception:
+            return web.json_response({"ok": False, "error": "invalid_json"}, status=400)
+
+        # Validate language first
+        lang = (body.get("language") or "").lower()
+        if not lang or lang not in LANGUAGES:
+            return web.json_response({"ok": False, "error": "invalid_language"}, status=400)
+
         # Normalize to list
+        raw_words = body.get("words")
         if not raw_words:
-            # try single word format
             word = (body.get("word") or "").strip()
             translation = (body.get("translation") or "").strip()
             if word and translation:
                 raw_words = [{
-                    "word": word, 
-                    "translation": translation, 
+                    "word": word,
+                    "translation": translation,
                     "example": body.get("example"),
                     "level": body.get("level")
                 }]
-        
-        if not raw_words or not isinstance(raw_words, list):
-            return web.json_response({
-                "ok": False, 
-                "error": "no_words", 
-                "message": "⚠️ No word or translation provided"
-            }, status=400)
 
-        # Clean and validate data
-        words_data = []
-        for w in raw_words:
-            word = (w.get("word") or "").strip()
-            trans = (w.get("translation") or "").strip()
-            if word and trans:
-                words_data.append({
-                    "word": word,
-                    "translation": trans,
-                    "example": (w.get("example") or "").strip() or None,
-                    "level": (w.get("level") or "").strip() or None
-                })
-        
+        if not raw_words or not isinstance(raw_words, list):
+            return web.json_response({"ok": False, "error": "no_words"}, status=400)
+
+        words_data = _clean_words(raw_words)
         if not words_data:
-            return web.json_response({
-                "ok": False, 
-                "error": "invalid_data", 
-                "message": "⚠️ Provided data is empty after cleaning"
-            }, status=400)
-            
-        lang = (body.get("language") or "").lower()
-        if not lang or lang not in LANGUAGES:
-            return web.json_response({
-                "ok": False,
-                "error": "invalid_language",
-                "message": "Language is required or not supported"
-            }, status=400)
+            return web.json_response({"ok": False, "error": "invalid_data"}, status=400)
         word_repo = WordRepo(db)
         added_count = await word_repo.add_words_batch(user_id, lang, words_data)
         
         # Build response
         if len(words_data) == 1:
-            single_word = words_data[0]["word"]
             return web.json_response({
-                "ok": True, 
+                "ok": True,
                 "result": {
-                    "added": added_count > 0,
-                    "word": single_word,
-                    "message": f"✅ Added: {single_word}" if added_count > 0 else f"ℹ️ Already exists: {single_word}"
+                    "added": added_count,
+                    "word": words_data[0]["word"]
                 }
             })
-        
+
         return web.json_response({
-            "ok": True, 
+            "ok": True,
             "result": {
-                "processed": len(words_data),
                 "added": added_count,
-                "message": f"📥 Processed {len(words_data)} valid words, added {added_count}"
+                "processed": len(words_data)
             }
         })
 
@@ -97,21 +86,7 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         user_id = request["user_id"]
         lang = request['language']
         body = await request.json()
-        raw_words = body.get("words", [])
-        
-        # Clean and validate data
-        words_data = []
-        for w in raw_words:
-            word = (w.get("word") or "").strip()
-            trans = (w.get("translation") or "").strip()
-            if word and trans:
-                words_data.append({
-                    "word": word,
-                    "translation": trans,
-                    "example": (w.get("example") or "").strip() or None,
-                    "level": (w.get("level") or "").strip() or None
-                })
-
+        words_data = _clean_words(body.get("words", []))
         if not words_data:
             return web.json_response({"ok": False, "error": "no_valid_words"}, status=400)
             
@@ -135,7 +110,7 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         word_repo = WordRepo(db)
         try:
             await word_repo.update_word_text(word_id, user_id, word, translation, example, level)
-        except Exception:
+        except aiosqlite.IntegrityError:
             return web.json_response({"ok": False, "error": "duplicate"}, status=409)
         return web.json_response({"ok": True})
 
