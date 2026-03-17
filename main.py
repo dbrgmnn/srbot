@@ -7,7 +7,7 @@ from aiogram import Bot, Dispatcher
 
 from config import load_config
 from db.models import init_db
-from db.repository import UserRepo, WordRepo
+from db.repository import UserRepo
 from core.scheduler import setup_scheduler
 from core.bot_handlers import setup_handlers
 from api.server import start_api_server

@@ -1,88 +1,92 @@
 # SRbot — Telegram SRS Mini App
 
-A minimalist Telegram Mini App for learning foreign vocabulary using Spaced Repetition Systems (SM-2 algorithm).
+A minimalist Telegram Mini App for learning foreign vocabulary using Spaced Repetition (SM-2 algorithm). Designed for personal use on a Raspberry Pi Zero 2W, accessed via Tailscale Funnel.
 
 ## 📁 Project Structure
 
 ```text
 srbot/
-├── main.py              # Telegram bot entry point (notifications)
+├── main.py              # Entry point: bot polling, scheduler, API server
+├── config.py            # Configuration loaded from .env
 ├── api/
-│   ├── server.py        # aiohttp server for the Mini App
-│   └── routes/          # API routes (words, stats, settings)
+│   ├── server.py        # aiohttp server, auth middleware, static serving
+│   ├── auth.py          # HMAC-SHA256 initData verification, Bearer token auth
+│   └── routes/          # API routes: init, words, practice, settings
 ├── core/
-│   ├── languages.py     # Registry of 10 supported languages (EN, DE, RU, etc.)
-│   ├── srs.py           # SM-2 algorithm logic
-│   └── scheduler.py     # Notification scheduler
+│   ├── languages.py     # 10 supported languages with flags and TTS codes
+│   ├── srs.py           # SM-2 spaced repetition algorithm
+│   ├── scheduler.py     # APScheduler notification job
+│   └── bot_handlers.py  # /token, /token_new commands
 ├── db/
-│   ├── models.py        # Database schema (SQLite)
-│   └── repository.py    # Data persistence (SQL queries)
-├── webapp/              # Frontend (Mini App)
-│   ├── index.html       # Application structure
-│   ├── css/style.css    # Styles (Telegram Theme Integration)
+│   ├── models.py        # SQLite schema (users, user_settings, words)
+│   └── repository.py    # All DB queries (UserRepo, WordRepo)
+├── webapp/
+│   ├── index.html       # Single-page app shell
+│   ├── css/style.css    # Glass-morphism UI, Telegram themeParams
 │   └── js/
-│       ├── app.js       # Entry point, window bindings
-│       ├── api.js       # HTTP client, shared state
-│       ├── ui.js        # Screen switching, home screen rendering
-│       ├── practice.js  # Practice session logic, swipe gestures
-│       ├── dictionary.js# Word search, add, edit, delete, CSV import
-│       └── settings.js  # Settings screen, universal picker
-└── config.py            # Configuration and environment
+│       ├── app.js       # Entry point, window bindings, global haptics
+│       ├── api.js       # fetch wrapper, shared state, language sync
+│       ├── ui.js        # Screen switching, home screen, countdowns
+│       ├── practice.js  # Session logic, swipe gestures, audio, undo
+│       ├── dictionary.js# Add/edit/delete/search/CSV import/export
+│       ├── settings.js  # Settings screen, universal bottom sheet picker
+│       └── toast.js     # Toast notifications and message constants
+└── update.sh            # Deploy script for Raspberry Pi
 ```
 
 ## 🚀 Quick Start
 
-1. **Environment:**
-   - Clone the repository and create a `.env` file based on `.env.example`.
-   - Install dependencies: `pip install -r requirements.txt`.
+1. Create `.env` from `.env.example` and fill in `BOT_TOKEN` and `ALLOWED_USERS`.
+2. Install dependencies: `pip install -r requirements.txt`
+3. Run: `python main.py`
 
-2. **Run:**
-   - Execute `./update.sh` (if configured) or start manually:
-   - `python main.py`
-
-3. **Frontend Development:**
-   - Static files are served by the aiohttp server. Any changes in `webapp/` will be applied upon refreshing the app in Telegram.
+Frontend changes in `webapp/` are served immediately — no build step needed.
 
 ## 🛠 User Guide
 
 ### Word Management
-- **Adding:** Use the "Add" tab. 
-  - **Single Entry:** Enter word, translation, example sentence, and select a level (Optional, A1-C2) into the fields.
-  - **CSV Upload:** Upload a CSV file with headers: `term,translation,example,level`.
-- **Search:** Use the "Search" tab. Search starts from 2 characters with instant highlighting. Tap a word to edit (including its level) or delete it.
+- **Add tab:** Enter word, translation, optional example and level (A1–C2). Or upload a CSV with headers `term,translation,example,level`.
+- **Search tab:** Search from 2 characters with instant highlighting. Tap to edit, swipe/tap ✕ to delete.
 
 ### Practice Session
-- **Flip:** Tap the card to flip it and see the translation.
-- **Swipe Right:** Mark as **"Good"** (Retained well).
-- **Swipe Left:** Mark as **"Again"** (Forgotten, review soon).
-- **Swipe Up:** Mark as **"Hard"** (Recalled with difficulty).
-*Tactile haptic feedback is triggered on every successful swipe.*
+- **Tap card** — flip to see translation.
+- **Swipe right** — Good ✅ (remembered well)
+- **Swipe left** — Again ❌ (forgotten)
+- **Swipe up** — Hard 🟡 (recalled with effort)
+- **🔊 button** — speaks the word (front) or example sentence (back)
+- **Undo button** — appears after first card, reverts last grade
+- On session end: toast shows `❌ N · 🟡 N · ✅ N`
+- Nav bar is hidden during practice to prevent accidental exits
 
-### Multi-Language Support
-- **10 Languages:** Supports English, German, Russian, Spanish, French, Italian, Chinese, Japanese, Korean, and Portuguese.
-- **Dynamic Selection:** Switch your study language instantly in the Settings tab via a dropdown menu.
-- **Auto-Updating UI:** The interface and notifications adapt to the selected language's flag and settings.
+### Settings
+- **Active Dictionary** — switch between 10 languages
+- **Practice Mode** — Word→Translation or Translation→Word
+- **New words limit** — daily cap for new words (from config)
+- **Frequency** — notification interval
+- **Quiet hours** — start/end time for suppressing notifications
+- **Import default words** — load bundled vocabulary pack for current language
+- **Export dictionary** — share as CSV
+
+### Statistics (Home screen)
+- **🔥 Review** — due for repetition today; countdown if none
+- **🌱 New** — available new words today; countdown until reset if limit reached; "Empty" if no words
+- **Queue / Learning / Known / Mastered** — SM-2 progression buckets
 
 ### Bot Commands
-- `/token`: Generates or shows your unique API token for external integrations. The message auto-deletes after 30 seconds.
-- `/token_new`: Revokes the old token and generates a new one.
+- `/token` — show your API token (auto-deletes after 30s)
+- `/token_new` — revoke and regenerate API token
 
 ### External API
-Add words from outside (e.g., Browser Extensions, iOS Shortcuts):
-- **Endpoint:** `POST /api/external/words`
-- **Auth:** `Authorization: Bearer <YOUR_TOKEN>`
-- **Payload:** `{"word": "...", "translation": "...", "example": "...", "language": "en"}`
-
-### Internal Settings API
-- **Endpoint:** `GET /api/settings/languages` — Returns the list of supported languages with their flags and TTS codes.
-
-### Statistics
-- **Home Header:** Displays the current active dictionary and the total number of words in an accent capsule (e.g., "DE 555").
-- **New:** Words you haven't started learning yet. (If limit is reached, shows a countdown until reset).
-- **Review:** Words due for repetition. (If none, shows a countdown until the next word becomes due).
-- **Empty:** Shown when no more words are available in the current dictionary.
+Add words from iOS Shortcuts, browser extensions, etc.:
+```
+POST /api/external/words
+Authorization: Bearer <token>
+{"word": "Apfel", "translation": "apple", "example": "Der Apfel ist rot.", "language": "de"}
+```
 
 ## ⚙️ Tech Stack
-- **Backend:** Python, aiohttp, aiosqlite.
-- **Frontend:** Vanilla JS, CSS Variables (Telegram Theme API).
-- **Database:** SQLite.
+- **Backend:** Python 3.11+, aiohttp, aiosqlite, APScheduler, aiogram 3.x
+- **Frontend:** Vanilla JS (ES modules), CSS custom properties, Telegram WebApp SDK
+- **Database:** SQLite with WAL mode
+- **Auth:** HMAC-SHA256 Telegram initData + ALLOWED_USERS whitelist + Bearer token for external API
+- **Deployment:** Raspberry Pi Zero 2W, systemd service, Tailscale Funnel for HTTPS

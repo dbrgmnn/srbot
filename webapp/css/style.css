@@ -249,6 +249,7 @@ body.no-nav {
 
 .word-card-container {
   flex: 1;
+  min-height: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -322,6 +323,7 @@ body.no-nav {
 
 .practice-footer {
   padding-top: 20px;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom));
   display: flex;
   flex-direction: column;
   align-items: center;
