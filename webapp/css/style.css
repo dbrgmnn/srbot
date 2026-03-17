@@ -209,7 +209,7 @@ body.no-nav {
   display: flex;
   flex-direction: column;
   height: 100dvh;
-  padding: var(--gap) var(--gap) 0;
+  padding: calc(var(--gap) + env(safe-area-inset-top)) var(--gap) 0;
   box-sizing: border-box;
 }
 .practice-header {
@@ -237,7 +237,7 @@ body.no-nav {
   height: 4px;
   background: rgba(255,255,255,0.08);
   border-radius: 2px;
-  margin-bottom: 24px;
+  margin-bottom: 12px;
 }
 .progress-fill {
   height: 100%;
@@ -322,8 +322,8 @@ body.no-nav {
 .word-card.swipe-up::before    { background: rgba(255,214,10,0.12) !important; border-color: rgba(255,214,10,0.5) !important; }
 
 .practice-footer {
-  padding-top: 4px;
-  padding-bottom: calc(16px + env(safe-area-inset-bottom));
+  padding-top: 8px;
+  padding-bottom: calc(20px + env(safe-area-inset-bottom));
   display: flex;
   flex-direction: row;
   justify-content: center;
