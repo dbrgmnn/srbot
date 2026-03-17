@@ -58,7 +58,7 @@ function _openLevelPicker(context) {
     const displaySpan = document.getElementById(`${context}-level-display`);
     hiddenInput.value = val;
     displaySpan.textContent = val || 'Level';
-    displaySpan.style.color = val ? 'var(--text)' : 'var(--hint)';
+    displaySpan.classList.toggle('picker-trigger-placeholder', !val);
   });
 }
 

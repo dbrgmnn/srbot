@@ -28,7 +28,7 @@ export async function submitWords() {
       toast(T.WORD_ADDED(word), 'success');
       wordEl.value = ''; transEl.value = ''; exEl.value = ''; levelEl.value = '';
       const levelDisp = document.getElementById('add-level-display');
-      if (levelDisp) { levelDisp.textContent = 'Level'; levelDisp.style.color = 'var(--hint)'; }
+      if (levelDisp) { levelDisp.textContent = 'Level'; levelDisp.classList.add('picker-trigger-placeholder'); }
       loadHome();
     }
   } catch (e) { toast(T.WORD_ADD_FAIL, 'error'); }
@@ -143,7 +143,7 @@ export function openEdit(w) {
   if (levelInput) levelInput.value = levelVal;
   if (levelDisp) {
     levelDisp.textContent = levelVal || 'Level';
-    levelDisp.style.color = levelVal ? 'var(--text)' : 'var(--hint)';
+    levelDisp.classList.toggle('picker-trigger-placeholder', !levelVal);
   }
 
   document.getElementById('edit-overlay').classList.add('open');

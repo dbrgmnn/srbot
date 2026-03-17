@@ -50,4 +50,9 @@ export const T = {
 
   // App
   INIT_FAIL:      _fail('load app'),
+
+  // Practice
+  SESSION_FAIL:   _fail('load session'),
+  GRADE_FAIL:     _fail('save progress'),
+  UNDO_FAIL:      _fail('undo'),
 };

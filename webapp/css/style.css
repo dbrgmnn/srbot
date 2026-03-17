@@ -72,6 +72,7 @@ body.no-nav {
 /* ── Screens ── */
 .screen { display: none; padding: 0 var(--gap) var(--gap); }
 .screen.active { display: block; }
+#screen-practice { padding: 0; }
 
 /* ── Header ── */
 .header {
@@ -101,7 +102,9 @@ body.no-nav {
   border: 1px solid var(--glass-border);
   backdrop-filter: var(--blur);
   -webkit-backdrop-filter: var(--blur);
+  cursor: pointer;
 }
+.header-count { opacity: 0.5; }
 .header-title-add { margin-bottom: 24px; }
 
 .header-title-spaced { margin-bottom: 24px; display: block; }
@@ -175,9 +178,6 @@ body.no-nav {
 .text-known    { color: #30d158; }
 .text-mastered { color: #bf5af2; }
 
-
-
-
 /* ── Buttons ── */
 .btn {
   width: 100%;
@@ -208,7 +208,9 @@ body.no-nav {
 .practice-screen-content {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 160px);
+  height: 100dvh;
+  padding: var(--gap) var(--gap) var(--gap);
+  box-sizing: border-box;
 }
 .practice-header {
   display: flex;
@@ -231,6 +233,12 @@ body.no-nav {
 .practice-badge-review { background: rgba(10,132,255,0.12); color: #64b5f6; }
 .practice-badge-info   { background: var(--glass);          color: var(--hint); }
 
+.progress-track {
+  height: 4px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 2px;
+  margin-bottom: 24px;
+}
 .progress-fill {
   height: 100%;
   width: 0%;
@@ -315,6 +323,12 @@ body.no-nav {
 .practice-footer {
   padding-top: 20px;
   display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.practice-footer-row {
+  display: flex;
   justify-content: center;
   gap: 12px;
 }
@@ -328,6 +342,19 @@ body.no-nav {
   justify-content: center;
   margin: 0;
   font-size: 18px;
+}
+.btn-practice-footer-undo {
+  height: 44px;
+  padding: 0 24px;
+  border-radius: var(--radius-xl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  width: auto;
+  transition: opacity .2s;
 }
 
 /* ── Settings ── */
@@ -430,6 +457,7 @@ body.no-nav {
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 .toast-success { color: #30d158; }
 .toast-error   { color: #ff453a; }
+body.no-nav .toast { bottom: calc(24px + env(safe-area-inset-bottom)); }
 
 /* ── Add Form ── */
 .add-form {
@@ -525,6 +553,15 @@ mark {
 }
 
 /* ── Picker ── */
+.picker-trigger {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+}
+.picker-trigger-placeholder { color: var(--hint); }
+.picker-trigger-arrow { opacity: 0.3; }
+
 .picker-value {
   color: rgba(255,255,255,0.5);
   font-size: 14px;

@@ -13,10 +13,10 @@
   <!-- Screen: Home -->
   <div id="screen-home" class="screen active">
     <div class="header header-centered">
-      <div class="header-capsule" onclick="window._refreshHome()" style="cursor: pointer;">
+      <div class="header-capsule" onclick="window._refreshHome()">
         <span id="header-flag"></span>
         <span id="header-lang"></span>
-        <span id="header-count" style="opacity: 0.5;"></span>
+        <span id="header-count" class="header-count"></span>
       </div>
     </div>
 
@@ -33,7 +33,7 @@
       </div>
     </div>
 
-    <div class="card stats-details-card">
+    <div class="card">
       <div class="card-title">Statistics</div>
       <div class="stats-summary-row">
         <div class="stats-summary-item">
@@ -66,7 +66,7 @@
         <div class="practice-badge practice-badge-new" id="practice-type">New</div>
       </div>
       
-      <div class="progress-track" style="margin-bottom: 24px; height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px;">
+      <div class="progress-track">
         <div class="progress-fill" id="practice-bar"></div>
       </div>
 
@@ -85,9 +85,11 @@
       </div>
 
       <div class="practice-footer">
-        <button class="btn btn-secondary btn-practice-footer" onclick="exitPractice()">Exit</button>
-        <button class="btn btn-secondary btn-practice-footer" onclick="playAudio(event)">🔊</button>
-        <button id="btn-undo" class="btn btn-secondary btn-practice-footer" onclick="undo()" disabled style="opacity: 0; pointer-events: none;">↩️</button>
+        <div class="practice-footer-row">
+          <button class="btn btn-secondary btn-practice-footer" onclick="exitPractice()">Exit</button>
+          <button class="btn btn-secondary btn-practice-footer" onclick="playAudio(event)">🔊</button>
+        </div>
+        <button id="btn-undo" class="btn btn-secondary btn-practice-footer-undo" onclick="undo()" disabled style="opacity: 0; pointer-events: none;">Undo</button>
       </div>
     </div>
   </div>
@@ -101,9 +103,9 @@
       <input type="text" id="add-word" class="edit-input" placeholder="Word">
       <input type="text" id="add-translation" class="edit-input" placeholder="Translate">
       <input type="text" id="add-example" class="edit-input" placeholder="Example">
-      <div id="add-level-trigger" class="edit-input picker-trigger" onclick="openPicker('level', 'add')" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
-        <span id="add-level-display" style="color: var(--hint);">Level</span>
-        <span style="opacity: 0.3;">›</span>
+      <div id="add-level-trigger" class="edit-input picker-trigger" onclick="openPicker('level', 'add')">
+        <span id="add-level-display" class="picker-trigger-placeholder">Level</span>
+        <span class="picker-trigger-arrow">›</span>
       </div>
       <input type="hidden" id="add-level" value="">
       <button class="btn" onclick="submitWords()">Add</button>
@@ -145,11 +147,11 @@
         <div class="settings-label">New words limit</div>
         <div class="picker-value" id="set-limit-val">—</div>
       </div>
-      </div>
+    </div>
 
-      <!-- Section: Reminders -->
-      <div class="settings-section-title">Reminders</div>
-      <div class="card settings-group">
+    <!-- Section: Reminders -->
+    <div class="settings-section-title">Reminders</div>
+    <div class="card settings-group">
       <div class="settings-row" onclick="openPicker('notification_interval_minutes')">
         <div class="settings-label">Frequency</div>
         <div class="picker-value" id="set-notify-interval">—</div>
@@ -161,7 +163,7 @@
       </div>
       <input type="hidden" id="set-quiet-start" value="23:00">
       <input type="hidden" id="set-quiet-end" value="08:00">
-      </div>
+    </div>
 
     <!-- Section: Maintenance -->
     <div class="settings-section-title">Data Management</div>
@@ -208,9 +210,9 @@
     <input type="text" id="edit-word" class="edit-input" placeholder="Word">
     <input type="text" id="edit-translation" class="edit-input" placeholder="Translate">
     <input type="text" id="edit-example" class="edit-input" placeholder="Example">
-    <div id="edit-level-trigger" class="edit-input picker-trigger" onclick="openPicker('level', 'edit')" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
-        <span id="edit-level-display" style="color: var(--hint);">Level</span>
-        <span style="opacity: 0.3;">›</span>
+    <div id="edit-level-trigger" class="edit-input picker-trigger" onclick="openPicker('level', 'edit')">
+        <span id="edit-level-display" class="picker-trigger-placeholder">Level</span>
+        <span class="picker-trigger-arrow">›</span>
     </div>
     <input type="hidden" id="edit-level" value="">
     <button id="edit-save-btn" class="btn" onclick="saveEdit()">Save</button>

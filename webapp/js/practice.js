@@ -1,5 +1,6 @@
 import { GET, POST, state } from './api.js';
 import { showScreen } from './ui.js';
+import { toast, T } from './toast.js';
 
 const tg = window.Telegram.WebApp;
 
@@ -22,8 +23,9 @@ export async function startPractice() {
     sessionStats = { good: 0, hard: 0, again: 0 };
     practiceHistory = [];
     showScreen('practice');
+    initSwipe();
     renderWord();
-  } catch(e) { console.error(e); }
+  } catch(e) { console.error(e); toast(T.SESSION_FAIL, 'error'); }
 }
 
 function handleStart(x, y) {
@@ -180,7 +182,6 @@ function renderWord() {
     card.style.transform = 'scale(1) rotateY(0deg)';
     card.style.opacity = '1';
   }, 10);
-  initSwipe();
 }
 
 async function grade(quality) {
@@ -211,6 +212,7 @@ async function grade(quality) {
     sessionIdx++;
     POST('/api/grade', { word_id: word.id, quality }).catch((e) => {
       console.error('Grade failed, word progress may not be saved:', e);
+      toast(T.GRADE_FAIL, 'error');
     });
     setTimeout(() => { isGrading = false; renderWord(); }, 300);
   } catch(e) {
@@ -236,7 +238,7 @@ export async function undo() {
         started_at: last.word.started_at ?? null
       }
     });
-  } catch (e) { console.error('Undo failed', e); }
+  } catch (e) { console.error('Undo failed', e); toast(T.UNDO_FAIL, 'error'); }
 
   sessionIdx = last.sessionIdx;
   sessionStats = last.stats;
