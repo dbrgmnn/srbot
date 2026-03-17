@@ -244,11 +244,29 @@ export function playAudio(e) {
   if (e) e.stopPropagation();
   const word = sessionWords[sessionIdx];
   if (!word || !window.speechSynthesis) return;
-  window.speechSynthesis.cancel();
+
+  const synth = window.speechSynthesis;
+  synth.cancel();
+  synth.resume(); // unblock paused state in Telegram WebView
+
   const msg = new SpeechSynthesisUtterance(word.word);
   msg.lang = state.ttsCode || 'en-US';
   msg.rate = 0.85;
-  window.speechSynthesis.speak(msg);
+
+  // Pick the best available voice for the language
+  const voices = synth.getVoices();
+  if (voices.length > 0) {
+    const lang = msg.lang;
+    const base = lang.split('-')[0];
+    const voice =
+      voices.find(v => v.lang === lang && v.localService && /enhanced|premium/i.test(v.name)) ||
+      voices.find(v => v.lang === lang && v.localService) ||
+      voices.find(v => v.lang === lang) ||
+      voices.find(v => v.lang.startsWith(base));
+    if (voice) msg.voice = voice;
+  }
+
+  synth.speak(msg);
 }
 
 function showSummary() {
