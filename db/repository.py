@@ -127,7 +127,6 @@ class UserRepo:
         await self._create_settings(row['id'], new_language, 'UTC')
         await self.db.commit()
 
-
     async def get_min_notification_interval(self) -> float:
         cursor = await self.db.execute(
             "SELECT MIN(notification_interval_minutes) as min_interval FROM user_settings"

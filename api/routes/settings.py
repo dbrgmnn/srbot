@@ -39,11 +39,14 @@ def setup_routes_settings(app: web.Application, db: aiosqlite.Connection):
         
         config = request.app["config"]
         
+        preload_available = (config.data_dir / f"words_{lang}.csv").exists()
+
         return web.json_response({
             "ok": True,
             "result": {
                 **settings,
                 "total_words": stats["total"],
+                "preload_available": preload_available,
                 "limits": {
                     "min_daily_limit": config.min_daily_limit,
                     "max_daily_limit": config.max_daily_limit,

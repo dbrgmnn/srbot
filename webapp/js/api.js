@@ -35,7 +35,7 @@ async function api(method, path, body) {
     const data = isJson ? await res.json() : null;
     
     if (isJson && data && data.ok === false) {
-      const msg = data.message || data.error || `Error ${res.status}`;
+      const msg = data.error || `Error ${res.status}`;
       throw new Error(msg);
     }
 

@@ -216,6 +216,9 @@ export async function loadSettings() {
 
     // Update practiceMode in state so picker highlights current value
     state.practiceMode = s.practice_mode || 'word_to_translation';
+    state.preloadAvailable = s.preload_available === true;
+    const importRow = document.getElementById('import-row');
+    if (importRow) importRow.style.display = state.preloadAvailable ? '' : 'none';
 
     if (document.getElementById('set-quiet-start')) document.getElementById('set-quiet-start').value = s.quiet_start || '23:00';
     if (document.getElementById('set-quiet-end')) document.getElementById('set-quiet-end').value = s.quiet_end || '08:00';
@@ -235,7 +238,6 @@ export async function loadSettings() {
       else if (val === 60) el.textContent = `Every 1 hour`;
       else el.textContent = `Every ${val / 60} hours`;
     }
-
 
   } catch(e) { console.error(e); }
 }
