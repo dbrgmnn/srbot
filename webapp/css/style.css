@@ -254,7 +254,6 @@ body {
   justify-content: center;
   perspective: 1200px;
   position: relative;
-  touch-action: none;
 }
 .word-card {
   width: 100%;
@@ -266,6 +265,7 @@ body {
   transform-style: preserve-3d;
   transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1), opacity 0.3s ease;
   cursor: pointer;
+  touch-action: none;
   will-change: transform, opacity;
 }
 /* Glass effect via ::before to avoid breaking preserve-3d */
