@@ -72,7 +72,13 @@ body.no-nav {
 /* ── Screens ── */
 .screen { display: none; padding: 0 var(--gap) var(--gap); }
 .screen.active { display: block; }
-#screen-practice { padding: 0; overflow: hidden; }
+#screen-practice {
+  padding: 0;
+  position: fixed;
+  inset: 0;
+  height: 100dvh;
+  overflow: hidden;
+}
 
 /* ── Header ── */
 .header {
@@ -208,7 +214,7 @@ body.no-nav {
 .practice-screen-content {
   display: flex;
   flex-direction: column;
-  height: 100dvh;
+  height: 100%;
   padding: calc(var(--gap) + env(safe-area-inset-top)) var(--gap) 0;
   box-sizing: border-box;
 }
@@ -259,7 +265,7 @@ body.no-nav {
 .word-card {
   width: 100%;
   max-width: 320px;
-  height: 380px;
+  height: min(380px, 55vh);
   background: transparent;
   border-radius: 32px;
   position: relative;
