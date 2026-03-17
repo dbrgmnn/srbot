@@ -105,7 +105,7 @@ function handleEnd(x, y) {
   pointerStartX = 0; pointerStartY = 0;
 }
 
-export function initSwipe() {
+function initSwipe() {
   const card = document.getElementById('word-card');
   if (!card) return;
   

@@ -1,15 +1,8 @@
 import { loadHome, showScreen } from './ui.js';
 import { toast, T } from './toast.js';
-import { startPractice, playAudio, exitPractice, undo } from './practice.js';
-import { 
-  submitWords, handleFileUpload, onSearchInput, 
-  saveEdit, closeEdit, clearAllWords, shareWords 
-} from './dictionary.js';
-import {
-  loadSettings,
-  preloadDefaultWords,
-  openPicker, closePicker
-} from './settings.js';
+import { startPractice, exitPractice, undo, playAudio } from './practice.js';
+import { submitWords, handleFileUpload, onSearchInput, saveEdit, closeEdit, clearAllWords, shareWords } from './dictionary.js';
+import { loadSettings, preloadDefaultWords, openPicker, closePicker } from './settings.js';
 
 const tg = window.Telegram.WebApp;
 tg.ready();
@@ -17,23 +10,24 @@ tg.expand();
 tg.isVerticalSwipesEnabled = false;
 
 // Expose functions to window for HTML onclick attributes
-window.showScreen = (name) => {
-  showScreen(name);
-  if (name === 'settings') loadSettings();
-};
-window.startPractice = startPractice;
-window.playAudio = playAudio;
-window.exitPractice = exitPractice;
-window.undo = undo;
-window.submitWords = submitWords;
+// ui
+window.showScreen = (name) => { showScreen(name); if (name === 'settings') loadSettings(); };
+// practice
+window.startPractice   = startPractice;
+window.exitPractice    = exitPractice;
+window.undo            = undo;
+window.playAudio       = playAudio;
+// dictionary
+window.submitWords     = submitWords;
 window.handleFileUpload = handleFileUpload;
-window.onSearchInput = onSearchInput;
-window.saveEdit = saveEdit;
-window.closeEdit = closeEdit;
-window.clearAllWords = clearAllWords;
-window.shareWords = shareWords;
-window.openPicker = openPicker;
-window.closePicker = closePicker;
+window.onSearchInput   = onSearchInput;
+window.saveEdit        = saveEdit;
+window.closeEdit       = closeEdit;
+window.clearAllWords   = clearAllWords;
+window.shareWords      = shareWords;
+// settings
+window.openPicker      = openPicker;
+window.closePicker     = closePicker;
 window.preloadDefaultWords = preloadDefaultWords;
 
 function initGlobalHaptics() {

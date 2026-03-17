@@ -1,7 +1,8 @@
 import { GET, state, setLanguage } from './api.js';
-export { toast } from './toast.js';
 
 const tg = window.Telegram.WebApp;
+
+// ── Screen switching ──────────────────────────────────────────────────────
 
 export function showScreen(name) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -10,12 +11,11 @@ export function showScreen(name) {
   if (screen) screen.classList.add('active');
   const nav = document.getElementById(`nav-${name}`);
   if (nav) nav.classList.add('active');
-  
+
   if (name === 'home') {
     if (tg.enableVerticalSwipe) tg.enableVerticalSwipe();
     loadHome();
   } else {
-    // Enable for all screens except practice
     if (name !== 'practice' && tg.enableVerticalSwipe) tg.enableVerticalSwipe();
   }
 
@@ -29,20 +29,17 @@ export function showScreen(name) {
   }
 }
 
+// ── Countdown helpers ─────────────────────────────────────────────────────
+
 let countdownInterval = null;
 
 function formatTimeLeft(targetDate) {
   if (!targetDate) return null;
   const diff = new Date(targetDate) - new Date();
   if (diff <= 0) return null;
-
   const hours = Math.floor(diff / (1000 * 60 * 60));
   const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-
-  if (hours > 0) {
-    return `In ${hours}h ${mins}m`;
-  }
-  return `In ${mins}m`;
+  return hours > 0 ? `In ${hours}h ${mins}m` : `In ${mins}m`;
 }
 
 function updateCountdowns() {
@@ -68,19 +65,13 @@ function updateCountdowns() {
   } else {
     const time = formatTimeLeft(stats.next_day_start_utc);
     if (newLabel) {
-       if (stats.st_new === 0) newLabel.textContent = 'Empty';
-       else newLabel.textContent = time || 'New';
+      if (stats.st_new === 0) newLabel.textContent = 'Empty';
+      else newLabel.textContent = time || 'New';
     }
   }
 }
 
-window._refreshHome = async () => {
-  const capsule = document.getElementById('header-flag')?.closest('.header-capsule');
-  if (capsule) capsule.style.opacity = '0.5';
-  await loadHome();
-  if (capsule) capsule.style.opacity = '';
-  tg.HapticFeedback.impactOccurred('light');
-};
+// ── Home screen ───────────────────────────────────────────────────────────
 
 export async function loadHome() {
   try {
@@ -88,10 +79,10 @@ export async function loadHome() {
     const init = resp.result;
     const stats = init.stats;
     const settings = init.settings;
-    const ttsCode = init.tts_code;
 
     state.currentStats = stats;
     state.currentSettings = settings;
+    state.practiceMode = settings.practice_mode;
 
     if (init.limits) {
       state.min_daily_limit = init.limits.min_daily_limit;
@@ -100,10 +91,9 @@ export async function loadHome() {
       state.max_notify_interval = init.limits.max_notify_interval;
     }
     if (init.languages) state.languages = init.languages;
-
-    state.practiceMode = settings.practice_mode;
     if (settings.language) setLanguage(settings.language);
-    if (ttsCode) state.ttsCode = ttsCode;
+    if (init.tts_code) state.ttsCode = init.tts_code;
+
     const due = stats.due || 0;
     const newWords = stats.new || 0;
     const todayDone = stats.today_new || 0;
@@ -111,16 +101,17 @@ export async function loadHome() {
     const availableNew = Math.max(0, limit - todayDone);
     const sessionTotal = due + Math.min(newWords, availableNew);
 
-    if (document.getElementById('stat-due')) document.getElementById('stat-due').textContent = due;
-    if (document.getElementById('stat-new')) document.getElementById('stat-new').textContent = availableNew;
+    const statDue = document.getElementById('stat-due');
+    const statNew = document.getElementById('stat-new');
+    if (statDue) statDue.textContent = due;
+    if (statNew) statNew.textContent = availableNew;
 
-    const total = stats.total || 0;
     const flagEl = document.getElementById('header-flag');
     const langEl = document.getElementById('header-lang');
     const countEl = document.getElementById('header-count');
     if (flagEl) flagEl.textContent = init.lang_flag || '';
     if (langEl) langEl.textContent = init.lang_name || (settings.language || '').toUpperCase();
-    if (countEl) countEl.textContent = total;
+    if (countEl) countEl.textContent = stats.total || 0;
 
     updateCountdowns();
     if (!countdownInterval) {
@@ -133,17 +124,18 @@ export async function loadHome() {
       btn.disabled = sessionTotal === 0;
     }
 
-    const cats = {
-      'new': 'st_new',
-      'learning': 'st_learning',
-      'known': 'st_known',
-      'mastered': 'st_mastered'
-    };
-
+    const cats = { 'new': 'st_new', 'learning': 'st_learning', 'known': 'st_known', 'mastered': 'st_mastered' };
     Object.entries(cats).forEach(([cat, key]) => {
-      const val = stats[key] || 0;
-      const count = document.getElementById(`count-${cat}`);
-      if (count) count.textContent = val;
+      const el = document.getElementById(`count-${cat}`);
+      if (el) el.textContent = stats[key] || 0;
     });
-  } catch (e) { console.error("LoadHome failed", e); }
+  } catch (e) { console.error('LoadHome failed', e); }
 }
+
+window._refreshHome = async () => {
+  const capsule = document.getElementById('header-flag')?.closest('.header-capsule');
+  if (capsule) capsule.style.opacity = '0.5';
+  await loadHome();
+  if (capsule) capsule.style.opacity = '';
+  tg.HapticFeedback.impactOccurred('light');
+};
