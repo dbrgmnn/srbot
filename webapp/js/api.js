@@ -4,6 +4,7 @@ export let state = {
   currentLang: localStorage.getItem('currentLang') || (navigator.language || 'en').split('-')[0],
   practiceMode: null,
   ttsCode: 'en-US',
+  languages: null,
   min_daily_limit: null,
   max_daily_limit: null,
   min_notify_interval: null,

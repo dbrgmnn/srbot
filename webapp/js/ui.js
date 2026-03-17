@@ -99,6 +99,7 @@ export async function loadHome() {
       state.min_notify_interval = init.limits.min_notify_interval;
       state.max_notify_interval = init.limits.max_notify_interval;
     }
+    if (init.languages) state.languages = init.languages;
 
     state.practiceMode = settings.practice_mode;
     if (settings.language) setLanguage(settings.language);

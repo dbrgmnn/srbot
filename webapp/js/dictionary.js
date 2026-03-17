@@ -186,7 +186,14 @@ export function clearAllWords() {
 
 export async function shareWords() {
   try {
-    const res = await fetch('/api/words/export', { headers: { 'X-Init-Data': tg.initData, 'X-Language': state.currentLang }});
+    const res = await fetch('/api/words/export', {
+      headers: {
+        'X-Init-Data': tg.initData,
+        'X-Language': state.currentLang,
+        'X-Timezone': Intl.DateTimeFormat().resolvedOptions().timeZone,
+      }
+    });
+    if (!res.ok) throw new Error(`Error ${res.status}`);
     const text = await res.text();
     if (navigator.share) await navigator.share({ title: 'SRbot dictionary', text });
     else { await navigator.clipboard.writeText(text); toast(T.COPIED, 'success'); }

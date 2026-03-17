@@ -4,11 +4,16 @@ import { toast, T } from './toast.js';
 
 const tg = window.Telegram.WebApp;
 
-// ── Languages from API ───────────────────────────────────────────────────
-async function getLanguages() {
-  const resp = await GET('/api/settings/languages');
-  return resp.result.languages;
+// ── Languages from state (loaded at init) ────────────────────────────────
+function getLanguages() {
+  return state.languages || {};
 }
+
+// ── Shared label maps ─────────────────────────────────────────────────────
+const MODE_LABELS = {
+  'word_to_translation': 'Word → Translation',
+  'translation_to_word': 'Translation → Word',
+};
 
 // ── Universal Picker ──────────────────────────────────────────────────────
 
@@ -23,7 +28,8 @@ export function openPicker(type, context = null) {
 }
 
 async function _openLanguagePicker() {
-  const languages = await getLanguages();
+  const resp = await GET('/api/settings/languages');
+  const languages = resp.result.languages;
   const options = Object.entries(languages).map(([code, meta]) => ({
     value: code,
     label: meta.word_count > 0
@@ -202,7 +208,42 @@ export async function switchLanguage(lang) {
   } catch (e) { toast(T.LANG_FAIL, 'error'); }
 }
 
+function _fillSettingsFromState() {
+  const s = state.currentSettings;
+  if (!s) return;
+
+  const modeDisplay = document.getElementById('practice-mode-display');
+  if (modeDisplay && s.practice_mode) modeDisplay.textContent = MODE_LABELS[s.practice_mode] || s.practice_mode;
+
+  if (document.getElementById('set-limit-val') && s.daily_limit)
+    document.getElementById('set-limit-val').textContent = s.daily_limit;
+
+  if (document.getElementById('set-quiet-start') && s.quiet_start)
+    document.getElementById('set-quiet-start').value = s.quiet_start;
+  if (document.getElementById('set-quiet-end') && s.quiet_end)
+    document.getElementById('set-quiet-end').value = s.quiet_end;
+  if (document.getElementById('quiet-hours-display') && s.quiet_start && s.quiet_end)
+    document.getElementById('quiet-hours-display').textContent = `${s.quiet_start} — ${s.quiet_end}`;
+
+  if (document.getElementById('set-notify-interval') && s.notification_interval_minutes) {
+    const val = s.notification_interval_minutes;
+    const el = document.getElementById('set-notify-interval');
+    el.dataset.value = val;
+    if (val < 60) el.textContent = `Every ${val} min`;
+    else if (val === 60) el.textContent = `Every 1 hour`;
+    else el.textContent = `Every ${val / 60} hours`;
+  }
+
+  const langDisplay = document.getElementById('language-display');
+  if (langDisplay && s.language) {
+    const languages = getLanguages();
+    const meta = languages[s.language];
+    langDisplay.textContent = meta ? `${meta.flag} ${meta.name}` : s.language.toUpperCase();
+  }
+}
+
 export async function loadSettings() {
+  _fillSettingsFromState();
   try {
     const resp = await GET('/api/settings');
     const s = resp.result;
@@ -223,17 +264,13 @@ export async function loadSettings() {
     }
 
     // Update picker display values
-    const languages = await getLanguages();
+    const languages = getLanguages();
     const langMeta = languages[s.language];
     const langDisplay = document.getElementById('language-display');
     if (langDisplay) langDisplay.textContent = langMeta ? `${langMeta.flag} ${langMeta.name}` : s.language.toUpperCase();
 
-    const modeLabels = {
-      'word_to_translation': 'Word → Translation',
-      'translation_to_word': 'Translation → Word',
-    };
     const modeDisplay = document.getElementById('practice-mode-display');
-    if (modeDisplay) modeDisplay.textContent = modeLabels[s.practice_mode] || s.practice_mode;
+    if (modeDisplay) modeDisplay.textContent = MODE_LABELS[s.practice_mode] || s.practice_mode;
 
     // Update practiceMode in state so picker highlights current value
     state.practiceMode = s.practice_mode;
@@ -272,13 +309,8 @@ export async function saveSetting(key, val, showToast = true) {
 export function setPracticeMode(mode) {
   state.practiceMode = mode;
   saveSetting('practice_mode', mode);
-  // Update display label immediately
-  const modeLabels = {
-    'word_to_translation': 'Word → Translation',
-    'translation_to_word': 'Translation → Word',
-  };
   const modeDisplay = document.getElementById('practice-mode-display');
-  if (modeDisplay) modeDisplay.textContent = modeLabels[mode] || mode;
+  if (modeDisplay) modeDisplay.textContent = MODE_LABELS[mode] || mode;
 }
 
 export async function preloadDefaultWords() {

@@ -21,6 +21,11 @@ def setup_routes_init(app: web.Application, db: aiosqlite.Connection):
         lang_meta = LANGUAGES.get(lang, {})
         tts_code = lang_meta.get("tts", "en-US")
 
+        languages = {
+            code: {**meta}
+            for code, meta in LANGUAGES.items()
+        }
+
         return web.json_response({
             "ok": True,
             "result": {
@@ -36,6 +41,7 @@ def setup_routes_init(app: web.Application, db: aiosqlite.Connection):
                     "min_notify_interval": config.min_notify_interval,
                     "max_notify_interval": config.max_notify_interval,
                 },
+                "languages": languages,
             }
         })
     app.router.add_get("/api/init", init_user)
