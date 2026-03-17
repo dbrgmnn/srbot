@@ -470,6 +470,9 @@ body {
 .edit-sheet {
   position: fixed;
   bottom: 0; left: 0; right: 0;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
   background: rgba(20,20,24,0.85);
   backdrop-filter: var(--blur);
   -webkit-backdrop-filter: var(--blur);
@@ -549,8 +552,13 @@ mark {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  flex: 1;
+  min-height: 0;
   max-height: 60vh;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
   padding-bottom: 8px;
 }
 .picker-item {
