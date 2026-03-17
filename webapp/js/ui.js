@@ -21,6 +21,11 @@ export function showScreen(name) {
 
   if (name === 'practice') {
     if (tg.disableVerticalSwipe) tg.disableVerticalSwipe();
+    document.querySelector('.nav').style.display = 'none';
+    document.body.classList.add('no-nav');
+  } else {
+    document.querySelector('.nav').style.display = '';
+    document.body.classList.remove('no-nav');
   }
 }
 
