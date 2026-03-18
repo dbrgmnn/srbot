@@ -13,10 +13,11 @@ class Translator:
     async def translate_and_enrich(self, text: str, source_lang: str) -> dict | None:
         lang_name = LANGUAGES.get(source_lang, {}).get("name", source_lang)
         
+        article_rule = "Nouns: lowercase article + Capitalized noun (e.g. der Hund). Verbs/adj: lowercase." if source_lang == "de" else "All words: lowercase."
         prompt = f"""Translate "{text}" between {lang_name} ({source_lang}) and Russian.
 
 Rules:
-- word: {lang_name} form. De nouns: lowercase article + Capitalized noun (e.g. der Hund). Other words: lowercase.
+- word: {lang_name} form. {article_rule}
 - translation: Russian lowercase.
 - example: natural {lang_name} sentence, B1+ level.
 - level: CEFR (A1-C2).
@@ -28,7 +29,8 @@ Return JSON only: {{"word": "", "translation": "", "example": "", "level": "", "
             "contents": [{"parts": [{"text": prompt}]}],
             "generationConfig": {
                 "responseMimeType": "application/json",
-                "temperature": 0.3
+                "temperature": 0.3,
+                "maxOutputTokens":512
             }
         }
 
