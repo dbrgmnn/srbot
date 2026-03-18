@@ -23,21 +23,22 @@ class Translator:
         # 2. Russian always goes to "translation".
         # 3. If source_lang is 'de' and it's a noun: "Der/Die/Das Word" (Capitalized).
         # 4. Everything else (English, non-noun German, Russian): lowercase.
-        
         prompt = f"""
         Input text: "{text}"
         Target foreign language: {lang_name} (Code: {source_lang}).
-        
+
         Task:
         1. Identify if "{text}" is Russian or {lang_name}. 
-        2. Find the equivalent in {lang_name} (this will be the "word" field).
-        3. Find the equivalent in Russian (this will be the "translation" field).
+        2. Find the equivalent in {lang_name} (field "word").
+        3. Find the equivalent in Russian (field "translation").
         4. Apply STRICT formatting:
-           - If language is 'de' and it's a noun: "Der/Die/Das [Noun]" (e.g., 'Der Hund', 'Die Freiheit').
-           - ALL other foreign words (English, German verbs/adj): lowercase (e.g., 'house', 'laufen').
+           - If language is 'de' and it's a noun: "lowercase_article Capitalized_Noun" (e.g., 'der Hund', 'die Freiheit', 'das Haus').
+           - ALL other foreign words (English, German verbs/adj): lowercase (e.g., 'house', 'laufen', 'schnell').
            - ALL Russian translations: lowercase (e.g., 'собака', 'бегать').
         5. Provide a natural example sentence in {lang_name} (Level B1+).
         6. Determine CEFR level (A1-C2).
+        ...
+        """
 
         Output ONLY JSON:
         {{
