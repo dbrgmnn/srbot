@@ -18,26 +18,36 @@ class Translator:
         """
         lang_name = LANGUAGES.get(source_lang, {}).get("name", source_lang)
         
-        # System instructions: Lemma with article -> Russian translation -> B1+ Example
-        prompt = f"""
-        Analyze input: "{text}" (Language: {lang_name}, Code: {source_lang}).
-        Task:
-        1. Provide the lemma of "{text}" in {lang_name}. 
-           CRITICAL: If it's a noun, ALWAYS include the definite article (e.g. 'der Hund').
-        2. Translate it to Russian.
-        3. Provide a natural example sentence in {lang_name}.
-           CRITICAL: The example must be strictly CEFR level B1 or higher.
-        4. Determine CEFR level (A1-C2).
+        # Strict rules:
+        # 1. Target Language (DE/EN) always goes to "word".
+        # 2. Russian always goes to "translation".
+        # 3. If source_lang is 'de' and it's a noun: "Der/Die/Das Word" (Capitalized).
+        # 4. Everything else (English, non-noun German, Russian): lowercase.
         
-        Output ONLY valid JSON:
+        prompt = f"""
+        Input text: "{text}"
+        Target foreign language: {lang_name} (Code: {source_lang}).
+        
+        Task:
+        1. Identify if "{text}" is Russian or {lang_name}. 
+        2. Find the equivalent in {lang_name} (this will be the "word" field).
+        3. Find the equivalent in Russian (this will be the "translation" field).
+        4. Apply STRICT formatting:
+           - If language is 'de' and it's a noun: "Der/Die/Das [Noun]" (e.g., 'Der Hund', 'Die Freiheit').
+           - ALL other foreign words (English, German verbs/adj): lowercase (e.g., 'house', 'laufen').
+           - ALL Russian translations: lowercase (e.g., 'собака', 'бегать').
+        5. Provide a natural example sentence in {lang_name} (Level B1+).
+        6. Determine CEFR level (A1-C2).
+
+        Output ONLY JSON:
         {{
-          "word": "lemma_with_article",
-          "translation": "russian_translation",
-          "example": "B1_plus_example",
-          "level": "B1",
+          "word": "foreign_word_with_casing_rules",
+          "translation": "russian_lowercase_translation",
+          "example": "B1_plus_example_sentence",
+          "level": "CEFR",
           "is_valid": true
         }}
-        If "{text}" is gibberish or not a word in {lang_name}, set "is_valid": false.
+        If input is gibberish, set "is_valid": false.
         """
 
         payload = {
