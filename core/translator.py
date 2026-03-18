@@ -18,11 +18,12 @@ class Translator:
         """
         lang_name = LANGUAGES.get(source_lang, {}).get("name", source_lang)
         
-        # Strict rules:
-        # 1. Target Language (DE/EN) always goes to "word".
-        # 2. Russian always goes to "translation".
-        # 3. If source_lang is 'de' and it's a noun: "Der/Die/Das Word" (Capitalized).
-        # 4. Everything else (English, non-noun German, Russian): lowercase.
+        # Strict rules for casing and articles:
+        # 1. Target Language word (DE/EN) always goes to "word".
+        # 2. Russian translation always goes to "translation".
+        # 3. German (de) Nouns: "lowercase_article Capitalized_Noun" (e.g., 'der Hund').
+        # 4. Verbs, adjectives, all English, all Russian: strictly lowercase.
+        
         prompt = f"""
         Input text: "{text}"
         Target foreign language: {lang_name} (Code: {source_lang}).
@@ -37,10 +38,8 @@ class Translator:
            - ALL Russian translations: lowercase (e.g., 'собака', 'бегать').
         5. Provide a natural example sentence in {lang_name} (Level B1+).
         6. Determine CEFR level (A1-C2).
-        ...
-        """
 
-        Output ONLY JSON:
+        Output ONLY valid JSON:
         {{
           "word": "foreign_word_with_casing_rules",
           "translation": "russian_lowercase_translation",
