@@ -150,12 +150,12 @@ class UserRepo:
         await self.db.commit()
         return new_token
 
-    async def get_user_id_by_token(self, token: str) -> int | None:
+    async def get_user_by_token(self, token: str) -> tuple[int, int] | None:
         cursor = await self.db.execute(
-            "SELECT id FROM users WHERE api_token = ?", (token,)
+            "SELECT id, telegram_id FROM users WHERE api_token = ?", (token,)
         )
         row = await cursor.fetchone()
-        return row['id'] if row else None
+        return (row['id'], row['telegram_id']) if row else None
 
     async def get_words_count_per_language(self, user_id: int) -> dict:
         cursor = await self.db.execute(

@@ -8,47 +8,21 @@ logger = logging.getLogger(__name__)
 class Translator:
     def __init__(self, api_key: str):
         self.api_key = api_key
-        # Use gemini-2.5-flash-lite via direct REST API
         self.url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent"
 
     async def translate_and_enrich(self, text: str, source_lang: str) -> dict | None:
-        """
-        Translates word from source_lang, provides example and level.
-        Uses direct HTTP POST to avoid heavy library imports.
-        """
         lang_name = LANGUAGES.get(source_lang, {}).get("name", source_lang)
         
-        # Strict rules for casing and articles:
-        # 1. Target Language word (DE/EN) always goes to "word".
-        # 2. Russian translation always goes to "translation".
-        # 3. German (de) Nouns: "lowercase_article Capitalized_Noun" (e.g., 'der Hund').
-        # 4. Verbs, adjectives, all English, all Russian: strictly lowercase.
-        
-        prompt = f"""
-        Input text: "{text}"
-        Target foreign language: {lang_name} (Code: {source_lang}).
+        prompt = f"""Translate "{text}" between {lang_name} ({source_lang}) and Russian.
 
-        Task:
-        1. Identify if "{text}" is Russian or {lang_name}. 
-        2. Find the equivalent in {lang_name} (field "word").
-        3. Find the equivalent in Russian (field "translation").
-        4. Apply STRICT formatting:
-           - If language is 'de' and it's a noun: "lowercase_article Capitalized_Noun" (e.g., 'der Hund', 'die Freiheit', 'das Haus').
-           - ALL other foreign words (English, German verbs/adj): lowercase (e.g., 'house', 'laufen', 'schnell').
-           - ALL Russian translations: lowercase (e.g., 'собака', 'бегать').
-        5. Provide a natural example sentence in {lang_name} (Level B1+).
-        6. Determine CEFR level (A1-C2).
+Rules:
+- word: {lang_name} form. De nouns: lowercase article + Capitalized noun (e.g. der Hund). Other words: lowercase.
+- translation: Russian lowercase.
+- example: natural {lang_name} sentence, B1+ level.
+- level: CEFR (A1-C2).
+- is_valid: false if input is gibberish, else true.
 
-        Output ONLY valid JSON:
-        {{
-          "word": "foreign_word_with_casing_rules",
-          "translation": "russian_lowercase_translation",
-          "example": "B1_plus_example_sentence",
-          "level": "CEFR",
-          "is_valid": true
-        }}
-        If input is gibberish, set "is_valid": false.
-        """
+Return JSON only: {{"word": "", "translation": "", "example": "", "level": "", "is_valid": true}}"""
 
         payload = {
             "contents": [{"parts": [{"text": prompt}]}],
@@ -61,7 +35,7 @@ class Translator:
         try:
             async with aiohttp.ClientSession() as session:
                 url_with_key = f"{self.url}?key={self.api_key}"
-                async with session.post(url_with_key, json=payload, timeout=15) as resp:
+                async with session.post(url_with_key, json=payload, timeout=aiohttp.ClientTimeout(total=15)) as resp:
                     if resp.status != 200:
                         err_text = await resp.text()
                         logger.error(f"Gemini API error {resp.status}: {err_text}")
