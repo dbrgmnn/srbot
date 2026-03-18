@@ -1,10 +1,14 @@
 import csv
 import io
+import logging
 from aiohttp import web
 import aiosqlite
 from db.repository import UserRepo, WordRepo
 from api.auth import verify_bearer_token
 from core.languages import LANGUAGES
+from core.translator import Translator
+
+logger = logging.getLogger(__name__)
 
 
 def _clean_words(raw: list) -> list:
@@ -27,33 +31,92 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
     async def add_external_words(request: web.Request) -> web.Response:
         user_id = await verify_bearer_token(request, db)
         if not user_id:
-            return web.json_response({
-                "ok": False,
-                "error": "unauthorized"
-            }, status=401)
+            return web.json_response({"ok": False, "error": "unauthorized"}, status=401)
         
         try:
             body = await request.json()
         except Exception:
             return web.json_response({"ok": False, "error": "invalid_json"}, status=400)
 
-        # Validate language first
+        # 1. Get raw input
+        raw_word = (body.get("word") or "").strip()
         lang = (body.get("language") or "").lower()
-        if not lang or lang not in LANGUAGES:
-            return web.json_response({"ok": False, "error": "invalid_language"}, status=400)
+        translation = (body.get("translation") or "").strip()
+        example = (body.get("example") or "").strip()
+        level = (body.get("level") or "").strip()
+        
+        if not raw_word and not body.get("words"):
+            return web.json_response({"ok": False, "error": "no_words"}, status=400)
 
+        word_repo = WordRepo(db)
+        config = request.app["config"]
+
+        # Case A: Single word with AI enrichment
+        if raw_word and not translation:
+            # 2. Check for exact duplicate before calling AI
+            if lang and lang in LANGUAGES:
+                existing = await word_repo.search_words(user_id, lang, raw_word)
+                if any(w["word"].lower() == raw_word.lower() for w in existing):
+                    return web.json_response({"ok": True, "result": {"added": 0, "status": "duplicate", "word": raw_word}})
+
+            # 3. Call Gemini if API Key is available
+            if not config.gemini_api_key:
+                return web.json_response({"ok": False, "error": "translation_required_no_api_key"}, status=400)
+            
+            translator = Translator(config.gemini_api_key)
+            ai_data = await translator.translate_and_enrich(raw_word, hint_lang=lang)
+            
+            if not ai_data:
+                return web.json_response({"ok": False, "error": "ai_translation_failed"}, status=422)
+
+            lang = ai_data["language"]
+            word = ai_data["word"]
+            translation = ai_data["translation"]
+            example = ai_data["example"]
+            level = ai_data["level"]
+
+            # 4. Check if language is supported
+            if lang not in LANGUAGES:
+                return web.json_response({
+                    "ok": False, 
+                    "error": f"unsupported_language: {lang}", 
+                    "details": ai_data
+                }, status=400)
+
+            # 5. Check for duplicate again using normalized lemma
+            existing = await word_repo.search_words(user_id, lang, word)
+            if any(w["word"].lower() == word.lower() for w in existing):
+                return web.json_response({"ok": True, "result": {"added": 0, "status": "duplicate", "word": word}})
+
+            # 6. Save enriched word
+            words_to_add = [{"word": word, "translation": translation, "example": example, "level": level}]
+            added_count = await word_repo.add_words_batch(user_id, lang, words_to_add)
+            
+            return web.json_response({
+                "ok": True,
+                "result": {
+                    "added": added_count,
+                    "word": word,
+                    "language": lang,
+                    "translation": translation,
+                    "level": level
+                }
+            })
+
+        # Case B: Batch words or manual translation (Legacy/Manual)
         # Normalize to list
         raw_words = body.get("words")
         if not raw_words:
-            word = (body.get("word") or "").strip()
-            translation = (body.get("translation") or "").strip()
-            if word and translation:
+            if raw_word and translation:
                 raw_words = [{
-                    "word": word,
+                    "word": raw_word,
                     "translation": translation,
-                    "example": body.get("example"),
-                    "level": body.get("level")
+                    "example": example,
+                    "level": level
                 }]
+
+        if not lang or lang not in LANGUAGES:
+             return web.json_response({"ok": False, "error": "invalid_language"}, status=400)
 
         if not raw_words or not isinstance(raw_words, list):
             return web.json_response({"ok": False, "error": "no_words"}, status=400)
@@ -61,26 +124,9 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         words_data = _clean_words(raw_words)
         if not words_data:
             return web.json_response({"ok": False, "error": "invalid_data"}, status=400)
-        word_repo = WordRepo(db)
+            
         added_count = await word_repo.add_words_batch(user_id, lang, words_data)
-        
-        # Build response
-        if len(words_data) == 1:
-            return web.json_response({
-                "ok": True,
-                "result": {
-                    "added": added_count,
-                    "word": words_data[0]["word"]
-                }
-            })
-
-        return web.json_response({
-            "ok": True,
-            "result": {
-                "added": added_count,
-                "processed": len(words_data)
-            }
-        })
+        return web.json_response({"ok": True, "result": {"added": added_count}})
 
     async def add_words(request: web.Request) -> web.Response:
         user_id = request["user_id"]

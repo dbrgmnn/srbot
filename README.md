@@ -13,7 +13,7 @@ srbot/
 │   ├── auth.py          # HMAC-SHA256 initData verification, Bearer token auth
 │   └── routes/          # API routes: init, words, practice, settings
 ├── core/
-│   ├── languages.py     # 10 supported languages with flags and TTS codes
+│   ├── languages.py     # Supported languages (EN, DE) with flags and TTS codes
 │   ├── srs.py           # SM-2 spaced repetition algorithm
 │   ├── scheduler.py     # APScheduler notification job
 │   └── bot_handlers.py  # /token, /token_new commands
@@ -36,7 +36,7 @@ srbot/
 
 ## 🚀 Quick Start
 
-1. Create `.env` from `.env.example` and fill in `BOT_TOKEN` and `ALLOWED_USERS`.
+1. Create `.env` from `.env.example` and fill in `BOT_TOKEN`, `ALLOWED_USERS` and `GEMINI_API_KEY` (optional).
 2. Install dependencies: `pip install -r requirements.txt`
 3. Run: `python main.py`
 
@@ -59,7 +59,7 @@ Frontend changes in `webapp/` are served immediately — no build step needed.
 - Nav bar is hidden during practice to prevent accidental exits
 
 ### Settings
-- **Active Dictionary** — switch between 10 languages
+- **Active Dictionary** — switch between supported languages (DE/EN)
 - **Practice Mode** — Word→Translation or Translation→Word
 - **New words limit** — daily cap for new words (from config)
 - **Frequency** — notification interval
@@ -78,10 +78,18 @@ Frontend changes in `webapp/` are served immediately — no build step needed.
 
 ### External API
 Add words from iOS Shortcuts, browser extensions, etc.:
-```
+```bash
+# Option 1: Full manual data
 POST /api/external/words
 Authorization: Bearer <token>
-{"word": "Apfel", "translation": "apple", "example": "Der Apfel ist rot.", "language": "de"}
+{"word": "Apfel", "translation": "apple", "example": "Der Apple ist rot.", "language": "de"}
+
+# Option 2: AI Enrichment (requires GEMINI_API_KEY)
+# Detects language, adds noun articles (e.g. "der Hund"), 
+# provides B1+ examples, and checks for duplicates.
+POST /api/external/words
+Authorization: Bearer <token>
+{"word": "Haus"}
 ```
 
 ## ⚙️ Tech Stack

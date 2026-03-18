@@ -10,6 +10,11 @@ cd /home/pi/srbot
 echo -e "${GREEN}[1/3] Updating code...${NC}"
 git pull origin main
 
+echo -e "${GREEN}[1.5/3] Updating dependencies...${NC}"
+if [ -f "requirements.txt" ]; then
+    ./venv/bin/pip install -q -r requirements.txt
+fi
+
 echo -e "${GREEN}[2/3] Restarting srbot service...${NC}"
 sudo systemctl restart srbot
 

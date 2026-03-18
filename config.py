@@ -11,6 +11,7 @@ class Config:
     allowed_users: list[int]
     db_path: str
     api_port: int
+    gemini_api_key: str | None = None
     token_expiry: int = 3600
     data_dir: Path = Path(__file__).parent / "data"
     min_daily_limit: int = 5
@@ -37,6 +38,7 @@ def load_config() -> Config:
         allowed_users=allowed_users,
         db_path=os.getenv("DB_PATH", "srbot.db"),
         api_port=int(os.getenv("API_PORT", "8080")),
+        gemini_api_key=os.getenv("GEMINI_API_KEY"),
         token_expiry=int(os.getenv("TOKEN_EXPIRY", "3600")),
         data_dir=Path(os.getenv("DATA_DIR", str(Path(__file__).parent / "data"))),
         min_daily_limit=int(os.getenv("MIN_DAILY_LIMIT", "5")),
