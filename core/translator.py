@@ -1,73 +1,76 @@
 import json
 import logging
-import google.generativeai as genai
+import aiohttp
 from core.languages import LANGUAGES
 
 logger = logging.getLogger(__name__)
 
 class Translator:
     def __init__(self, api_key: str):
-        genai.configure(api_key=api_key)
-        self.model = genai.GenerativeModel("gemini-1.5-flash")
+        self.api_key = api_key
+        # Use gemini-2.5-flash-lite via direct REST API
+        self.url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent"
 
-    async def translate_and_enrich(self, text: str, hint_lang: str = None) -> dict | None:
+    async def translate_and_enrich(self, text: str, source_lang: str) -> dict | None:
         """
-        Translates word, detects language, provides example and level.
-        Returns dict or None if invalid.
+        Translates word from source_lang, provides example and level.
+        Uses direct HTTP POST to avoid heavy library imports.
         """
-        prompt = f"""
-        You are a senior linguistic expert for a language learning app (SRbot).
-        Analyze the input text: "{text}"
+        lang_name = LANGUAGES.get(source_lang, {}).get("name", source_lang)
         
-        Tasks:
-        1. Identify the source language (ISO 639-1 code).
-        2. Provide the lemma (base form) of the word. 
-           CRITICAL: If it's a noun, ALWAYS include the definite article (e.g., 'der Hund' for German, 'la table' for French).
-        3. Translate it to Russian.
-        4. Provide a natural example sentence in the source language.
-           CRITICAL: The example must be strictly CEFR level B1, B2, or C1. Avoid simple A1/A2 sentences. 
-           Use professional or literary context if appropriate.
-        5. Determine the actual CEFR level of the word/phrase (A1-C2).
-        6. Validate if it's a real word or a meaningful phrase.
-
-        If a hint_lang is provided ("{hint_lang or 'none'}"), prioritize it but override if clearly wrong.
-
+        # System instructions: Lemma with article -> Russian translation -> B1+ Example
+        prompt = f"""
+        Analyze input: "{text}" (Language: {lang_name}, Code: {source_lang}).
+        Task:
+        1. Provide the lemma of "{text}" in {lang_name}. 
+           CRITICAL: If it's a noun, ALWAYS include the definite article (e.g. 'der Hund').
+        2. Translate it to Russian.
+        3. Provide a natural example sentence in {lang_name}.
+           CRITICAL: The example must be strictly CEFR level B1 or higher.
+        4. Determine CEFR level (A1-C2).
+        
         Output ONLY valid JSON:
         {{
-          "word": "lemma_with_article_if_noun",
-          "language": "iso_code",
+          "word": "lemma_with_article",
           "translation": "russian_translation",
-          "example": "B1_plus_example_sentence",
-          "level": "CEFR_level",
+          "example": "B1_plus_example",
+          "level": "B1",
           "is_valid": true
         }}
-        If "{text}" is gibberish, offensive, or not a word, set "is_valid": false.
+        If "{text}" is gibberish or not a word in {lang_name}, set "is_valid": false.
         """
 
-        try:
-            response = await self.model.generate_content_async(
-                prompt,
-                generation_config={"response_mime_type": "application/json"}
-            )
-            data = json.loads(response.text)
-            
-            if not data.get("is_valid"):
-                logger.warning(f"Invalid word detected by AI: {text}")
-                return None
-            
-            # Final safety checks
-            if len(data.get("word", "")) > 60 or len(data.get("translation", "")) > 100:
-                logger.warning(f"AI returned suspicious data length for: {text}")
-                return None
+        payload = {
+            "contents": [{"parts": [{"text": prompt}]}],
+            "generationConfig": {
+                "responseMimeType": "application/json",
+                "temperature": 0.3
+            }
+        }
 
-            # Normalize language code to what we support if possible
-            lang = data.get("language", "").lower()
-            if lang not in LANGUAGES:
-                # If we don't support it, we still return it, 
-                # but the caller will decide what to do.
-                pass
-                
-            return data
+        try:
+            async with aiohttp.ClientSession() as session:
+                url_with_key = f"{self.url}?key={self.api_key}"
+                async with session.post(url_with_key, json=payload, timeout=15) as resp:
+                    if resp.status != 200:
+                        err_text = await resp.text()
+                        logger.error(f"Gemini API error {resp.status}: {err_text}")
+                        return None
+                    
+                    result = await resp.json()
+                    
+                    if 'candidates' not in result or not result['candidates']:
+                        logger.error(f"Gemini returned empty candidates: {result}")
+                        return None
+                        
+                    content_text = result['candidates'][0]['content']['parts'][0]['text']
+                    data = json.loads(content_text)
+                    
+                    if not data.get("is_valid"):
+                        logger.warning(f"Invalid word detected by AI: {text}")
+                        return None
+                        
+                    return data
 
         except Exception as e:
             logger.error(f"Translation error for '{text}': {e}")
