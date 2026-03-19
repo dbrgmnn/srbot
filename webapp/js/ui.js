@@ -1,4 +1,5 @@
 import { GET, state, setLanguage } from './api.js';
+import { toast } from './toast.js';
 
 const tg = window.Telegram.WebApp;
 
@@ -91,7 +92,11 @@ function renderHeatmap(data) {
   for (let i = WEEKS * 7 - 1; i >= 0; i--) {
     const d = new Date(today);
     d.setDate(d.getDate() - i);
-    const key = d.toISOString().slice(0, 10);
+    // local date instead of toISOString (UTC)
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const key = `${y}-${m}-${day}`;
     days.push({ key, month: d.getMonth() });
   }
 
@@ -117,8 +122,13 @@ function renderHeatmap(data) {
   if (!grid) return;
   grid.innerHTML = '';
   days.forEach(({ key }) => {
+    const count = lookup[key] || 0;
     const cell = document.createElement('div');
-    cell.className = `hm-cell h${lvl(lookup[key] || 0)}`;
+    cell.className = `hm-cell h${lvl(count)}`;
+    cell.title = `${key}: ${count} words`;
+    cell.onclick = () => {
+      toast(`${key}: ${count} words`);
+    };
     grid.appendChild(cell);
   });
 

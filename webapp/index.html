@@ -34,7 +34,6 @@
     </div>
 
     <div class="card">
-      <div class="card-title">Statistics</div>
       <div class="stats-summary-row">
         <div class="stats-summary-item">
           <div id="count-new" class="stats-num text-new">0</div>
@@ -55,13 +54,10 @@
       </div>
     </div>
 
-    <div class="card">
-      <div class="heatmap-header">
-        <div class="card-title" style="margin-bottom:0">Activity</div>
-        <div class="heatmap-streak" id="hm-streak"></div>
-      </div>
-      <div class="hm-grid" id="hm-grid"></div>
+    <div class="card heatmap-card">
       <div class="hm-months" id="hm-months"></div>
+      <div class="hm-grid" id="hm-grid"></div>
+      <div id="hm-streak" class="heatmap-streak"></div>
     </div>
 
     <button id="btn-practice" class="btn" onclick="startPractice()">Practice</button>
