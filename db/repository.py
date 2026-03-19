@@ -409,6 +409,28 @@ class WordRepo:
         row = await cursor.fetchone()
         return dict(row) if row else None
 
+    async def get_activity_heatmap(self, user_id: int, language: str, days: int = 91, tz_name: str = "UTC") -> list[dict]:
+        tz = _safe_zoneinfo(tz_name, "UTC")
+        now_utc = datetime.now(tz=timezone.utc)
+        local_now = now_utc.astimezone(tz)
+        cutoff_local = (local_now - timedelta(days=days)).replace(hour=0, minute=0, second=0, microsecond=0)
+        cutoff_utc = cutoff_local.astimezone(timezone.utc).isoformat()
+
+        cursor = await self.db.execute(
+            """
+            SELECT DATE(last_reviewed_at, 'localtime') as day, COUNT(*) as count
+            FROM words
+            WHERE user_id = ? AND language = ?
+              AND last_reviewed_at IS NOT NULL
+              AND last_reviewed_at >= ?
+            GROUP BY day
+            ORDER BY day ASC
+            """,
+            (user_id, language, cutoff_utc),
+        )
+        rows = await cursor.fetchall()
+        return [{"date": row["day"], "count": row["count"]} for row in rows]
+
     async def get_word_by_term(self, user_id: int, language: str, word: str) -> dict | None:
         cursor = await self.db.execute(
             """SELECT id, word, translation, example, level FROM words

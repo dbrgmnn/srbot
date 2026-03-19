@@ -71,6 +71,72 @@ function updateCountdowns() {
   }
 }
 
+// ── Heatmap ─────────────────────────────────────────────────────────────
+
+function renderHeatmap(data) {
+  const WEEKS = 13;
+  const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+  // build lookup: date string -> count
+  const lookup = {};
+  let maxCount = 1;
+  data.forEach(({ date, count }) => {
+    lookup[date] = count;
+    if (count > maxCount) maxCount = count;
+  });
+
+  // generate last 91 days
+  const today = new Date();
+  const days = [];
+  for (let i = WEEKS * 7 - 1; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const key = d.toISOString().slice(0, 10);
+    days.push({ key, month: d.getMonth() });
+  }
+
+  function lvl(c) {
+    if (c === 0) return 0;
+    if (c < maxCount * 0.20) return 1;
+    if (c < maxCount * 0.45) return 2;
+    if (c < maxCount * 0.75) return 3;
+    return 4;
+  }
+
+  // streak
+  let streak = 0;
+  for (let i = days.length - 1; i >= 0; i--) {
+    if (lookup[days[i].key]) streak++;
+    else break;
+  }
+  const streakEl = document.getElementById('hm-streak');
+  if (streakEl) streakEl.textContent = streak > 0 ? `${streak} day streak` : '';
+
+  // cells
+  const grid = document.getElementById('hm-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  days.forEach(({ key }) => {
+    const cell = document.createElement('div');
+    cell.className = `hm-cell h${lvl(lookup[key] || 0)}`;
+    grid.appendChild(cell);
+  });
+
+  // month labels
+  const monthsEl = document.getElementById('hm-months');
+  if (!monthsEl) return;
+  monthsEl.innerHTML = '';
+  let lastMonth = -1;
+  for (let w = 0; w < WEEKS; w++) {
+    const m = days[w * 7].month;
+    const lbl = document.createElement('div');
+    lbl.className = 'hm-month';
+    lbl.textContent = (m !== lastMonth) ? MONTHS[m] : '';
+    lastMonth = m;
+    monthsEl.appendChild(lbl);
+  }
+}
+
 // ── Home screen ───────────────────────────────────────────────────────────
 
 export async function loadHome() {
@@ -129,6 +195,8 @@ export async function loadHome() {
       const el = document.getElementById(`count-${cat}`);
       if (el) el.textContent = stats[key] || 0;
     });
+
+    renderHeatmap(init.heatmap || []);
   } catch (e) { console.error('LoadHome failed', e); }
 }
 

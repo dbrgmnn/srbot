@@ -636,3 +636,45 @@ mark {
   color: var(--hint);
   font-size: 12px;
 }
+
+/* ── Heatmap ── */
+.heatmap-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.heatmap-streak {
+  font-size: 11px;
+  color: #ff9f0a;
+  font-weight: 600;
+}
+.hm-grid {
+  display: grid;
+  grid-template-columns: repeat(13, 1fr);
+  grid-template-rows: repeat(7, 1fr);
+  grid-auto-flow: column;
+  gap: 3px;
+  width: 100%;
+}
+.hm-cell {
+  aspect-ratio: 1;
+  border-radius: 2px;
+  width: 100%;
+}
+.h0 { background: rgba(255,255,255,0.06); }
+.h1 { background: rgba(48,209,88,0.22); }
+.h2 { background: rgba(48,209,88,0.45); }
+.h3 { background: rgba(48,209,88,0.70); }
+.h4 { background: #30d158; }
+.hm-months {
+  display: grid;
+  grid-template-columns: repeat(13, 1fr);
+  gap: 3px;
+  margin-top: 3px;
+}
+.hm-month {
+  font-size: 9px;
+  color: var(--hint);
+  text-align: center;
+}

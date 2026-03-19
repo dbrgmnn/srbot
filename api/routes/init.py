@@ -16,7 +16,9 @@ def setup_routes_init(app: web.Application, db: aiosqlite.Connection):
         
         config = request.app["config"]
         settings = await user_repo.get_user_settings(telegram_id, lang, config)
-        stats = await word_repo.get_full_stats(user_id, lang, tz_name=settings.get("timezone", "UTC"))
+        tz = settings.get("timezone", "UTC")
+        stats = await word_repo.get_full_stats(user_id, lang, tz_name=tz)
+        heatmap = await word_repo.get_activity_heatmap(user_id, lang, days=91, tz_name=tz)
 
         lang_meta = LANGUAGES.get(lang, {})
         tts_code = lang_meta.get("tts", "en-US")
@@ -42,6 +44,7 @@ def setup_routes_init(app: web.Application, db: aiosqlite.Connection):
                     "max_notify_interval": config.max_notify_interval,
                 },
                 "languages": languages,
+                "heatmap": heatmap,
             }
         })
     app.router.add_get("/api/init", init_user)
