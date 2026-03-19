@@ -53,8 +53,9 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
 
         # 2. Check for duplicate before calling AI
         existing = await word_repo.search_words(user_id, lang, raw_word)
-        if any(w["word"].lower() == raw_word.lower() for w in existing):
-            return web.json_response({"ok": True, "result": {"added": 0, "status": "duplicate", "word": raw_word, "language": lang}})
+        match = next((w for w in existing if w["word"].lower() == raw_word.lower()), None)
+        if match:
+            return web.json_response({"ok": True, "result": {"added": 0, "status": "duplicate", "word": match["word"], "translation": match["translation"], "example": match.get("example"), "level": match.get("level"), "language": lang}})
 
         # 3. Call Gemini
         if not config.gemini_api_key:
@@ -73,8 +74,9 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
 
         # 4. Check for duplicate again using normalized lemma
         existing = await word_repo.search_words(user_id, lang, word)
-        if any(w["word"].lower() == word.lower() for w in existing):
-            return web.json_response({"ok": True, "result": {"added": 0, "status": "duplicate", "word": word, "language": lang}})
+        match = next((w for w in existing if w["word"].lower() == word.lower()), None)
+        if match:
+            return web.json_response({"ok": True, "result": {"added": 0, "status": "duplicate", "word": match["word"], "translation": match["translation"], "example": match.get("example"), "level": match.get("level"), "language": lang}})
 
         # 5. Save enriched word
         words_to_add = [{"word": word, "translation": trans, "example": example, "level": level}]
