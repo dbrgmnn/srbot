@@ -121,10 +121,18 @@ class UserRepo:
         await self._update_setting('notification_interval_minutes', minutes, telegram_id, language)
 
     async def update_quiet_hours(self, telegram_id: int, quiet_start: str = None, quiet_end: str = None, language: str = None):
-        if quiet_start is not None:
-            await self._update_setting('quiet_start', quiet_start, telegram_id, language)
-        if quiet_end is not None:
-            await self._update_setting('quiet_end', quiet_end, telegram_id, language)
+        fields = {}
+        if quiet_start is not None: fields['quiet_start'] = quiet_start
+        if quiet_end is not None:   fields['quiet_end'] = quiet_end
+        if not fields: return
+        set_clause = ", ".join(f"{k} = ?" for k in fields)
+        await self.db.execute(
+            f"""UPDATE user_settings SET {set_clause}
+                WHERE user_id = (SELECT id FROM users WHERE telegram_id = ?)
+                AND language = ?""",
+            (*fields.values(), telegram_id, language)
+        )
+        await self.db.commit()
 
     async def update_practice_mode(self, telegram_id: int, mode: str, language: str):
         await self._update_setting('practice_mode', mode, telegram_id, language)
@@ -194,14 +202,14 @@ class UserRepo:
         cursor = await self.db.execute(
             """SELECT u.id as user_id, u.telegram_id,
                         w.language,
-                        s.quiet_start, s.quiet_end, s.daily_limit, s.notification_interval_minutes, s.last_notified_at, s.timezone,
-                        SUM(CASE WHEN w.started_at IS NOT NULL AND w.next_review <= ? THEN 1 ELSE 0 END) as due_count,
-                        SUM(CASE WHEN w.started_at IS NULL THEN 1 ELSE 0 END) as new_count
+                        s.quiet_start, s.quiet_end, s.daily_limit, s.notification_interval_minutes, s.last_notified_at, s.timezone
                 FROM users u
                 JOIN words w ON w.user_id = u.id
                 JOIN user_settings s ON s.user_id = u.id AND s.language = w.language
                 GROUP BY u.id, w.language
-                HAVING due_count > 0 OR new_count > 0""",
+                HAVING
+                    SUM(CASE WHEN w.started_at IS NOT NULL AND w.next_review <= ? THEN 1 ELSE 0 END) > 0
+                    OR SUM(CASE WHEN w.started_at IS NULL THEN 1 ELSE 0 END) > 0""",
             (now_utc,)
         )
         rows = await cursor.fetchall()

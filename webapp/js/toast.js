@@ -29,9 +29,10 @@ export const T = {
   CSV_FAIL:       _fail('upload file'),
 
   // Dictionary — edit / delete
-  WORD_SAVED:     _saved,
-  WORD_SAVE_FAIL: _fail('save'),
-  DELETE_FAIL:    _fail('delete'),
+  WORD_SAVED:      _saved,
+  WORD_SAVE_FAIL:  _fail('save'),
+  WORD_DUPLICATE:  'Word already exists',
+  DELETE_FAIL:     _fail('delete'),
 
   // Dictionary — clear / export / search
   CLEARED:        'Dictionary cleared',

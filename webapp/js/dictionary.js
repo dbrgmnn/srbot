@@ -147,7 +147,9 @@ export async function saveEdit() {
     closeEdit();
     toast(T.WORD_SAVED, 'success');
     loadHome();
-  } catch(e) { toast(T.WORD_SAVE_FAIL, 'error'); }
+  } catch(e) {
+    toast(e.message === '409' ? T.WORD_DUPLICATE : T.WORD_SAVE_FAIL, 'error');
+  }
 }
 
 export function clearAllWords() {

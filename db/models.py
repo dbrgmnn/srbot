@@ -18,7 +18,7 @@ async def init_db(db_path: str = "srbot.db") -> aiosqlite.Connection:
             id INTEGER PRIMARY KEY,
             telegram_id INTEGER UNIQUE NOT NULL,
             api_token TEXT,
-            created_at TEXT DEFAULT (date('now'))
+            created_at TEXT DEFAULT (datetime('now'))
         )
     """)
 

@@ -67,8 +67,6 @@ def setup_routes_settings(app: web.Application, db: aiosqlite.Connection):
             if new_lang in LANGUAGES:
                 await user_repo.update_language(telegram_id, new_lang, request.app["config"])
                 lang = new_lang  # use new lang for subsequent updates in this request
-                # Invalidate user_cache so next request re-fetches user_id for new language
-                request.app["user_cache"].pop((telegram_id, new_lang), None)
 
         # 2. Update other settings
         if "timezone" in body:
