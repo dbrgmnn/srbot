@@ -108,15 +108,6 @@ function renderHeatmap(data) {
     return 4;
   }
 
-  // streak
-  let streak = 0;
-  for (let i = days.length - 1; i >= 0; i--) {
-    if (lookup[days[i].key]) streak++;
-    else break;
-  }
-  const streakEl = document.getElementById('hm-streak');
-  if (streakEl) streakEl.textContent = streak > 0 ? `${streak} day streak` : '';
-
   // cells
   const grid = document.getElementById('hm-grid');
   if (!grid) return;
@@ -125,9 +116,8 @@ function renderHeatmap(data) {
     const count = lookup[key] || 0;
     const cell = document.createElement('div');
     cell.className = `hm-cell h${lvl(count)}`;
-    cell.title = `${key}: ${count} words`;
     cell.onclick = () => {
-      toast(`${key}: ${count} words`);
+      toast(count.toString());
     };
     grid.appendChild(cell);
   });

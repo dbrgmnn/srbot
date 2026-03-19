@@ -640,15 +640,7 @@ mark {
 /* ── Heatmap ── */
 .heatmap-card {
   padding-top: 10px;
-  padding-bottom: 12px;
-}
-.heatmap-streak {
-  font-size: 11px;
-  color: #ff9f0a;
-  font-weight: 600;
-  text-align: center;
-  margin-top: 10px;
-  min-height: 14px;
+  padding-bottom: 16px;
 }
 .hm-grid {
   display: grid;
@@ -664,10 +656,6 @@ mark {
   border-radius: 2px;
   width: 100%;
   cursor: pointer;
-  transition: opacity 0.1s;
-}
-.hm-cell:hover {
-  opacity: 0.8;
 }
 .h0 { background: rgba(255,255,255,0.06); }
 .h1 { background: rgba(48,209,88,0.22); }
