@@ -409,24 +409,36 @@ class WordRepo:
         row = await cursor.fetchone()
         return dict(row) if row else None
 
+    async def increment_daily_stat(self, user_id: int, language: str, is_new: bool, tz_name: str = "UTC"):
+        tz = _safe_zoneinfo(tz_name, "UTC")
+        local_now = datetime.now(tz=timezone.utc).astimezone(tz)
+        day_str = local_now.strftime("%Y-%m-%d")
+        
+        col = "new_count" if is_new else "review_count"
+        await self.db.execute(
+            f"""INSERT INTO daily_stats (user_id, language, day, {col})
+                VALUES (?, ?, ?, 1)
+                ON CONFLICT(user_id, language, day) 
+                DO UPDATE SET {col} = {col} + 1""",
+            (user_id, language, day_str),
+        )
+        await self.db.commit()
+
     async def get_activity_heatmap(self, user_id: int, language: str, days: int = 91, tz_name: str = "UTC") -> list[dict]:
         tz = _safe_zoneinfo(tz_name, "UTC")
-        now_utc = datetime.now(tz=timezone.utc)
-        local_now = now_utc.astimezone(tz)
-        cutoff_local = (local_now - timedelta(days=days)).replace(hour=0, minute=0, second=0, microsecond=0)
-        cutoff_utc = cutoff_local.astimezone(timezone.utc).isoformat()
+        local_now = datetime.now(tz=timezone.utc).astimezone(tz)
+        cutoff_local = (local_now - timedelta(days=days))
+        cutoff_day = cutoff_local.strftime("%Y-%m-%d")
 
         cursor = await self.db.execute(
             """
-            SELECT DATE(last_reviewed_at, 'localtime') as day, COUNT(*) as count
-            FROM words
+            SELECT day, (new_count + review_count) as count
+            FROM daily_stats
             WHERE user_id = ? AND language = ?
-              AND last_reviewed_at IS NOT NULL
-              AND last_reviewed_at >= ?
-            GROUP BY day
+              AND day >= ?
             ORDER BY day ASC
             """,
-            (user_id, language, cutoff_utc),
+            (user_id, language, cutoff_day),
         )
         rows = await cursor.fetchall()
         return [{"date": row["day"], "count": row["count"]} for row in rows]

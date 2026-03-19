@@ -49,6 +49,15 @@ def setup_routes_practice(app: web.Application, db: aiosqlite.Connection):
         except (ValueError, TypeError):
             return web.json_response({"ok": False, "error": "invalid_grade"}, status=400)
 
+        # Track activity
+        is_new = int(word["repetitions"]) == 0
+        user_repo = UserRepo(db)
+        config = request.app["config"]
+        settings = await user_repo.get_user_settings(request["telegram_id"], word["language"], config)
+        tz_name = settings.get("timezone", config.default_timezone)
+        
+        await word_repo.increment_daily_stat(user_id, word["language"], is_new, tz_name)
+
         await word_repo.update_word_after_review(
             word_id=word_id,
             repetitions=result.repetitions,
