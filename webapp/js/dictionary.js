@@ -96,7 +96,19 @@ export async function handleFileUpload(input) {
 
 export function onSearchInput(val) {
   clearTimeout(searchTimer);
+  const clearBtn = document.getElementById('search-clear');
+  if (clearBtn) clearBtn.style.display = val ? 'block' : 'none';
   searchTimer = setTimeout(() => loadSearch(val), 300);
+}
+
+export function clearSearch() {
+  const input = document.getElementById('search-input');
+  const clearBtn = document.getElementById('search-clear');
+  const results = document.getElementById('search-results');
+  if (input) input.value = '';
+  if (clearBtn) clearBtn.style.display = 'none';
+  if (results) results.innerHTML = '';
+  if (input) input.focus();
 }
 
 export function openEdit(w) {
@@ -179,7 +191,9 @@ async function loadSearch(q) {
           </div>
           <div class="word-row-trans">${highlight(w.translation, q)}</div>
         </div>
-        <button class="del-btn" data-id="${w.id}">✕</button>
+        <button class="del-btn" data-id="${w.id}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14H6L5 6"></path><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M9 6V4h6v2"></path></svg>
+        </button>
       </div>
     `).join('');
 

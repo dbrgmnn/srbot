@@ -118,7 +118,10 @@
     <div class="header">
       <div class="header-title header-title-spaced">Dictionary</div>
     </div>
-    <input type="text" class="search-input" placeholder="Search words..." oninput="onSearchInput(this.value)">
+    <div class="search-wrapper">
+      <input type="text" id="search-input" class="search-input" placeholder="Search words..." oninput="onSearchInput(this.value)">
+      <button class="search-clear" id="search-clear" onclick="clearSearch()" style="display:none">✕</button>
+    </div>
     <div id="search-results"></div>
   </div>
 
