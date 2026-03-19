@@ -12,7 +12,6 @@ let isGrading = false;
 let isSwiping = false;
 let pointerStartX = 0, pointerStartY = 0, pointerStartTime = 0;
 let rafId = null;
-let longPressTimer = null;
 let hintCache = {};
 
 export async function startPractice() {
@@ -42,9 +41,6 @@ function handleStart(x, y) {
     card.classList.add('swiping');
     card.style.cursor = 'grabbing';
   }
-  longPressTimer = setTimeout(() => {
-    if (!isSwiping) triggerHint();
-  }, 550);
 }
 
 function handleMove(x, y) {
@@ -53,7 +49,6 @@ function handleMove(x, y) {
   const deltaY = y - pointerStartY;
   if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
     isSwiping = true;
-    clearTimeout(longPressTimer);
   }
 
   if (isSwiping) {
@@ -83,7 +78,6 @@ function handleMove(x, y) {
 
 function handleEnd(x, y) {
   if (isGrading || (pointerStartX === 0 && pointerStartY === 0)) return;
-  clearTimeout(longPressTimer);
   if (rafId) cancelAnimationFrame(rafId);
   const card = document.getElementById('word-card');
   if (!card) return;
@@ -132,7 +126,6 @@ function initSwipe() {
   };
   card.onpointercancel = (e) => {
     card.releasePointerCapture(e.pointerId);
-    clearTimeout(longPressTimer);
     pointerStartX = 0; pointerStartY = 0;
   };
 }
@@ -143,18 +136,8 @@ function renderWord() {
     return;
   }
 
-  const btnUndo = document.getElementById('btn-undo');
-  if (btnUndo) {
-    if (practiceHistory.length > 0) {
-      btnUndo.disabled = false;
-      btnUndo.style.opacity = '1';
-      btnUndo.style.pointerEvents = 'auto';
-    } else {
-      btnUndo.disabled = true;
-      btnUndo.style.opacity = '0';
-      btnUndo.style.pointerEvents = 'none';
-    }
-  }
+  const undoRow = document.getElementById('practice-undo-row');
+  if (undoRow) undoRow.classList.toggle('visible', practiceHistory.length > 0);
 
   const word = sessionWords[sessionIdx];
   const progEl = document.getElementById('practice-progress');
@@ -289,7 +272,7 @@ function toastSession(good, hard, again) {
   }, 3000);
 }
 
-async function triggerHint() {
+export async function triggerHint() {
   const word = sessionWords[sessionIdx];
   if (!word) return;
 
@@ -336,7 +319,7 @@ function renderHintContent(hint) {
   const metaEl = document.getElementById('hint-meta');
   const mnemonicEl = document.getElementById('hint-mnemonic');
 
-  const metaItems = [hint.gender, hint.forms].filter(Boolean);
+  const metaItems = [hint.pos, hint.gender].filter(Boolean);
   if (metaEl) {
     metaEl.innerHTML = metaItems.length
       ? metaItems.map(s => `<span class="hint-meta-item">${s}</span>`).join('')

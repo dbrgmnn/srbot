@@ -69,18 +69,18 @@ Return JSON only: {{"word": "", "translation": "", "example": "", "level": "", "
     async def get_hint(self, word: str, translation: str, example: str, lang: str) -> dict | None:
         lang_name = LANGUAGES.get(lang, {}).get("name", lang)
 
-        prompt = f"""Ты помощник для изучения языков. Дай краткую справку о слове на русском языке.
+        prompt = f"""You are a language learning assistant. Return a short reference for a {lang_name} word.
 
-Слово: {word} ({lang_name})
-Перевод: {translation}
-Пример: {example or 'нет'}
+Word: {word}
+Translation (Russian): {translation}
+Example: {example or 'none'}
 
-Верни JSON:
-- gender: для существительных — артикль и род на русском (например "der — мужской"), для глаголов — "глагол", для прилагательных — "прилагательное", иначе ""
-- forms: для глаголов — Präteritum и Partizip II (например "ging, ist gegangen"), для существительных — форма множественного числа (например "die Hunde"), иначе ""
-- mnemonic: образная мнемоника для запоминания на русском, 1-2 предложения. Должна быть конкретной, логичной и привязанной к звучанию или значению слова.
+Return JSON:
+- pos: part of speech in {lang_name} (e.g. "Substantiv", "Verb", "Adjektiv", "Adverb"). Use the target language.
+- gender: for nouns — article + noun plural form (e.g. "der, die Hunde"). For verbs — Präteritum and Partizip II (e.g. "ging, ist gegangen"). Empty string for adjectives/adverbs.
+- mnemonic: a short memorable association in Russian, max 1 sentence. Must be concrete and tied to the sound or meaning of the word.
 
-Только JSON: {{"gender": "", "forms": "", "mnemonic": ""}}"""
+JSON only: {{"pos": "", "gender": "", "mnemonic": ""}}"""
 
         payload = {
             "contents": [{"parts": [{"text": prompt}]}],
@@ -109,7 +109,7 @@ Return JSON only: {{"word": "", "translation": "", "example": "", "level": "", "
                     content_text = result['candidates'][0]['content']['parts'][0]['text']
                     data = json.loads(content_text)
 
-                    if not data.get("mnemonic"):
+                    if not data.get("mnemonic") or not data.get("pos"):
                         logger.error(f"Hint incomplete for '{word}': {data}")
                         return None
 

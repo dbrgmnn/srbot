@@ -331,24 +331,64 @@ body.no-nav {
   padding-top: 8px;
   padding-bottom: calc(20px + env(safe-area-inset-bottom));
   display: flex;
-  flex-direction: row;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
-.btn-practice-footer {
-  width: auto;
-  min-width: 80px;
-  height: 50px;
-  border-radius: var(--radius-xl);
+.practice-footer-row {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+.btn-round {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 1px solid var(--glass-border);
+  background: var(--glass);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0;
-  font-size: 16px;
-  font-weight: 600;
-  transition: opacity .2s;
+  cursor: pointer;
+  transition: opacity .15s, transform .1s;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.2), inset 0 1px 0 var(--glass-shine);
 }
+.btn-round:active { opacity: .7; transform: scale(0.94); }
+.btn-round svg { width: 20px; height: 20px; stroke: rgba(255,255,255,0.65); }
+.practice-undo-row {
+  width: 100%;
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition: max-height .25s ease, opacity .2s ease;
+}
+.practice-undo-row.visible {
+  max-height: 60px;
+  opacity: 1;
+}
+.btn-undo-wide {
+  width: 100%;
+  height: 44px;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--glass-border);
+  background: var(--glass);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: rgba(255,255,255,0.55);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity .15s, transform .1s;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.2), inset 0 1px 0 var(--glass-shine);
+}
+.btn-undo-wide:active { opacity: .7; transform: scale(0.98); }
+.btn-undo-wide svg { width: 16px; height: 16px; stroke: rgba(255,255,255,0.4); }
 
 /* ── Settings ── */
 .settings-section-title {
@@ -655,8 +695,9 @@ mark {
   letter-spacing: 0.02em;
   margin-bottom: 16px;
   display: flex;
-  gap: 12px;
+  gap: 8px;
   flex-wrap: wrap;
+  justify-content: center;
 }
 .hint-meta-item {
   background: var(--glass);
