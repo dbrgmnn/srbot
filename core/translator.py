@@ -65,3 +65,56 @@ Return JSON only: {{"word": "", "translation": "", "example": "", "level": "", "
         except Exception as e:
             logger.error(f"Translation error for '{text}': {e}")
             return None
+
+    async def get_hint(self, word: str, translation: str, example: str, lang: str) -> dict | None:
+        lang_name = LANGUAGES.get(lang, {}).get("name", lang)
+
+        prompt = f"""Ты помощник для изучения языков. Дай краткую справку о слове на русском языке.
+
+Слово: {word} ({lang_name})
+Перевод: {translation}
+Пример: {example or 'нет'}
+
+Верни JSON:
+- gender: для существительных — артикль и род на русском (например "der — мужской"), для глаголов — "глагол", для прилагательных — "прилагательное", иначе ""
+- forms: для глаголов — Präteritum и Partizip II (например "ging, ist gegangen"), для существительных — форма множественного числа (например "die Hunde"), иначе ""
+- mnemonic: образная мнемоника для запоминания на русском, 1-2 предложения. Должна быть конкретной, логичной и привязанной к звучанию или значению слова.
+
+Только JSON: {{"gender": "", "forms": "", "mnemonic": ""}}"""
+
+        payload = {
+            "contents": [{"parts": [{"text": prompt}]}],
+            "generationConfig": {
+                "responseMimeType": "application/json",
+                "temperature": 0.7,
+                "maxOutputTokens": 256
+            }
+        }
+
+        try:
+            async with aiohttp.ClientSession() as session:
+                url_with_key = f"{self.url}?key={self.api_key}"
+                async with session.post(url_with_key, json=payload, timeout=aiohttp.ClientTimeout(total=15)) as resp:
+                    if resp.status != 200:
+                        err_text = await resp.text()
+                        logger.error(f"Gemini hint error {resp.status}: {err_text}")
+                        return None
+
+                    result = await resp.json()
+
+                    if 'candidates' not in result or not result['candidates']:
+                        logger.error(f"Gemini hint returned empty candidates: {result}")
+                        return None
+
+                    content_text = result['candidates'][0]['content']['parts'][0]['text']
+                    data = json.loads(content_text)
+
+                    if not data.get("mnemonic"):
+                        logger.error(f"Hint incomplete for '{word}': {data}")
+                        return None
+
+                    return data
+
+        except Exception as e:
+            logger.error(f"Hint error for '{word}': {e}")
+            return None

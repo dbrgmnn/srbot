@@ -224,6 +224,19 @@
     <button class="btn btn-secondary" onclick="closeEdit()">Cancel</button>
   </div>
 
+  <!-- Hint Sheet -->
+  <div id="hint-overlay" class="edit-overlay" onclick="closeHint()"></div>
+  <div id="hint-sheet" class="edit-sheet">
+    <div class="edit-sheet-title" id="hint-word-title"></div>
+    <div id="hint-body">
+      <div id="hint-loader" class="hint-loader"><span></span><span></span><span></span></div>
+      <div id="hint-content" style="display:none">
+        <div id="hint-meta" class="hint-meta"></div>
+        <div id="hint-mnemonic" class="hint-mnemonic"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- Universal Picker Sheet -->
   <div id="picker-overlay" class="edit-overlay" onclick="closePicker()"></div>
   <div id="picker-sheet" class="edit-sheet">

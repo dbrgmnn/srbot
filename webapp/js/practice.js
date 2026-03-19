@@ -12,6 +12,8 @@ let isGrading = false;
 let isSwiping = false;
 let pointerStartX = 0, pointerStartY = 0, pointerStartTime = 0;
 let rafId = null;
+let longPressTimer = null;
+let hintCache = {};
 
 export async function startPractice() {
   try {
@@ -22,6 +24,7 @@ export async function startPractice() {
     sessionIdx = 0;
     sessionStats = { good: 0, hard: 0, again: 0 };
     practiceHistory = [];
+    hintCache = {};
     showScreen('practice');
     initSwipe();
     renderWord();
@@ -39,13 +42,19 @@ function handleStart(x, y) {
     card.classList.add('swiping');
     card.style.cursor = 'grabbing';
   }
+  longPressTimer = setTimeout(() => {
+    if (!isSwiping) triggerHint();
+  }, 550);
 }
 
 function handleMove(x, y) {
   if (isGrading || (pointerStartX === 0 && pointerStartY === 0)) return;
   const deltaX = x - pointerStartX;
   const deltaY = y - pointerStartY;
-  if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) isSwiping = true;
+  if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
+    isSwiping = true;
+    clearTimeout(longPressTimer);
+  }
 
   if (isSwiping) {
     const card = document.getElementById('word-card');
@@ -74,6 +83,7 @@ function handleMove(x, y) {
 
 function handleEnd(x, y) {
   if (isGrading || (pointerStartX === 0 && pointerStartY === 0)) return;
+  clearTimeout(longPressTimer);
   if (rafId) cancelAnimationFrame(rafId);
   const card = document.getElementById('word-card');
   if (!card) return;
@@ -122,6 +132,7 @@ function initSwipe() {
   };
   card.onpointercancel = (e) => {
     card.releasePointerCapture(e.pointerId);
+    clearTimeout(longPressTimer);
     pointerStartX = 0; pointerStartY = 0;
   };
 }
@@ -276,6 +287,71 @@ function toastSession(good, hard, again) {
     el.classList.remove('show');
     setTimeout(() => { el.innerHTML = ''; }, 300);
   }, 3000);
+}
+
+async function triggerHint() {
+  const word = sessionWords[sessionIdx];
+  if (!word) return;
+
+  tg.HapticFeedback.impactOccurred('medium');
+
+  // open sheet immediately with loader
+  const titleEl = document.getElementById('hint-word-title');
+  const loaderEl = document.getElementById('hint-loader');
+  const contentEl = document.getElementById('hint-content');
+  if (titleEl) titleEl.textContent = word.word;
+  if (loaderEl) loaderEl.style.display = 'flex';
+  if (contentEl) contentEl.style.display = 'none';
+
+  document.getElementById('hint-overlay').classList.add('open');
+  document.getElementById('hint-sheet').classList.add('open');
+  window._lockScroll();
+
+  // use cache if available
+  if (hintCache[word.id]) {
+    renderHintContent(hintCache[word.id]);
+    return;
+  }
+
+  try {
+    const data = await GET(`/api/hint?word_id=${word.id}`);
+    hintCache[word.id] = data.result;
+    renderHintContent(data.result);
+  } catch (e) {
+    console.error('Hint failed', e);
+    if (loaderEl) loaderEl.style.display = 'none';
+    if (contentEl) {
+      contentEl.style.display = 'block';
+      const metaEl = document.getElementById('hint-meta');
+      const mnemonicEl = document.getElementById('hint-mnemonic');
+      if (metaEl) metaEl.innerHTML = '';
+      if (mnemonicEl) mnemonicEl.textContent = 'Не удалось загрузить подсказку.';
+    }
+  }
+}
+
+function renderHintContent(hint) {
+  const loaderEl = document.getElementById('hint-loader');
+  const contentEl = document.getElementById('hint-content');
+  const metaEl = document.getElementById('hint-meta');
+  const mnemonicEl = document.getElementById('hint-mnemonic');
+
+  const metaItems = [hint.gender, hint.forms].filter(Boolean);
+  if (metaEl) {
+    metaEl.innerHTML = metaItems.length
+      ? metaItems.map(s => `<span class="hint-meta-item">${s}</span>`).join('')
+      : '';
+  }
+  if (mnemonicEl) mnemonicEl.textContent = hint.mnemonic || '';
+
+  if (loaderEl) loaderEl.style.display = 'none';
+  if (contentEl) contentEl.style.display = 'block';
+}
+
+export function closeHint() {
+  document.getElementById('hint-overlay').classList.remove('open');
+  document.getElementById('hint-sheet').classList.remove('open');
+  window._unlockScroll();
 }
 
 export function exitPractice() {
