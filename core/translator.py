@@ -55,6 +55,10 @@ Return JSON only: {{"word": "", "translation": "", "example": "", "level": "", "
                     if not data.get("is_valid"):
                         logger.warning(f"Invalid word detected by AI: {text}")
                         return None
+
+                    if not data.get("word") or not data.get("translation"):
+                        logger.error(f"AI returned incomplete data for '{text}': {data}")
+                        return None
                         
                     return data
 

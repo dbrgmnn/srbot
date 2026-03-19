@@ -56,7 +56,7 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         if any(w["word"].lower() == raw_word.lower() for w in existing):
             return web.json_response({"ok": True, "result": {"added": 0, "status": "duplicate", "word": raw_word, "language": lang}})
 
-        # 3. Call Gemini (Lightweight REST version)
+        # 3. Call Gemini
         if not config.gemini_api_key:
             return web.json_response({"ok": False, "error": "no_gemini_api_key"}, status=400)
         
@@ -66,8 +66,8 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         if not ai_data:
             return web.json_response({"ok": False, "error": "ai_translation_failed"}, status=422)
 
-        word = ai_data["word"]        # Lemma with article
-        trans = ai_data["translation"] # Russian translation
+        word = ai_data["word"]
+        trans = ai_data["translation"]
         example = ai_data["example"]
         level = ai_data["level"]
 
