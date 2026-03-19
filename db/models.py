@@ -1,11 +1,18 @@
 import aiosqlite
 
 
+async def apply_pragmas(db: aiosqlite.Connection):
+    # WAL mode + NORMAL sync — must be applied to every new connection
+    await db.execute("PRAGMA journal_mode=WAL")
+    await db.execute("PRAGMA synchronous=NORMAL")
+
+
 async def init_db(db_path: str = "srbot.db") -> aiosqlite.Connection:
     # creates tables on first run and returns connection
     db = await aiosqlite.connect(db_path)
     db.row_factory = aiosqlite.Row
-    
+    await apply_pragmas(db)
+
     await db.execute("""
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY,

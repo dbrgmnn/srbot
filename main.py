@@ -1,7 +1,6 @@
 import asyncio
 import logging
 import signal
-from pathlib import Path
 
 from aiogram import Bot, Dispatcher
 
