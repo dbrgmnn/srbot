@@ -36,12 +36,11 @@ async function api(method, path, body) {
     const data = isJson ? await res.json() : null;
     
     if (isJson && data && data.ok === false) {
-      const msg = data.error || `Error ${res.status}`;
-      throw new Error(msg);
+      if (res.status === 409) throw new Error('409');
+      throw new Error(data.error || `Error ${res.status}`);
     }
 
     if (!res.ok) {
-      if (res.status === 409) throw new Error('409');
       throw new Error(`Error ${res.status}`);
     }
     return data;

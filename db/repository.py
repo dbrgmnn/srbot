@@ -21,7 +21,7 @@ class UserRepo:
     def __init__(self, db: aiosqlite.Connection):
         self.db = db
 
-    async def get_or_create(self, telegram_id: int, language: str, timezone: str, config=None) -> int:
+    async def get_or_create(self, telegram_id: int, language: str, tz_name: str, config=None) -> int:
         cursor = await self.db.execute(
             "SELECT id FROM users WHERE telegram_id = ?", (telegram_id,)
         )
@@ -35,7 +35,7 @@ class UserRepo:
                 (user_id, language)
             )
             if not await cursor.fetchone():
-                await self._create_settings(user_id, language, timezone, config)
+                await self._create_settings(user_id, language, tz_name, config)
                 await self.db.commit()
             return user_id
 
@@ -46,11 +46,11 @@ class UserRepo:
         row = await cursor.fetchone()
         user_id = row['id']
         
-        await self._create_settings(user_id, language, timezone, config)
+        await self._create_settings(user_id, language, tz_name, config)
         await self.db.commit()
         return user_id
 
-    async def _create_settings(self, user_id: int, language: str, timezone: str, config=None):
+    async def _create_settings(self, user_id: int, language: str, tz_name: str, config=None):
         limit = config.max_daily_limit // 2 if config else 20
         interval = config.max_notify_interval // 2 if config else 240
 
@@ -58,7 +58,7 @@ class UserRepo:
             """INSERT OR IGNORE INTO user_settings 
                (user_id, language, timezone, daily_limit, notification_interval_minutes) 
                VALUES (?, ?, ?, ?, ?)""",
-            (user_id, language, timezone, limit, interval)
+            (user_id, language, tz_name, limit, interval)
         )
 
     async def set_last_notified_at(self, telegram_id: int, language: str):

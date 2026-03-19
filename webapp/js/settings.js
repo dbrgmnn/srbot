@@ -119,8 +119,7 @@ function _openQuietEndPicker(startVal) {
   _showPickerSheet('Quiet hours (End)', options, currentVal, (val) => {
     document.getElementById('set-quiet-end').value = val;
     document.getElementById('quiet-hours-display').textContent = `${startVal} — ${val}`;
-    saveSetting('quiet_start', startVal, false);
-    saveSetting('quiet_end', val);
+    saveSetting('quiet_hours', { quiet_start: startVal, quiet_end: val });
   });
 }
 
@@ -256,8 +255,10 @@ export async function loadSettings() {
 }
 
 export async function saveSetting(key, val, showToast = true) {
+  // key can be a string (single field) or a sentinel like 'quiet_hours' with val as object
+  const body = (typeof val === 'object' && val !== null) ? val : { [key]: val };
   try {
-    await POST('/api/settings', { [key]: val });
+    await POST('/api/settings', body);
     if (showToast) toast(T.SAVED, 'success');
     if (key === 'practice_mode' || key === 'daily_limit' || key === 'timezone') loadHome();
   } catch (e) { if (showToast) toast(T.SAVE_FAIL, 'error'); }

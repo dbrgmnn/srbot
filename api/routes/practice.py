@@ -51,10 +51,8 @@ def setup_routes_practice(app: web.Application, db: aiosqlite.Connection):
 
         # Track activity
         is_new = int(word["repetitions"]) == 0
-        user_repo = UserRepo(db)
         config = request.app["config"]
-        settings = await user_repo.get_user_settings(request["telegram_id"], word["language"], config)
-        tz_name = settings.get("timezone", config.default_timezone)
+        tz_name = request.headers.get("X-Timezone", config.default_timezone)
         
         await word_repo.increment_daily_stat(user_id, word["language"], is_new, tz_name)
 

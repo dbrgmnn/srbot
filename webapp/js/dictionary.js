@@ -74,6 +74,8 @@ export async function submitWords() {
       const levelDisp = document.getElementById('add-level-display');
       if (levelDisp) { levelDisp.textContent = 'Level'; levelDisp.classList.add('picker-trigger-placeholder'); }
       loadHome();
+    } else {
+      toast(T.WORD_DUPLICATE, 'error');
     }
   } catch (e) { toast(T.WORD_ADD_FAIL, 'error'); }
 }
@@ -89,6 +91,7 @@ export async function handleFileUpload(input) {
     try {
       const res = await POST('/api/words', { words });
       if (res.result && res.result.added) { toast(T.CSV_ADDED(res.result.added), 'success'); loadHome(); }
+      else { toast(T.WORD_DUPLICATE, 'error'); }
     } catch (e) { toast(T.CSV_FAIL, 'error'); }
   };
   reader.readAsText(file);
