@@ -8,7 +8,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 
 from db.models import apply_pragmas
-from db.repository import UserRepo, WordRepo
+from db.repository import UserRepo, WordRepo, _safe_zoneinfo
 from core.languages import LANGUAGES
 
 logger = logging.getLogger(__name__)
@@ -62,10 +62,10 @@ async def check_and_send_notifications(bot: Bot, db_path: str, config):
         for row in candidates:
             telegram_id = row["telegram_id"]
             user_tz_name = row.get("timezone", config.default_timezone)
-            user_tz = ZoneInfo(user_tz_name)
+            user_tz = _safe_zoneinfo(user_tz_name, config.default_timezone)
 
             # Get real stats for this user to know exactly how many new words are left for TODAY
-            stats = await word_repo.get_full_stats(row["user_id"], row["language"], tz_name=user_tz_name)
+            stats = await word_repo.get_full_stats(row["user_id"], row["language"], tz_name=user_tz_name, fallback_tz=config.default_timezone)
 
             due_count = stats["due"]
             daily_remaining = max(0, row["daily_limit"] - stats["today_new"])

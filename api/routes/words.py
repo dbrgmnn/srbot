@@ -52,8 +52,7 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         config = request.app["config"]
 
         # 2. Check for duplicate before calling AI
-        existing = await word_repo.search_words(user_id, lang, raw_word)
-        match = next((w for w in existing if w["word"].lower() == raw_word.lower()), None)
+        match = await word_repo.get_word_by_term(user_id, lang, raw_word)
         if match:
             return web.json_response({"ok": True, "result": {"added": 0, "status": "duplicate", "word": match["word"], "translation": match["translation"], "example": match.get("example"), "level": match.get("level"), "language": lang}})
 
@@ -72,9 +71,8 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         example = ai_data["example"]
         level = ai_data["level"]
 
-        # 4. Check for duplicate again using normalized lemma
-        existing = await word_repo.search_words(user_id, lang, word)
-        match = next((w for w in existing if w["word"].lower() == word.lower()), None)
+        # 4. Check for duplicate again using normalized AI lemma
+        match = await word_repo.get_word_by_term(user_id, lang, word)
         if match:
             return web.json_response({"ok": True, "result": {"added": 0, "status": "duplicate", "word": match["word"], "translation": match["translation"], "example": match.get("example"), "level": match.get("level"), "language": lang}})
 

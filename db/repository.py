@@ -1,9 +1,20 @@
 import csv
+import logging
 import secrets
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
-from zoneinfo import ZoneInfo
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 import aiosqlite
+
+logger = logging.getLogger(__name__)
+
+
+def _safe_zoneinfo(tz_name: str, fallback: str) -> ZoneInfo:
+    try:
+        return ZoneInfo(tz_name)
+    except (ZoneInfoNotFoundError, KeyError):
+        logger.warning(f"Invalid timezone '{tz_name}', falling back to '{fallback}'")
+        return ZoneInfo(fallback)
 
 
 class UserRepo:
@@ -165,8 +176,8 @@ class UserRepo:
         rows = await cursor.fetchall()
         return {row['language']: row['cnt'] for row in rows}
 
-    async def get_today_new_count(self, user_id: int, language: str, tz_name: str = "UTC") -> int:
-        tz = ZoneInfo(tz_name)
+    async def get_today_new_count(self, user_id: int, language: str, tz_name: str = "UTC", fallback_tz: str = "UTC") -> int:
+        tz = _safe_zoneinfo(tz_name, fallback_tz)
         now_utc = datetime.now(tz=timezone.utc)
         local_now = now_utc.astimezone(tz)
         today_start_utc = local_now.replace(hour=0, minute=0, second=0, microsecond=0).astimezone(timezone.utc)
@@ -305,9 +316,9 @@ class WordRepo:
         )
         await self.db.commit()
 
-    async def get_full_stats(self, user_id: int, language: str, tz_name: str = "UTC") -> dict:
+    async def get_full_stats(self, user_id: int, language: str, tz_name: str = "UTC", fallback_tz: str = "UTC") -> dict:
         now_utc = datetime.now(tz=timezone.utc)
-        tz = ZoneInfo(tz_name)
+        tz = _safe_zoneinfo(tz_name, fallback_tz)
         local_now = now_utc.astimezone(tz)
         today_start_local = local_now.replace(hour=0, minute=0, second=0, microsecond=0)
         today_start_utc = today_start_local.astimezone(timezone.utc)
@@ -394,6 +405,15 @@ class WordRepo:
         cursor = await self.db.execute(
             "SELECT * FROM words WHERE id = ? AND user_id = ?",
             (word_id, user_id),
+        )
+        row = await cursor.fetchone()
+        return dict(row) if row else None
+
+    async def get_word_by_term(self, user_id: int, language: str, word: str) -> dict | None:
+        cursor = await self.db.execute(
+            """SELECT id, word, translation, example, level FROM words
+               WHERE user_id = ? AND language = ? AND LOWER(word) = LOWER(?)""",
+            (user_id, language, word),
         )
         row = await cursor.fetchone()
         return dict(row) if row else None
