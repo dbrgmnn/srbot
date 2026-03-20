@@ -28,6 +28,7 @@ class Translator:
             }
         }
 
+        content_text = ""
         try:
             session = await self._get_session()
             url_with_key = f"{self.url}?key={self.api_key}"
@@ -43,10 +44,20 @@ class Translator:
                     logger.error(f"Gemini returned empty candidates: {result}")
                     return None
                     
-                content_text = result['candidates'][0]['content']['parts'][0]['text']
+                content_text = result['candidates'][0]['content']['parts'][0]['text'].strip()
+                
+                # Robust JSON extraction
+                if content_text.startswith("```"):
+                    lines = content_text.splitlines()
+                    if lines[0].startswith("```"):
+                        lines = lines[1:]
+                    if lines and lines[-1].startswith("```"):
+                        lines = lines[:-1]
+                    content_text = "\n".join(lines).strip()
+
                 return json.loads(content_text)
         except Exception as e:
-            logger.error(f"Gemini call failed: {e}")
+            logger.error(f"Gemini call failed: {e}. Raw content: {content_text[:200]}")
             return None
 
     async def translate_and_enrich(self, text: str, source_lang: str) -> dict | None:
@@ -55,14 +66,14 @@ class Translator:
         article_rule = "Nouns: lowercase article + Capitalized noun (e.g. der Hund). Verbs/adj: lowercase." if source_lang == "de" else "All words: lowercase."
         prompt = f"""Translate "{text}" between {lang_name} ({source_lang}) and Russian.
 
-Rules:
+Schema:
 - word: {lang_name} form. {article_rule}
 - translation: Russian lowercase.
 - example: natural {lang_name} sentence, B1+ level.
 - level: CEFR (A1-C2).
 - is_valid: false if input is gibberish, else true.
 
-Return JSON only: {{"word": "", "translation": "", "example": "", "level": "", "is_valid": true}}"""
+Response must be a valid JSON object matching the schema."""
 
         data = await self._call_gemini(prompt)
         
@@ -85,15 +96,14 @@ Return JSON only: {{"word": "", "translation": "", "example": "", "level": "", "
 
         prompt = f"""You are a language learning assistant. Provide a short linguistic reference for a {lang_name} word.
 
+Input:
 Word: {word}
 Translation (Russian): {translation}
 
-Return JSON with:
-- pos: part of speech in {lang_name} (e.g. "Substantiv", "Verb", "Noun", "Verb").
-- forms: essential word forms (e.g., plural for nouns, basic conjugations for verbs, or comparative for adjectives).
-- mnemonic: a short memorable association in Russian (max 1 sentence), tied to the word's sound or meaning.
-
-JSON only: {{"pos": "", "forms": "", "mnemonic": ""}}"""
+Response JSON fields:
+- pos: part of speech in {lang_name} (e.g. "Substantiv", "Verb", "Noun").
+- forms: essential word forms (e.g., plural for nouns, basic conjugations for verbs).
+- mnemonic: a short memorable association in Russian (max 1 sentence), tied to the word's sound or meaning."""
 
         return await self._call_gemini(prompt, temperature=0.7, max_tokens=256)
 
