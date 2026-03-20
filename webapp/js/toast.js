@@ -1,11 +1,20 @@
 // ── Toast function ────────────────────────────────────────────────────────
 
+let toastTimeout = null;
+
 export function toast(msg, type = 'info') {
   const el = document.getElementById('toast');
   if (!el) return;
-  el.textContent = msg;
+  
+  if (toastTimeout) clearTimeout(toastTimeout);
+  
+  el.innerHTML = msg;
   el.className = `toast toast-${type} show`;
-  setTimeout(() => el.classList.remove('show'), 3000);
+  
+  toastTimeout = setTimeout(() => {
+    el.classList.remove('show');
+    toastTimeout = null;
+  }, 3000);
 }
 
 // ── Shared base messages ──────────────────────────────────────────────────
@@ -55,5 +64,5 @@ export const T = {
   // Practice
   SESSION_FAIL:   _fail('load session'),
   GRADE_FAIL:     _fail('save progress'),
-  UNDO_FAIL:      _fail('undo'),
+  UNDO_FAIL:      'Reverted',
 };

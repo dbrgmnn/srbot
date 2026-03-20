@@ -273,18 +273,13 @@ export function playAudio(e) {
 // ── Session toast ────────────────────────────────────────────────────────────
 
 function toastSession(good, hard, again) {
-  const el = document.getElementById('toast');
-  if (!el) return;
-  el.innerHTML = [
+  const msg = [
     again > 0 ? `<span style="color:#ff453a">${again}</span>` : null,
     hard  > 0 ? `<span style="color:#ffd60a">${hard}</span>`  : null,
     good  > 0 ? `<span style="color:#30d158">${good}</span>`  : null,
   ].filter(Boolean).join('<span style="opacity:0.3"> · </span>');
-  el.className = 'toast show';
-  setTimeout(() => {
-    el.classList.remove('show');
-    setTimeout(() => { el.innerHTML = ''; }, 300);
-  }, 3000);
+  
+  toast(msg, 'info');
 }
 
 // ── Exit ─────────────────────────────────────────────────────────────────────
