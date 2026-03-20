@@ -374,18 +374,19 @@ body.no-nav {
   padding: 0 16px;
   margin-bottom: 8px;
 }
-.settings-row {
+.settings-row, .word-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 14px 0;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
+  padding: 16px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
   cursor: pointer;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
+  transition: opacity 0.15s;
 }
-.settings-row:active { opacity: 0.6; }
-.settings-row:last-child { border-bottom: none; }
+.settings-row:active, .word-row-content:active { opacity: 0.6; }
+.settings-row:last-child, .word-row:last-child { border-bottom: none; }
 .settings-label { font-size: 15px; color: var(--text); }
 .settings-row-danger { justify-content: center; }
 .settings-label-danger { font-size: 15px; color: #ff453a; font-weight: 500; }
@@ -409,14 +410,6 @@ body.no-nav {
   line-height: 1;
 }
 
-/* ── Word rows ── */
-.word-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 0;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
-}
 .word-row-content { flex: 1; cursor: pointer; }
 .word-row-text {
   font-weight: 600;
@@ -480,12 +473,12 @@ body.no-nav .toast { bottom: calc(28px + env(safe-area-inset-bottom)); }
 
 /* ── Edit / Picker sheets ── */
 .edit-sheet-title {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 700;
   color: var(--text);
-  margin-bottom: 16px;
+  margin-bottom: 24px;
   text-align: center;
-  letter-spacing: -0.1px;
+  letter-spacing: 0.02em;
 }
 .edit-overlay {
   display: none;
@@ -503,18 +496,16 @@ body.no-nav .toast { bottom: calc(28px + env(safe-area-inset-bottom)); }
   max-height: 85vh;
   display: flex;
   flex-direction: column;
-  background: rgba(20,20,24,0.85);
+  background: rgba(20,20,24,0.96);
   backdrop-filter: var(--blur);
   -webkit-backdrop-filter: var(--blur);
   border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   border-top: 1px solid var(--glass-border);
-  border-left: 1px solid var(--glass-border);
-  border-right: 1px solid var(--glass-border);
-  padding: 20px var(--gap) 32px;
-  z-index: 301;
+  padding: 24px 16px calc(env(safe-area-inset-bottom) + 32px);
+  z-index: 600;
   transform: translateY(100%);
-  transition: transform .28s cubic-bezier(0.32, 0.72, 0, 1);
-  box-shadow: 0 -8px 40px rgba(0,0,0,0.4), inset 0 1px 0 var(--glass-shine);
+  transition: transform .3s cubic-bezier(0.32, 0.72, 0, 1);
+  box-shadow: 0 -8px 40px rgba(0,0,0,0.5), inset 0 1px 0 var(--glass-shine);
 }
 .edit-sheet.open { transform: translateY(0); }
 
