@@ -277,7 +277,7 @@ function toastSession(good, hard, again) {
     again > 0 ? `<span style="color:#ff453a">${again}</span>` : null,
     hard  > 0 ? `<span style="color:#ffd60a">${hard}</span>`  : null,
     good  > 0 ? `<span style="color:#30d158">${good}</span>`  : null,
-  ].filter(Boolean).join('<span style="opacity:0.3"> · </span>');
+  ].filter(Boolean).join('&nbsp;&nbsp;');
   
   toast(msg, 'info');
 }
