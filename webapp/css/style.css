@@ -28,6 +28,7 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
   font-size: 16px;
   min-height: 100vh;
+  padding-top: env(safe-area-inset-top);
   padding-bottom: calc(100px + env(safe-area-inset-bottom));
 }
 body.no-nav {
@@ -83,11 +84,11 @@ body.no-nav {
 
 /* ── Header ── */
 .header {
-  padding: 12px var(--gap) 8px;
+  padding: calc(env(safe-area-inset-top) + 8px) var(--gap) 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 44px;
+  min-height: calc(env(safe-area-inset-top) + 44px);
 }
 .header-title {
   font-size: 15px;
@@ -441,7 +442,7 @@ body.no-nav {
 /* ── Toast ── */
 .toast {
   position: fixed;
-  bottom: calc(82px + env(safe-area-inset-bottom));
+  bottom: calc(90px + env(safe-area-inset-bottom));
   left: 50%;
   transform: translateX(-50%) translateY(20px);
   background: var(--glass-mid);
