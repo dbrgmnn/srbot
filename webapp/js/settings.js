@@ -73,6 +73,7 @@ function _openLimitPicker() {
   }
   const currentVal = document.getElementById('set-limit-val').textContent;
   _showPickerSheet('New words limit', options, currentVal, (val) => {
+    if (val === currentVal) return;
     document.getElementById('set-limit-val').textContent = val;
     saveSetting('daily_limit', parseInt(val));
   });
@@ -88,11 +89,12 @@ function _openIntervalPicker() {
     { value: '480', label: 'Every 8 hours' },
   ].filter(o => parseInt(o.value) >= state.min_notify_interval && parseInt(o.value) <= state.max_notify_interval);
 
-  const currentVal = document.getElementById('set-notify-interval').dataset.value
-    || String(Math.floor(state.max_notify_interval / 2));
+  const intervalEl = document.getElementById('set-notify-interval');
+  const currentVal = intervalEl.dataset.value || String(Math.floor(state.max_notify_interval / 2));
 
   _showPickerSheet('Notification frequency', options, currentVal, (val) => {
-    _renderIntervalEl(document.getElementById('set-notify-interval'), parseInt(val));
+    if (val === currentVal) return;
+    _renderIntervalEl(intervalEl, parseInt(val));
     saveSetting('notification_interval_minutes', parseInt(val));
   });
 }
@@ -114,8 +116,11 @@ function _openQuietEndPicker(startVal) {
     const h = String(i).padStart(2, '0');
     return { value: `${h}:00`, label: `${h}:00` };
   });
-  const currentVal = document.getElementById('set-quiet-end').value;
-  _showPickerSheet('Quiet hours (End)', options, currentVal, (val) => {
+  const currentEndVal = document.getElementById('set-quiet-end').value;
+  const currentStartVal = document.getElementById('set-quiet-start').value;
+
+  _showPickerSheet('Quiet hours (End)', options, currentEndVal, (val) => {
+    if (val === currentEndVal && startVal === currentStartVal) return;
     document.getElementById('set-quiet-end').value = val;
     document.getElementById('quiet-hours-display').textContent = `${startVal} — ${val}`;
     saveSetting('quiet_hours', { quiet_start: startVal, quiet_end: val });
@@ -276,6 +281,7 @@ export async function switchLanguage(lang) {
 }
 
 export function setPracticeMode(mode) {
+  if (state.practiceMode === mode) return;
   state.practiceMode = mode;
   saveSetting('practice_mode', mode);
   const modeDisplay = document.getElementById('practice-mode-display');

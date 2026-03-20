@@ -175,8 +175,17 @@ export async function shareWords() {
     });
     if (!res.ok) throw new Error(`Error ${res.status}`);
     const text = await res.text();
-    if (navigator.share) await navigator.share({ title: 'SRbot dictionary', text });
-    else { await navigator.clipboard.writeText(text); toast(T.COPIED, 'success'); }
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'SRbot dictionary', text });
+      } catch (e) {
+        if (e.name === 'AbortError') return;
+        throw e;
+      }
+    } else {
+      await navigator.clipboard.writeText(text);
+      toast(T.COPIED, 'success');
+    }
   } catch (e) { toast(T.EXPORT_FAIL, 'error'); }
 }
 
