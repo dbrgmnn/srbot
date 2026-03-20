@@ -2,6 +2,12 @@
 
 A minimalist Telegram Mini App for learning foreign vocabulary using Spaced Repetition (SM-2 algorithm). Designed for personal use on a Raspberry Pi Zero 2W, accessed via Tailscale Funnel.
 
+### Performance & Interaction
+- **Optimized Taps:** Buttons use `touch-action: manipulation` and stable hit areas (no scale effects) for instant response on mobile.
+- **Immediate Haptics:** Tactical feedback triggers on `pointerdown` to feel native.
+- **Swipe Gestures:** SM-2 grading via intuitive swipes (Right: Good, Left: Again, Up: Hard).
+- **Zero-Build:** Pure ESM and CSS variables — refresh the page to see changes.
+
 ## 📁 Project Structure
 
 ```text

@@ -62,10 +62,11 @@ body.no-nav {
   cursor: pointer;
   transition: color .2s, transform .2s;
   border-radius: var(--radius-xl);
+  touch-action: manipulation;
 }
 .nav-btn.active {
   color: rgba(255,255,255,0.92);
-  transform: scale(1.22);
+  transform: scale(1.15);
 }
 .nav-btn svg { width: 22px; height: 22px; }
 
@@ -198,11 +199,13 @@ body.no-nav {
   font-weight: 600;
   cursor: pointer;
   margin-bottom: var(--gap);
-  transition: opacity .15s, transform .1s;
+  transition: opacity .15s;
   letter-spacing: 0.01em;
   box-shadow: 0 2px 12px rgba(0,0,0,0.2), inset 0 1px 0 var(--glass-shine);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
-.btn:active { opacity: .75; transform: scale(0.98); }
+.btn:active { opacity: .7; }
 .btn:disabled { opacity: 0.35; cursor: not-allowed; }
 .btn-secondary {
   background: var(--glass);
@@ -355,10 +358,12 @@ body.no-nav {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: opacity .15s, transform .1s;
+  transition: opacity .15s;
   box-shadow: 0 2px 12px rgba(0,0,0,0.2), inset 0 1px 0 var(--glass-shine);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
-.btn-round:active { opacity: .7; transform: scale(0.96); }
+.btn-round:active { opacity: .7; }
 .btn-round svg { width: 20px; height: 20px; stroke: rgba(255,255,255,0.65); }
 
 /* ── Settings ── */
@@ -381,7 +386,10 @@ body.no-nav {
   padding: 14px 0;
   border-bottom: 1px solid rgba(255,255,255,0.05);
   cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
+.settings-row:active { opacity: 0.6; }
 .settings-row:last-child { border-bottom: none; }
 .settings-label { font-size: 15px; color: var(--text); }
 .settings-row-danger { justify-content: center; }
@@ -626,6 +634,8 @@ mark {
   font-size: 15px;
   cursor: pointer;
   transition: background 0.15s, border-color 0.15s;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 .picker-item:active { opacity: 0.65; }
 .picker-item.selected {
