@@ -264,7 +264,7 @@ body.no-nav {
   justify-content: center;
   perspective: 1200px;
   position: relative;
-  padding: 8px 0;
+  padding: 0;
 }
 .word-card {
   width: 100%;
@@ -331,6 +331,8 @@ body.no-nav {
   display: flex;
   justify-content: center;
   width: 100%;
+  margin-top: 48px;
+  flex-shrink: 0;
 }
 .practice-footer-row {
   display: flex;
