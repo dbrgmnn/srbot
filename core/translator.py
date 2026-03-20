@@ -69,6 +69,13 @@ Return JSON only: {{"word": "", "translation": "", "example": "", "level": "", "
     async def get_hint(self, word: str, translation: str, example: str, lang: str) -> dict | None:
         lang_name = LANGUAGES.get(lang, {}).get("name", lang)
 
+        if lang == 'de':
+            pos_example = '"Substantiv", "Verb", "Adjektiv", "Adverb"'
+            forms_note = 'for nouns \u2014 plural form with article (e.g. "die Hunde"). For verbs \u2014 Pr\u00e4teritum and Partizip II (e.g. "ging, ist gegangen"). For adjectives \u2014 m/f/n forms (e.g. "schnell, schnelle, schnelles"). Empty string for adverbs.'
+        else:
+            pos_example = '"Noun", "Verb", "Adjective", "Adverb"'
+            forms_note = 'for nouns \u2014 plural form (e.g. "dogs"). For verbs \u2014 Past Simple and Past Participle (e.g. "went, gone"). For adjectives \u2014 comparative and superlative (e.g. "fast, faster, fastest"). Empty string for adverbs.'
+
         prompt = f"""You are a language learning assistant. Return a short reference for a {lang_name} word.
 
 Word: {word}
@@ -76,11 +83,11 @@ Translation (Russian): {translation}
 Example: {example or 'none'}
 
 Return JSON:
-- pos: part of speech in {lang_name} (e.g. "Substantiv", "Verb", "Adjektiv", "Adverb"). Use the target language.
-- gender: for nouns — article + noun plural form (e.g. "der, die Hunde"). For verbs — Präteritum and Partizip II (e.g. "ging, ist gegangen"). Empty string for adjectives/adverbs.
+- pos: part of speech in {lang_name} (e.g. {pos_example}). Use the target language.
+- forms: {forms_note}
 - mnemonic: a short memorable association in Russian, max 1 sentence. Must be concrete and tied to the sound or meaning of the word.
 
-JSON only: {{"pos": "", "gender": "", "mnemonic": ""}}"""
+JSON only: {{"pos": "", "forms": "", "mnemonic": ""}}"""
 
         payload = {
             "contents": [{"parts": [{"text": prompt}]}],

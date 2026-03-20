@@ -257,11 +257,10 @@ body.no-nav {
   flex: 1;
   min-height: 0;
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: center;
   perspective: 1200px;
   position: relative;
-  padding-bottom: 16px;
 }
 .word-card {
   width: 100%;
@@ -340,7 +339,9 @@ body.no-nav {
 .practice-footer-row {
   display: flex;
   justify-content: center;
-  gap: 16px;
+  gap: 32px;
+  width: 100%;
+  max-width: 320px;
 }
 .btn-round {
   width: 52px;
@@ -361,6 +362,7 @@ body.no-nav {
 .btn-round svg { width: 20px; height: 20px; stroke: rgba(255,255,255,0.65); }
 .practice-undo-row {
   width: 100%;
+  max-width: 320px;
   height: 54px;
   padding-top: 10px;
   opacity: 0;
@@ -698,11 +700,16 @@ mark {
   font-size: 13px;
   color: var(--hint);
   letter-spacing: 0.02em;
-  margin-bottom: 16px;
+  margin-bottom: 0;
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
   justify-content: center;
+}
+.hint-divider {
+  height: 1px;
+  background: rgba(255,255,255,0.07);
+  margin: 14px 0;
 }
 .hint-meta-item {
   background: var(--glass);
@@ -716,12 +723,10 @@ mark {
 }
 .hint-mnemonic {
   font-size: 15px;
-  color: var(--text);
+  color: rgba(255,255,255,0.65);
   line-height: 1.6;
-  padding: 14px 16px;
-  background: var(--glass);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-md);
+  text-align: center;
+  padding: 0 4px;
   margin-bottom: 8px;
 }
 
