@@ -61,62 +61,23 @@ class Translator:
             return None
 
     async def translate_and_enrich(self, text: str, source_lang: str) -> dict | None:
-        """Translates a word and provides context-rich metadata."""
+        """Minified translation prompt."""
         lang_name = LANGUAGES.get(source_lang, {}).get("name", source_lang)
-        
-        article_rule = "German nouns: lowercase article + Capitalized noun (e.g. der Hund). Other languages/types: lowercase." if source_lang == "de" else "All words: lowercase."
-        
-        prompt = f"""You are a Senior Linguist and Lexicographer. 
-Translate the input "{text}" from {lang_name} ({source_lang}) to Russian with high precision.
-
-Rules:
-1. DICTIONARY FORM: Always return the lemma/infinitive. {article_rule}
-2. TRANSLATION: Provide the most frequent and useful Russian meaning for a B1-B2 learner.
-3. SEMANTIC EXAMPLE: Create a natural, vivid sentence where the word's meaning is evident from context. Avoid trivial sentences like "I see a..." or "This is a...".
-4. LEVEL: Accurately estimate CEFR level (A1-C2).
-5. VALIDITY: Set "is_valid": false only for non-existent words or gibberish.
-
-Response must be a valid JSON object matching this schema:
-{{"word": "normalized word", "translation": "russian", "example": "context-rich sentence", "level": "A1-C2", "is_valid": true}}"""
-
-        data = await self._call_gemini(prompt)
-        
-        if not data:
-            return None
-            
-        if not data.get("is_valid"):
-            logger.warning(f"Invalid word detected by AI: {text}")
-            return None
-
-        if not data.get("word") or not data.get("translation"):
-            logger.error(f"AI returned incomplete data for '{text}': {data}")
-            return None
-            
-        return data
+        art = " (nouns: article+Capitalized)" if source_lang == "de" else ""
+        prompt = f"""Expert translator. Translate {lang_name} "{text}" to Russian. 
+Rules: 1.Dictionary form{art}. 2.Frequent B1-B2 meaning. 3.Vivid context example. 4.CEFR Level.
+Return JSON: {{"word":"", "translation":"", "example":"", "level":"", "is_valid":true}}"""
+        return await self._call_gemini(prompt, max_tokens=256)
 
     async def get_hint(self, word: str, translation: str, lang: str) -> dict | None:
-        """Provides a powerful mnemonic hint for a word using phonetic association."""
+        """Minified mnemonic prompt: sound-bridge to meaning."""
         lang_name = LANGUAGES.get(lang, {}).get("name", lang)
-
-        prompt = f"""You are an expert in mnemonics and language learning. 
-Create a powerful, memorable mnemonic in Russian to help a student remember a {lang_name} word.
-
-Input:
-Word: {word}
-Translation: {translation}
-
-Instruction for Mnemonic:
-1. Link the SOUND of the {lang_name} word to a similar-sounding Russian word (keyword).
-2. Create a vivid, emotional, or absurd mental image connecting that Russian keyword to the actual meaning.
-3. Keep it to ONE concise sentence.
-
-Example (DE): "Hund" (dog) -> "ХУНт — это собака, которая требует фунт мяса".
-Example (EN): "Pillow" (подушка) -> "ПИЛЛОу — ПИЛой ломаю подушку".
-
-Response JSON fields:
-- mnemonic: the generated mnemonic in Russian."""
-
-        return await self._call_gemini(prompt, temperature=0.8, max_tokens=128)
+        prompt = f"""Expert mnemonics. Link {lang_name} "{word}" sound to its Russian "{translation}" meaning.
+Instruction: Create a funny/absurd 1-sentence Russian scene using Russian words that sound like "{word}".
+Example (DE): "Schwangere" (pregnant) -> "ШВАбра ГРЕется на солнце и вдруг забеременела."
+Example (EN): "Salary" (salary) -> "САЛо в АРенду вместо зарплаты."
+Response JSON: {{"mnemonic": ""}}"""
+        return await self._call_gemini(prompt, temperature=0.8, max_tokens=64)
 
     async def close(self):
         """Closes the aiohttp session."""
