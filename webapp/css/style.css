@@ -18,7 +18,7 @@
   --radius-lg:    26px;
   --radius-xl:    50px;
 
-  --gap:          12px;
+  --gap:          16px;
   --blur:         blur(28px) saturate(1.8);
 }
 
@@ -362,12 +362,12 @@ body.no-nav {
 .btn-round:active { opacity: .7; }
 .btn-round svg { width: 20px; height: 20px; stroke: rgba(255,255,255,0.65); }
 
-/* ── Settings ── */
-.settings-section-title {
+/* ── Section Titles ── */
+.section-title {
   font-size: 12px;
   text-transform: uppercase;
   color: var(--hint);
-  margin: 20px 0 8px var(--gap);
+  margin: 24px 0 8px var(--gap);
   letter-spacing: 0.07em;
   font-weight: 600;
 }
