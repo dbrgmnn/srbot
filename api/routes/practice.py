@@ -52,7 +52,10 @@ def setup_routes_practice(app: web.Application, db: aiosqlite.Connection):
         # Track activity
         is_new = word["started_at"] is None
         config = request.app["config"]
-        tz_name = request.headers.get("X-Timezone", config.default_timezone)
+        telegram_id = request["telegram_id"]
+        user_repo = UserRepo(db)
+        settings = await user_repo.get_user_settings(telegram_id, word["language"], config)
+        tz_name = settings.get("timezone", config.default_timezone)
         
         await word_repo.increment_daily_stat(user_id, word["language"], is_new, tz_name)
 
@@ -81,7 +84,10 @@ def setup_routes_practice(app: web.Application, db: aiosqlite.Connection):
         if word:
             is_new = int(old_state.get("repetitions", 0)) == 0
             config = request.app["config"]
-            tz_name = request.headers.get("X-Timezone", config.default_timezone)
+            telegram_id = request["telegram_id"]
+            user_repo = UserRepo(db)
+            settings = await user_repo.get_user_settings(telegram_id, word["language"], config)
+            tz_name = settings.get("timezone", config.default_timezone)
             await word_repo.decrement_daily_stat(user_id, word["language"], is_new, tz_name)
 
         await word_repo.undo_word_review(

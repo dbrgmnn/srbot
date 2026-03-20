@@ -69,8 +69,8 @@ class Translator:
 Rules:
 - word: {lang_name} form. {article_rule}
 - translation: Russian lowercase.
-- example: natural {lang_name} sentence, B1+ level.
-- level: CEFR (A1-C2).
+- level: CEFR level of the word (A1-C2).
+- example: natural {lang_name} sentence using the word. Match complexity to the word's level: simple present tense and basic vocabulary for A1-A2, moderate grammar for B1-B2, complex structures for C1-C2.
 - is_valid: false if input is gibberish, else true.
 
 Return JSON only: {{"word": "", "translation": "", "example": "", "level": "", "is_valid": true}}"""

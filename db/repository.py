@@ -246,18 +246,15 @@ class WordRepo:
             (user_id, w["word"], w["translation"], language, w.get("example"), w.get("level"), now, now)
             for w in words
         ]
-        before_row = await (await self.db.execute("SELECT total_changes()")).fetchone()
-        before = before_row[0] if before_row else 0
         await self.db.executemany(
             """INSERT OR IGNORE INTO words
                 (user_id, word, translation, language, example, level, next_review, created_at)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
             data,
         )
+        row = await (await self.db.execute("SELECT changes()")).fetchone()
         await self.db.commit()
-        after_row = await (await self.db.execute("SELECT total_changes()")).fetchone()
-        after = after_row[0] if after_row else 0
-        return after - before
+        return int(row[0]) if row else 0
 
     async def get_session_words(self, user_id: int, language: str, new_limit: int) -> list[dict]:
         now = datetime.now(tz=timezone.utc).isoformat()
