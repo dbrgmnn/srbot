@@ -198,7 +198,6 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
             hint = await translator.get_hint(
                 word=word["word"],
                 translation=word["translation"],
-                example=word.get("example") or "",
                 lang=word["language"],
             )
         finally:

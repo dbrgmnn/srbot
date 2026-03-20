@@ -79,26 +79,19 @@ Return JSON only: {{"word": "", "translation": "", "example": "", "level": "", "
             
         return data
 
-    async def get_hint(self, word: str, translation: str, example: str, lang: str) -> dict | None:
+    async def get_hint(self, word: str, translation: str, lang: str) -> dict | None:
+        """Provides linguistic hints (POS, forms, mnemonic) for a word."""
         lang_name = LANGUAGES.get(lang, {}).get("name", lang)
 
-        if lang == 'de':
-            pos_example = '"Substantiv", "Verb", "Adjektiv", "Adverb"'
-            forms_note = 'for nouns — plural form with article (e.g. "die Hunde"). For verbs — Pr\u00e4teritum and Partizip II (e.g. "ging, ist gegangen"). For adjectives — comparative and superlative (e.g. "schnell, schnelle, schnelles"). Empty string for adverbs.'
-        else:
-            pos_example = '"Noun", "Verb", "Adjective", "Adverb"'
-            forms_note = 'for nouns — plural form (e.g. "dogs"). For verbs — Past Simple and Past Participle (e.g. "went, gone"). For adjectives — comparative and superlative (e.g. "fast, faster, fastest"). Empty string for adverbs.'
-
-        prompt = f"""You are a language learning assistant. Return a short reference for a {lang_name} word.
+        prompt = f"""You are a language learning assistant. Provide a short linguistic reference for a {lang_name} word.
 
 Word: {word}
 Translation (Russian): {translation}
-Example: {example or 'none'}
 
-Return JSON:
-- pos: part of speech in {lang_name} (e.g. {pos_example}). Use the target language.
-- forms: {forms_note}
-- mnemonic: a short memorable association in Russian, max 1 sentence. Must be concrete and tied to the sound or meaning of the word.
+Return JSON with:
+- pos: part of speech in {lang_name} (e.g. "Substantiv", "Verb", "Noun", "Verb").
+- forms: essential word forms (e.g., plural for nouns, basic conjugations for verbs, or comparative for adjectives).
+- mnemonic: a short memorable association in Russian (max 1 sentence), tied to the word's sound or meaning.
 
 JSON only: {{"pos": "", "forms": "", "mnemonic": ""}}"""
 
