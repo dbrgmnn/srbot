@@ -61,23 +61,25 @@ class Translator:
             return None
 
     async def translate_and_enrich(self, text: str, source_lang: str) -> dict | None:
-        """Minified translation prompt."""
         lang_name = LANGUAGES.get(source_lang, {}).get("name", source_lang)
-        art = " (nouns: article+Capitalized)" if source_lang == "de" else ""
-        prompt = f"""Expert translator. Translate {lang_name} "{text}" to Russian. 
-Rules: 1.Dictionary form{art}. 2.Frequent B1-B2 meaning. 3.Vivid context example. 4.CEFR Level.
-Return JSON: {{"word":"", "translation":"", "example":"", "level":"", "is_valid":true}}"""
+        
+        article_rule = "Nouns: lowercase article + Capitalized noun (e.g. der Hund)." if source_lang == "de" else "All words: lowercase."
+        prompt = f"""Translate "{text}" between {lang_name} ({source_lang}) and Russian.
+
+Rules:
+- word: {lang_name} form. {article_rule}
+- translation: Russian lowercase.
+- example: natural {lang_name} sentence, B1+ level.
+- level: CEFR (A1-C2).
+- is_valid: false if input is gibberish, else true.
+
+Return JSON only: {{"word": "", "translation": "", "example": "", "level": "", "is_valid": true}}"""
+
         return await self._call_gemini(prompt, max_tokens=256)
 
     async def get_hint(self, word: str, translation: str, lang: str) -> dict | None:
-        """Minified mnemonic prompt: sound-bridge to meaning."""
-        lang_name = LANGUAGES.get(lang, {}).get("name", lang)
-        prompt = f"""Expert mnemonics. Link {lang_name} "{word}" sound to its Russian "{translation}" meaning.
-Instruction: Create a funny/absurd 1-sentence Russian scene using Russian words that sound like "{word}".
-Example (DE): "Schwangere" (pregnant) -> "ШВАбра ГРЕется на солнце и вдруг забеременела."
-Example (EN): "Salary" (salary) -> "САЛо в АРенду вместо зарплаты."
-Response JSON: {{"mnemonic": ""}}"""
-        return await self._call_gemini(prompt, temperature=0.8, max_tokens=64)
+        """Placeholder for future hint logic."""
+        return {"mnemonic": "Hint coming soon..."}
 
     async def close(self):
         """Closes the aiohttp session."""
