@@ -270,7 +270,7 @@ body.no-nav {
 .word-card {
   width: 100%;
   max-width: 320px;
-  height: min(420px, 100%);
+  height: 400px;
   background: transparent;
   border-radius: 32px;
   position: relative;
