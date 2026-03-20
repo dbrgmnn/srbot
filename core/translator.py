@@ -9,6 +9,45 @@ class Translator:
     def __init__(self, api_key: str):
         self.api_key = api_key
         self.url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent"
+        self._session = None
+
+    async def _get_session(self) -> aiohttp.ClientSession:
+        """Returns or creates an aiohttp.ClientSession."""
+        if self._session is None or self._session.closed:
+            self._session = aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=15))
+        return self._session
+
+    async def _call_gemini(self, prompt: str, temperature: float = 0.3, max_tokens: int = 512) -> dict | None:
+        """Unified method to call Gemini API and parse JSON response."""
+        payload = {
+            "contents": [{"parts": [{"text": prompt}]}],
+            "generationConfig": {
+                "responseMimeType": "application/json",
+                "temperature": temperature,
+                "maxOutputTokens": max_tokens
+            }
+        }
+
+        try:
+            session = await self._get_session()
+            url_with_key = f"{self.url}?key={self.api_key}"
+            async with session.post(url_with_key, json=payload) as resp:
+                if resp.status != 200:
+                    err_text = await resp.text()
+                    logger.error(f"Gemini API error {resp.status}: {err_text}")
+                    return None
+                
+                result = await resp.json()
+                
+                if 'candidates' not in result or not result['candidates']:
+                    logger.error(f"Gemini returned empty candidates: {result}")
+                    return None
+                    
+                content_text = result['candidates'][0]['content']['parts'][0]['text']
+                return json.loads(content_text)
+        except Exception as e:
+            logger.error(f"Gemini call failed: {e}")
+            return None
 
     async def translate_and_enrich(self, text: str, source_lang: str) -> dict | None:
         lang_name = LANGUAGES.get(source_lang, {}).get("name", source_lang)
@@ -25,56 +64,30 @@ Rules:
 
 Return JSON only: {{"word": "", "translation": "", "example": "", "level": "", "is_valid": true}}"""
 
-        payload = {
-            "contents": [{"parts": [{"text": prompt}]}],
-            "generationConfig": {
-                "responseMimeType": "application/json",
-                "temperature": 0.3,
-                "maxOutputTokens":512
-            }
-        }
-
-        try:
-            async with aiohttp.ClientSession() as session:
-                url_with_key = f"{self.url}?key={self.api_key}"
-                async with session.post(url_with_key, json=payload, timeout=aiohttp.ClientTimeout(total=15)) as resp:
-                    if resp.status != 200:
-                        err_text = await resp.text()
-                        logger.error(f"Gemini API error {resp.status}: {err_text}")
-                        return None
-                    
-                    result = await resp.json()
-                    
-                    if 'candidates' not in result or not result['candidates']:
-                        logger.error(f"Gemini returned empty candidates: {result}")
-                        return None
-                        
-                    content_text = result['candidates'][0]['content']['parts'][0]['text']
-                    data = json.loads(content_text)
-                    
-                    if not data.get("is_valid"):
-                        logger.warning(f"Invalid word detected by AI: {text}")
-                        return None
-
-                    if not data.get("word") or not data.get("translation"):
-                        logger.error(f"AI returned incomplete data for '{text}': {data}")
-                        return None
-                        
-                    return data
-
-        except Exception as e:
-            logger.error(f"Translation error for '{text}': {e}")
+        data = await self._call_gemini(prompt)
+        
+        if not data:
             return None
+            
+        if not data.get("is_valid"):
+            logger.warning(f"Invalid word detected by AI: {text}")
+            return None
+
+        if not data.get("word") or not data.get("translation"):
+            logger.error(f"AI returned incomplete data for '{text}': {data}")
+            return None
+            
+        return data
 
     async def get_hint(self, word: str, translation: str, example: str, lang: str) -> dict | None:
         lang_name = LANGUAGES.get(lang, {}).get("name", lang)
 
         if lang == 'de':
             pos_example = '"Substantiv", "Verb", "Adjektiv", "Adverb"'
-            forms_note = 'for nouns \u2014 plural form with article (e.g. "die Hunde"). For verbs \u2014 Pr\u00e4teritum and Partizip II (e.g. "ging, ist gegangen"). For adjectives \u2014 m/f/n forms (e.g. "schnell, schnelle, schnelles"). Empty string for adverbs.'
+            forms_note = 'for nouns — plural form with article (e.g. "die Hunde"). For verbs — Pr\u00e4teritum and Partizip II (e.g. "ging, ist gegangen"). For adjectives — comparative and superlative (e.g. "schnell, schnelle, schnelles"). Empty string for adverbs.'
         else:
             pos_example = '"Noun", "Verb", "Adjective", "Adverb"'
-            forms_note = 'for nouns \u2014 plural form (e.g. "dogs"). For verbs \u2014 Past Simple and Past Participle (e.g. "went, gone"). For adjectives \u2014 comparative and superlative (e.g. "fast, faster, fastest"). Empty string for adverbs.'
+            forms_note = 'for nouns — plural form (e.g. "dogs"). For verbs — Past Simple and Past Participle (e.g. "went, gone"). For adjectives — comparative and superlative (e.g. "fast, faster, fastest"). Empty string for adverbs.'
 
         prompt = f"""You are a language learning assistant. Return a short reference for a {lang_name} word.
 
@@ -89,39 +102,9 @@ Return JSON:
 
 JSON only: {{"pos": "", "forms": "", "mnemonic": ""}}"""
 
-        payload = {
-            "contents": [{"parts": [{"text": prompt}]}],
-            "generationConfig": {
-                "responseMimeType": "application/json",
-                "temperature": 0.7,
-                "maxOutputTokens": 256
-            }
-        }
+        return await self._call_gemini(prompt, temperature=0.7, max_tokens=256)
 
-        try:
-            async with aiohttp.ClientSession() as session:
-                url_with_key = f"{self.url}?key={self.api_key}"
-                async with session.post(url_with_key, json=payload, timeout=aiohttp.ClientTimeout(total=15)) as resp:
-                    if resp.status != 200:
-                        err_text = await resp.text()
-                        logger.error(f"Gemini hint error {resp.status}: {err_text}")
-                        return None
-
-                    result = await resp.json()
-
-                    if 'candidates' not in result or not result['candidates']:
-                        logger.error(f"Gemini hint returned empty candidates: {result}")
-                        return None
-
-                    content_text = result['candidates'][0]['content']['parts'][0]['text']
-                    data = json.loads(content_text)
-
-                    if not data.get("mnemonic"):
-                        logger.error(f"Hint incomplete for '{word}': {data}")
-                        return None
-
-                    return data
-
-        except Exception as e:
-            logger.error(f"Hint error for '{word}': {e}")
-            return None
+    async def close(self):
+        """Closes the aiohttp session."""
+        if self._session and not self._session.closed:
+            await self._session.close()

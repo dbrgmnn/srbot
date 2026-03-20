@@ -61,7 +61,10 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
             return web.json_response({"ok": False, "error": "no_gemini_api_key"}, status=400)
         
         translator = Translator(config.gemini_api_key)
-        ai_data = await translator.translate_and_enrich(raw_word, lang)
+        try:
+            ai_data = await translator.translate_and_enrich(raw_word, lang)
+        finally:
+            await translator.close()
         
         if not ai_data:
             return web.json_response({"ok": False, "error": "ai_translation_failed"}, status=422)
@@ -191,12 +194,15 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
             return web.json_response({"ok": False, "error": "not_found"}, status=404)
 
         translator = Translator(config.gemini_api_key)
-        hint = await translator.get_hint(
-            word=word["word"],
-            translation=word["translation"],
-            example=word.get("example") or "",
-            lang=word["language"],
-        )
+        try:
+            hint = await translator.get_hint(
+                word=word["word"],
+                translation=word["translation"],
+                example=word.get("example") or "",
+                lang=word["language"],
+            )
+        finally:
+            await translator.close()
 
         if not hint:
             return web.json_response({"ok": False, "error": "hint_failed"}, status=422)
