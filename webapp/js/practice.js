@@ -308,7 +308,7 @@ export async function triggerHint() {
       const metaEl = document.getElementById('hint-meta');
       const mnemonicEl = document.getElementById('hint-mnemonic');
       if (metaEl) metaEl.innerHTML = '';
-      if (mnemonicEl) mnemonicEl.textContent = 'Не удалось загрузить подсказку.';
+      if (mnemonicEl) mnemonicEl.textContent = 'Failed to load hint.';
     }
   }
 }
