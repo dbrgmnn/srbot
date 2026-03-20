@@ -129,6 +129,14 @@ body.no-nav {
   box-shadow: 0 4px 20px rgba(0,0,0,0.2), inset 0 1px 0 var(--glass-shine);
 }
 .settings-group { padding: 0 16px; margin-bottom: 8px; }
+/* ── Stats grid ── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--gap);
+  margin-bottom: var(--gap);
+}
+
 .stat-card { text-align: center; margin-bottom: 0; }
 .card-title {
   font-size: 11px;
