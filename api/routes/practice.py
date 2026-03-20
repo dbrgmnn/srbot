@@ -50,7 +50,7 @@ def setup_routes_practice(app: web.Application, db: aiosqlite.Connection):
             return web.json_response({"ok": False, "error": "invalid_grade"}, status=400)
 
         # Track activity
-        is_new = int(word["repetitions"]) == 0
+        is_new = word["started_at"] is None
         config = request.app["config"]
         tz_name = request.headers.get("X-Timezone", config.default_timezone)
         
