@@ -14,7 +14,6 @@ let isGrading = false;
 let isSwiping = false;
 let pointerStartX = 0, pointerStartY = 0, pointerStartTime = 0;
 let rafId = null;
-let hintCache = {};
 
 // ── Session ───────────────────────────────────────────────────────────────────
 
@@ -27,7 +26,6 @@ export async function startPractice() {
     sessionIdx = 0;
     sessionStats = { good: 0, hard: 0, again: 0 };
     practiceHistory = [];
-    hintCache = {};
     showScreen('practice');
     initSwipe();
     renderWord();
@@ -145,8 +143,8 @@ function renderWord() {
     return;
   }
 
-  const undoRow = document.getElementById('practice-undo-row');
-  if (undoRow) undoRow.classList.toggle('visible', practiceHistory.length > 0);
+  const btnUndo = document.getElementById('btn-undo');
+  if (btnUndo) btnUndo.style.visibility = practiceHistory.length > 0 ? 'visible' : 'hidden';
 
   const word = sessionWords[sessionIdx];
   const progEl = document.getElementById('practice-progress');
@@ -287,66 +285,6 @@ function toastSession(good, hard, again) {
     el.classList.remove('show');
     setTimeout(() => { el.innerHTML = ''; }, 300);
   }, 3000);
-}
-
-// ── Hint ─────────────────────────────────────────────────────────────────────
-
-export async function triggerHint() {
-  const word = sessionWords[sessionIdx];
-  if (!word) return;
-
-  tg.HapticFeedback.impactOccurred('medium');
-
-  // show sheet immediately with loader, fetch in background
-  const titleEl = document.getElementById('hint-word-title');
-  const loaderEl = document.getElementById('hint-loader');
-  const contentEl = document.getElementById('hint-content');
-  if (titleEl) titleEl.textContent = word.word;
-  if (loaderEl) loaderEl.style.display = 'flex';
-  if (contentEl) contentEl.style.display = 'none';
-
-  document.getElementById('hint-overlay').classList.add('open');
-  document.getElementById('hint-sheet').classList.add('open');
-  window._lockScroll();
-
-  // serve from cache if available
-  if (hintCache[word.id]) {
-    renderHintContent(hintCache[word.id]);
-    return;
-  }
-
-  try {
-    const data = await GET(`/api/hint?word_id=${word.id}`);
-    hintCache[word.id] = data.result;
-    renderHintContent(data.result);
-  } catch (e) {
-    console.error('Hint failed', e);
-    if (loaderEl) loaderEl.style.display = 'none';
-    if (contentEl) {
-      contentEl.style.display = 'block';
-      const metaEl = document.getElementById('hint-meta');
-      const mnemonicEl = document.getElementById('hint-mnemonic');
-      if (metaEl) metaEl.innerHTML = '';
-      if (mnemonicEl) mnemonicEl.textContent = 'Failed to load hint.';
-    }
-  }
-}
-
-function renderHintContent(hint) {
-  const loaderEl = document.getElementById('hint-loader');
-  const contentEl = document.getElementById('hint-content');
-  const mnemonicEl = document.getElementById('hint-mnemonic');
-
-  if (mnemonicEl) mnemonicEl.textContent = hint.mnemonic || '';
-
-  if (loaderEl) loaderEl.style.display = 'none';
-  if (contentEl) contentEl.style.display = 'block';
-}
-
-export function closeHint() {
-  document.getElementById('hint-overlay').classList.remove('open');
-  document.getElementById('hint-sheet').classList.remove('open');
-  window._unlockScroll();
 }
 
 // ── Exit ─────────────────────────────────────────────────────────────────────

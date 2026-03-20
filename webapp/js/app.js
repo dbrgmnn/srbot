@@ -1,6 +1,6 @@
 import { loadHome, showScreen } from './ui.js';
 import { toast, T } from './toast.js';
-import { startPractice, exitPractice, undo, playAudio, closeHint, triggerHint } from './practice.js';
+import { startPractice, exitPractice, undo, playAudio } from './practice.js';
 import { submitWords, handleFileUpload, onSearchInput, clearSearch, saveEdit, closeEdit, clearAllWords, shareWords } from './dictionary.js';
 import { loadSettings, preloadDefaultWords, openPicker, closePicker } from './settings.js';
 
@@ -18,8 +18,6 @@ window.startPractice   = startPractice;
 window.exitPractice    = exitPractice;
 window.undo            = undo;
 window.playAudio       = playAudio;
-window.closeHint       = closeHint;
-window.triggerHint     = triggerHint;
 // dictionary
 window.submitWords     = submitWords;
 window.handleFileUpload = handleFileUpload;

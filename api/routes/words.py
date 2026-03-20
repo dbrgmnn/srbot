@@ -189,39 +189,6 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         response.headers["Content-Disposition"] = f'attachment; filename="words_{lang}.csv"'
         return response
 
-    async def get_hint(request: web.Request) -> web.Response:
-        """Generate a mnemonic hint for a word using Gemini AI."""
-        user_id = request["user_id"]
-        config = request.app["config"]
-
-        if not config.gemini_api_key:
-            return web.json_response({"ok": False, "error": "no_gemini_api_key"}, status=400)
-
-        try:
-            word_id = int(request.query.get("word_id", ""))
-        except (ValueError, TypeError):
-            return web.json_response({"ok": False, "error": "invalid_id"}, status=400)
-
-        word_repo = WordRepo(db)
-        word = await word_repo.get_word(word_id, user_id)
-        if not word:
-            return web.json_response({"ok": False, "error": "not_found"}, status=404)
-
-        translator = Translator(config.gemini_api_key)
-        try:
-            hint = await translator.get_hint(
-                word=word["word"],
-                translation=word["translation"],
-                lang=word["language"],
-            )
-        finally:
-            await translator.close()
-
-        if not hint:
-            return web.json_response({"ok": False, "error": "hint_failed"}, status=422)
-
-        return web.json_response({"ok": True, "result": hint})
-
     async def preload_words(request: web.Request) -> web.Response:
         """Load and add words from a pre-defined CSV file for the current language."""
         user_id = request["user_id"]
@@ -248,7 +215,6 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
     app.router.add_post("/api/words/preload", preload_words)
     app.router.add_get("/api/words/export", export_words)
     app.router.add_get("/api/words/search", search_words)
-    app.router.add_get("/api/hint", get_hint)
     app.router.add_delete("/api/words/all", delete_all_words)
     app.router.add_patch("/api/words/{word_id}", patch_word)
     app.router.add_delete("/api/words/{word_id}", delete_word)

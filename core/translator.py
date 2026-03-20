@@ -79,10 +79,6 @@ Return JSON only: {{"word": "", "translation": "", "example": "", "level": "", "
 
         return await self._call_gemini(prompt, max_tokens=256)
 
-    async def get_hint(self, word: str, translation: str, lang: str) -> dict | None:
-        """Placeholder — hint generation not yet implemented."""
-        return {"mnemonic": "Hint coming soon..."}
-
     async def close(self):
         """Close the aiohttp session."""
         if self._session and not self._session.closed:

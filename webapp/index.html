@@ -93,17 +93,11 @@
           <button class="btn-round" onclick="exitPractice()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
+          <button id="btn-undo" class="btn-round" onclick="undo()" style="visibility: hidden;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.95"/></svg>
+          </button>
           <button class="btn-round" onclick="playAudio(event)">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
-          </button>
-          <button class="btn-round" onclick="triggerHint()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-          </button>
-        </div>
-        <div class="practice-undo-row" id="practice-undo-row">
-          <button id="btn-undo" class="btn-undo-wide" onclick="undo()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.95"/></svg>
-            Undo
           </button>
         </div>
       </div>
@@ -236,18 +230,6 @@
     <input type="hidden" id="edit-level" value="">
     <button id="edit-save-btn" class="btn" onclick="saveEdit()">Save</button>
     <button class="btn btn-secondary" onclick="closeEdit()">Cancel</button>
-  </div>
-
-  <!-- Hint Sheet -->
-  <div id="hint-overlay" class="edit-overlay" onclick="closeHint()"></div>
-  <div id="hint-sheet" class="edit-sheet">
-    <div class="edit-sheet-title" id="hint-word-title"></div>
-    <div id="hint-body">
-      <div id="hint-loader" class="hint-loader"><span></span><span></span><span></span></div>
-      <div id="hint-content" style="display:none">
-        <div id="hint-mnemonic" class="hint-mnemonic"></div>
-      </div>
-    </div>
   </div>
 
   <!-- Universal Picker Sheet -->
