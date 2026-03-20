@@ -116,7 +116,7 @@ JSON only: {{"pos": "", "forms": "", "mnemonic": ""}}"""
                     content_text = result['candidates'][0]['content']['parts'][0]['text']
                     data = json.loads(content_text)
 
-                    if not data.get("mnemonic") or not data.get("pos"):
+                    if not data.get("mnemonic"):
                         logger.error(f"Hint incomplete for '{word}': {data}")
                         return None
 

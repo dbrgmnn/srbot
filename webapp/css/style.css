@@ -76,7 +76,7 @@ body.no-nav {
   padding: 0;
   position: fixed;
   inset: 0;
-  height: 100dvh;
+  height: 100%;
   overflow: hidden;
 }
 
