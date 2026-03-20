@@ -59,7 +59,7 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         config = request.app["config"]
 
         # Check for duplicate before calling AI
-        match = await word_repo.get_word_by_term(user_id, lang, raw_word)
+        match = await word_repo.get_word_by_text(user_id, lang, raw_word)
         if match:
             return web.json_response({"ok": True, "result": {"added": 0, "status": "duplicate", "word": match["word"], "translation": match["translation"], "example": match.get("example"), "level": match.get("level"), "language": lang}})
 
@@ -82,7 +82,7 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         level = ai_data["level"]
 
         # Check again using AI-normalized lemma
-        match = await word_repo.get_word_by_term(user_id, lang, word)
+        match = await word_repo.get_word_by_text(user_id, lang, word)
         if match:
             return web.json_response({"ok": True, "result": {"added": 0, "status": "duplicate", "word": match["word"], "translation": match["translation"], "example": match.get("example"), "level": match.get("level"), "language": lang}})
 
@@ -156,7 +156,7 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         return web.json_response({"ok": True})
 
     async def search_words(request: web.Request) -> web.Response:
-        """Search words by term or translation for the current user and language."""
+        """Search words by word or translation for the current user and language."""
         user_id = request["user_id"]
         lang = request['language']
         query = request.query.get("q", "")
@@ -175,7 +175,7 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         writer = csv.writer(output)
         
         # Headers match load_csv_words expected format
-        writer.writerow(['term', 'translation', 'example', 'level'])
+        writer.writerow(['word', 'translation', 'example', 'level'])
         
         for w in words:
             writer.writerow([

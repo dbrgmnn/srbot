@@ -45,7 +45,7 @@ Frontend changes in `webapp/` are served immediately — no build step needed.
 ## 🛠 User Guide
 
 ### Word Management
-- **Add tab:** Enter word, translation, optional example and level (A1–C2). Or upload a CSV with headers `term,translation,example,level`.
+- **Add tab:** Enter word, translation, optional example and level (A1–C2). Or upload a CSV with headers `word,translation,example,level`.
 - **Search tab:** Search from 2 characters with instant highlighting. Tap to edit, swipe/tap ✕ to delete.
 
 ### Practice Session

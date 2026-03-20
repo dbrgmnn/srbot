@@ -253,7 +253,7 @@ class WordRepo:
         with open(path, encoding="utf-8", newline="") as f:
             reader = csv.DictReader(f)
             for row in reader:
-                word = (row.get("term") or "").strip()
+                word = (row.get("word") or "").strip()
                 translation = (row.get("translation") or "").strip()
                 if not word or not translation:
                     continue
@@ -418,7 +418,7 @@ class WordRepo:
         await self.db.commit()
 
     async def search_words(self, user_id: int, language: str, query: str) -> list[dict]:
-        """Search for words in the user's dictionary by term or translation."""
+        """Search for words in the user's dictionary by word or translation."""
         q = f"%{query}%"
         cursor = await self.db.execute(
             """SELECT id, word, translation, example, level FROM words
@@ -499,7 +499,7 @@ class WordRepo:
         rows = await cursor.fetchall()
         return [{"date": row["day"], "count": row["count"]} for row in rows]
 
-    async def get_word_by_term(self, user_id: int, language: str, word: str) -> dict | None:
+    async def get_word_by_text(self, user_id: int, language: str, word: str) -> dict | None:
         """Retrieve a word by its term (case-insensitive)."""
         cursor = await self.db.execute(
             """SELECT id, word, translation, example, level FROM words
