@@ -215,7 +215,7 @@ body.no-nav {
   display: flex;
   flex-direction: column;
   height: 100%;
-  padding: calc(var(--gap) + env(safe-area-inset-top)) var(--gap) 0;
+  padding: calc(var(--gap) + env(safe-area-inset-top)) var(--gap) calc(var(--gap) + env(safe-area-inset-bottom));
   box-sizing: border-box;
 }
 .practice-header {
@@ -265,7 +265,7 @@ body.no-nav {
 .word-card {
   width: 100%;
   max-width: 320px;
-  height: min(380px, 55vh);
+  height: min(340px, 46vh);
   background: transparent;
   border-radius: 32px;
   position: relative;
@@ -338,15 +338,14 @@ body.no-nav {
 }
 .practice-footer-row {
   display: flex;
-  justify-content: center;
-  gap: 32px;
+  gap: 10px;
   width: 100%;
   max-width: 320px;
 }
 .btn-round {
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
+  flex: 1;
+  height: 50px;
+  border-radius: var(--radius-md);
   border: 1px solid var(--glass-border);
   background: var(--glass);
   backdrop-filter: var(--blur);
@@ -358,7 +357,7 @@ body.no-nav {
   transition: opacity .15s, transform .1s;
   box-shadow: 0 2px 12px rgba(0,0,0,0.2), inset 0 1px 0 var(--glass-shine);
 }
-.btn-round:active { opacity: .7; transform: scale(0.94); }
+.btn-round:active { opacity: .7; transform: scale(0.96); }
 .btn-round svg { width: 20px; height: 20px; stroke: rgba(255,255,255,0.65); }
 .practice-undo-row {
   width: 100%;
