@@ -197,7 +197,7 @@ async function loadSearch(q) {
   try {
     const data = await GET(`/api/words/search?q=${encodeURIComponent(q)}`);
     el.innerHTML = data.result.words.map(w => `
-      <div class="word-row" id="wr-${w.id}">
+      <div class="word-row" id="wr-${w.id}" style="border-bottom: 1px solid rgba(255,255,255,0.08)">
         <div class="word-row-content" data-word='${JSON.stringify(w).replace(/'/g, "&apos;")}'>
           <div class="word-row-text">
             ${highlight(w.word, q)}
