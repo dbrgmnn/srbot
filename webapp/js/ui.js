@@ -171,13 +171,6 @@ export async function loadHome() {
     if (statDue) statDue.textContent = due;
     if (statNew) statNew.textContent = availableNew;
 
-    const flagEl = document.getElementById('header-flag');
-    const langEl = document.getElementById('header-lang');
-    const countEl = document.getElementById('header-count');
-    if (flagEl) flagEl.textContent = init.lang_flag || '';
-    if (langEl) langEl.textContent = init.lang_name || (settings.language || '').toUpperCase();
-    if (countEl) countEl.textContent = stats.total || 0;
-
     updateCountdowns();
     if (!countdownInterval) {
       countdownInterval = setInterval(updateCountdowns, 30000);
@@ -198,10 +191,3 @@ export async function loadHome() {
     renderHeatmap(init.heatmap || []);
   } catch (e) { console.error('LoadHome failed', e); }
 }
-
-window._refreshHome = async () => {
-  const capsule = document.getElementById('header-flag')?.closest('.header-capsule');
-  if (capsule) capsule.style.opacity = '0.5';
-  await loadHome();
-  if (capsule) capsule.style.opacity = '';
-};

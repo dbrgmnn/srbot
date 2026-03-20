@@ -83,17 +83,17 @@ body.no-nav {
 
 /* ── Header ── */
 .header {
-  padding: 16px var(--gap) 20px;
+  padding: 12px var(--gap) 16px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  min-height: 60px;
+  justify-content: center;
+  min-height: 44px;
 }
 .header-title {
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--text);
-  letter-spacing: -0.3px;
+  font-size: 15px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.45);
+  letter-spacing: 0.02em;
 }
 .header-centered { justify-content: center; }
 .header-capsule {
@@ -113,9 +113,6 @@ body.no-nav {
 }
 .header-capsule:active { opacity: 0.7; }
 .header-count { opacity: 0.5; }
-.header-title-add { margin-bottom: 24px; }
-
-.header-title-spaced { margin-bottom: 24px; display: block; }
 
 /* ── Cards ── */
 .card, .stat-card, .settings-group {
