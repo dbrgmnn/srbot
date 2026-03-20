@@ -111,13 +111,14 @@ body.no-nav {
   -webkit-backdrop-filter: var(--blur);
   cursor: pointer;
 }
+.header-capsule:active { opacity: 0.7; }
 .header-count { opacity: 0.5; }
 .header-title-add { margin-bottom: 24px; }
 
 .header-title-spaced { margin-bottom: 24px; display: block; }
 
 /* ── Cards ── */
-.card {
+.card, .stat-card, .settings-group {
   background: var(--glass);
   backdrop-filter: var(--blur);
   -webkit-backdrop-filter: var(--blur);
@@ -127,6 +128,8 @@ body.no-nav {
   margin-bottom: var(--gap);
   box-shadow: 0 4px 20px rgba(0,0,0,0.2), inset 0 1px 0 var(--glass-shine);
 }
+.settings-group { padding: 0 16px; margin-bottom: 8px; }
+.stat-card { text-align: center; margin-bottom: 0; }
 .card-title {
   font-size: 11px;
   text-transform: uppercase;
@@ -134,26 +137,6 @@ body.no-nav {
   color: var(--hint);
   margin-bottom: 12px;
   font-weight: 600;
-}
-
-/* ── Stats grid ── */
-.stats-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--gap);
-  margin-bottom: var(--gap);
-}
-
-
-.stat-card {
-  background: var(--glass);
-  backdrop-filter: var(--blur);
-  -webkit-backdrop-filter: var(--blur);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-md);
-  padding: 16px;
-  text-align: center;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.15), inset 0 1px 0 var(--glass-shine);
 }
 .stat-icon { font-size: 20px; margin-bottom: 6px; }
 .stat-val { font-size: 30px; font-weight: 700; letter-spacing: -0.5px; }
@@ -227,20 +210,38 @@ body.no-nav {
   align-items: center;
   margin-bottom: 16px;
 }
-.practice-badge {
-  padding: 5px 12px;
+.practice-badge, .word-level-badge, .word-row-level {
+  padding: 4px 12px;
   border-radius: var(--radius-xl);
   text-transform: uppercase;
   font-weight: 700;
   font-size: 10px;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
   border: 1px solid var(--glass-border);
   backdrop-filter: var(--blur);
   -webkit-backdrop-filter: var(--blur);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
 }
 .practice-badge-new    { background: rgba(48,209,88,0.12);  color: #30d158; }
 .practice-badge-review { background: rgba(10,132,255,0.12); color: #64b5f6; }
 .practice-badge-info   { background: var(--glass);          color: var(--hint); }
+
+/* Overrides for specific placements */
+.word-level-badge {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: var(--glass);
+  color: var(--hint);
+}
+.word-row-level {
+  background: var(--glass);
+  color: var(--hint);
+  padding: 4px 12px;
+}
 
 .progress-track {
   height: 4px;
@@ -308,19 +309,6 @@ body.no-nav {
   padding: 32px;
   text-align: center;
   z-index: 1;
-}
-.word-level-badge {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  background: var(--glass);
-  border: 1px solid var(--glass-border);
-  padding: 4px 10px;
-  border-radius: var(--radius-sm);
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--hint);
-  letter-spacing: 0.04em;
 }
 .word-back  { transform: rotateY(180deg); }
 .word-main  { font-size: 22px; font-weight: 800; color: var(--text); letter-spacing: -0.5px; }
@@ -431,17 +419,6 @@ body.no-nav {
   align-items: center;
   gap: 8px;
 }
-.word-row-level {
-  font-size: 10px;
-  background: var(--glass);
-  border: 1px solid var(--glass-border);
-  padding: 2px 6px;
-  border-radius: var(--radius-sm);
-  color: var(--hint);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
 .word-row-trans { font-size: 14px; color: var(--hint); }
 .del-btn {
   background: none;
@@ -492,7 +469,7 @@ body.no-nav .toast { bottom: calc(28px + env(safe-area-inset-bottom)); }
   gap: 2px;
   margin-bottom: 24px;
 }
-.add-form .edit-input { margin-bottom: 8px; }
+.add-form .form-input { margin-bottom: 8px; }
 
 /* ── Edit / Picker sheets ── */
 .edit-sheet-title {
