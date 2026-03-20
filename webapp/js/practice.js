@@ -316,15 +316,8 @@ export async function triggerHint() {
 function renderHintContent(hint) {
   const loaderEl = document.getElementById('hint-loader');
   const contentEl = document.getElementById('hint-content');
-  const metaEl = document.getElementById('hint-meta');
   const mnemonicEl = document.getElementById('hint-mnemonic');
 
-  const metaItems = [hint.pos, hint.forms].filter(Boolean);
-  if (metaEl) {
-    metaEl.innerHTML = metaItems.length
-      ? metaItems.map(s => `<span class="hint-meta-item">${s}</span>`).join('')
-      : '';
-  }
   if (mnemonicEl) mnemonicEl.textContent = hint.mnemonic || '';
 
   if (loaderEl) loaderEl.style.display = 'none';

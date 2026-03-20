@@ -91,21 +91,19 @@ Response must be a valid JSON object matching the schema."""
         return data
 
     async def get_hint(self, word: str, translation: str, lang: str) -> dict | None:
-        """Provides linguistic hints (POS, forms, mnemonic) for a word."""
+        """Provides a mnemonic hint for a word."""
         lang_name = LANGUAGES.get(lang, {}).get("name", lang)
 
-        prompt = f"""You are a language learning assistant. Provide a short linguistic reference for a {lang_name} word.
+        prompt = f"""You are a language learning assistant. Provide a mnemonic for a {lang_name} word.
 
 Input:
 Word: {word}
 Translation (Russian): {translation}
 
 Response JSON fields:
-- pos: part of speech in {lang_name} (e.g. "Substantiv", "Verb", "Noun").
-- forms: essential word forms (e.g., plural for nouns, basic conjugations for verbs).
 - mnemonic: a short memorable association in Russian (max 1 sentence), tied to the word's sound or meaning."""
 
-        return await self._call_gemini(prompt, temperature=0.7, max_tokens=256)
+        return await self._call_gemini(prompt, temperature=0.7, max_tokens=128)
 
     async def close(self):
         """Closes the aiohttp session."""
