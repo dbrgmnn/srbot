@@ -64,19 +64,11 @@
   <!-- Screen: Practice -->
   <div id="screen-practice" class="screen">
     <div class="practice-screen-content">
-      <div class="practice-header">
-        <div class="practice-badge practice-badge-info" id="practice-progress">0 / 0</div>
-        <div class="practice-badge practice-badge-new" id="practice-type">New</div>
-      </div>
       
-      <div class="progress-track">
-        <div class="progress-fill" id="practice-bar"></div>
-      </div>
-
       <div class="word-card-container">
         <div id="word-card" class="word-card">
           <div class="word-face word-front">
-            <div class="word-level-badge" id="word-front-level"></div>
+            <div class="practice-badge" id="practice-type"></div>
             <div class="word-main" id="word-front"></div>
           </div>
           <div class="word-face word-back">
@@ -88,6 +80,9 @@
       </div>
 
       <div class="practice-footer">
+        <div class="practice-info-row">
+          <div class="practice-badge practice-badge-info" id="practice-progress">0 / 0</div>
+        </div>
         <div class="practice-footer-row">
           <button class="btn-round" onclick="exitPractice()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>

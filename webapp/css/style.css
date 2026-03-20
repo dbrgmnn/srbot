@@ -207,14 +207,8 @@ body.no-nav {
   display: flex;
   flex-direction: column;
   height: 100%;
-  padding: calc(env(safe-area-inset-top) + 24px) var(--gap) 0;
+  padding: env(safe-area-inset-top) var(--gap) 0;
   box-sizing: border-box;
-}
-.practice-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
 }
 .practice-badge, .word-level-badge, .word-row-level {
   padding: 4px 12px;
@@ -235,13 +229,12 @@ body.no-nav {
 .practice-badge-review { background: rgba(10,132,255,0.12); color: #64b5f6; }
 .practice-badge-info   { background: var(--glass);          color: var(--hint); }
 
-/* Overrides for specific placements */
-.word-level-badge {
+/* Badge positioning inside cards */
+.word-face .practice-badge, 
+.word-face .word-level-badge {
   position: absolute;
   top: 20px;
   right: 20px;
-  background: var(--glass);
-  color: var(--hint);
 }
 .word-row-level {
   background: var(--glass);
@@ -331,8 +324,13 @@ body.no-nav {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0;
+  gap: 16px;
   flex-shrink: 0;
+}
+.practice-info-row {
+  display: flex;
+  justify-content: center;
+  width: 100%;
 }
 .practice-footer-row {
   display: flex;
