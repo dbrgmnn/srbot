@@ -61,19 +61,23 @@ class Translator:
             return None
 
     async def translate_and_enrich(self, text: str, source_lang: str) -> dict | None:
+        """Translates a word and provides context-rich metadata."""
         lang_name = LANGUAGES.get(source_lang, {}).get("name", source_lang)
         
-        article_rule = "Nouns: lowercase article + Capitalized noun (e.g. der Hund). Verbs/adj: lowercase." if source_lang == "de" else "All words: lowercase."
-        prompt = f"""Translate "{text}" between {lang_name} ({source_lang}) and Russian.
+        article_rule = "German nouns: lowercase article + Capitalized noun (e.g. der Hund). Other languages/types: lowercase." if source_lang == "de" else "All words: lowercase."
+        
+        prompt = f"""You are a Senior Linguist and Lexicographer. 
+Translate the input "{text}" from {lang_name} ({source_lang}) to Russian with high precision.
 
-Schema:
-- word: {lang_name} form. {article_rule}
-- translation: Russian lowercase.
-- example: natural {lang_name} sentence, B1+ level.
-- level: CEFR (A1-C2).
-- is_valid: false if input is gibberish, else true.
+Rules:
+1. DICTIONARY FORM: Always return the lemma/infinitive. {article_rule}
+2. TRANSLATION: Provide the most frequent and useful Russian meaning for a B1-B2 learner.
+3. SEMANTIC EXAMPLE: Create a natural, vivid sentence where the word's meaning is evident from context. Avoid trivial sentences like "I see a..." or "This is a...".
+4. LEVEL: Accurately estimate CEFR level (A1-C2).
+5. VALIDITY: Set "is_valid": false only for non-existent words or gibberish.
 
-Response must be a valid JSON object matching the schema."""
+Response must be a valid JSON object matching this schema:
+{{"word": "normalized word", "translation": "russian", "example": "context-rich sentence", "level": "A1-C2", "is_valid": true}}"""
 
         data = await self._call_gemini(prompt)
         
@@ -91,19 +95,28 @@ Response must be a valid JSON object matching the schema."""
         return data
 
     async def get_hint(self, word: str, translation: str, lang: str) -> dict | None:
-        """Provides a mnemonic hint for a word."""
+        """Provides a powerful mnemonic hint for a word using phonetic association."""
         lang_name = LANGUAGES.get(lang, {}).get("name", lang)
 
-        prompt = f"""You are a language learning assistant. Provide a mnemonic for a {lang_name} word.
+        prompt = f"""You are an expert in mnemonics and language learning. 
+Create a powerful, memorable mnemonic in Russian to help a student remember a {lang_name} word.
 
 Input:
 Word: {word}
-Translation (Russian): {translation}
+Translation: {translation}
+
+Instruction for Mnemonic:
+1. Link the SOUND of the {lang_name} word to a similar-sounding Russian word (keyword).
+2. Create a vivid, emotional, or absurd mental image connecting that Russian keyword to the actual meaning.
+3. Keep it to ONE concise sentence.
+
+Example (DE): "Hund" (dog) -> "ХУНт — это собака, которая требует фунт мяса".
+Example (EN): "Pillow" (подушка) -> "ПИЛЛОу — ПИЛой ломаю подушку".
 
 Response JSON fields:
-- mnemonic: a short memorable association in Russian (max 1 sentence), tied to the word's sound or meaning."""
+- mnemonic: the generated mnemonic in Russian."""
 
-        return await self._call_gemini(prompt, temperature=0.7, max_tokens=128)
+        return await self._call_gemini(prompt, temperature=0.8, max_tokens=128)
 
     async def close(self):
         """Closes the aiohttp session."""
