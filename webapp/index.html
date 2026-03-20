@@ -110,10 +110,10 @@
       <div class="header-title header-title-add">Add Word</div>
     </div>
     <div class="add-form">
-      <input type="text" id="add-word" class="edit-input" placeholder="Word">
-      <input type="text" id="add-translation" class="edit-input" placeholder="Translate">
-      <input type="text" id="add-example" class="edit-input" placeholder="Example">
-      <div id="add-level-trigger" class="edit-input picker-trigger" onclick="openPicker('level', 'add')">
+      <input type="text" id="add-word" class="form-input" placeholder="Word">
+      <input type="text" id="add-translation" class="form-input" placeholder="Translate">
+      <input type="text" id="add-example" class="form-input" placeholder="Example">
+      <div id="add-level-trigger" class="form-input picker-trigger" onclick="openPicker('level', 'add')">
         <span id="add-level-display" class="picker-trigger-placeholder">Level</span>
         <span class="picker-trigger-arrow">›</span>
       </div>
@@ -131,7 +131,7 @@
       <div class="header-title header-title-spaced">Dictionary</div>
     </div>
     <div class="search-wrapper">
-      <input type="text" id="search-input" class="search-input" placeholder="Search words..." oninput="onSearchInput(this.value)">
+      <input type="text" id="search-input" class="form-input" placeholder="Search words..." oninput="onSearchInput(this.value)">
       <button class="search-clear" id="search-clear" onclick="clearSearch()" style="display:none">✕</button>
     </div>
     <div id="search-results"></div>
@@ -220,10 +220,10 @@
   <div id="edit-overlay" class="edit-overlay" onclick="closeEdit()"></div>
   <div id="edit-sheet" class="edit-sheet">
     <div class="edit-sheet-title">Edit Word</div>
-    <input type="text" id="edit-word" class="edit-input" placeholder="Word">
-    <input type="text" id="edit-translation" class="edit-input" placeholder="Translate">
-    <input type="text" id="edit-example" class="edit-input" placeholder="Example">
-    <div id="edit-level-trigger" class="edit-input picker-trigger" onclick="openPicker('level', 'edit')">
+    <input type="text" id="edit-word" class="form-input" placeholder="Word">
+    <input type="text" id="edit-translation" class="form-input" placeholder="Translate">
+    <input type="text" id="edit-example" class="form-input" placeholder="Example">
+    <div id="edit-level-trigger" class="form-input picker-trigger" onclick="openPicker('level', 'edit')">
         <span id="edit-level-display" class="picker-trigger-placeholder">Level</span>
         <span class="picker-trigger-arrow">›</span>
     </div>
