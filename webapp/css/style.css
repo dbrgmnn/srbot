@@ -207,7 +207,7 @@ body.no-nav {
   display: flex;
   flex-direction: column;
   height: 100%;
-  padding: env(safe-area-inset-top) var(--gap) env(safe-area-inset-bottom);
+  padding: env(safe-area-inset-top) 20px env(safe-area-inset-bottom);
   box-sizing: border-box;
   justify-content: center;
   gap: 24px;
