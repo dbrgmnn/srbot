@@ -75,6 +75,15 @@ def setup_routes_practice(app: web.Application, db: aiosqlite.Connection):
             return web.json_response({"ok": False, "error": "missing_fields"}, status=400)
 
         word_repo = WordRepo(db)
+
+        # Get current word state to know language and whether it was new
+        word = await word_repo.get_word(word_id, user_id)
+        if word:
+            is_new = int(old_state.get("repetitions", 0)) == 0
+            config = request.app["config"]
+            tz_name = request.headers.get("X-Timezone", config.default_timezone)
+            await word_repo.decrement_daily_stat(user_id, word["language"], is_new, tz_name)
+
         await word_repo.undo_word_review(
             word_id=word_id,
             repetitions=old_state.get("repetitions", 0),

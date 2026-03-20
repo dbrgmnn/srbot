@@ -417,6 +417,18 @@ class WordRepo:
         row = await cursor.fetchone()
         return dict(row) if row else None
 
+    async def decrement_daily_stat(self, user_id: int, language: str, is_new: bool, tz_name: str = "UTC"):
+        tz = _safe_zoneinfo(tz_name, "UTC")
+        local_now = datetime.now(tz=timezone.utc).astimezone(tz)
+        day_str = local_now.strftime("%Y-%m-%d")
+        col = "new_count" if is_new else "review_count"
+        await self.db.execute(
+            f"""UPDATE daily_stats SET {col} = MAX(0, {col} - 1)
+                WHERE user_id = ? AND language = ? AND day = ?""",
+            (user_id, language, day_str),
+        )
+        await self.db.commit()
+
     async def increment_daily_stat(self, user_id: int, language: str, is_new: bool, tz_name: str = "UTC"):
         tz = _safe_zoneinfo(tz_name, "UTC")
         local_now = datetime.now(tz=timezone.utc).astimezone(tz)
