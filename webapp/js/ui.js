@@ -204,5 +204,4 @@ window._refreshHome = async () => {
   if (capsule) capsule.style.opacity = '0.5';
   await loadHome();
   if (capsule) capsule.style.opacity = '';
-  tg.HapticFeedback.impactOccurred('light');
 };

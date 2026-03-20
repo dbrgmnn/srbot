@@ -29,7 +29,6 @@ function _renderIntervalEl(el, val) {
 // ── Universal Picker ──────────────────────────────────────────────────────
 
 export function openPicker(type, context = null) {
-  tg.HapticFeedback.impactOccurred('light');
   if (type === 'language')                      _openLanguagePicker();
   else if (type === 'practice_mode')            _openPracticeModePicker();
   else if (type === 'level')                    _openLevelPicker(context);
@@ -268,7 +267,6 @@ export async function saveSetting(key, val, showToast = true) {
 
 export async function switchLanguage(lang) {
   if (state.currentLang === lang) return;
-  tg.HapticFeedback.impactOccurred('light');
   try {
     setLanguage(lang);
     await POST('/api/settings', { language: lang });
@@ -285,7 +283,6 @@ export function setPracticeMode(mode) {
 }
 
 export async function preloadDefaultWords() {
-  tg.HapticFeedback.impactOccurred('medium');
   tg.showConfirm(`Import default ${state.currentLang.toUpperCase()} pack? Duplicates will be skipped.`, async (ok) => {
     if (!ok) return;
     try {

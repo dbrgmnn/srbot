@@ -35,7 +35,7 @@ window.preloadDefaultWords = preloadDefaultWords;
 // ── Haptics ──────────────────────────────────────────────────────────────────────
 
 function initGlobalHaptics() {
-  const selector = 'button, .nav-btn, .picker-item, .stat-card, .settings-row, .word-row-content, .del-btn, .file-input-label';
+  const selector = 'button, .nav-btn, .picker-item, .settings-row, .word-row-content, .del-btn, .file-input-label, .header-capsule, .picker-trigger';
   document.addEventListener('pointerdown', (e) => {
     if (e.target.closest(selector)) tg.HapticFeedback.impactOccurred('light');
   }, { passive: true });
