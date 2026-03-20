@@ -1,3 +1,7 @@
+"""
+API server setup and lifecycle management.
+Uses aiohttp to serve the web application and API endpoints.
+"""
 import logging
 import json
 from pathlib import Path
@@ -19,7 +23,7 @@ WEBAPP_DIR = Path(__file__).parent.parent / "webapp"
 
 
 async def create_app(config: Config, db: aiosqlite.Connection, scheduler=None) -> web.Application:
-    # CORS for Telegram Mini App
+    """Create and configure the aiohttp web application."""
     @web.middleware
     async def cors_middleware(request: web.Request, handler):
         if request.method == "OPTIONS":
@@ -36,7 +40,7 @@ async def create_app(config: Config, db: aiosqlite.Connection, scheduler=None) -
 
     @web.middleware
     async def auth_middleware(request: web.Request, handler):
-        # skip auth for static files, root, and external api
+        # Skip auth for static files, root, and external api endpoints
         if not request.path.startswith("/api/") or request.path.startswith("/api/external/"):
             return await handler(request)
         
@@ -53,12 +57,12 @@ async def create_app(config: Config, db: aiosqlite.Connection, scheduler=None) -
         if telegram_id not in config.allowed_users:
             return web.json_response({"ok": False, "error": "forbidden"}, status=403)
         
-        # Get language and timezone from headers
+        # Get language from header, fall back to default if unsupported
         lang = request.headers.get("X-Language", config.default_lang).lower()
         if lang not in LANGUAGES:
             lang = config.default_lang
 
-        # Optimization: Check cache first to avoid DB hit on every request
+        # Check cache first to avoid DB hit on every request
         cache_key = (telegram_id, lang)
         if cache_key in request.app["user_cache"]:
             user_id = request.app["user_cache"][cache_key]
@@ -79,14 +83,15 @@ async def create_app(config: Config, db: aiosqlite.Connection, scheduler=None) -
     app["scheduler"] = scheduler
     app["user_cache"] = {}  # (telegram_id, lang) -> user_id
 
-    # register all api routes
     setup_routes_init(app, db)
     setup_routes_words(app, db)
     setup_routes_practice(app, db)
     setup_routes_settings(app, db)
 
-    # serve index.html for root
+    # --- Static files ---
+
     async def index(request: web.Request) -> web.Response:
+        """Serve the main index page."""
         response = web.FileResponse(WEBAPP_DIR / "index.html")
         response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
         response.headers["Pragma"] = "no-cache"
@@ -94,7 +99,8 @@ async def create_app(config: Config, db: aiosqlite.Connection, scheduler=None) -
         return response
 
     async def static_handler(request: web.Request) -> web.Response:
-        # serve static files with no-cache so browser always gets fresh version
+        """Serve static files with no-cache headers."""
+        # No-cache so browser always fetches fresh version after deploy
         rel = request.match_info["path"]
         file_path = WEBAPP_DIR / rel
         if not file_path.exists() or not file_path.is_file():
@@ -111,6 +117,7 @@ async def create_app(config: Config, db: aiosqlite.Connection, scheduler=None) -
 
 
 async def start_api_server(config: Config, db: aiosqlite.Connection, scheduler=None) -> web.AppRunner:
+    """Initialize and start the API server."""
     app = await create_app(config, db, scheduler)
     runner = web.AppRunner(app)
     await runner.setup()

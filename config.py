@@ -1,3 +1,7 @@
+"""
+Configuration management for the SRBot application.
+Handles environment variables and application-wide settings.
+"""
 import os
 from dataclasses import dataclass
 from pathlib import Path
@@ -7,6 +11,7 @@ load_dotenv()
 
 @dataclass
 class Config:
+    """Application configuration container."""
     bot_token: str
     allowed_users: list[int]
     db_path: str
@@ -23,6 +28,7 @@ class Config:
 
 
 def load_config() -> Config:
+    """Load configuration from environment variables."""
     token = os.getenv("BOT_TOKEN")
     if not token:
         raise ValueError("BOT_TOKEN environment variable is not set")

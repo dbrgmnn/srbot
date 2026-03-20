@@ -6,19 +6,20 @@ from core.languages import LANGUAGES
 logger = logging.getLogger(__name__)
 
 class Translator:
+    """Handles interaction with Gemini API for translation and word enrichment."""
     def __init__(self, api_key: str):
         self.api_key = api_key
         self.url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent"
         self._session = None
 
     async def _get_session(self) -> aiohttp.ClientSession:
-        """Returns or creates an aiohttp.ClientSession."""
+        """Return existing session or create a new one."""
         if self._session is None or self._session.closed:
             self._session = aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=15))
         return self._session
 
     async def _call_gemini(self, prompt: str, temperature: float = 0.3, max_tokens: int = 512) -> dict | None:
-        """Unified method to call Gemini API and parse JSON response."""
+        """Call Gemini API and return parsed JSON response."""
         payload = {
             "contents": [{"parts": [{"text": prompt}]}],
             "generationConfig": {
@@ -61,6 +62,7 @@ class Translator:
             return None
 
     async def translate_and_enrich(self, text: str, source_lang: str) -> dict | None:
+        """Translate word and generate example + CEFR level via Gemini."""
         lang_name = LANGUAGES.get(source_lang, {}).get("name", source_lang)
         
         article_rule = "Nouns: lowercase article + Capitalized noun (e.g. der Hund)." if source_lang == "de" else "All words: lowercase."
@@ -78,10 +80,10 @@ Return JSON only: {{"word": "", "translation": "", "example": "", "level": "", "
         return await self._call_gemini(prompt, max_tokens=256)
 
     async def get_hint(self, word: str, translation: str, lang: str) -> dict | None:
-        """Placeholder for future hint logic."""
+        """Placeholder — hint generation not yet implemented."""
         return {"mnemonic": "Hint coming soon..."}
 
     async def close(self):
-        """Closes the aiohttp session."""
+        """Close the aiohttp session."""
         if self._session and not self._session.closed:
             await self._session.close()

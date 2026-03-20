@@ -9,7 +9,8 @@ tg.ready();
 tg.expand();
 tg.isVerticalSwipesEnabled = false;
 
-// Expose functions to window for HTML onclick attributes
+// ── Window bindings (HTML onclick attributes) ────────────────────────────────────
+
 // ui
 window.showScreen = (name) => { showScreen(name); if (name === 'settings') loadSettings(); };
 // practice
@@ -33,18 +34,16 @@ window.openPicker      = openPicker;
 window.closePicker     = closePicker;
 window.preloadDefaultWords = preloadDefaultWords;
 
+// ── Haptics ──────────────────────────────────────────────────────────────────────
+
 function initGlobalHaptics() {
-  // Common interactive elements selector
   const selector = 'button, .nav-btn, .picker-item, .stat-card, .settings-row, .word-row-content, .del-btn, .file-input-label';
-  
   document.addEventListener('click', (e) => {
-    const target = e.target.closest(selector);
-    if (target) {
-      // Light impact for regular button clicks
-      tg.HapticFeedback.impactOccurred('light');
-    }
+    if (e.target.closest(selector)) tg.HapticFeedback.impactOccurred('light');
   }, { passive: true });
 }
+
+// ── Init ────────────────────────────────────────────────────────────────────────
 
 async function init() {
   try {

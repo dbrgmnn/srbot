@@ -11,20 +11,18 @@ class ReviewResult:
 
 
 def sm2(
-    quality: int,
+    quality: int,     # 0-2 = fail, 3 = hard, 4 = good, 5 = perfect
     repetitions: int,
     easiness: float,
-    interval: int,
+    interval: int,    # Days
 ) -> ReviewResult:
-    # Standard SM-2 Algorithm (Intervals in DAYS)
-    # quality: 0-2 = fail, 3 = hard, 4 = good, 5 = perfect
-    
+    """Implementation of the SM-2 Spaced Repetition Algorithm."""
     if quality < 3:
-        # Failure: reset learning process
+        # Failure: reset learning progress
         repetitions = 0
         interval = 1
     else:
-        # Success: increment repetitions and calculate next interval
+        # Success: advance interval
         repetitions += 1
         if repetitions == 1:
             interval = 1
@@ -33,7 +31,7 @@ def sm2(
         else:
             interval = round(interval * easiness)
 
-    # Update easiness factor
+    # Update easiness factor (min 1.3 to prevent intervals from collapsing)
     easiness = easiness + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02))
     easiness = max(1.3, easiness)
 

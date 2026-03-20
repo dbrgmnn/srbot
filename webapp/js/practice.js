@@ -4,6 +4,8 @@ import { toast, T } from './toast.js';
 
 const tg = window.Telegram.WebApp;
 
+// ── State ──────────────────────────────────────────────────────────────────────
+
 let sessionWords = [];
 let sessionIdx = 0;
 let sessionStats = { good: 0, hard: 0, again: 0 };
@@ -13,6 +15,8 @@ let isSwiping = false;
 let pointerStartX = 0, pointerStartY = 0, pointerStartTime = 0;
 let rafId = null;
 let hintCache = {};
+
+// ── Session ───────────────────────────────────────────────────────────────────
 
 export async function startPractice() {
   try {
@@ -29,6 +33,8 @@ export async function startPractice() {
     renderWord();
   } catch(e) { console.error(e); toast(T.SESSION_FAIL, 'error'); }
 }
+
+// ── Swipe handlers ───────────────────────────────────────────────────────────
 
 function handleStart(x, y) {
   if (isGrading) return;
@@ -91,7 +97,6 @@ function handleEnd(x, y) {
 
   if (!isSwiping) {
     card.classList.toggle('flipped');
-    // Vibration for card flip (interactive gesture)
     tg.HapticFeedback.impactOccurred('light');
     const rot = card.classList.contains('flipped') ? 180 : 0;
     card.style.transform = `rotateY(${rot}deg)`;
@@ -108,6 +113,8 @@ function handleEnd(x, y) {
   }
   pointerStartX = 0; pointerStartY = 0;
 }
+
+// ── Swipe init ───────────────────────────────────────────────────────────────
 
 function initSwipe() {
   const card = document.getElementById('word-card');
@@ -129,6 +136,8 @@ function initSwipe() {
     pointerStartX = 0; pointerStartY = 0;
   };
 }
+
+// ── Render ───────────────────────────────────────────────────────────────────
 
 function renderWord() {
   if (sessionIdx >= sessionWords.length) {
@@ -178,6 +187,8 @@ function renderWord() {
   }, 10);
 }
 
+// ── Grading ──────────────────────────────────────────────────────────────────
+
 async function grade(quality) {
   if (isGrading) return;
   isGrading = true;
@@ -215,6 +226,8 @@ async function grade(quality) {
   }
 }
 
+// ── Undo ─────────────────────────────────────────────────────────────────────
+
 export async function undo() {
   if (isGrading) return;
   if (practiceHistory.length === 0) return;
@@ -239,6 +252,8 @@ export async function undo() {
   renderWord();
 }
 
+// ── Audio ───────────────────────────────────────────────────────────────────
+
 export function playAudio(e) {
   if (e) e.stopPropagation();
   const word = sessionWords[sessionIdx];
@@ -257,6 +272,8 @@ export function playAudio(e) {
   synth.speak(msg);
 }
 
+// ── Session toast ────────────────────────────────────────────────────────────
+
 function toastSession(good, hard, again) {
   const el = document.getElementById('toast');
   if (!el) return;
@@ -272,13 +289,15 @@ function toastSession(good, hard, again) {
   }, 3000);
 }
 
+// ── Hint ─────────────────────────────────────────────────────────────────────
+
 export async function triggerHint() {
   const word = sessionWords[sessionIdx];
   if (!word) return;
 
   tg.HapticFeedback.impactOccurred('medium');
 
-  // open sheet immediately with loader
+  // show sheet immediately with loader, fetch in background
   const titleEl = document.getElementById('hint-word-title');
   const loaderEl = document.getElementById('hint-loader');
   const contentEl = document.getElementById('hint-content');
@@ -290,7 +309,7 @@ export async function triggerHint() {
   document.getElementById('hint-sheet').classList.add('open');
   window._lockScroll();
 
-  // use cache if available
+  // serve from cache if available
   if (hintCache[word.id]) {
     renderHintContent(hintCache[word.id]);
     return;
@@ -329,6 +348,8 @@ export function closeHint() {
   document.getElementById('hint-sheet').classList.remove('open');
   window._unlockScroll();
 }
+
+// ── Exit ─────────────────────────────────────────────────────────────────────
 
 export function exitPractice() {
   isGrading = false;

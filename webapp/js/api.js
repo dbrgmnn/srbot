@@ -1,5 +1,7 @@
 const tg = window.Telegram.WebApp;
 
+// ── State ───────────────────────────────────────────────────────────────────────────────
+
 export let state = {
   currentLang: localStorage.getItem('currentLang') || (navigator.language || 'en').split('-')[0],
   practiceMode: null,
@@ -16,18 +18,20 @@ export function setLanguage(lang) {
   localStorage.setItem('currentLang', lang);
 }
 
+// ── HTTP client ───────────────────────────────────────────────────────────────────
+
 async function api(method, path, body) {
   const opts = {
     method,
     headers: { 
       'Content-Type': 'application/json', 
-      'X-Init-Data': tg.initData, // Get fresh initData every time
+      'X-Init-Data': tg.initData, // fetched fresh on every request
       'X-Language': state.currentLang,
       'X-Timezone': Intl.DateTimeFormat().resolvedOptions().timeZone
     },
   };
   if (body) opts.body = JSON.stringify(body);
-  
+
   try {
     const res = await fetch(path, opts);
     if (res.status === 401 || res.status === 403) throw new Error('Please open the app from Telegram');
@@ -49,6 +53,8 @@ async function api(method, path, body) {
     throw e;
   }
 }
+
+// ── Exports ───────────────────────────────────────────────────────────────────────────
 
 export const GET   = (path)       => api('GET',    path);
 export const POST  = (path, body) => api('POST',   path, body);

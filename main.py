@@ -1,3 +1,7 @@
+"""
+Main entry point for the SRBot application.
+Initializes the database, Telegram bot, scheduler, and API server.
+"""
 import asyncio
 import logging
 import signal
@@ -19,6 +23,7 @@ logger = logging.getLogger(__name__)
 
 
 async def main():
+    """Initialize and start all system components."""
     config = load_config()
 
     db = await init_db(config.db_path)
@@ -36,12 +41,12 @@ async def main():
     logger.info("Scheduler and API Server started")
 
     polling_task = asyncio.create_task(dp.start_polling(bot))
-
     logger.info("Starting...")
 
     stop_event = asyncio.Event()
 
     def handle_signal():
+        """Set the stop event on signal reception."""
         stop_event.set()
 
     loop = asyncio.get_running_loop()
@@ -52,15 +57,9 @@ async def main():
         await stop_event.wait()
     finally:
         logger.info("Stopping...")
-        
-        # 1. Stop polling first
         polling_task.cancel()
-        
-        # 2. Shutdown scheduler immediately
         if scheduler:
             scheduler.shutdown(wait=False)
-            
-        # 3. Cleanup other resources
         try:
             await asyncio.wait_for(asyncio.gather(
                 api_runner.cleanup(),
@@ -72,7 +71,6 @@ async def main():
             logger.warning("Cleanup timed out, forcing exit")
         except Exception as e:
             logger.error(f"Error during shutdown: {e}")
-        
         logger.info("Stopped.")
 
 if __name__ == "__main__":

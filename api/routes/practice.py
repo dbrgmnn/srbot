@@ -4,9 +4,13 @@ from db.repository import UserRepo, WordRepo
 from core.srs import sm2
 
 
+# --- Routes ---
+
 def setup_routes_practice(app: web.Application, db: aiosqlite.Connection):
+    """Register practice-related routes."""
 
     async def get_session(request: web.Request) -> web.Response:
+        """Return a session of words for practice, respecting user limits."""
         user_id = request["user_id"]
         telegram_id = request["telegram_id"]
         lang = request['language']
@@ -16,7 +20,7 @@ def setup_routes_practice(app: web.Application, db: aiosqlite.Connection):
         config = request.app["config"]
         settings = await user_repo.get_user_settings(telegram_id, lang, config)
 
-        # Calculate remaining limit with User's TZ
+        # Remaining new words for today in user's timezone
         tz_name = settings.get("timezone", config.default_timezone)
         today_done = await user_repo.get_today_new_count(user_id, lang, tz_name)
         daily_limit = settings.get("daily_limit", config.max_daily_limit // 2)
@@ -26,6 +30,7 @@ def setup_routes_practice(app: web.Application, db: aiosqlite.Connection):
         return web.json_response({"ok": True, "result": {"words": words}})
 
     async def grade_word(request: web.Request) -> web.Response:
+        """Process word grading using SM-2 algorithm."""
         user_id = request["user_id"]
         body = await request.json()
         word_id = body.get("word_id")
@@ -49,7 +54,7 @@ def setup_routes_practice(app: web.Application, db: aiosqlite.Connection):
         except (ValueError, TypeError):
             return web.json_response({"ok": False, "error": "invalid_grade"}, status=400)
 
-        # Track activity
+        # Record activity in user's timezone
         is_new = word["started_at"] is None
         config = request.app["config"]
         telegram_id = request["telegram_id"]
@@ -69,6 +74,7 @@ def setup_routes_practice(app: web.Application, db: aiosqlite.Connection):
         return web.json_response({"ok": True, "result": {"next_review": result.next_review.isoformat()}})
 
     async def undo_grade(request: web.Request) -> web.Response:
+        """Revert the last grading action for a word."""
         user_id = request["user_id"]
         body = await request.json()
         word_id = body.get("word_id")
@@ -79,7 +85,7 @@ def setup_routes_practice(app: web.Application, db: aiosqlite.Connection):
 
         word_repo = WordRepo(db)
 
-        # Get current word state to know language and whether it was new
+        # Fetch current state to determine language and is_new flag
         word = await word_repo.get_word(word_id, user_id)
         if word:
             is_new = int(old_state.get("repetitions", 0)) == 0

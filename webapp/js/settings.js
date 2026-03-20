@@ -218,7 +218,7 @@ export async function loadSettings() {
       state.max_notify_interval = s.limits.max_notify_interval;
     }
 
-    // Automatic timezone sync
+    // sync timezone automatically on every settings open
     const deviceTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
     if (deviceTz && s.timezone !== deviceTz) {
       console.log(`[settings] timezone changed: ${s.timezone} → ${deviceTz}`);
@@ -255,7 +255,7 @@ export async function loadSettings() {
 }
 
 export async function saveSetting(key, val, showToast = true) {
-  // key can be a string (single field) or a sentinel like 'quiet_hours' with val as object
+  // val can be a scalar or an object (e.g. quiet_hours: { quiet_start, quiet_end })
   const body = (typeof val === 'object' && val !== null) ? val : { [key]: val };
   try {
     await POST('/api/settings', body);

@@ -11,7 +11,10 @@ from core.translator import Translator
 logger = logging.getLogger(__name__)
 
 
+# --- Helpers ---
+
 def _clean_words(raw: list) -> list:
+    """Clean and validate a list of raw word dictionaries."""
     result = []
     for w in raw:
         word = (w.get("word") or "").strip()
@@ -26,9 +29,13 @@ def _clean_words(raw: list) -> list:
     return result
 
 
+# --- Routes ---
+
 def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
+    """Register word management routes."""
 
     async def add_external_words(request: web.Request) -> web.Response:
+        """Process a single word from external source: translate, enrich via AI, and save."""
         user_id = await verify_bearer_token(request, db)
         if not user_id:
             return web.json_response({"ok": False, "error": "unauthorized"}, status=401)
@@ -38,7 +45,7 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         except Exception:
             return web.json_response({"ok": False, "error": "invalid_json"}, status=400)
 
-        # 1. Get raw input
+        # Get and validate raw input
         raw_word = (body.get("word") or "").strip()
         lang = (body.get("language") or "").lower()
         
@@ -51,12 +58,12 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         word_repo = WordRepo(db)
         config = request.app["config"]
 
-        # 2. Check for duplicate before calling AI
+        # Check for duplicate before calling AI
         match = await word_repo.get_word_by_term(user_id, lang, raw_word)
         if match:
             return web.json_response({"ok": True, "result": {"added": 0, "status": "duplicate", "word": match["word"], "translation": match["translation"], "example": match.get("example"), "level": match.get("level"), "language": lang}})
 
-        # 3. Call Gemini
+        # Call Gemini for translation and enrichment
         if not config.gemini_api_key:
             return web.json_response({"ok": False, "error": "no_gemini_api_key"}, status=400)
         
@@ -74,12 +81,12 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         example = ai_data["example"]
         level = ai_data["level"]
 
-        # 4. Check for duplicate again using normalized AI lemma
+        # Check again using AI-normalized lemma
         match = await word_repo.get_word_by_term(user_id, lang, word)
         if match:
             return web.json_response({"ok": True, "result": {"added": 0, "status": "duplicate", "word": match["word"], "translation": match["translation"], "example": match.get("example"), "level": match.get("level"), "language": lang}})
 
-        # 5. Save enriched word
+        # Save enriched word
         words_to_add = [{"word": word, "translation": trans, "example": example, "level": level}]
         added_count = await word_repo.add_words_batch(user_id, lang, words_to_add)
         
@@ -96,6 +103,7 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         })
 
     async def add_words(request: web.Request) -> web.Response:
+        """Batch add words for the current user and language."""
         user_id = request["user_id"]
         lang = request['language']
         body = await request.json()
@@ -108,6 +116,7 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         return web.json_response({"ok": True, "result": {"added": added_count}})
 
     async def patch_word(request: web.Request) -> web.Response:
+        """Update an existing word's text, translation, example, or level."""
         user_id = request["user_id"]
         try:
             word_id = int(request.match_info["word_id"])
@@ -128,6 +137,7 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         return web.json_response({"ok": True})
 
     async def delete_all_words(request: web.Request) -> web.Response:
+        """Delete all words for the user's current language."""
         user_id = request["user_id"]
         lang = request['language']
         word_repo = WordRepo(db)
@@ -135,6 +145,7 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         return web.json_response({"ok": True})
 
     async def delete_word(request: web.Request) -> web.Response:
+        """Delete a specific word by its ID."""
         user_id = request["user_id"]
         try:
             word_id = int(request.match_info["word_id"])
@@ -145,6 +156,7 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         return web.json_response({"ok": True})
 
     async def search_words(request: web.Request) -> web.Response:
+        """Search words by term or translation for the current user and language."""
         user_id = request["user_id"]
         lang = request['language']
         query = request.query.get("q", "")
@@ -153,6 +165,7 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         return web.json_response({"ok": True, "result": {"words": words}})
 
     async def export_words(request: web.Request) -> web.Response:
+        """Export all words for the current user and language to a CSV file."""
         user_id = request["user_id"]
         lang = request['language']
         word_repo = WordRepo(db)
@@ -161,7 +174,7 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         output = io.StringIO()
         writer = csv.writer(output)
         
-        # Add headers for consistency with load_csv_words
+        # Headers match load_csv_words expected format
         writer.writerow(['term', 'translation', 'example', 'level'])
         
         for w in words:
@@ -177,6 +190,7 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         return response
 
     async def get_hint(request: web.Request) -> web.Response:
+        """Generate a mnemonic hint for a word using Gemini AI."""
         user_id = request["user_id"]
         config = request.app["config"]
 
@@ -209,6 +223,7 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         return web.json_response({"ok": True, "result": hint})
 
     async def preload_words(request: web.Request) -> web.Response:
+        """Load and add words from a pre-defined CSV file for the current language."""
         user_id = request["user_id"]
         lang = request['language']
         word_repo = WordRepo(db)
@@ -227,7 +242,7 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         return web.json_response({"ok": True, "result": {"added": added_count}})
 
 
-    # Static/specific routes MUST be registered before parameterized routes
+    # specific routes must be registered before parameterized ones
     app.router.add_post("/api/words", add_words)
     app.router.add_post("/api/external/words", add_external_words)
     app.router.add_post("/api/words/preload", preload_words)

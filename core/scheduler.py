@@ -16,9 +16,8 @@ logger = logging.getLogger(__name__)
 JOB_ID = "check_notifications"
 
 
-# ── Notification texts ────────────────────────────────────────────────────
-
 def build_notification_text(due: int, new: int, lang: str) -> str:
+    """Build the text for the notification message."""
     parts = []
     if due > 0:
         parts.append(f"{due} review")
@@ -30,9 +29,8 @@ def build_notification_text(due: int, new: int, lang: str) -> str:
     return f"{flag} " + " · ".join(parts)
 
 
-# ── Quiet hours ───────────────────────────────────────────────────────────
-
 def is_quiet_time(now: datetime, quiet_start: str, quiet_end: str, tz: ZoneInfo) -> bool:
+    """Check if the current time falls within the user's quiet hours."""
     local = now.astimezone(tz)
     current = local.hour * 60 + local.minute
 
@@ -46,9 +44,8 @@ def is_quiet_time(now: datetime, quiet_start: str, quiet_end: str, tz: ZoneInfo)
     return start <= current < end
 
 
-# ── Main job ──────────────────────────────────────────────────────────────
-
 async def check_and_send_notifications(bot: Bot, db_path: str, config):
+    """Periodic job to check for due words and send notifications."""
     async with aiosqlite.connect(db_path) as db:
         db.row_factory = aiosqlite.Row
         await apply_pragmas(db)
@@ -64,14 +61,14 @@ async def check_and_send_notifications(bot: Bot, db_path: str, config):
             user_tz_name = row.get("timezone", config.default_timezone)
             user_tz = _safe_zoneinfo(user_tz_name, config.default_timezone)
 
-            # Get real stats for this user to know exactly how many new words are left for TODAY
+            # Get real stats to know due count and remaining daily quota
             stats = await word_repo.get_full_stats(row["user_id"], row["language"], tz_name=user_tz_name, fallback_tz=config.default_timezone)
 
             due_count = stats["due"]
             daily_remaining = max(0, row["daily_limit"] - stats["today_new"])
             new_to_show = min(stats["new"], daily_remaining)
 
-            # If nothing to review and goal is already reached, skip this user
+            # Skip if nothing due and daily quota already reached
             if due_count == 0 and new_to_show == 0:
                 continue
 
@@ -101,19 +98,16 @@ async def check_and_send_notifications(bot: Bot, db_path: str, config):
                 logger.warning(f"[scheduler] Notification failed for {telegram_id}: {e}")
 
 
-# ── Reschedule ────────────────────────────────────────────────────────────
-
 async def reschedule(scheduler: AsyncIOScheduler, db: aiosqlite.Connection, config=None):
-    # reads minimum interval across all users and reschedules the job
+    """Read minimum interval across all users and reschedule the job."""
     user_repo = UserRepo(db)
     interval = await user_repo.get_min_notification_interval(config)
     scheduler.reschedule_job(JOB_ID, trigger=IntervalTrigger(minutes=interval))
     logger.info(f"Scheduler rescheduled — interval: {interval} min")
 
 
-# ── Setup ─────────────────────────────────────────────────────────────────
-
 async def setup_scheduler(bot: Bot, db: aiosqlite.Connection, config) -> AsyncIOScheduler:
+    """Initialize the APScheduler and add the notification job."""
     scheduler = AsyncIOScheduler(timezone=timezone.utc)
     user_repo = UserRepo(db)
     interval = await user_repo.get_min_notification_interval(config)

@@ -2,13 +2,13 @@ import aiosqlite
 
 
 async def apply_pragmas(db: aiosqlite.Connection):
-    # WAL mode + NORMAL sync — must be applied to every new connection
+    """Apply standard PRAGMAs to every new connection (WAL mode and NORMAL sync)."""
     await db.execute("PRAGMA journal_mode=WAL")
     await db.execute("PRAGMA synchronous=NORMAL")
 
 
 async def init_db(db_path: str = "srbot.db") -> aiosqlite.Connection:
-    # creates tables on first run and returns connection
+    """Create all tables and indexes if they do not exist; return open connection."""
     db = await aiosqlite.connect(db_path)
     db.row_factory = aiosqlite.Row
     await apply_pragmas(db)
@@ -71,7 +71,7 @@ async def init_db(db_path: str = "srbot.db") -> aiosqlite.Connection:
         )
     """)
 
-    # indexes for common queries
+    # Indexes for common queries
     await db.execute("CREATE INDEX IF NOT EXISTS idx_words_user_lang_review ON words (user_id, language, next_review)")
     await db.execute("CREATE INDEX IF NOT EXISTS idx_words_user_lang_rep ON words (user_id, language, repetitions)")
     await db.execute("CREATE INDEX IF NOT EXISTS idx_words_user_lang ON words (user_id, language)")

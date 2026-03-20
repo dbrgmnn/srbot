@@ -5,7 +5,10 @@ from core.scheduler import reschedule
 from core.languages import LANGUAGES
 
 
+# --- Helpers ---
+
 def _is_valid_time(value: str) -> bool:
+    """Validate time format (HH:MM)."""
     try:
         parts = value.split(":")
         if len(parts) != 2:
@@ -16,9 +19,13 @@ def _is_valid_time(value: str) -> bool:
         return False
 
 
+# --- Routes ---
+
 def setup_routes_settings(app: web.Application, db: aiosqlite.Connection):
+    """Register user settings routes."""
 
     async def get_languages_list(request: web.Request) -> web.Response:
+        """Return a list of supported languages with word counts for the user."""
         user_id = request["user_id"]
         user_repo = UserRepo(db)
         counts = await user_repo.get_words_count_per_language(user_id)
@@ -29,6 +36,7 @@ def setup_routes_settings(app: web.Application, db: aiosqlite.Connection):
         return web.json_response({"ok": True, "result": {"languages": languages}})
 
     async def get_settings(request: web.Request) -> web.Response:
+        """Return user settings for the current language."""
         user_id = request["user_id"]
         telegram_id = request["telegram_id"]
         lang = request['language']
@@ -56,19 +64,19 @@ def setup_routes_settings(app: web.Application, db: aiosqlite.Connection):
         })
 
     async def update_settings(request: web.Request) -> web.Response:
+        """Update user settings (language, timezone, daily limit, etc.)."""
         telegram_id = request["telegram_id"]
         lang = request['language']
         body = await request.json()
         user_repo = UserRepo(db)
 
-        # 1. Update language first, so other settings apply to the correct one
+        # Update language first so subsequent settings target the correct row
         if "language" in body:
             new_lang = body["language"]
             if new_lang in LANGUAGES:
                 await user_repo.update_language(telegram_id, new_lang, request.app["config"])
-                lang = new_lang  # use new lang for subsequent updates in this request
+                lang = new_lang  # Use new lang for subsequent updates in this request
 
-        # 2. Update other settings
         if "timezone" in body:
             await user_repo.update_timezone(telegram_id, body["timezone"], lang)
 

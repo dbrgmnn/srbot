@@ -18,10 +18,14 @@ def _safe_zoneinfo(tz_name: str, fallback: str) -> ZoneInfo:
 
 
 class UserRepo:
+    """Repository for managing user-related data and settings."""
+
     def __init__(self, db: aiosqlite.Connection):
+        """Initialize the UserRepo with a database connection."""
         self.db = db
 
     async def get_or_create(self, telegram_id: int, language: str, tz_name: str, config=None) -> int:
+        """Get an existing user's ID or create a new user record with default settings."""
         cursor = await self.db.execute(
             "SELECT id FROM users WHERE telegram_id = ?", (telegram_id,)
         )
@@ -39,7 +43,7 @@ class UserRepo:
                 await self.db.commit()
             return user_id
 
-        # New user
+        # New user — create record and default settings
         cursor = await self.db.execute(
             "INSERT INTO users (telegram_id) VALUES (?) RETURNING id", (telegram_id,)
         )
@@ -51,6 +55,7 @@ class UserRepo:
         return user_id
 
     async def _create_settings(self, user_id: int, language: str, tz_name: str, config=None):
+        """Create default settings for a user and language."""
         limit = config.max_daily_limit // 2 if config else 20
         interval = config.max_notify_interval // 2 if config else 240
 
@@ -62,6 +67,7 @@ class UserRepo:
         )
 
     async def set_last_notified_at(self, telegram_id: int, language: str):
+        """Update the timestamp of the last notification sent to the user."""
         now = datetime.now(tz=timezone.utc).isoformat()
         await self.db.execute(
             """UPDATE user_settings SET last_notified_at = ?
@@ -72,6 +78,7 @@ class UserRepo:
         await self.db.commit()
 
     async def get_user_settings(self, telegram_id: int, language: str, config=None) -> dict:
+        """Retrieve user settings for a specific language, with defaults if not found."""
         cursor = await self.db.execute(
             """SELECT s.* FROM user_settings s
                 JOIN users u ON s.user_id = u.id
@@ -94,7 +101,7 @@ class UserRepo:
 
         if row:
             data = dict(row)
-            # Ensure None values from DB are replaced with defaults
+            # Replace any None values from DB with defaults
             for k, v in defaults.items():
                 if data.get(k) is None:
                     data[k] = v
@@ -103,6 +110,7 @@ class UserRepo:
         return defaults
 
     async def _update_setting(self, field: str, value, telegram_id: int, language: str):
+        """Generic method to update a single user setting field."""
         await self.db.execute(
             f"""INSERT INTO user_settings (user_id, language, {field})
                VALUES ((SELECT id FROM users WHERE telegram_id = ?), ?, ?)
@@ -112,15 +120,19 @@ class UserRepo:
         await self.db.commit()
 
     async def update_timezone(self, telegram_id: int, tz_name: str, language: str):
+        """Update the user's timezone for a specific language."""
         await self._update_setting('timezone', tz_name, telegram_id, language)
 
     async def update_daily_limit(self, telegram_id: int, limit: int, language: str):
+        """Update the daily limit for new words for a specific language."""
         await self._update_setting('daily_limit', limit, telegram_id, language)
 
     async def update_notification_interval(self, telegram_id: int, minutes: int, language: str):
+        """Update the notification interval for a specific language."""
         await self._update_setting('notification_interval_minutes', minutes, telegram_id, language)
 
     async def update_quiet_hours(self, telegram_id: int, quiet_start: str = None, quiet_end: str = None, language: str = None):
+        """Update the quiet hours during which notifications are suppressed."""
         fields = {}
         if quiet_start is not None: fields['quiet_start'] = quiet_start
         if quiet_end is not None:   fields['quiet_end'] = quiet_end
@@ -135,9 +147,11 @@ class UserRepo:
         await self.db.commit()
 
     async def update_practice_mode(self, telegram_id: int, mode: str, language: str):
+        """Update the practice mode for a specific language."""
         await self._update_setting('practice_mode', mode, telegram_id, language)
 
     async def update_language(self, telegram_id: int, new_language: str, config=None):
+        """Initialize settings for a new language for the user."""
         user_id_cur = await self.db.execute("SELECT id FROM users WHERE telegram_id = ?", (telegram_id,))
         row = await user_id_cur.fetchone()
         if not row: return
@@ -146,6 +160,7 @@ class UserRepo:
         await self.db.commit()
 
     async def get_min_notification_interval(self, config=None) -> float:
+        """Get the minimum notification interval across all users."""
         cursor = await self.db.execute(
             "SELECT MIN(notification_interval_minutes) as min_interval FROM user_settings"
         )
@@ -154,6 +169,7 @@ class UserRepo:
         return float(row['min_interval']) if (row and row['min_interval']) else default
 
     async def get_api_token(self, telegram_id: int) -> str | None:
+        """Retrieve the API token for a user."""
         cursor = await self.db.execute(
             "SELECT api_token FROM users WHERE telegram_id = ?", (telegram_id,)
         )
@@ -161,6 +177,7 @@ class UserRepo:
         return row['api_token'] if row else None
 
     async def generate_api_token(self, telegram_id: int) -> str:
+        """Generate and save a new API token for a user."""
         new_token = secrets.token_hex(16)
         await self.db.execute(
             "UPDATE users SET api_token = ? WHERE telegram_id = ?",
@@ -170,6 +187,7 @@ class UserRepo:
         return new_token
 
     async def get_user_by_token(self, token: str) -> tuple[int, int] | None:
+        """Find a user by their API token."""
         cursor = await self.db.execute(
             "SELECT id, telegram_id FROM users WHERE api_token = ?", (token,)
         )
@@ -177,6 +195,7 @@ class UserRepo:
         return (row['id'], row['telegram_id']) if row else None
 
     async def get_words_count_per_language(self, user_id: int) -> dict:
+        """Get the number of words learned by a user per language."""
         cursor = await self.db.execute(
             "SELECT language, COUNT(*) as cnt FROM words WHERE user_id = ? GROUP BY language",
             (user_id,)
@@ -185,6 +204,7 @@ class UserRepo:
         return {row['language']: row['cnt'] for row in rows}
 
     async def get_today_new_count(self, user_id: int, language: str, tz_name: str = "UTC", fallback_tz: str = "UTC") -> int:
+        """Count how many new words the user has started learning today."""
         tz = _safe_zoneinfo(tz_name, fallback_tz)
         now_utc = datetime.now(tz=timezone.utc)
         local_now = now_utc.astimezone(tz)
@@ -197,6 +217,7 @@ class UserRepo:
         return int(row['cnt']) if row else 0
 
     async def get_users_with_due_words(self) -> list[dict]:
+        """Find users who have words due for review or new words available."""
         now_utc = datetime.now(tz=timezone.utc).isoformat()
 
         cursor = await self.db.execute(
@@ -217,11 +238,15 @@ class UserRepo:
 
 
 class WordRepo:
+    """Repository for managing word-related data and statistics."""
+
     def __init__(self, db: aiosqlite.Connection):
+        """Initialize the WordRepo with a database connection."""
         self.db = db
 
     @staticmethod
     def load_csv_words(path: Path) -> list[dict]:
+        """Load words from a CSV file."""
         words = []
         if not path.exists():
             return []
@@ -241,6 +266,7 @@ class WordRepo:
         return words
 
     async def add_words_batch(self, user_id: int, language: str, words: list[dict]) -> int:
+        """Add a batch of words to the user's dictionary."""
         now = datetime.now(tz=timezone.utc).isoformat()
         data = [
             (user_id, w["word"], w["translation"], language, w.get("example"), w.get("level"), now, now)
@@ -257,6 +283,7 @@ class WordRepo:
         return int(row[0]) if row else 0
 
     async def get_session_words(self, user_id: int, language: str, new_limit: int) -> list[dict]:
+        """Get words for a practice session, including due reviews and new words."""
         now = datetime.now(tz=timezone.utc).isoformat()
         cursor = await self.db.execute(
             """SELECT id, word, translation, example, level, repetitions, started_at, 
@@ -291,6 +318,7 @@ class WordRepo:
         interval: int,
         next_review: datetime,
     ):
+        """Update word statistics after a review session."""
         now = datetime.now(tz=timezone.utc).isoformat()
         await self.db.execute(
             """UPDATE words
@@ -312,6 +340,7 @@ class WordRepo:
         last_reviewed_at: str | None,
         started_at: str | None,
     ):
+        """Revert word statistics to a previous state."""
         await self.db.execute(
             """UPDATE words
                 SET repetitions = ?, easiness = ?, interval = ?, next_review = ?, 
@@ -322,6 +351,7 @@ class WordRepo:
         await self.db.commit()
 
     async def get_full_stats(self, user_id: int, language: str, tz_name: str = "UTC", fallback_tz: str = "UTC") -> dict:
+        """Get comprehensive statistics about the user's learning progress."""
         now_utc = datetime.now(tz=timezone.utc)
         tz = _safe_zoneinfo(tz_name, fallback_tz)
         local_now = now_utc.astimezone(tz)
@@ -360,6 +390,7 @@ class WordRepo:
         return defaults
 
     async def update_word_text(self, word_id: int, user_id: int, word: str, translation: str, example: str | None, level: str | None):
+        """Update the text, translation, example, or level of a word."""
         await self.db.execute(
             """UPDATE words SET word = ?, translation = ?, example = ?, level = ?
                WHERE id = ? AND user_id = ?""",
@@ -368,6 +399,7 @@ class WordRepo:
         await self.db.commit()
 
     async def delete_all_words(self, user_id: int, language: str = None):
+        """Delete all words for a user, optionally filtered by language."""
         if language:
             await self.db.execute(
                 "DELETE FROM words WHERE user_id = ? AND language = ?",
@@ -378,6 +410,7 @@ class WordRepo:
         await self.db.commit()
 
     async def delete_word(self, word_id: int, user_id: int):
+        """Delete a specific word for a user."""
         await self.db.execute(
             "DELETE FROM words WHERE id = ? AND user_id = ?",
             (word_id, user_id),
@@ -385,6 +418,7 @@ class WordRepo:
         await self.db.commit()
 
     async def search_words(self, user_id: int, language: str, query: str) -> list[dict]:
+        """Search for words in the user's dictionary by term or translation."""
         q = f"%{query}%"
         cursor = await self.db.execute(
             """SELECT id, word, translation, example, level FROM words
@@ -396,6 +430,7 @@ class WordRepo:
         return [dict(row) for row in rows]
 
     async def get_all_words(self, user_id: int, language: str) -> list[dict]:
+        """Get all words for a user in a specific language."""
         cursor = await self.db.execute(
             """SELECT word, translation, example, level
                FROM words
@@ -407,6 +442,7 @@ class WordRepo:
         return [dict(row) for row in rows]
 
     async def get_word(self, word_id: int, user_id: int) -> dict | None:
+        """Retrieve a single word by its ID."""
         cursor = await self.db.execute(
             "SELECT * FROM words WHERE id = ? AND user_id = ?",
             (word_id, user_id),
@@ -415,6 +451,7 @@ class WordRepo:
         return dict(row) if row else None
 
     async def decrement_daily_stat(self, user_id: int, language: str, is_new: bool, tz_name: str = "UTC"):
+        """Decrement the daily learning/review count for a user."""
         tz = _safe_zoneinfo(tz_name, "UTC")
         local_now = datetime.now(tz=timezone.utc).astimezone(tz)
         day_str = local_now.strftime("%Y-%m-%d")
@@ -427,6 +464,7 @@ class WordRepo:
         await self.db.commit()
 
     async def increment_daily_stat(self, user_id: int, language: str, is_new: bool, tz_name: str = "UTC"):
+        """Increment the daily learning/review count for a user."""
         tz = _safe_zoneinfo(tz_name, "UTC")
         local_now = datetime.now(tz=timezone.utc).astimezone(tz)
         day_str = local_now.strftime("%Y-%m-%d")
@@ -442,6 +480,7 @@ class WordRepo:
         await self.db.commit()
 
     async def get_activity_heatmap(self, user_id: int, language: str, days: int = 91, tz_name: str = "UTC") -> list[dict]:
+        """Get activity data for a heatmap visualization."""
         tz = _safe_zoneinfo(tz_name, "UTC")
         local_now = datetime.now(tz=timezone.utc).astimezone(tz)
         cutoff_local = (local_now - timedelta(days=days))
@@ -461,6 +500,7 @@ class WordRepo:
         return [{"date": row["day"], "count": row["count"]} for row in rows]
 
     async def get_word_by_term(self, user_id: int, language: str, word: str) -> dict | None:
+        """Retrieve a word by its term (case-insensitive)."""
         cursor = await self.db.execute(
             """SELECT id, word, translation, example, level FROM words
                WHERE user_id = ? AND language = ? AND LOWER(word) = LOWER(?)""",

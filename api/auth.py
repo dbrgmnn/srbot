@@ -7,13 +7,13 @@ from db.repository import UserRepo
 
 
 def verify_init_data(init_data: str, bot_token: str, expires_in: int) -> dict | None:
-    # verifies Telegram WebApp initData signature and expiration
+    """Verify HMAC signature and expiration of Telegram WebApp initData."""
     params = dict(parse_qsl(init_data, keep_blank_values=True))
     received_hash = params.pop("hash", None)
     if not received_hash:
         return None
 
-    # Check expiration (auth_date is in seconds)
+    # auth_date is a Unix timestamp in seconds
     auth_date_raw = params.get("auth_date", "0")
     try:
         auth_date = int(auth_date_raw)
@@ -22,7 +22,7 @@ def verify_init_data(init_data: str, bot_token: str, expires_in: int) -> dict | 
     if time.time() - auth_date > expires_in:
         return None
 
-    # build data-check-string
+    # Build data-check-string per Telegram spec
     data_check = "\n".join(f"{k}={v}" for k, v in sorted(params.items()))
 
     secret_key = hmac.new(b"WebAppData", bot_token.encode(), hashlib.sha256).digest()
@@ -35,7 +35,7 @@ def verify_init_data(init_data: str, bot_token: str, expires_in: int) -> dict | 
 
 
 async def verify_bearer_token(request, db) -> int | None:
-    # Extracts Bearer token and returns user_id if valid and user is in allowed list
+    """Extract Bearer token and return user_id if valid and in allowed list."""
     auth_header = request.headers.get("Authorization")
     if not auth_header or not auth_header.startswith("Bearer "):
         return None

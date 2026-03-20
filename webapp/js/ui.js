@@ -78,7 +78,7 @@ function renderHeatmap(data) {
   const WEEKS = 13;
   const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-  // build lookup: date string -> count
+  // build lookup: date string → count
   const lookup = {};
   let maxCount = 1;
   data.forEach(({ date, count }) => {
@@ -86,13 +86,12 @@ function renderHeatmap(data) {
     if (count > maxCount) maxCount = count;
   });
 
-  // generate last 91 days
+  // generate last 91 days using local date (not UTC)
   const today = new Date();
   const days = [];
   for (let i = WEEKS * 7 - 1; i >= 0; i--) {
     const d = new Date(today);
     d.setDate(d.getDate() - i);
-    // local date instead of toISOString (UTC)
     const y = d.getFullYear();
     const m = String(d.getMonth() + 1).padStart(2, '0');
     const day = String(d.getDate()).padStart(2, '0');
@@ -108,7 +107,7 @@ function renderHeatmap(data) {
     return 4;
   }
 
-  // cells
+  // render cells
   const grid = document.getElementById('hm-grid');
   if (!grid) return;
   grid.innerHTML = '';
@@ -122,7 +121,7 @@ function renderHeatmap(data) {
     grid.appendChild(cell);
   });
 
-  // month labels
+  // render month labels
   const monthsEl = document.getElementById('hm-months');
   if (!monthsEl) return;
   monthsEl.innerHTML = '';
