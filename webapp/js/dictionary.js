@@ -50,7 +50,10 @@ function parseText(text) {
 
 // ── Public functions ──────────────────────────────────────────────────────
 
+let isSubmitting = false;
+
 export async function submitWords() {
+  if (isSubmitting) return;
   const wordEl = document.getElementById('add-word');
   const transEl = document.getElementById('add-translation');
   const exEl = document.getElementById('add-example');
@@ -66,6 +69,7 @@ export async function submitWords() {
     return;
   }
 
+  isSubmitting = true;
   try {
     const res = await POST('/api/words', { words: [{ word, translation, example, level }] });
     if (res.result && res.result.added) {
@@ -78,6 +82,7 @@ export async function submitWords() {
       toast(T.WORD_DUPLICATE, 'error');
     }
   } catch (e) { toast(T.WORD_ADD_FAIL, 'error'); }
+  finally { isSubmitting = false; }
 }
 
 export async function handleFileUpload(input) {
@@ -141,10 +146,13 @@ export function closeEdit() {
 }
 
 export async function saveEdit() {
+  if (isSubmitting) return;
   const word = document.getElementById('edit-word').value.trim();
   const trans = document.getElementById('edit-translation').value.trim();
   const ex = document.getElementById('edit-example').value.trim();
   const level = document.getElementById('edit-level').value.trim();
+  
+  isSubmitting = true;
   try {
     await PATCH(`/api/words/${editWordId}`, { word, translation: trans, example: ex, level });
     closeEdit();
@@ -152,7 +160,7 @@ export async function saveEdit() {
     loadHome();
   } catch(e) {
     toast(e.message === '409' ? T.WORD_DUPLICATE : T.WORD_SAVE_FAIL, 'error');
-  }
+  } finally { isSubmitting = false; }
 }
 
 export function clearAllWords() {
