@@ -83,7 +83,7 @@ body.no-nav {
 
 /* ── Header ── */
 .header {
-  padding: 12px var(--gap) 16px;
+  padding: 12px var(--gap) 8px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -364,10 +364,11 @@ body.no-nav {
   font-size: 12px;
   text-transform: uppercase;
   color: var(--hint);
-  margin: 24px 0 8px var(--gap);
+  margin: 16px 0 8px var(--gap);
   letter-spacing: 0.07em;
   font-weight: 600;
 }
+.header + .section-title { margin-top: 4px; }
 .settings-group {
   padding: 0 16px;
   margin-bottom: 8px;
