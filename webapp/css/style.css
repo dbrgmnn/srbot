@@ -683,3 +683,56 @@ mark {
   color: var(--hint);
   font-size: 12px;
 }
+
+/* ── Light theme overrides ── */
+body.theme-light {
+  --glass:        rgba(0,0,0,0.06);
+  --glass-mid:    rgba(0,0,0,0.09);
+  --glass-border: rgba(0,0,0,0.10);
+  --glass-shine:  rgba(0,0,0,0.06);
+}
+
+/* Nav */
+body.theme-light .nav-btn          { color: var(--text); }
+
+/* Buttons */
+body.theme-light .btn-secondary    { color: var(--hint); }
+body.theme-light .btn-round svg    { stroke: var(--text); opacity: 0.7; }
+
+/* Header */
+body.theme-light .header-title     { color: var(--hint); }
+
+/* Practice card */
+body.theme-light .word-trans       { color: var(--hint); }
+body.theme-light .word-card::before {
+  box-shadow: 0 24px 48px rgba(0,0,0,0.10), inset 0 1px 0 var(--glass-shine);
+}
+
+/* Picker */
+body.theme-light .picker-value        { color: var(--hint); }
+body.theme-light .picker-item-check   { color: var(--accent); }
+body.theme-light .picker-item.selected { background: rgba(0,0,0,0.08); }
+
+/* File input */
+body.theme-light .file-input-label { color: var(--hint); }
+
+/* Toast */
+body.theme-light .toast            { color: var(--text); }
+
+/* Edit / Picker sheet */
+body.theme-light .edit-sheet       { background: var(--bg); border-top-color: var(--glass-border); }
+
+/* Search highlight */
+body.theme-light mark              { background: rgba(0,0,0,0.10); }
+
+/* Settings row dividers */
+body.theme-light .settings-row,
+body.theme-light .word-row         { border-bottom-color: rgba(0,0,0,0.08); }
+
+/* Week grid empty cells */
+body.theme-light .week-cell        { background: rgba(0,0,0,0.05); }
+
+/* Swipe color overlays on card */
+body.theme-light .word-card.swipe-left::before  { background: rgba(255,69,58,0.10)  !important; }
+body.theme-light .word-card.swipe-right::before { background: rgba(48,209,88,0.10)  !important; }
+body.theme-light .word-card.swipe-up::before    { background: rgba(255,214,10,0.10) !important; }
