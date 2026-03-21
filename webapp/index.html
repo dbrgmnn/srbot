@@ -40,22 +40,29 @@
 
     <div class="section-title">Progress</div>
     <div class="card">
-      <div class="stats-summary-row">
-        <div class="stats-summary-item">
-          <div id="count-new" class="stats-num text-new">0</div>
-          <div class="stats-label-sub">Queue</div>
+      <div class="progress-total">TOTAL <span id="count-total">0</span></div>
+      <div class="progress-bar">
+        <div class="progress-bar-seg" id="bar-new"></div>
+        <div class="progress-bar-seg" id="bar-learning"></div>
+        <div class="progress-bar-seg" id="bar-known"></div>
+        <div class="progress-bar-seg" id="bar-mastered"></div>
+      </div>
+      <div class="progress-legend">
+        <div class="progress-legend-item">
+          <span class="progress-legend-lbl">QUEUE</span>
+          <b class="progress-legend-num text-new" id="count-new">0</b>
         </div>
-        <div class="stats-summary-item">
-          <div id="count-learning" class="stats-num text-learning">0</div>
-          <div class="stats-label-sub">Learning</div>
+        <div class="progress-legend-item">
+          <span class="progress-legend-lbl">LEARNING</span>
+          <b class="progress-legend-num text-learning" id="count-learning">0</b>
         </div>
-        <div class="stats-summary-item">
-          <div id="count-known" class="stats-num text-known">0</div>
-          <div class="stats-label-sub">Known</div>
+        <div class="progress-legend-item">
+          <span class="progress-legend-lbl">KNOWN</span>
+          <b class="progress-legend-num text-known" id="count-known">0</b>
         </div>
-        <div class="stats-summary-item">
-          <div id="count-mastered" class="stats-num text-mastered">0</div>
-          <div class="stats-label-sub">Mastered</div>
+        <div class="progress-legend-item">
+          <span class="progress-legend-lbl">MASTERED</span>
+          <b class="progress-legend-num text-mastered" id="count-mastered">0</b>
         </div>
       </div>
     </div>

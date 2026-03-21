@@ -177,11 +177,24 @@ export async function loadHome() {
       btn.disabled = sessionTotal === 0;
     }
 
-    const cats = { 'new': 'st_new', 'learning': 'st_learning', 'known': 'st_known', 'mastered': 'st_mastered' };
-    Object.entries(cats).forEach(([cat, key]) => {
-      const el = document.getElementById(`count-${cat}`);
-      if (el) el.textContent = stats[key] || 0;
-    });
+    const st_new      = stats.st_new      || 0;
+    const st_learning  = stats.st_learning  || 0;
+    const st_known     = stats.st_known     || 0;
+    const st_mastered  = stats.st_mastered  || 0;
+    const total = st_new + st_learning + st_known + st_mastered;
+
+    const elNew      = document.getElementById('count-new');      if (elNew)      elNew.textContent      = st_new;
+    const elLearning = document.getElementById('count-learning'); if (elLearning) elLearning.textContent = st_learning;
+    const elKnown    = document.getElementById('count-known');    if (elKnown)    elKnown.textContent    = st_known;
+    const elMastered = document.getElementById('count-mastered'); if (elMastered) elMastered.textContent = st_mastered;
+    const elTotal    = document.getElementById('count-total');    if (elTotal)    elTotal.textContent    = total;
+
+    // bar widths
+    const pct = (n) => total > 0 ? `${(n / total * 100).toFixed(1)}%` : '0%';
+    const barNew      = document.getElementById('bar-new');      if (barNew)      { barNew.style.width      = pct(st_new);      barNew.style.background      = '#8e8e93'; }
+    const barLearning = document.getElementById('bar-learning'); if (barLearning) { barLearning.style.width = pct(st_learning); barLearning.style.background = '#ff9f0a'; }
+    const barKnown    = document.getElementById('bar-known');    if (barKnown)    { barKnown.style.width    = pct(st_known);    barKnown.style.background    = '#30d158'; }
+    const barMastered = document.getElementById('bar-mastered'); if (barMastered) { barMastered.style.width = pct(st_mastered); barMastered.style.background = '#bf5af2'; }
 
     renderHeatmap(init.heatmap || []);
   } catch (e) { console.error('LoadHome failed', e); }

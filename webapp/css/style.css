@@ -151,25 +151,51 @@ body.no-nav {
 .stat-pill-icon-review { background: rgba(255,159,10,0.15); }
 .stat-pill-icon-new    { background: rgba(48,209,88,0.15); }
 
-.stats-summary-row {
-  display: flex;
-  justify-content: space-around;
-  text-align: center;
-  padding: 8px 0;
-}
-.stats-summary-item { flex: 1; }
-.stats-num {
-  font-size: 22px;
-  font-weight: 700;
-  margin-bottom: 4px;
-  letter-spacing: -0.3px;
-}
-.stats-label-sub {
+/* ── Progress block ── */
+.progress-total {
   font-size: 10px;
+  font-weight: 700;
   color: var(--hint);
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  font-weight: 600;
+  letter-spacing: 0.07em;
+  margin-bottom: 8px;
+}
+.progress-total span {
+  color: var(--text);
+}
+.progress-bar {
+  height: 8px;
+  border-radius: 4px;
+  display: flex;
+  gap: 2px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+.progress-bar-seg {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.4s ease;
+}
+.progress-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+}
+.progress-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+.progress-legend-lbl {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--hint);
+}
+.progress-legend-num {
+  font-size: 10px;
+  font-weight: 700;
 }
 
 .text-new      { color: #8e8e93; }
@@ -244,20 +270,6 @@ body.no-nav {
   background: var(--glass);
   color: var(--hint);
   padding: 4px 12px;
-}
-
-.progress-track {
-  height: 4px;
-  background: rgba(255,255,255,0.08);
-  border-radius: 2px;
-  margin-bottom: 12px;
-}
-.progress-fill {
-  height: 100%;
-  width: 0%;
-  background: rgba(255,255,255,0.4);
-  border-radius: 2px;
-  transition: width 0.4s ease;
 }
 
 .word-card-container {
