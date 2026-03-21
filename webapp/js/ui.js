@@ -45,33 +45,30 @@ function formatTimeLeft(targetDate) {
 
 function updateCountdowns() {
   const stats = state.currentStats;
-  if (!stats) return;
+  if (!stats || !state.currentSettings) return;
 
-  const statDue = document.getElementById('stat-due');
-  const statNew = document.getElementById('stat-new');
+  const statDue  = document.getElementById('stat-due');
+  const labelDue = document.getElementById('label-due');
+  const statNew  = document.getElementById('stat-new');
+  const labelNew = document.getElementById('label-new');
 
-  // Review: если слов на повтор нет — показываем таймер вместо цифры
-  if (stats.due > 0) {
-    if (statDue) statDue.textContent = stats.due;
-  } else {
-    const time = formatTimeLeft(stats.next_due_at);
-    if (statDue) statDue.textContent = time || '—';
+  // Review
+  if (statDue) statDue.textContent = stats.due || 0;
+  if (labelDue) {
+    const time = stats.due === 0 ? formatTimeLeft(stats.next_due_at) : null;
+    labelDue.textContent = time ? `Review  ${time}` : 'Review';
   }
 
-  // New: если лимит исчерпан или слов нет — показываем таймер вместо цифры
-  const limit = state.currentSettings?.daily_limit;
+  // New
+  const limit = state.currentSettings.daily_limit;
   const todayDone = stats.today_new || 0;
   const availableNew = Math.max(0, limit - todayDone);
-
-  if (availableNew > 0 && stats.st_new > 0) {
-    if (statNew) statNew.textContent = availableNew;
-  } else {
-    if (stats.st_new === 0) {
-      if (statNew) statNew.textContent = '—';
-    } else {
-      const time = formatTimeLeft(stats.next_day_start_utc);
-      if (statNew) statNew.textContent = time || '—';
-    }
+  if (statNew) statNew.textContent = availableNew;
+  if (labelNew) {
+    const time = (availableNew === 0 && stats.st_new > 0)
+      ? formatTimeLeft(stats.next_day_start_utc)
+      : null;
+    labelNew.textContent = time ? `New  ${time}` : 'New';
   }
 }
 
