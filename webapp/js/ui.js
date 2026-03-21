@@ -47,27 +47,30 @@ function updateCountdowns() {
   const stats = state.currentStats;
   if (!stats) return;
 
-  const dueLabel = document.getElementById('label-due');
-  const newLabel = document.getElementById('label-new');
+  const statDue = document.getElementById('stat-due');
+  const statNew = document.getElementById('stat-new');
 
+  // Review: если слов на повтор нет — показываем таймер вместо цифры
   if (stats.due > 0) {
-    if (dueLabel) dueLabel.textContent = 'Review';
+    if (statDue) statDue.textContent = stats.due;
   } else {
     const time = formatTimeLeft(stats.next_due_at);
-    if (dueLabel) dueLabel.textContent = time || 'Review';
+    if (statDue) statDue.textContent = time || '—';
   }
 
+  // New: если лимит исчерпан или слов нет — показываем таймер вместо цифры
   const limit = state.currentSettings?.daily_limit;
   const todayDone = stats.today_new || 0;
   const availableNew = Math.max(0, limit - todayDone);
 
   if (availableNew > 0 && stats.st_new > 0) {
-    if (newLabel) newLabel.textContent = 'New';
+    if (statNew) statNew.textContent = availableNew;
   } else {
-    const time = formatTimeLeft(stats.next_day_start_utc);
-    if (newLabel) {
-      if (stats.st_new === 0) newLabel.textContent = 'Empty';
-      else newLabel.textContent = time || 'New';
+    if (stats.st_new === 0) {
+      if (statNew) statNew.textContent = '—';
+    } else {
+      const time = formatTimeLeft(stats.next_day_start_utc);
+      if (statNew) statNew.textContent = time || '—';
     }
   }
 }
@@ -165,11 +168,6 @@ export async function loadHome() {
     const limit = settings.daily_limit;
     const availableNew = Math.max(0, limit - todayDone);
     const sessionTotal = due + Math.min(newWords, availableNew);
-
-    const statDue = document.getElementById('stat-due');
-    const statNew = document.getElementById('stat-new');
-    if (statDue) statDue.textContent = due;
-    if (statNew) statNew.textContent = availableNew;
 
     updateCountdowns();
     if (!countdownInterval) {
