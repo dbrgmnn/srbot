@@ -22,7 +22,7 @@ def setup_routes_init(app: web.Application, db: aiosqlite.Connection):
         settings = await user_repo.get_user_settings(telegram_id, lang, config)
         tz = settings.get("timezone", "UTC")
         stats = await word_repo.get_full_stats(user_id, lang, tz_name=tz)
-        heatmap = await word_repo.get_activity_heatmap(user_id, lang, days=91, tz_name=tz)
+        heatmap = await word_repo.get_activity_heatmap(user_id, lang, days=7, tz_name=tz)
 
         lang_meta = LANGUAGES.get(lang, {})
         tts_code = lang_meta.get("tts", "en-US")

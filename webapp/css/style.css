@@ -230,7 +230,6 @@ body.no-nav {
   color: var(--text);
   line-height: 1;
 }
-.week-cell-num.wc-empty { color: transparent; }
 .week-cell-day {
   font-size: 9px;
   color: var(--hint);

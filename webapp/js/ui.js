@@ -113,7 +113,7 @@ function renderWeek(data) {
 
     cell.appendChild(num);
     cell.appendChild(dayEl);
-    if (count > 0) cell.onclick = () => toast(count.toString());
+
     grid.appendChild(cell);
   }
 }
