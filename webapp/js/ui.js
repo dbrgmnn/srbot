@@ -86,27 +86,16 @@ function renderWeek(data) {
   grid.innerHTML = '';
 
   const today = new Date();
-  const todayKey = (() => {
-    const y = today.getFullYear();
-    const m = String(today.getMonth() + 1).padStart(2, '0');
-    const d = String(today.getDate()).padStart(2, '0');
-    return `${y}-${m}-${d}`;
-  })();
+  // todayKey для определения сегодняшней ячейки
+  const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
-  // find start of current week (Monday)
-  const dayOfWeek = today.getDay(); // 0=Sun
-  const diffToMon = (dayOfWeek + 6) % 7;
-
+  // последние 7 дней: i=0 → 6 дней назад, i=6 → сегодня
   for (let i = 0; i < 7; i++) {
     const d = new Date(today);
-    d.setDate(d.getDate() - diffToMon + i);
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    const key = `${y}-${m}-${day}`;
+    d.setDate(d.getDate() - 6 + i);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     const count = lookup[key] || 0;
     const isToday = key === todayKey;
-    const isPast = d <= today;
 
     const cell = document.createElement('div');
     const classes = ['week-cell'];
@@ -115,8 +104,8 @@ function renderWeek(data) {
     cell.className = classes.join(' ');
 
     const num = document.createElement('div');
-    num.className = 'week-cell-num' + (count === 0 && !isPast ? ' wc-empty' : '');
-    num.textContent = count > 0 ? count : (isPast ? '0' : '');
+    num.className = 'week-cell-num';
+    num.textContent = count > 0 ? count : '0';
 
     const dayEl = document.createElement('div');
     dayEl.className = 'week-cell-day';
