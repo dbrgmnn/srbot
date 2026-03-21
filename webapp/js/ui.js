@@ -72,67 +72,60 @@ function updateCountdowns() {
   }
 }
 
-// ── Heatmap ─────────────────────────────────────────────────────────────
+// ── Week activity ────────────────────────────────────────────────────────
 
-function renderHeatmap(data) {
-  const WEEKS = 13;
-  const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function renderWeek(data) {
+  const DAYS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 
   // build lookup: date string → count
   const lookup = {};
-  let maxCount = 1;
-  data.forEach(({ date, count }) => {
-    lookup[date] = count;
-    if (count > maxCount) maxCount = count;
-  });
+  data.forEach(({ date, count }) => { lookup[date] = count; });
 
-  // generate last 91 days using local date (not UTC)
+  const grid = document.getElementById('week-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+
   const today = new Date();
-  const days = [];
-  for (let i = WEEKS * 7 - 1; i >= 0; i--) {
+  const todayKey = (() => {
+    const y = today.getFullYear();
+    const m = String(today.getMonth() + 1).padStart(2, '0');
+    const d = String(today.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  })();
+
+  // find start of current week (Monday)
+  const dayOfWeek = today.getDay(); // 0=Sun
+  const diffToMon = (dayOfWeek + 6) % 7;
+
+  for (let i = 0; i < 7; i++) {
     const d = new Date(today);
-    d.setDate(d.getDate() - i);
+    d.setDate(d.getDate() - diffToMon + i);
     const y = d.getFullYear();
     const m = String(d.getMonth() + 1).padStart(2, '0');
     const day = String(d.getDate()).padStart(2, '0');
     const key = `${y}-${m}-${day}`;
-    days.push({ key, month: d.getMonth() });
-  }
-
-  function lvl(c) {
-    if (c === 0) return 0;
-    if (c < maxCount * 0.20) return 1;
-    if (c < maxCount * 0.45) return 2;
-    if (c < maxCount * 0.75) return 3;
-    return 4;
-  }
-
-  // render cells
-  const grid = document.getElementById('hm-grid');
-  if (!grid) return;
-  grid.innerHTML = '';
-  days.forEach(({ key }) => {
     const count = lookup[key] || 0;
-    const cell = document.createElement('div');
-    cell.className = `hm-cell h${lvl(count)}`;
-    cell.onclick = () => {
-      toast(count.toString());
-    };
-    grid.appendChild(cell);
-  });
+    const isToday = key === todayKey;
+    const isPast = d <= today;
 
-  // render month labels
-  const monthsEl = document.getElementById('hm-months');
-  if (!monthsEl) return;
-  monthsEl.innerHTML = '';
-  let lastMonth = -1;
-  for (let w = 0; w < WEEKS; w++) {
-    const m = days[w * 7].month;
-    const lbl = document.createElement('div');
-    lbl.className = 'hm-month';
-    lbl.textContent = (m !== lastMonth) ? MONTHS[m] : '';
-    lastMonth = m;
-    monthsEl.appendChild(lbl);
+    const cell = document.createElement('div');
+    const classes = ['week-cell'];
+    if (count > 0) classes.push('wc-active');
+    if (isToday) classes.push('wc-today');
+    cell.className = classes.join(' ');
+
+    const num = document.createElement('div');
+    num.className = 'week-cell-num' + (count === 0 && !isPast ? ' wc-empty' : '');
+    num.textContent = count > 0 ? count : (isPast ? '0' : '');
+
+    const dayEl = document.createElement('div');
+    dayEl.className = 'week-cell-day';
+    dayEl.textContent = DAYS[d.getDay()];
+
+    cell.appendChild(num);
+    cell.appendChild(dayEl);
+    if (count > 0) cell.onclick = () => toast(count.toString());
+    grid.appendChild(cell);
   }
 }
 
@@ -196,6 +189,6 @@ export async function loadHome() {
     const barKnown    = document.getElementById('bar-known');    if (barKnown)    { barKnown.style.width    = pct(st_known);    barKnown.style.background    = '#30d158'; }
     const barMastered = document.getElementById('bar-mastered'); if (barMastered) { barMastered.style.width = pct(st_mastered); barMastered.style.background = '#bf5af2'; }
 
-    renderHeatmap(init.heatmap || []);
+    renderWeek(init.heatmap || []);
   } catch (e) { console.error('LoadHome failed', e); }
 }
