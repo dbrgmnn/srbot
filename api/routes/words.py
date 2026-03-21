@@ -73,7 +73,7 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         finally:
             await translator.close()
         
-        if not ai_data:
+        if not ai_data or ai_data.get("is_valid") is False:
             return web.json_response({"ok": False, "error": "ai_translation_failed"}, status=422)
 
         word = ai_data["word"]
