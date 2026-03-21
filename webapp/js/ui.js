@@ -40,7 +40,7 @@ function formatTimeLeft(targetDate) {
   if (diff <= 0) return null;
   const hours = Math.floor(diff / (1000 * 60 * 60));
   const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-  return hours > 0 ? `In ${hours}h ${mins}m` : `In ${mins}m`;
+  return hours > 0 ? `in ${hours}h ${mins}m` : `in ${mins}m`;
 }
 
 function updateCountdowns() {

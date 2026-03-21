@@ -8,6 +8,7 @@ const tg = window.Telegram.WebApp;
 tg.ready();
 tg.expand();
 tg.isVerticalSwipesEnabled = false;
+if (tg.lockOrientation) tg.lockOrientation();
 
 // ── Window bindings (HTML onclick attributes) ────────────────────────────────────
 
