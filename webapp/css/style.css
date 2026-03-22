@@ -530,6 +530,30 @@ body.no-nav {
   -webkit-tap-highlight-color: transparent;
   transition: opacity 0.15s;
 }
+.settings-row-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.settings-icon {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.settings-icon svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2.5;
+}
+.settings-icon-lang { color: var(--color-mastered); filter: drop-shadow(0 0 4px rgba(191,90,242,0.3)); }
+.settings-icon-mode { color: var(--accent); filter: drop-shadow(0 0 4px rgba(10,132,255,0.3)); }
+.settings-icon-limit { color: var(--color-known); filter: drop-shadow(0 0 4px rgba(48,209,88,0.3)); }
+.settings-icon-notify { color: var(--color-learning); filter: drop-shadow(0 0 4px rgba(255,159,10,0.3)); }
+.settings-icon-quiet { color: var(--color-new); filter: drop-shadow(0 0 4px rgba(142,142,147,0.3)); }
+
 .settings-row:active, .word-row-content:active { opacity: 0.6; }
 .settings-row:last-child, .word-row:last-child { border-bottom: none; }
 .settings-label { font-size: 16px; color: var(--text); }
