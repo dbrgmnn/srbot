@@ -396,10 +396,11 @@ class WordRepo:
 
     async def search_words(self, user_id: int, language: str, query: str) -> list[dict]:
         """Search for words in the user's dictionary by word or translation."""
-        q = f"%{query}%"
+        q = f"%{query.lower()}%"
         cursor = await self.db.execute(
             """SELECT id, word, translation, example, level FROM words
-                WHERE user_id = ? AND language = ? AND (word LIKE ? OR translation LIKE ?)
+                WHERE user_id = ? AND language = ?
+                AND (LOWER(word) LIKE ? OR LOWER(translation) LIKE ?)
                 ORDER BY word ASC LIMIT 100""",
             (user_id, language, q, q),
         )
