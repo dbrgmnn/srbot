@@ -197,12 +197,18 @@ async function grade(quality) {
     const card = document.getElementById('word-card');
     const isFlipped = card.classList.contains('flipped');
     const baseRot = isFlipped ? 180 : 0;
-    if (quality === 1) card.style.transform = `translate(-1000px, 0) rotateY(${baseRot}deg) rotateZ(-30deg)`;
-    else if (quality === 5) card.style.transform = `translate(1000px, 0) rotateY(${baseRot}deg) rotateZ(30deg)`;
-    else if (quality === 3) card.style.transform = `translate(0, -1000px) rotateY(${baseRot}deg) scale(0.5)`;
+    if (quality === 1) {
+      card.style.transform = `translate(-1000px, 0) rotateY(${baseRot}deg) rotateZ(-30deg)`;
+      tg.HapticFeedback.notificationOccurred('warning');
+    } else if (quality === 5) {
+      card.style.transform = `translate(1000px, 0) rotateY(${baseRot}deg) rotateZ(30deg)`;
+      tg.HapticFeedback.notificationOccurred('success');
+    } else if (quality === 3) {
+      card.style.transform = `translate(0, -1000px) rotateY(${baseRot}deg) scale(0.5)`;
+      tg.HapticFeedback.impactOccurred('medium');
+    }
     card.style.opacity = '0';
 
-    tg.HapticFeedback.notificationOccurred('success');
     sessionIdx++;
     POST('/api/grade', { word_id: word.id, quality }).catch((e) => {
       console.error('Grade failed, word progress may not be saved:', e);

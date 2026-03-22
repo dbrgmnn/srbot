@@ -162,7 +162,11 @@ function _showPickerSheet(title, options, currentValue, onSelect) {
   `).join('');
 
   list.querySelectorAll('.picker-item').forEach(item => {
-    item.onclick = () => { closePicker(); onSelect(item.dataset.value); };
+    item.onclick = () => { 
+      tg.HapticFeedback.selectionChanged();
+      closePicker(); 
+      onSelect(item.dataset.value); 
+    };
   });
 
   document.getElementById('picker-overlay').classList.add('open');

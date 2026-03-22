@@ -2,6 +2,8 @@
 
 let toastTimeout = null;
 
+const tg = window.Telegram.WebApp;
+
 export function toast(msg, type = 'info') {
   const el = document.getElementById('toast');
   if (!el) return;
@@ -10,6 +12,11 @@ export function toast(msg, type = 'info') {
   
   el.innerHTML = msg;
   el.className = `toast toast-${type} show`;
+
+  // Haptics based on type
+  if (type === 'success') tg.HapticFeedback.notificationOccurred('success');
+  else if (type === 'error') tg.HapticFeedback.notificationOccurred('error');
+  else tg.HapticFeedback.impactOccurred('light');
   
   toastTimeout = setTimeout(() => {
     el.classList.remove('show');
