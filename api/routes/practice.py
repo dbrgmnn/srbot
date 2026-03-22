@@ -88,7 +88,7 @@ def setup_routes_practice(app: web.Application, db: aiosqlite.Connection):
         # Fetch current state to determine language and is_new flag
         word = await word_repo.get_word(word_id, user_id)
         if word:
-            is_new = int(old_state.get("repetitions", 0)) == 0
+            is_new = old_state.get("started_at") is None
             config = request.app["config"]
             telegram_id = request["telegram_id"]
             user_repo = UserRepo(db)
