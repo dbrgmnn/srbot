@@ -154,15 +154,13 @@ body.no-nav {
   flex-direction: column;
 }
 .stat-val { 
-  font-size: 28px; 
+  font-size: 18px; 
   font-weight: 700; 
-  letter-spacing: -0.5px; 
-  line-height: 1;
-  transition: font-size 0.2s;
+  letter-spacing: -0.2px; 
+  line-height: 1.2;
   font-variant-numeric: tabular-nums;
 }
 .stat-val.is-timer {
-  font-size: 18px;
   font-weight: 600;
   color: var(--text-secondary);
 }
