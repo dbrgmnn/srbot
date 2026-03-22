@@ -168,16 +168,8 @@ function renderWord() {
   bLvl.textContent = word.level || '';
   bLvl.style.display = word.level ? 'block' : 'none';  
   card.classList.remove('flipped', 'swipe-left', 'swipe-right', 'swipe-up');
-  card.style.transition = 'none';
-  card.style.transform = 'scale(0.8) rotateY(0deg)';
-  card.style.opacity = '0';
-  requestAnimationFrame(() => {
-    setTimeout(() => {
-      card.style.transition = 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1), opacity 0.3s ease';
-      card.style.transform = 'scale(1) rotateY(0deg)';
-      card.style.opacity = '1';
-    }, 0);
-  });
+  card.style.transform = 'rotateY(0deg)';
+  card.style.opacity = '';
 }
 
 // ── Grading ──────────────────────────────────────────────────────────────────
@@ -212,7 +204,7 @@ async function grade(quality) {
       console.error('Grade failed, word progress may not be saved:', e);
       toast(T.GRADE_FAIL, 'error');
     });
-    setTimeout(() => { isGrading = false; renderWord(); }, 400);
+    setTimeout(() => { isGrading = false; renderWord(); }, 300);
   } catch(e) {
     console.error('Grade failed', e);
     isGrading = false;
