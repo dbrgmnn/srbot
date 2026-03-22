@@ -20,9 +20,9 @@
   --glass-border: rgba(255,255,255,0.11);
   --glass-shine:  rgba(255,255,255,0.14);
 
-  --radius-sm:    10px;
+  --radius-sm:    6px;
   --radius-md:    18px;
-  --radius-lg:    26px;
+  --radius-lg:    24px;
   --radius-xl:    50px;
 
   --gap:          20px;
@@ -63,7 +63,7 @@ body.no-nav {
   backdrop-filter: var(--blur);
   -webkit-backdrop-filter: var(--blur);
   border: 1px solid var(--glass-border);
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-lg);
   z-index: 100;
   padding: 6px;
   box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 var(--glass-shine);
@@ -80,7 +80,7 @@ body.no-nav {
   opacity: 0.3;
   cursor: pointer;
   transition: opacity .2s;
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-lg);
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 }
@@ -306,13 +306,16 @@ body.no-nav {
   display: flex;
   justify-content: center;
   gap: 12px;
-  margin: 4px 0 20px;
+  margin: 24px 0 24px;
 }
 .capsule {
-  display: inline-flex;
+  flex: 1;
+  max-width: 200px;
+  display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  padding: 10px 20px;
+  padding: 12px 16px;
   background: var(--glass);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-xl);
@@ -321,9 +324,10 @@ body.no-nav {
   font-weight: 600;
   cursor: pointer;
   transition: opacity 0.15s;
+  white-space: nowrap;
 }
 .capsule:active { opacity: 0.6; }
-.capsule svg { width: 14px; height: 14px; stroke-width: 2.5; }
+.capsule svg { width: 14px; height: 14px; stroke-width: 2.5; flex-shrink: 0; }
 
 .capsule-danger {
   color: #ff453a;
