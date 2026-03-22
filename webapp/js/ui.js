@@ -56,7 +56,7 @@ function updateCountdowns() {
   if (statDue) statDue.textContent = stats.due || 0;
   if (labelDue) {
     const time = stats.due === 0 ? formatTimeLeft(stats.next_due_at) : null;
-    labelDue.textContent = time ? `Review  ${time}` : 'Review';
+    labelDue.textContent = time ? `Review ${time}` : 'Review';
   }
 
   // New
@@ -68,7 +68,7 @@ function updateCountdowns() {
     const time = (availableNew === 0 && stats.st_new > 0)
       ? formatTimeLeft(stats.next_day_start_utc)
       : null;
-    labelNew.textContent = time ? `New  ${time}` : 'New';
+    labelNew.textContent = time ? `New ${time}` : 'New';
   }
 }
 

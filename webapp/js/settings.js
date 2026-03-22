@@ -42,7 +42,7 @@ async function _openLanguagePicker() {
   const languages = resp.result.languages;
   const options = Object.entries(languages).map(([code, meta]) => ({
     value: code,
-    label: meta.word_count > 0 ? `${meta.flag} ${meta.name}  ${meta.word_count}` : `${meta.flag} ${meta.name}`,
+    label: meta.word_count > 0 ? `${meta.flag} ${meta.name} ${meta.word_count}` : `${meta.flag} ${meta.name}`,
   }));
   _showPickerSheet('Active Dictionary', options, state.currentLang, switchLanguage);
 }

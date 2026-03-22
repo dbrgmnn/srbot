@@ -20,6 +20,16 @@
 
   --gap:          16px;
   --blur:         blur(28px) saturate(1.8);
+
+  --row-divider:     rgba(255,255,255,0.08);
+  --text-muted:      rgba(255,255,255,0.45);
+  --text-secondary:  rgba(255,255,255,0.70);
+  --text-faint:      rgba(255,255,255,0.50);
+  --text-subtle:     rgba(255,255,255,0.65);
+  --icon-stroke:     rgba(255,255,255,0.65);
+  --cell-bg:         rgba(255,255,255,0.05);
+  --mark-bg:         rgba(255,255,255,0.15);
+  --sheet-bg:        rgba(20,20,24,0.96);
 }
 
 body {
@@ -59,7 +69,7 @@ body.no-nav {
   padding: 10px 0;
   border: none;
   background: none;
-  color: #ffffff;
+  color: var(--text);
   opacity: 0.3;
   cursor: pointer;
   transition: opacity .2s;
@@ -94,7 +104,7 @@ body.no-nav {
 .header-title {
   font-size: 15px;
   font-weight: 600;
-  color: rgba(255,255,255,0.45);
+  color: var(--text-muted);
   letter-spacing: 0.02em;
 }
 .header-centered { justify-content: center; }
@@ -214,7 +224,7 @@ body.no-nav {
   align-items: center;
   justify-content: center;
   gap: 3px;
-  background: rgba(255,255,255,0.05);
+  background: var(--cell-bg);
   border: 1px solid transparent;
 }
 .week-cell.wc-active {
@@ -266,7 +276,7 @@ body.no-nav {
 .btn:disabled { opacity: 0.35; cursor: not-allowed; }
 .btn-secondary {
   background: var(--glass);
-  color: rgba(255,255,255,0.65);
+  color: var(--text-subtle);
   border-color: var(--glass-border);
 }
 
@@ -324,6 +334,7 @@ body.no-nav {
 .word-card {
   width: 100%;
   max-width: 320px;
+  align-self: stretch;
   flex: 1;
   min-height: 200px;
   max-height: 400px;
@@ -368,7 +379,7 @@ body.no-nav {
 }
 .word-back  { transform: rotateY(180deg); }
 .word-main  { font-size: 22px; font-weight: 800; color: var(--text); letter-spacing: -0.5px; }
-.word-trans { font-size: 22px; color: rgba(255,255,255,0.7); font-weight: 600; }
+.word-trans { font-size: 22px; color: var(--text-secondary); font-weight: 600; }
 .word-example { font-size: 14px; color: var(--hint); margin-top: 20px; line-height: 1.5; }
 
 .word-card.swipe-left::before  { background: rgba(255,69,58,0.12)  !important; border-color: rgba(255,69,58,0.5)  !important; }
@@ -413,7 +424,7 @@ body.no-nav {
   -webkit-tap-highlight-color: transparent;
 }
 .btn-round:active { opacity: .7; }
-.btn-round svg { width: 20px; height: 20px; stroke: rgba(255,255,255,0.65); }
+.btn-round svg { width: 20px; height: 20px; stroke: var(--icon-stroke); }
 
 /* ── Section Titles ── */
 .section-title {
@@ -434,7 +445,7 @@ body.no-nav {
   justify-content: space-between;
   align-items: center;
   padding: 16px 0;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
+  border-bottom: 1px solid var(--row-divider);
   cursor: pointer;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
@@ -500,7 +511,7 @@ body.no-nav {
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-xl);
   padding: 10px 22px;
-  color: rgba(255,255,255,0.92);
+  color: var(--text);
   font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.03em;
@@ -552,7 +563,7 @@ body.no-nav .toast { bottom: calc(28px + env(safe-area-inset-bottom)); }
   max-height: 85vh;
   display: flex;
   flex-direction: column;
-  background: rgba(20,20,24,0.96);
+  background: var(--sheet-bg);
   backdrop-filter: var(--blur);
   -webkit-backdrop-filter: var(--blur);
   border-radius: var(--radius-lg) var(--radius-lg) 0 0;
@@ -588,7 +599,7 @@ body.no-nav .toast { bottom: calc(28px + env(safe-area-inset-bottom)); }
   display: block;
   text-align: center;
   padding: 15px;
-  color: rgba(255,255,255,0.5);
+  color: var(--text-faint);
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
@@ -607,7 +618,7 @@ body.no-nav .toast { bottom: calc(28px + env(safe-area-inset-bottom)); }
 
 /* ── Mark (search highlight) ── */
 mark {
-  background: rgba(255,255,255,0.15);
+  background: var(--mark-bg);
   color: var(--text);
   border-radius: 3px;
   padding: 0 2px;
@@ -624,7 +635,7 @@ mark {
 .picker-trigger-arrow { opacity: 0.3; }
 
 .picker-value {
-  color: rgba(255,255,255,0.5);
+  color: var(--text-faint);
   font-size: 14px;
   font-weight: 500;
   display: flex;
@@ -667,13 +678,13 @@ mark {
 }
 .picker-item:active { opacity: 0.6; }
 .picker-item.selected {
-  background: rgba(255,255,255,0.1);
+  background: var(--glass-mid);
   border-color: var(--glass-border);
   color: var(--text);
   font-weight: 600;
 }
 .picker-item-check {
-  color: rgba(255,255,255,0.6);
+  color: var(--text-subtle);
   font-size: 16px;
   font-weight: 600;
 }
@@ -688,53 +699,27 @@ mark {
 
 /* ── Light theme overrides ── */
 body.theme-light {
-  --glass:        rgba(0,0,0,0.06);
-  --glass-mid:    rgba(0,0,0,0.09);
-  --glass-border: rgba(0,0,0,0.10);
-  --glass-shine:  rgba(0,0,0,0.06);
+  --glass:           rgba(0,0,0,0.06);
+  --glass-mid:       rgba(0,0,0,0.09);
+  --glass-border:    rgba(0,0,0,0.10);
+  --glass-shine:     rgba(0,0,0,0.06);
+  --row-divider:     rgba(0,0,0,0.08);
+  --text-muted:      var(--hint);
+  --text-secondary:  var(--hint);
+  --text-faint:      var(--hint);
+  --text-subtle:     var(--hint);
+  --icon-stroke:     var(--text);
+  --cell-bg:         rgba(0,0,0,0.05);
+  --mark-bg:         rgba(0,0,0,0.10);
+  --sheet-bg:        var(--bg);
 }
 
-/* Nav */
-body.theme-light .nav-btn          { color: var(--text); }
-
-/* Buttons */
-body.theme-light .btn-secondary    { color: var(--hint); }
-body.theme-light .btn-round svg    { stroke: var(--text); opacity: 0.7; }
-
-/* Header */
-body.theme-light .header-title     { color: var(--hint); }
-
-/* Practice card */
-body.theme-light .word-trans       { color: var(--hint); }
+/* Practice card shadow */
 body.theme-light .word-card::before {
   box-shadow: 0 24px 48px rgba(0,0,0,0.10), inset 0 1px 0 var(--glass-shine);
 }
 
-/* Picker */
-body.theme-light .picker-value        { color: var(--hint); }
-body.theme-light .picker-item-check   { color: var(--accent); }
-body.theme-light .picker-item.selected { background: rgba(0,0,0,0.08); }
-
-/* File input */
-body.theme-light .file-input-label { color: var(--hint); }
-
-/* Toast */
-body.theme-light .toast            { color: var(--text); }
-
-/* Edit / Picker sheet */
-body.theme-light .edit-sheet       { background: var(--bg); border-top-color: var(--glass-border); }
-
-/* Search highlight */
-body.theme-light mark              { background: rgba(0,0,0,0.10); }
-
-/* Settings row dividers */
-body.theme-light .settings-row,
-body.theme-light .word-row         { border-bottom-color: rgba(0,0,0,0.08); }
-
-/* Week grid empty cells */
-body.theme-light .week-cell        { background: rgba(0,0,0,0.05); }
-
-/* Swipe color overlays on card */
+/* Swipe color overlays */
 body.theme-light .word-card.swipe-left::before  { background: rgba(255,69,58,0.10)  !important; }
 body.theme-light .word-card.swipe-right::before { background: rgba(48,209,88,0.10)  !important; }
 body.theme-light .word-card.swipe-up::before    { background: rgba(255,214,10,0.10) !important; }

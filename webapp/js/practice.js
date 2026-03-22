@@ -149,9 +149,6 @@ function renderWord() {
   const word = sessionWords[sessionIdx];
   const progEl = document.getElementById('practice-progress');
   if (progEl) progEl.textContent = `${sessionIdx + 1} / ${sessionWords.length}`;
-  const barEl = document.getElementById('practice-bar');
-  if (barEl) barEl.style.width = `${Math.round((sessionIdx / sessionWords.length) * 100)}%`;
-
   const typeEl = document.getElementById('practice-type');
   if (typeEl) {
     const isReview = !!word.started_at;
@@ -174,11 +171,13 @@ function renderWord() {
   card.style.transition = 'none';
   card.style.transform = 'scale(0.8) rotateY(0deg)';
   card.style.opacity = '0';
-  setTimeout(() => {
-    card.style.transition = 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1), opacity 0.3s ease';
-    card.style.transform = 'scale(1) rotateY(0deg)';
-    card.style.opacity = '1';
-  }, 10);
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      card.style.transition = 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1), opacity 0.3s ease';
+      card.style.transform = 'scale(1) rotateY(0deg)';
+      card.style.opacity = '1';
+    });
+  });
 }
 
 // ── Grading ──────────────────────────────────────────────────────────────────
@@ -259,9 +258,8 @@ export function playAudio(e) {
 
   const synth = window.speechSynthesis;
   synth.cancel();
-  synth.resume();
   const msg = new SpeechSynthesisUtterance(text);
-  msg.lang = state.ttsCode || 'en-US';
+  msg.lang = state.ttsCode || 'de-DE';
   msg.rate = 0.85;
   synth.speak(msg);
 }
