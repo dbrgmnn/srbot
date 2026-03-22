@@ -171,10 +171,9 @@ function renderWord() {
   card.style.transition = 'none';
   card.style.opacity = '0';
   card.style.transform = 'rotateY(0deg)';
-  requestAnimationFrame(() => {
-    card.style.transition = '';
-    card.style.opacity = '1';
-  });
+  void card.offsetHeight; // force reflow — fixes Android Chrome style batching
+  card.style.transition = '';
+  card.style.opacity = '1';
 }
 
 // ── Grading ──────────────────────────────────────────────────────────────────
