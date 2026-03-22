@@ -1,10 +1,21 @@
-// ── Toast function ────────────────────────────────────────────────────────
+const tg = window.Telegram.WebApp;
 
 let toastTimeout = null;
 
-const tg = window.Telegram.WebApp;
+/**
+ * Main notification dispatcher
+ * @param {string} msg - Message to show
+ * @param {'info'|'success'|'error'} type - Style of notification
+ * @param {boolean} native - Force native Telegram Alert for error/success
+ */
+export function toast(msg, type = 'info', native = false) {
+  // Use native Telegram Alert for critical errors or forced native
+  if (native || (type === 'error' && msg.length > 50)) {
+    tg.showAlert(msg);
+    if (type === 'error') tg.HapticFeedback.notificationOccurred('error');
+    return;
+  }
 
-export function toast(msg, type = 'info') {
   const el = document.getElementById('toast');
   if (!el) return;
   
@@ -13,7 +24,7 @@ export function toast(msg, type = 'info') {
   el.innerHTML = msg;
   el.className = `toast toast-${type} show`;
 
-  // Haptics based on type
+  // Haptics
   if (type === 'success') tg.HapticFeedback.notificationOccurred('success');
   else if (type === 'error') tg.HapticFeedback.notificationOccurred('error');
   else tg.HapticFeedback.impactOccurred('light');
@@ -21,7 +32,7 @@ export function toast(msg, type = 'info') {
   toastTimeout = setTimeout(() => {
     el.classList.remove('show');
     toastTimeout = null;
-  }, 3000);
+  }, 2500); // Slightly faster for native feel
 }
 
 // ── Shared base messages ──────────────────────────────────────────────────

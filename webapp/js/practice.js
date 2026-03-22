@@ -266,16 +266,22 @@ export function playAudio(e) {
   synth.speak(msg);
 }
 
-// ── Session toast ────────────────────────────────────────────────────────────
+// ── Session popup ────────────────────────────────────────────────────────────
 
-function toastSession(good, hard, again) {
-  const msg = [
-    again > 0 ? `<span style="color:#ff453a">${again}</span>` : null,
-    hard  > 0 ? `<span style="color:#ffd60a">${hard}</span>`  : null,
-    good  > 0 ? `<span style="color:#30d158">${good}</span>`  : null,
-  ].filter(Boolean).join('&nbsp;&nbsp;');
-  
-  toast(msg, 'info');
+function showSessionPopup(good, hard, again) {
+  const parts = [];
+  if (good > 0)  parts.push(`✅ ${good} good`);
+  if (hard > 0)  parts.push(`🟡 ${hard} hard`);
+  if (again > 0) parts.push(`❌ ${again} again`);
+
+  tg.showPopup({
+    title: 'Session Complete',
+    message: parts.join('\n') || 'Great job!',
+    buttons: [
+      { id: 'ok', type: 'default', text: 'Done' }
+    ]
+  });
+  tg.HapticFeedback.notificationOccurred('success');
 }
 
 // ── Exit ─────────────────────────────────────────────────────────────────────
@@ -284,7 +290,7 @@ export function exitPractice() {
   isGrading = false;
   const total = sessionStats.good + sessionStats.hard + sessionStats.again;
   if (total > 0) {
-    toastSession(sessionStats.good, sessionStats.hard, sessionStats.again);
+    showSessionPopup(sessionStats.good, sessionStats.hard, sessionStats.again);
     state.currentStats = null; // Trigger stats refresh
   }
   showScreen('home');
