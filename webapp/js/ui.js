@@ -133,65 +133,94 @@ function renderWeek(data) {
   }
 }
 
+// ── State Subscriptions ───────────────────────────────────────────────────
+
+function initSubscriptions() {
+  if (window._subsInit) return;
+  window._subsInit = true;
+
+  state.subscribe('currentStats', (stats) => {
+    if (stats === null) {
+      loadHome();
+    } else {
+      updateCountdowns();
+      renderStats();
+    }
+  });
+
+  state.subscribe('sessionTotal', (total) => {
+    const btn = document.getElementById('btn-practice');
+    if (btn) {
+      btn.textContent = total === 0 ? 'Nothing to practice' : 'Practice';
+      btn.disabled = total === 0;
+    }
+  });
+
+  state.subscribe('currentLang', () => {
+    // Refresh home and settings when language changes
+    loadHome();
+  });
+}
+
+function renderStats() {
+  const stats = state.currentStats;
+  if (!stats) return;
+
+  const st_new      = stats.st_new      || 0;
+  const st_learning  = stats.st_learning  || 0;
+  const st_known     = stats.st_known     || 0;
+  const st_mastered  = stats.st_mastered  || 0;
+  const total = st_new + st_learning + st_known + st_mastered;
+
+  const elNew      = document.getElementById('count-new');      if (elNew)      elNew.textContent      = st_new;
+  const elLearning = document.getElementById('count-learning'); if (elLearning) elLearning.textContent = st_learning;
+  const elKnown    = document.getElementById('count-known');    if (elKnown)    elKnown.textContent    = st_known;
+  const elMastered = document.getElementById('count-mastered'); if (elMastered) elMastered.textContent = st_mastered;
+  const elTotal    = document.getElementById('count-total');    if (elTotal)    elTotal.textContent    = total;
+
+  // bar widths
+  const pct = (n) => total > 0 ? `${(n / total * 100).toFixed(1)}%` : '0%';
+  const barNew      = document.getElementById('bar-new');      if (barNew)      { barNew.style.width      = pct(st_new);      barNew.style.background      = '#8e8e93'; }
+  const barLearning = document.getElementById('bar-learning'); if (barLearning) { barLearning.style.width = pct(st_learning); barLearning.style.background = '#ff9f0a'; }
+  const barKnown    = document.getElementById('bar-known');    if (barKnown)    { barKnown.style.width    = pct(st_known);    barKnown.style.background    = '#30d158'; }
+  const barMastered = document.getElementById('bar-mastered'); if (barMastered) { barMastered.style.width = pct(st_mastered); barMastered.style.background = '#bf5af2'; }
+}
+
 // ── Home screen ───────────────────────────────────────────────────────────
 
 export async function loadHome() {
+  initSubscriptions();
   try {
     const resp = await GET('/api/init');
     const init = resp.result;
-    const stats = init.stats;
-    const settings = init.settings;
-
-    state.currentStats = stats;
-    state.currentSettings = settings;
-    state.practiceMode = settings.practice_mode;
-
+    
+    // This will trigger all subscriptions automatically
+    state.languages = init.languages;
+    state.ttsCode = init.tts_code;
+    
     if (init.limits) {
       state.min_daily_limit = init.limits.min_daily_limit;
       state.max_daily_limit = init.limits.max_daily_limit;
       state.min_notify_interval = init.limits.min_notify_interval;
       state.max_notify_interval = init.limits.max_notify_interval;
     }
-    if (init.languages) state.languages = init.languages;
-    if (settings.language) setLanguage(settings.language);
-    if (init.tts_code) state.ttsCode = init.tts_code;
 
+    state.currentSettings = init.settings;
+    state.practiceMode = init.settings.practice_mode;
+
+    const stats = init.stats;
     const due = stats.due || 0;
     const newWords = stats.new || 0;
     const todayDone = stats.today_new || 0;
-    const limit = settings.daily_limit;
+    const limit = init.settings.daily_limit;
     const availableNew = Math.max(0, limit - todayDone);
-    const sessionTotal = due + Math.min(newWords, availableNew);
+    
+    state.sessionTotal = due + Math.min(newWords, availableNew);
+    state.currentStats = stats; // triggers renderStats and updateCountdowns
 
-    updateCountdowns();
     if (!countdownInterval) {
       countdownInterval = setInterval(updateCountdowns, 30000);
     }
-
-    const btn = document.getElementById('btn-practice');
-    if (btn) {
-      btn.textContent = sessionTotal === 0 ? 'Nothing to practice' : 'Practice';
-      btn.disabled = sessionTotal === 0;
-    }
-
-    const st_new      = stats.st_new      || 0;
-    const st_learning  = stats.st_learning  || 0;
-    const st_known     = stats.st_known     || 0;
-    const st_mastered  = stats.st_mastered  || 0;
-    const total = st_new + st_learning + st_known + st_mastered;
-
-    const elNew      = document.getElementById('count-new');      if (elNew)      elNew.textContent      = st_new;
-    const elLearning = document.getElementById('count-learning'); if (elLearning) elLearning.textContent = st_learning;
-    const elKnown    = document.getElementById('count-known');    if (elKnown)    elKnown.textContent    = st_known;
-    const elMastered = document.getElementById('count-mastered'); if (elMastered) elMastered.textContent = st_mastered;
-    const elTotal    = document.getElementById('count-total');    if (elTotal)    elTotal.textContent    = total;
-
-    // bar widths
-    const pct = (n) => total > 0 ? `${(n / total * 100).toFixed(1)}%` : '0%';
-    const barNew      = document.getElementById('bar-new');      if (barNew)      { barNew.style.width      = pct(st_new);      barNew.style.background      = '#8e8e93'; }
-    const barLearning = document.getElementById('bar-learning'); if (barLearning) { barLearning.style.width = pct(st_learning); barLearning.style.background = '#ff9f0a'; }
-    const barKnown    = document.getElementById('bar-known');    if (barKnown)    { barKnown.style.width    = pct(st_known);    barKnown.style.background    = '#30d158'; }
-    const barMastered = document.getElementById('bar-mastered'); if (barMastered) { barMastered.style.width = pct(st_mastered); barMastered.style.background = '#bf5af2'; }
 
     renderWeek(init.heatmap || []);
   } catch (e) { console.error('LoadHome failed', e); }

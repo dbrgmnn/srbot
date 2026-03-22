@@ -1,22 +1,5 @@
 const tg = window.Telegram.WebApp;
-
-// ── State ───────────────────────────────────────────────────────────────────────────────
-
-export let state = {
-  currentLang: localStorage.getItem('currentLang') || (navigator.language || 'en').split('-')[0],
-  practiceMode: null,
-  ttsCode: 'en-US',
-  languages: null,
-  min_daily_limit: null,
-  max_daily_limit: null,
-  min_notify_interval: null,
-  max_notify_interval: null
-};
-
-export function setLanguage(lang) {
-  state.currentLang = lang;
-  localStorage.setItem('currentLang', lang);
-}
+import { state } from './state.js';
 
 // ── HTTP client ───────────────────────────────────────────────────────────────────
 
@@ -60,3 +43,4 @@ export const GET   = (path)       => api('GET',    path);
 export const POST  = (path, body) => api('POST',   path, body);
 export const DEL   = (path)       => api('DELETE', path);
 export const PATCH = (path, body) => api('PATCH',  path, body);
+export { state, setLanguage } from './state.js';

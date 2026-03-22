@@ -77,7 +77,9 @@ export async function submitWords() {
       wordEl.value = ''; transEl.value = ''; exEl.value = ''; levelEl.value = '';
       const levelDisp = document.getElementById('add-level-display');
       if (levelDisp) { levelDisp.textContent = 'Level'; levelDisp.classList.add('picker-trigger-placeholder'); }
-      loadHome();
+      
+      // Invalidate stats to trigger reload via ui.js subscription
+      state.currentStats = null; 
     } else {
       toast(T.WORD_DUPLICATE, 'error');
     }
@@ -95,7 +97,10 @@ export async function handleFileUpload(input) {
     if (!words.length) { toast(T.NO_WORDS_CSV, 'error'); return; }
     try {
       const res = await POST('/api/words', { words });
-      if (res.result && res.result.added) { toast(T.CSV_ADDED(res.result.added), 'success'); loadHome(); }
+      if (res.result && res.result.added) { 
+        toast(T.CSV_ADDED(res.result.added), 'success'); 
+        state.currentStats = null;
+      }
       else { toast(T.WORD_DUPLICATE, 'error'); }
     } catch (e) { toast(T.CSV_FAIL, 'error'); }
   };
@@ -157,7 +162,7 @@ export async function saveEdit() {
     await PATCH(`/api/words/${editWordId}`, { word, translation: trans, example: ex, level });
     closeEdit();
     toast(T.WORD_SAVED, 'success');
-    loadHome();
+    state.currentStats = null;
   } catch(e) {
     toast(e.message === '409' ? T.WORD_DUPLICATE : T.WORD_SAVE_FAIL, 'error');
   } finally { isSubmitting = false; }
@@ -166,7 +171,7 @@ export async function saveEdit() {
 export function clearAllWords() {
   tg.showConfirm(`Delete all ${state.currentLang.toUpperCase()} words?`, async (ok) => {
     if (ok) {
-      try { await DEL('/api/words/all'); toast(T.CLEARED, 'success'); loadHome(); }
+      try { await DEL('/api/words/all'); toast(T.CLEARED, 'success'); state.currentStats = null; }
       catch(e) { toast(T.CLEAR_FAIL, 'error'); }
     }
   });
@@ -232,6 +237,6 @@ async function deleteWord(id) {
   try {
     await DEL(`/api/words/${id}`);
     document.getElementById(`wr-${id}`)?.remove();
-    loadHome();
+    state.currentStats = null;
   } catch(e) { toast(T.DELETE_FAIL, 'error'); }
 }

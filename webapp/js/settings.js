@@ -17,6 +17,28 @@ const MODE_LABELS = {
   'translation_to_word': 'Translation → Word',
 };
 
+// ── State Subscriptions ───────────────────────────────────────────────────
+
+function initSubscriptions() {
+  if (window._settingsSubsInit) return;
+  window._settingsSubsInit = true;
+
+  state.subscribe('currentSettings', (s) => {
+    if (s) _fillSettingsFromState();
+  });
+
+  state.subscribe('languages', () => {
+    const s = state.currentSettings;
+    if (s && s.language) {
+      const langDisplay = document.getElementById('language-display');
+      if (langDisplay) {
+        const meta = getLanguages()[s.language];
+        langDisplay.textContent = meta ? `${meta.flag} ${meta.name}` : s.language.toUpperCase();
+      }
+    }
+  });
+}
+
 // ── Shared render helpers ─────────────────────────────────────────────────
 
 function _renderIntervalEl(el, val) {
@@ -29,6 +51,7 @@ function _renderIntervalEl(el, val) {
 // ── Universal Picker ──────────────────────────────────────────────────────
 
 export function openPicker(type, context = null) {
+  initSubscriptions();
   if (type === 'language')                      _openLanguagePicker();
   else if (type === 'practice_mode')            _openPracticeModePicker();
   else if (type === 'level')                    _openLevelPicker(context);
@@ -210,57 +233,37 @@ function _fillSettingsFromState() {
 }
 
 export async function loadSettings() {
+  initSubscriptions();
   _fillSettingsFromState();
   try {
     const resp = await GET('/api/settings');
     const s = resp.result;
-
-    if (s.limits) {
-      state.min_daily_limit = s.limits.min_daily_limit;
-      state.max_daily_limit = s.limits.max_daily_limit;
-      state.min_notify_interval = s.limits.min_notify_interval;
-      state.max_notify_interval = s.limits.max_notify_interval;
-    }
-
-    // sync timezone automatically on every settings open
+    
+    // Automatic sync timezone
     const deviceTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
     if (deviceTz && s.timezone !== deviceTz) {
-      console.log(`[settings] timezone changed: ${s.timezone} → ${deviceTz}`);
       await saveSetting('timezone', deviceTz, false);
     }
 
-    const langMeta = getLanguages()[s.language];
-    const langDisplay = document.getElementById('language-display');
-    if (langDisplay) langDisplay.textContent = langMeta ? `${langMeta.flag} ${langMeta.name}` : s.language.toUpperCase();
-
-    const modeDisplay = document.getElementById('practice-mode-display');
-    if (modeDisplay) modeDisplay.textContent = MODE_LABELS[s.practice_mode] || s.practice_mode;
-
-    state.practiceMode = s.practice_mode;
-
-    const quietStart = document.getElementById('set-quiet-start');
-    const quietEnd = document.getElementById('set-quiet-end');
-    const quietDisplay = document.getElementById('quiet-hours-display');
-    if (quietStart) quietStart.value = s.quiet_start;
-    if (quietEnd) quietEnd.value = s.quiet_end;
-    if (quietDisplay) quietDisplay.textContent = `${s.quiet_start} — ${s.quiet_end}`;
-
-    const limitEl = document.getElementById('set-limit-val');
-    if (limitEl) limitEl.textContent = s.daily_limit;
-
-    const notifyEl = document.getElementById('set-notify-interval');
-    if (notifyEl) _renderIntervalEl(notifyEl, s.notification_interval_minutes);
-
+    state.currentSettings = s; // triggers _fillSettingsFromState through subscription
   } catch (e) { console.error(e); }
 }
 
 export async function saveSetting(key, val, showToast = true) {
-  // val can be a scalar or an object (e.g. quiet_hours: { quiet_start, quiet_end })
   const body = (typeof val === 'object' && val !== null) ? val : { [key]: val };
   try {
-    await POST('/api/settings', body);
+    const res = await POST('/api/settings', body);
     if (showToast) toast(T.SAVED, 'success');
-    if (key === 'practice_mode' || key === 'daily_limit' || key === 'timezone') loadHome();
+    
+    // Optimization: Update state locally to trigger subscriptions immediately
+    const updatedSettings = { ...state.currentSettings, ...body };
+    state.currentSettings = updatedSettings;
+    
+    // If these settings change, we need new stats
+    if (key === 'practice_mode' || key === 'daily_limit' || key === 'timezone') {
+       // stats will be reloaded via loadHome if needed, 
+       // but we can just wait for the next loadHome call from subscription
+    }
   } catch (e) { if (showToast) toast(T.SAVE_FAIL, 'error'); }
 }
 
@@ -270,16 +273,13 @@ export async function switchLanguage(lang) {
   if (state.currentLang === lang) return;
   try {
     setLanguage(lang);
-    await POST('/api/settings', { language: lang });
-    await Promise.all([loadHome(), loadSettings()]);
+    const res = await POST('/api/settings', { language: lang });
     toast(T.LANG_SWITCHED(lang.toUpperCase()), 'success');
   } catch (e) { toast(T.LANG_FAIL, 'error'); }
 }
 
 export function setPracticeMode(mode) {
   if (state.practiceMode === mode) return;
-  state.practiceMode = mode;
+  state.practiceMode = mode; // this will trigger any subscription on practiceMode
   saveSetting('practice_mode', mode);
-  const modeDisplay = document.getElementById('practice-mode-display');
-  if (modeDisplay) modeDisplay.textContent = MODE_LABELS[mode] || mode;
 }
