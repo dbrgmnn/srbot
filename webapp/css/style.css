@@ -324,7 +324,9 @@ body.no-nav {
 .word-card {
   width: 100%;
   max-width: 320px;
-  height: 400px;
+  flex: 1;
+  min-height: 200px;
+  max-height: 400px;
   background: transparent;
   border-radius: 32px;
   position: relative;
