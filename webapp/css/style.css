@@ -159,6 +159,7 @@ body.no-nav {
   letter-spacing: -0.5px; 
   line-height: 1;
   transition: font-size 0.2s;
+  font-variant-numeric: tabular-nums;
 }
 .stat-val.is-timer {
   font-size: 18px;
@@ -182,26 +183,27 @@ body.no-nav {
 .progress-total {
   font-size: 11px;
   font-weight: 700;
-  color: var(--hint);
+  color: var(--text-faint);
   text-transform: uppercase;
   letter-spacing: 0.07em;
   margin-bottom: 14px;
   text-align: center;
+  font-variant-numeric: tabular-nums;
 }
 .progress-total span {
-  color: var(--text);
+  color: var(--text-faint);
+  opacity: 0.8;
 }
 .progress-bar {
   height: 6px;
-  border-radius: 3px;
+  border-radius: var(--radius-sm);
   display: flex;
-  gap: 2px;
   overflow: hidden;
   margin-bottom: 14px;
+  background: var(--cell-bg);
 }
 .progress-bar-seg {
   height: 100%;
-  border-radius: 3px;
   transition: width 0.4s ease;
 }
 .progress-legend {
@@ -227,6 +229,7 @@ body.no-nav {
   font-size: 14px;
   font-weight: 700;
   letter-spacing: -0.3px;
+  font-variant-numeric: tabular-nums;
 }
 
 /* ── Week activity grid ── */
@@ -242,7 +245,7 @@ body.no-nav {
 }
 .week-cell {
   aspect-ratio: 1;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -251,18 +254,19 @@ body.no-nav {
   background: var(--cell-bg);
   border: 1px solid transparent;
 }
-.week-cell.wc-active {
-  background: rgba(48,209,88,0.12);
-  border-color: rgba(48,209,88,0.20);
-}
+.week-cell.wc-lvl-1 { background: rgba(48,209,88,0.08); border-color: rgba(48,209,88,0.10); }
+.week-cell.wc-lvl-2 { background: rgba(48,209,88,0.18); border-color: rgba(48,209,88,0.15); }
+.week-cell.wc-lvl-3 { background: rgba(48,209,88,0.30); border-color: rgba(48,209,88,0.20); }
+
 .week-cell.wc-today {
-  border-color: rgba(48,209,88,0.45);
+  border-color: rgba(48,209,88,0.55);
 }
 .week-cell-num {
   font-size: 11px;
   font-weight: 700;
   color: var(--text);
   line-height: 1;
+  font-variant-numeric: tabular-nums;
 }
 .week-cell-day {
   font-size: 7px;

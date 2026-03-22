@@ -106,7 +106,11 @@ function renderWeek(data) {
 
     const cell = document.createElement('div');
     const classes = ['week-cell'];
-    if (count > 0) classes.push('wc-active');
+    if (count > 0) {
+      if (count <= 5) classes.push('wc-lvl-1');
+      else if (count <= 15) classes.push('wc-lvl-2');
+      else classes.push('wc-lvl-3');
+    }
     if (isToday) classes.push('wc-today');
     cell.className = classes.join(' ');
 
