@@ -283,6 +283,9 @@ function toastSession(good, hard, again) {
 export function exitPractice() {
   isGrading = false;
   const total = sessionStats.good + sessionStats.hard + sessionStats.again;
-  if (total > 0) toastSession(sessionStats.good, sessionStats.hard, sessionStats.again);
+  if (total > 0) {
+    toastSession(sessionStats.good, sessionStats.hard, sessionStats.again);
+    state.currentStats = null; // Trigger stats refresh
+  }
   showScreen('home');
 }
