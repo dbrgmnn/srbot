@@ -174,16 +174,21 @@ body.no-nav {
   justify-content: center;
   flex-shrink: 0;
 }
-.stat-pill-icon svg { width: 20px; height: 20px; stroke-width: 2.5; }
+.stat-pill-icon svg { 
+  width: 20px; 
+  height: 20px; 
+  stroke: currentColor;
+  stroke-width: 2.5; 
+}
 .stat-pill-icon-review { 
   background: none; 
-  stroke: var(--color-review); 
-  filter: drop-shadow(0 0 4px rgba(255,159,10,0.3));
+  color: var(--color-review);
+  filter: drop-shadow(0 0 5px rgba(255,159,10,0.4));
 }
 .stat-pill-icon-new { 
   background: none; 
-  stroke: var(--color-known); 
-  filter: drop-shadow(0 0 4px rgba(48,209,88,0.3));
+  color: var(--color-known);
+  filter: drop-shadow(0 0 5px rgba(48,209,88,0.4));
 }
 
 /* ── Progress block ── */
