@@ -40,7 +40,7 @@ function formatTimeLeft(targetDate) {
   if (diff <= 0) return null;
   const hours = Math.floor(diff / (1000 * 60 * 60));
   const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-  return hours > 0 ? `in ${hours}h ${mins}m` : `in ${mins}m`;
+  return hours > 0 ? `In ${hours}h ${mins}m` : `In ${mins}m`;
 }
 
 function updateCountdowns() {
@@ -48,27 +48,34 @@ function updateCountdowns() {
   if (!stats || !state.currentSettings) return;
 
   const statDue  = document.getElementById('stat-due');
-  const labelDue = document.getElementById('label-due');
   const statNew  = document.getElementById('stat-new');
-  const labelNew = document.getElementById('label-new');
 
   // Review
-  if (statDue) statDue.textContent = stats.due || 0;
-  if (labelDue) {
-    const time = stats.due === 0 ? formatTimeLeft(stats.next_due_at) : null;
-    labelDue.textContent = time ? `Review ${time}` : 'Review';
+  const dueCount = stats.due || 0;
+  if (statDue) {
+    if (dueCount > 0) {
+      statDue.textContent = dueCount;
+      statDue.classList.remove('is-timer');
+    } else {
+      const time = formatTimeLeft(stats.next_due_at);
+      statDue.textContent = time || '0';
+      statDue.classList.toggle('is-timer', !!time);
+    }
   }
 
   // New
   const limit = state.currentSettings.daily_limit;
   const todayDone = stats.today_new || 0;
   const availableNew = Math.max(0, limit - todayDone);
-  if (statNew) statNew.textContent = availableNew;
-  if (labelNew) {
-    const time = (availableNew === 0 && stats.st_new > 0)
-      ? formatTimeLeft(stats.next_day_start_utc)
-      : null;
-    labelNew.textContent = time ? `New ${time}` : 'New';
+  if (statNew) {
+    if (availableNew > 0 || stats.st_new === 0) {
+      statNew.textContent = availableNew;
+      statNew.classList.remove('is-timer');
+    } else {
+      const time = formatTimeLeft(stats.next_day_start_utc);
+      statNew.textContent = time || '0';
+      statNew.classList.toggle('is-timer', !!time);
+    }
   }
 }
 
