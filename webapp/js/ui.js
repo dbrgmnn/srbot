@@ -104,6 +104,13 @@ function renderWeek(data) {
     const count = lookup[key] || 0;
     const isToday = key === todayKey;
 
+    const col = document.createElement('div');
+    col.className = 'week-day-column';
+
+    const dayEl = document.createElement('div');
+    dayEl.className = 'week-cell-day';
+    dayEl.textContent = DAYS[d.getDay()];
+
     const cell = document.createElement('div');
     const classes = ['week-cell'];
     if (count > 0) {
@@ -118,14 +125,11 @@ function renderWeek(data) {
     num.className = 'week-cell-num';
     num.textContent = count > 0 ? count : '0';
 
-    const dayEl = document.createElement('div');
-    dayEl.className = 'week-cell-day';
-    dayEl.textContent = DAYS[d.getDay()];
-
     cell.appendChild(num);
-    cell.appendChild(dayEl);
+    col.appendChild(dayEl);
+    col.appendChild(cell);
 
-    grid.appendChild(cell);
+    grid.appendChild(col);
   }
 }
 
