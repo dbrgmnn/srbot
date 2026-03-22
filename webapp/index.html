@@ -16,7 +16,6 @@
       <div class="header-title">Overview</div>
     </div>
 
-    <div class="section-title">Sessions</div>
     <div class="stats-grid">
       <div class="stat-pill">
         <div class="stat-pill-left">
@@ -24,7 +23,7 @@
           <div class="stat-label" id="label-due">Review</div>
         </div>
         <div class="stat-pill-icon stat-pill-icon-review">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#ff9f0a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.95"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="#ff9f0a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.95"/></svg>
         </div>
       </div>
       <div class="stat-pill">
@@ -33,12 +32,11 @@
           <div class="stat-label" id="label-new">New</div>
         </div>
         <div class="stat-pill-icon stat-pill-icon-new">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#30d158" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="#30d158" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         </div>
       </div>
     </div>
 
-    <div class="section-title">Progress</div>
     <div class="card">
       <div class="progress-total">TOTAL <span id="count-total">0</span></div>
       <div class="progress-bar">
@@ -65,10 +63,7 @@
           <span class="progress-legend-lbl">MASTERED</span>
         </div>
       </div>
-    </div>
-
-    <div class="section-title">Activity</div>
-    <div class="card">
+      <div class="card-sep"></div>
       <div class="week-grid" id="week-grid"></div>
     </div>
 
@@ -118,19 +113,26 @@
     <div class="header">
       <div class="header-title">Add Word</div>
     </div>
-    <div class="add-form">
-      <input type="text" id="add-word" class="form-input" placeholder="Word">
-      <input type="text" id="add-translation" class="form-input" placeholder="Translate">
-      <input type="text" id="add-example" class="form-input" placeholder="Example">
-      <div id="add-level-trigger" class="form-input picker-trigger" onclick="openPicker('level', 'add')">
-        <span id="add-level-display" class="picker-trigger-placeholder">Level</span>
-        <span class="picker-trigger-arrow">›</span>
+    <div class="card settings-group">
+      <div class="add-form">
+        <input type="text" id="add-word" class="form-input" placeholder="Word">
+        <input type="text" id="add-translation" class="form-input" placeholder="Translate">
+        <input type="text" id="add-example" class="form-input" placeholder="Example">
+        <div id="add-level-trigger" class="form-input picker-trigger" onclick="openPicker('level', 'add')">
+          <span id="add-level-display" class="picker-trigger-placeholder">Level</span>
+          <span class="picker-trigger-arrow">›</span>
+        </div>
+        <input type="hidden" id="add-level" value="">
       </div>
-      <input type="hidden" id="add-level" value="">
-      <button class="btn" onclick="submitWords()">Add</button>
     </div>
+    <button class="btn" onclick="submitWords()">Add</button>
     
-    <label class="file-input-label" for="file-input">Upload CSV</label>
+    <div class="capsule-wrapper">
+      <label class="capsule" for="file-input">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Upload CSV
+      </label>
+    </div>
     <input type="file" id="file-input" accept=".csv,.txt" onchange="handleFileUpload(this)">
   </div>
 
@@ -152,8 +154,6 @@
       <div class="header-title">Settings</div>
     </div>
 
-    <!-- Section: Dictionary -->
-    <div class="section-title">Dictionary</div>
     <div class="card settings-group">
       <div class="settings-row" onclick="openPicker('language')">
         <div class="settings-label">Active Dictionary</div>
@@ -171,8 +171,6 @@
       </div>
     </div>
 
-    <!-- Section: Reminders -->
-    <div class="section-title">Reminders</div>
     <div class="card settings-group">
       <div class="settings-row" onclick="openPicker('notification_interval_minutes')">
         <div class="settings-label">Frequency</div>
@@ -187,12 +185,10 @@
       <input type="hidden" id="set-quiet-end" value="08:00">
     </div>
 
-    <!-- Section: Maintenance -->
-    <div class="section-title">Data Management</div>
-    <div class="card settings-group">
-      <div class="settings-row" onclick="shareWords()">
-        <div class="settings-label">Export dictionary</div>
-        <div class="picker-value"></div>
+    <div class="capsule-wrapper">
+      <div class="capsule" onclick="shareWords()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export dictionary
       </div>
     </div>
 

@@ -163,27 +163,28 @@ body.no-nav {
 
 /* ── Progress block ── */
 .progress-total {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
   color: var(--hint);
   text-transform: uppercase;
   letter-spacing: 0.07em;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
+  text-align: center;
 }
 .progress-total span {
   color: var(--text);
 }
 .progress-bar {
-  height: 8px;
-  border-radius: 4px;
+  height: 6px;
+  border-radius: 3px;
   display: flex;
   gap: 2px;
   overflow: hidden;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 .progress-bar-seg {
   height: 100%;
-  border-radius: 4px;
+  border-radius: 3px;
   transition: width 0.4s ease;
 }
 .progress-legend {
@@ -199,49 +200,54 @@ body.no-nav {
   gap: 3px;
 }
 .progress-legend-lbl {
-  font-size: 9px;
+  font-size: 8px;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: var(--hint);
 }
 .progress-legend-num {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
   letter-spacing: -0.3px;
 }
 
 /* ── Week activity grid ── */
+.card-sep {
+  height: 1px;
+  background: var(--row-divider);
+  margin: 12px 0;
+}
 .week-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 6px;
+  gap: 4px;
 }
 .week-cell {
   aspect-ratio: 1;
-  border-radius: 10px;
+  border-radius: 8px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
+  gap: 2px;
   background: var(--cell-bg);
   border: 1px solid transparent;
 }
 .week-cell.wc-active {
   background: rgba(48,209,88,0.12);
-  border-color: rgba(48,209,88,0.25);
+  border-color: rgba(48,209,88,0.20);
 }
 .week-cell.wc-today {
-  border-color: rgba(48,209,88,0.55);
+  border-color: rgba(48,209,88,0.45);
 }
 .week-cell-num {
-  font-size: 14px;
+  font-size: 11px;
   font-weight: 700;
   color: var(--text);
   line-height: 1;
 }
 .week-cell-day {
-  font-size: 9px;
+  font-size: 7px;
   color: var(--hint);
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -265,7 +271,7 @@ body.no-nav {
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
-  margin-bottom: var(--gap);
+  margin-bottom: 12px;
   transition: opacity .15s;
   letter-spacing: 0.01em;
   box-shadow: 0 2px 12px rgba(0,0,0,0.2), inset 0 1px 0 var(--glass-shine);
@@ -279,6 +285,29 @@ body.no-nav {
   color: var(--text-subtle);
   border-color: var(--glass-border);
 }
+
+/* ── Capsule ── */
+.capsule-wrapper {
+  display: flex;
+  justify-content: center;
+  margin: 4px 0 16px;
+}
+.capsule {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  color: var(--text-faint);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.capsule:active { opacity: 0.6; }
+.capsule svg { width: 14px; height: 14px; stroke-width: 2.5; }
 
 /* ── Practice ── */
 .practice-screen-content {
@@ -528,10 +557,22 @@ body.no-nav .toast { bottom: calc(28px + env(safe-area-inset-bottom)); }
 .add-form {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  margin-bottom: 24px;
+  gap: 0;
+  margin-bottom: 0;
 }
-.add-form .form-input { margin-bottom: 8px; }
+.add-form .form-input { 
+  margin-bottom: 0; 
+  background: none; 
+  border: none; 
+  border-radius: 0;
+  border-bottom: 1px solid var(--row-divider);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none;
+}
+.add-form .form-input:last-child {
+  border-bottom: none;
+}
 
 /* ── Edit / Picker sheets ── */
 .edit-sheet-title {
@@ -589,26 +630,6 @@ body.no-nav .toast { bottom: calc(28px + env(safe-area-inset-bottom)); }
 }
 .form-input::placeholder { color: var(--hint); }
 
-/* ── File Input ── */
-.file-input-label {
-  display: block;
-  text-align: center;
-  padding: 15px;
-  color: var(--text-faint);
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  margin-top: 24px;
-  background: var(--glass);
-  backdrop-filter: var(--blur);
-  -webkit-backdrop-filter: var(--blur);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-md);
-  box-shadow: inset 0 1px 0 var(--glass-shine);
-  touch-action: manipulation;
-  transition: opacity 0.15s;
-}
-.file-input-label:active { opacity: 0.6; }
 #file-input { display: none; }
 
 /* ── Mark (search highlight) ── */

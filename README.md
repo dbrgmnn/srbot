@@ -75,10 +75,10 @@ Frontend changes in `webapp/` are served immediately — no build step needed.
 - **Export dictionary** — share as CSV
 
 ### Statistics (Home screen)
-- **Activity Heatmap** — 91-day visual chart of learning progress (new words and reviews).
-- **🔥 Review** — due for repetition today; countdown if none
-- **🌱 New** — available new words today; countdown until reset if limit reached; "Empty" if no words
-- **Queue / Learning / Known / Mastered** — SM-2 progression buckets
+- **Activity Grid** — 7-day visual chart of learning progress (new words and reviews).
+- **Review** — due for repetition today; countdown if none
+- **New** — available new words today; countdown until reset if limit reached; "Empty" if no words
+- **Queue / Learning / Known / Mastered / Total** — SM-2 progression buckets
 
 ### Bot Commands
 - `/token` — show your API token (auto-deletes after 30s)

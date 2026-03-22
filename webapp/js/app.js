@@ -49,7 +49,7 @@ window.closePicker     = closePicker;
 // ── Haptics ──────────────────────────────────────────────────────────────────────
 
 function initGlobalHaptics() {
-  const selector = 'button, .nav-btn, .picker-item, .settings-row, .word-row-content, .del-btn, .file-input-label, .header-capsule, .picker-trigger';
+  const selector = 'button, .nav-btn, .picker-item, .settings-row, .word-row-content, .del-btn, .capsule, .picker-trigger';
   document.addEventListener('pointerdown', (e) => {
     if (e.target.closest(selector)) tg.HapticFeedback.impactOccurred('light');
   }, { passive: true });
