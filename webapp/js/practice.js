@@ -266,22 +266,87 @@ export function playAudio(e) {
   synth.speak(msg);
 }
 
+// ── Confetti effect ──────────────────────────────────────────────────────────
+
+function launchConfetti() {
+  const canvas = document.getElementById('confetti-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const particles = [];
+  const colors = ['#0a84ff', '#30d158', '#bf5af2', '#ff9f0a', '#ff453a'];
+  
+  for (let i = 0; i < 100; i++) {
+    particles.push({
+      x: Math.random() * canvas.width,
+      y: -10,
+      r: Math.random() * 6 + 4,
+      dx: Math.random() * 4 - 2,
+      dy: Math.random() * 5 + 3,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      tilt: Math.random() * 10
+    });
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    let finished = true;
+    
+    particles.forEach(p => {
+      p.y += p.dy;
+      p.x += p.dx;
+      p.tilt = Math.sin(p.y * 0.1) * 10;
+      
+      if (p.y < canvas.height + 20) finished = false;
+
+      ctx.beginPath();
+      ctx.lineWidth = p.r;
+      ctx.strokeStyle = p.color;
+      ctx.moveTo(p.x + p.tilt + p.r / 4, p.y);
+      ctx.lineTo(p.x + p.tilt, p.y + p.r / 2);
+      ctx.stroke();
+    });
+
+    if (!finished) {
+      requestAnimationFrame(draw);
+    } else {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+  }
+  
+  // Handle resize during animation
+  window.addEventListener('resize', () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }, { once: true });
+
+  requestAnimationFrame(draw);
+}
+
 // ── Session popup ────────────────────────────────────────────────────────────
 
-function showSessionPopup(good, hard, again) {
-  const parts = [];
-  if (good > 0)  parts.push(`✅ ${good} good`);
-  if (hard > 0)  parts.push(`🟡 ${hard} hard`);
-  if (again > 0) parts.push(`❌ ${again} again`);
+function showSessionPopup(good, hard, again, isComplete = false) {
+  const lines = [];
+  if (good > 0)  lines.push(`Good: ${good}`);
+  if (hard > 0)  lines.push(`Hard: ${hard}`);
+  if (again > 0) lines.push(`Again: ${again}`);
 
   tg.showPopup({
-    title: 'Session Complete',
-    message: parts.join('\n') || 'Great job!',
+    title: isComplete ? 'Session Complete' : 'Practice Paused',
+    message: lines.join('  •  ') || 'Great job!',
     buttons: [
-      { id: 'ok', type: 'default', text: 'Done' }
+      { id: 'done', type: 'default', text: 'Done' }
     ]
+  }, (id) => {
+    if (id === 'done') {
+      toast('Session saved', 'success');
+    }
   });
+  
   tg.HapticFeedback.notificationOccurred('success');
+  if (isComplete) launchConfetti();
 }
 
 // ── Exit ─────────────────────────────────────────────────────────────────────
@@ -290,7 +355,8 @@ export function exitPractice() {
   isGrading = false;
   const total = sessionStats.good + sessionStats.hard + sessionStats.again;
   if (total > 0) {
-    showSessionPopup(sessionStats.good, sessionStats.hard, sessionStats.again);
+    const isComplete = sessionIdx >= sessionWords.length;
+    showSessionPopup(sessionStats.good, sessionStats.hard, sessionStats.again, isComplete);
     state.currentStats = null; // Trigger stats refresh
   }
   showScreen('home');

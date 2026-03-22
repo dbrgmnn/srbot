@@ -140,9 +140,12 @@ function initSubscriptions() {
   window._subsInit = true;
 
   state.subscribe('currentStats', (stats) => {
+    const home = document.getElementById('screen-home');
     if (stats === null) {
+      if (home) { home.classList.add('loading'); home.classList.remove('not-loading'); }
       loadHome();
     } else {
+      if (home) { home.classList.remove('loading'); home.classList.add('not-loading'); }
       updateCountdowns();
       renderStats();
     }

@@ -602,6 +602,33 @@ body.no-nav {
 }
 .del-btn svg { width: 18px; height: 18px; stroke: #ff453a; }
 
+/* ── Skeletons ── */
+@keyframes skeleton-pulse {
+  0%   { opacity: 0.6; }
+  50%  { opacity: 0.3; }
+  100% { opacity: 0.6; }
+}
+.skeleton {
+  background: var(--glass-mid);
+  border-radius: 4px;
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+  display: inline-block;
+  pointer-events: none;
+}
+.skeleton-val { width: 40px; height: 28px; border-radius: 6px; }
+.skeleton-total { width: 80px; height: 12px; margin: 0 auto 14px; display: block; }
+.skeleton-bar { width: 100%; height: 6px; border-radius: var(--radius-sm); margin-bottom: 14px; }
+.skeleton-cell { width: 100%; aspect-ratio: 1; border-radius: var(--radius-sm); }
+
+/* Hide real content when loading */
+.loading .stat-val, 
+.loading .stat-pill-icon,
+.loading .progress-total, 
+.loading .progress-bar,
+.loading .progress-legend,
+.loading .week-grid { display: none; }
+.not-loading .skeleton { display: none; }
+
 /* ── Toast (SnackBar) ── */
 .toast {
   position: fixed;

@@ -11,7 +11,7 @@
   <div id="toast" class="toast"></div>
 
   <!-- Screen: Home -->
-  <div id="screen-home" class="screen active">
+  <div id="screen-home" class="screen active loading">
     <div class="header">
       <div class="header-title">Overview</div>
     </div>
@@ -19,16 +19,20 @@
     <div class="stats-grid">
       <div class="stat-pill">
         <div class="stat-pill-left">
+          <div class="skeleton skeleton-val"></div>
           <div class="stat-val" id="stat-due">0</div>
         </div>
+        <div class="skeleton skeleton-val" style="width:38px;height:38px;border-radius:50%"></div>
         <div class="stat-pill-icon stat-pill-icon-review">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
         </div>
       </div>
       <div class="stat-pill">
         <div class="stat-pill-left">
+          <div class="skeleton skeleton-val"></div>
           <div class="stat-val" id="stat-new">0</div>
         </div>
+        <div class="skeleton skeleton-val" style="width:38px;height:38px;border-radius:50%"></div>
         <div class="stat-pill-icon stat-pill-icon-new">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
         </div>
@@ -37,13 +41,18 @@
 
 
     <div class="card">
+      <div class="skeleton skeleton-total"></div>
       <div class="progress-total">TOTAL <span id="count-total">0</span></div>
+      
+      <div class="skeleton skeleton-bar"></div>
       <div class="progress-bar">
         <div class="progress-bar-seg" id="bar-new"></div>
         <div class="progress-bar-seg" id="bar-learning"></div>
         <div class="progress-bar-seg" id="bar-known"></div>
         <div class="progress-bar-seg" id="bar-mastered"></div>
       </div>
+
+      <div class="skeleton skeleton-bar" style="width:100%; height:30px; margin-top:10px"></div>
       <div class="progress-legend">
         <div class="progress-legend-item">
           <b class="progress-legend-num text-new" id="count-new">0</b>
@@ -63,6 +72,8 @@
         </div>
       </div>
       <div class="card-sep"></div>
+      
+      <div class="skeleton skeleton-bar" style="margin-top:10px"></div>
       <div class="week-grid" id="week-grid"></div>
     </div>
 
@@ -266,6 +277,7 @@
     <div id="picker-list" class="picker-list"></div>
   </div>
 
+  <canvas id="confetti-canvas" style="position:fixed; inset:0; width:100%; height:100%; pointer-events:none; z-index:2000;"></canvas>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script type="module" src="static/js/app.js"></script>
 </body>
