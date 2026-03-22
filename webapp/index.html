@@ -155,6 +155,7 @@
     </div>
 
     <div class="card settings-group">
+      <!-- Section: Dictionary -->
       <div class="settings-row" onclick="openPicker('language')">
         <div class="settings-label">Active Dictionary</div>
         <div class="picker-value" id="language-display">—</div>
@@ -169,9 +170,8 @@
         <div class="settings-label">New words limit</div>
         <div class="picker-value" id="set-limit-val">—</div>
       </div>
-    </div>
 
-    <div class="card settings-group">
+      <!-- Section: Reminders -->
       <div class="settings-row" onclick="openPicker('notification_interval_minutes')">
         <div class="settings-label">Frequency</div>
         <div class="picker-value" id="set-notify-interval">—</div>
@@ -190,11 +190,9 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         Export dictionary
       </div>
-    </div>
-
-    <div class="card settings-group">
-      <div class="settings-row settings-row-danger" onclick="clearAllWords()">
-        <div class="settings-label-danger">Clear all words</div>
+      <div class="capsule capsule-danger" onclick="clearAllWords()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14H6L5 6"></path><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M9 6V4h6v2"></path></svg>
+        Clear all words
       </div>
     </div>
 
@@ -221,14 +219,18 @@
   <div id="edit-overlay" class="edit-overlay" onclick="closeEdit()"></div>
   <div id="edit-sheet" class="edit-sheet">
     <div class="edit-sheet-title">Edit Word</div>
-    <input type="text" id="edit-word" class="form-input" placeholder="Word">
-    <input type="text" id="edit-translation" class="form-input" placeholder="Translate">
-    <input type="text" id="edit-example" class="form-input" placeholder="Example">
-    <div id="edit-level-trigger" class="form-input picker-trigger" onclick="openPicker('level', 'edit')">
-        <span id="edit-level-display" class="picker-trigger-placeholder">Level</span>
-        <span class="picker-trigger-arrow">›</span>
+    <div class="card settings-group">
+      <div class="add-form">
+        <input type="text" id="edit-word" class="form-input" placeholder="Word">
+        <input type="text" id="edit-translation" class="form-input" placeholder="Translate">
+        <input type="text" id="edit-example" class="form-input" placeholder="Example">
+        <div id="edit-level-trigger" class="form-input picker-trigger" onclick="openPicker('level', 'edit')">
+            <span id="edit-level-display" class="picker-trigger-placeholder">Level</span>
+            <span class="picker-trigger-arrow">›</span>
+        </div>
+        <input type="hidden" id="edit-level" value="">
+      </div>
     </div>
-    <input type="hidden" id="edit-level" value="">
     <button id="edit-save-btn" class="btn" onclick="saveEdit()">Save</button>
     <button class="btn btn-secondary" onclick="closeEdit()">Cancel</button>
   </div>
