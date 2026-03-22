@@ -55,8 +55,6 @@ export const T = {
   SAVE_FAIL:      _fail('save'),
   LANG_SWITCHED:  (l) => `Switched to ${l}`,
   LANG_FAIL:      _fail('switch language'),
-  IMPORT_ADDED:   _added,
-  IMPORT_FAIL:    _fail('import'),
 
   // App
   INIT_FAIL:      _fail('load app'),

@@ -4,7 +4,6 @@ Handles environment variables and application-wide settings.
 """
 import os
 from dataclasses import dataclass
-from pathlib import Path
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -18,7 +17,6 @@ class Config:
     api_port: int
     gemini_api_key: str | None = None
     token_expiry: int = 3600
-    data_dir: Path = Path(__file__).parent / "data"
     min_daily_limit: int = 5
     max_daily_limit: int = 50
     min_notify_interval: int = 10
@@ -46,7 +44,6 @@ def load_config() -> Config:
         api_port=int(os.getenv("API_PORT", "8080")),
         gemini_api_key=os.getenv("GEMINI_API_KEY"),
         token_expiry=int(os.getenv("TOKEN_EXPIRY", "3600")),
-        data_dir=Path(os.getenv("DATA_DIR", str(Path(__file__).parent / "data"))),
         min_daily_limit=int(os.getenv("MIN_DAILY_LIMIT", "5")),
         max_daily_limit=int(os.getenv("MAX_DAILY_LIMIT", "50")),
         min_notify_interval=int(os.getenv("MIN_NOTIFY_INTERVAL", "10")),

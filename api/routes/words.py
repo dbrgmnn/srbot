@@ -189,30 +189,9 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         response.headers["Content-Disposition"] = f'attachment; filename="words_{lang}.csv"'
         return response
 
-    async def preload_words(request: web.Request) -> web.Response:
-        """Load and add words from a pre-defined CSV file for the current language."""
-        user_id = request["user_id"]
-        lang = request['language']
-        word_repo = WordRepo(db)
-        
-        config = request.app["config"]
-        csv_path = config.data_dir / f"words_{lang}.csv"
-        
-        if not csv_path.exists():
-            return web.json_response({"ok": False, "error": "not_found"}, status=404)
-        
-        words = word_repo.load_csv_words(csv_path)
-        if not words:
-            return web.json_response({"ok": False, "error": "empty_file"}, status=400)
-            
-        added_count = await word_repo.add_words_batch(user_id, lang, words)
-        return web.json_response({"ok": True, "result": {"added": added_count}})
-
-
     # specific routes must be registered before parameterized ones
     app.router.add_post("/api/words", add_words)
     app.router.add_post("/api/external/words", add_external_words)
-    app.router.add_post("/api/words/preload", preload_words)
     app.router.add_get("/api/words/export", export_words)
     app.router.add_get("/api/words/search", search_words)
     app.router.add_delete("/api/words/all", delete_all_words)

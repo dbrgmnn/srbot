@@ -2,7 +2,7 @@ import { loadHome, showScreen } from './ui.js';
 import { toast, T } from './toast.js';
 import { startPractice, exitPractice, undo, playAudio } from './practice.js';
 import { submitWords, handleFileUpload, onSearchInput, clearSearch, saveEdit, closeEdit, clearAllWords, shareWords } from './dictionary.js';
-import { loadSettings, preloadDefaultWords, openPicker, closePicker } from './settings.js';
+import { loadSettings, openPicker, closePicker } from './settings.js';
 
 const tg = window.Telegram.WebApp;
 tg.ready();
@@ -45,7 +45,6 @@ window.shareWords      = shareWords;
 // settings
 window.openPicker      = openPicker;
 window.closePicker     = closePicker;
-window.preloadDefaultWords = preloadDefaultWords;
 
 // ── Haptics ──────────────────────────────────────────────────────────────────────
 

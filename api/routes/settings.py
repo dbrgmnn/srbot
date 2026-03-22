@@ -46,14 +46,11 @@ def setup_routes_settings(app: web.Application, db: aiosqlite.Connection):
         settings = await user_repo.get_user_settings(telegram_id, lang, config)
         stats = await word_repo.get_full_stats(user_id, lang, tz_name=settings.get("timezone", "UTC"))
         
-        preload_available = (config.data_dir / f"words_{lang}.csv").exists()
-
         return web.json_response({
             "ok": True,
             "result": {
                 **settings,
                 "total_words": stats["total"],
-                "preload_available": preload_available,
                 "limits": {
                     "min_daily_limit": config.min_daily_limit,
                     "max_daily_limit": config.max_daily_limit,

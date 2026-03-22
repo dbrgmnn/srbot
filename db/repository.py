@@ -1,8 +1,6 @@
-import csv
 import logging
 import secrets
 from datetime import datetime, timezone, timedelta
-from pathlib import Path
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 import aiosqlite
 
@@ -243,27 +241,6 @@ class WordRepo:
     def __init__(self, db: aiosqlite.Connection):
         """Initialize the WordRepo with a database connection."""
         self.db = db
-
-    @staticmethod
-    def load_csv_words(path: Path) -> list[dict]:
-        """Load words from a CSV file."""
-        words = []
-        if not path.exists():
-            return []
-        with open(path, encoding="utf-8", newline="") as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                word = (row.get("word") or "").strip()
-                translation = (row.get("translation") or "").strip()
-                if not word or not translation:
-                    continue
-                words.append({
-                    "word": word,
-                    "translation": translation,
-                    "example": (row.get("example") or "").strip() or None,
-                    "level": (row.get("level") or "").strip() or None,
-                })
-        return words
 
     async def add_words_batch(self, user_id: int, language: str, words: list[dict]) -> int:
         """Add a batch of words to the user's dictionary."""

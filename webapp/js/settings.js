@@ -237,10 +237,6 @@ export async function loadSettings() {
     if (modeDisplay) modeDisplay.textContent = MODE_LABELS[s.practice_mode] || s.practice_mode;
 
     state.practiceMode = s.practice_mode;
-    state.preloadAvailable = s.preload_available === true;
-
-    const importRow = document.getElementById('import-row');
-    if (importRow) importRow.style.display = state.preloadAvailable ? '' : 'none';
 
     const quietStart = document.getElementById('set-quiet-start');
     const quietEnd = document.getElementById('set-quiet-end');
@@ -286,19 +282,4 @@ export function setPracticeMode(mode) {
   saveSetting('practice_mode', mode);
   const modeDisplay = document.getElementById('practice-mode-display');
   if (modeDisplay) modeDisplay.textContent = MODE_LABELS[mode] || mode;
-}
-
-export async function preloadDefaultWords() {
-  tg.showConfirm(`Import default ${state.currentLang.toUpperCase()} pack? Duplicates will be skipped.`, async (ok) => {
-    if (!ok) return;
-    try {
-      const res = await POST('/api/words/preload');
-      toast(T.IMPORT_ADDED(res.result.added), 'success');
-      await loadSettings();
-      await loadHome();
-    } catch (e) {
-      toast(T.IMPORT_FAIL, 'error');
-      console.error(e);
-    }
-  });
 }
