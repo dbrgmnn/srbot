@@ -277,7 +277,9 @@ export async function switchLanguage(lang) {
   if (state.currentLang === lang) return;
   try {
     setLanguage(lang);
-    const res = await POST('/api/settings', { language: lang });
+    await POST('/api/settings', { language: lang });
+    // Update settings object to trigger subscriptions
+    state.currentSettings = { ...state.currentSettings, language: lang };
     toast(T.LANG_SWITCHED(lang.toUpperCase()), 'success');
   } catch (e) { toast(T.LANG_FAIL, 'error'); }
 }

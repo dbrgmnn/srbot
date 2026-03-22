@@ -162,7 +162,14 @@ function initSubscriptions() {
   state.subscribe('currentLang', (newLang, oldLang) => {
     // Only reload home if the language has truly changed
     if (oldLang && newLang !== oldLang) {
-      loadHome();
+      state.currentStats = null;
+    }
+  });
+
+  state.subscribe('currentSettings', (newS, oldS) => {
+    // If settings changed (not the initial load), refresh stats
+    if (oldS && JSON.stringify(newS) !== JSON.stringify(oldS)) {
+      state.currentStats = null;
     }
   });
 }
