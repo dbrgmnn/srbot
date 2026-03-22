@@ -325,38 +325,23 @@ function launchConfetti() {
   requestAnimationFrame(draw);
 }
 
-// ── Session popup ────────────────────────────────────────────────────────────
-
-function showSessionPopup(good, hard, again, isComplete = false) {
-  const lines = [];
-  if (good > 0)  lines.push(`Good: ${good}`);
-  if (hard > 0)  lines.push(`Hard: ${hard}`);
-  if (again > 0) lines.push(`Again: ${again}`);
-
-  tg.showPopup({
-    title: isComplete ? 'Session Complete' : 'Practice Paused',
-    message: lines.join('  •  ') || 'Great job!',
-    buttons: [
-      { id: 'done', type: 'default', text: 'Done' }
-    ]
-  }, (id) => {
-    if (id === 'done') {
-      toast('Session saved', 'success');
-    }
-  });
-  
-  tg.HapticFeedback.notificationOccurred('success');
-  if (isComplete) launchConfetti();
-}
-
 // ── Exit ─────────────────────────────────────────────────────────────────────
 
 export function exitPractice() {
   isGrading = false;
   const total = sessionStats.good + sessionStats.hard + sessionStats.again;
+  
   if (total > 0) {
     const isComplete = sessionIdx >= sessionWords.length;
-    showSessionPopup(sessionStats.good, sessionStats.hard, sessionStats.again, isComplete);
+    
+    const statsHtml = `
+      <span class="stat-again">${sessionStats.again}</span>
+      <span class="stat-hard">${sessionStats.hard}</span>
+      <span class="stat-good">${sessionStats.good}</span>
+    `;
+    toast(statsHtml, 'stats');
+
+    if (isComplete) launchConfetti();
     state.currentStats = null; // Trigger stats refresh
   }
   showScreen('home');

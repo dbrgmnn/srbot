@@ -2,37 +2,40 @@ const tg = window.Telegram.WebApp;
 
 let toastTimeout = null;
 
-/**
- * Main notification dispatcher
- * @param {string} msg - Message to show
- * @param {'info'|'success'|'error'} type - Style of notification
- * @param {boolean} native - Force native Telegram Alert for error/success
- */
-export function toast(msg, type = 'info', native = false) {
-  // Use native Telegram Alert for critical errors or forced native
-  if (native || (type === 'error' && msg.length > 50)) {
-    tg.showAlert(msg);
-    if (type === 'error') tg.HapticFeedback.notificationOccurred('error');
-    return;
-  }
+const ICONS = {
+  success: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>',
+  error:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>',
+  info:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>',
+  stats:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>'
+};
 
+/**
+ * Modern Pill Notification
+ * @param {string} msg - Message text (supports HTML)
+ * @param {'info'|'success'|'error'|'stats'} type - Notification style
+ */
+export function toast(msg, type = 'info') {
   const el = document.getElementById('toast');
   if (!el) return;
   
   if (toastTimeout) clearTimeout(toastTimeout);
   
-  el.innerHTML = msg;
+  // Update content with icon
+  const iconHtml = `<div class="toast-icon">${ICONS[type] || ICONS.info}</div>`;
+  el.innerHTML = `${iconHtml}<div class="toast-text">${msg}</div>`;
   el.className = `toast toast-${type} show`;
 
   // Haptics
-  if (type === 'success') tg.HapticFeedback.notificationOccurred('success');
+  if (type === 'success' || (type === 'stats' && msg.includes('stat-good'))) tg.HapticFeedback.notificationOccurred('success');
   else if (type === 'error') tg.HapticFeedback.notificationOccurred('error');
   else tg.HapticFeedback.impactOccurred('light');
+  
+  const duration = (type === 'stats') ? 4500 : 2200; 
   
   toastTimeout = setTimeout(() => {
     el.classList.remove('show');
     toastTimeout = null;
-  }, 2500); // Slightly faster for native feel
+  }, duration);
 }
 
 // ── Shared base messages ──────────────────────────────────────────────────
