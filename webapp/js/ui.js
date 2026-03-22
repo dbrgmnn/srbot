@@ -15,7 +15,7 @@ export function showScreen(name) {
 
   if (name === 'home') {
     if (tg.enableVerticalSwipe) tg.enableVerticalSwipe();
-    loadHome();
+    // loadHome is now handled by subscriptions and initial init
   } else {
     if (name !== 'practice' && tg.enableVerticalSwipe) tg.enableVerticalSwipe();
   }
@@ -156,9 +156,11 @@ function initSubscriptions() {
     }
   });
 
-  state.subscribe('currentLang', () => {
-    // Refresh home and settings when language changes
-    loadHome();
+  state.subscribe('currentLang', (newLang, oldLang) => {
+    // Only reload home if the language has truly changed
+    if (oldLang && newLang !== oldLang) {
+      loadHome();
+    }
   });
 }
 
