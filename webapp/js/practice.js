@@ -169,10 +169,11 @@ function renderWord() {
   bLvl.style.display = word.level ? 'block' : 'none';  
   card.classList.remove('flipped', 'swipe-left', 'swipe-right', 'swipe-up');
   card.style.transition = 'none';
+  card.style.opacity = '0';
   card.style.transform = 'rotateY(0deg)';
-  card.style.opacity = '';
   requestAnimationFrame(() => {
     card.style.transition = '';
+    card.style.opacity = '1';
   });
 }
 
