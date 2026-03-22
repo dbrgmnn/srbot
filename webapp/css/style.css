@@ -8,6 +8,13 @@
   --accent:       var(--tg-theme-button-color, #0a84ff);
   --btn-text:     var(--tg-theme-button-text-color, #ffffff);
 
+  /* Status Colors */
+  --color-new:      #8e8e93;
+  --color-learning: #ff9f0a;
+  --color-known:    #30d158;
+  --color-mastered: #bf5af2;
+  --color-review:   #ff9f0a;
+
   --glass:        rgba(255,255,255,0.07);
   --glass-mid:    rgba(255,255,255,0.11);
   --glass-border: rgba(255,255,255,0.11);
@@ -18,7 +25,7 @@
   --radius-lg:    26px;
   --radius-xl:    50px;
 
-  --gap:          16px;
+  --gap:          20px;
   --blur:         blur(28px) saturate(1.8);
 
   --row-divider:     rgba(255,255,255,0.08);
@@ -36,10 +43,10 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
-  font-size: 16px;
+  font-size: 17px;
   min-height: 100vh;
   padding-top: env(safe-area-inset-top);
-  padding-bottom: calc(100px + env(safe-area-inset-bottom));
+  padding-bottom: calc(110px + env(safe-area-inset-bottom));
 }
 body.no-nav {
   padding-bottom: env(safe-area-inset-bottom);
@@ -116,11 +123,11 @@ body.no-nav {
   -webkit-backdrop-filter: var(--blur);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
-  padding: 16px;
+  padding: 20px;
   margin-bottom: var(--gap);
-  box-shadow: 0 4px 20px rgba(0,0,0,0.2), inset 0 1px 0 var(--glass-shine);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.2), inset 0 1px 0 var(--glass-shine);
 }
-.settings-group { padding: 0 16px; margin-bottom: 8px; }
+.settings-group { padding: 0 20px; margin-bottom: 12px; }
 /* ── Stats grid ── */
 .stats-grid {
   display: grid;
@@ -135,7 +142,7 @@ body.no-nav {
   -webkit-backdrop-filter: var(--blur);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-xl);
-  padding: 12px 16px;
+  padding: 18px 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -157,9 +164,9 @@ body.no-nav {
   justify-content: center;
   flex-shrink: 0;
 }
-.stat-pill-icon svg { width: 15px; height: 15px; }
-.stat-pill-icon-review { background: rgba(255,159,10,0.15); }
-.stat-pill-icon-new    { background: rgba(48,209,88,0.15); }
+.stat-pill-icon svg { width: 15px; height: 15px; stroke-width: 2.5; }
+.stat-pill-icon-review { background: rgba(255,159,10,0.15); stroke: var(--color-review); }
+.stat-pill-icon-new    { background: rgba(48,209,88,0.15); stroke: var(--color-known); }
 
 /* ── Progress block ── */
 .progress-total {
@@ -254,23 +261,23 @@ body.no-nav {
   letter-spacing: 0.04em;
 }
 
-.text-new      { color: #8e8e93; }
-.text-learning { color: #ff9f0a; }
-.text-known    { color: #30d158; }
-.text-mastered { color: #bf5af2; }
+.text-new      { color: var(--color-new); }
+.text-learning { color: var(--color-learning); }
+.text-known    { color: var(--color-known); }
+.text-mastered { color: var(--color-mastered); }
 
 /* ── Buttons ── */
 .btn {
   width: 100%;
-  padding: 15px;
+  padding: 16px;
   border-radius: var(--radius-md);
   border: 1px solid var(--accent);
   background: var(--accent);
   color: var(--btn-text);
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 700;
   cursor: pointer;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
   transition: opacity .15s, background .15s, box-shadow .15s;
   letter-spacing: 0.01em;
   box-shadow: 0 4px 16px rgba(10,132,255,0.25);
@@ -298,19 +305,19 @@ body.no-nav {
 .capsule-wrapper {
   display: flex;
   justify-content: center;
-  gap: 8px;
-  margin: 4px 0 16px;
+  gap: 12px;
+  margin: 4px 0 20px;
 }
 .capsule {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 16px;
+  gap: 8px;
+  padding: 10px 20px;
   background: var(--glass);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-xl);
   color: var(--text-faint);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: opacity 0.15s;
@@ -482,7 +489,7 @@ body.no-nav {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 0;
+  padding: 18px 0;
   border-bottom: 1px solid var(--row-divider);
   cursor: pointer;
   touch-action: manipulation;
@@ -491,9 +498,9 @@ body.no-nav {
 }
 .settings-row:active, .word-row-content:active { opacity: 0.6; }
 .settings-row:last-child, .word-row:last-child { border-bottom: none; }
-.settings-label { font-size: 15px; color: var(--text); }
+.settings-label { font-size: 16px; color: var(--text); }
 .settings-row-danger { justify-content: center; }
-.settings-label-danger { font-size: 15px; color: #ff453a; font-weight: 500; }
+.settings-label-danger { font-size: 16px; color: #ff453a; font-weight: 500; }
 
 /* ── Search ── */
 .search-wrapper {
@@ -576,7 +583,7 @@ body.no-nav .toast { bottom: calc(28px + env(safe-area-inset-bottom)); }
 }
 .add-form .form-input { 
   margin-bottom: 0; 
-  padding: 16px 0;
+  padding: 18px 0;
   background: none; 
   border: none; 
   border-radius: 0;
@@ -591,10 +598,10 @@ body.no-nav .toast { bottom: calc(28px + env(safe-area-inset-bottom)); }
 
 /* ── Edit / Picker sheets ── */
 .edit-sheet-title {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 700;
   color: var(--text);
-  margin-bottom: 12px;
+  margin-bottom: 16px;
   text-align: center;
   letter-spacing: 0.02em;
 }
@@ -620,7 +627,7 @@ body.no-nav .toast { bottom: calc(28px + env(safe-area-inset-bottom)); }
   -webkit-backdrop-filter: var(--blur);
   border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   border-top: 1px solid var(--glass-border);
-  padding: 24px 16px calc(env(safe-area-inset-bottom) + 32px);
+  padding: 24px 20px calc(env(safe-area-inset-bottom) + 32px);
   z-index: 600;
   transform: translateY(100%);
   transition: transform .3s cubic-bezier(0.32, 0.72, 0, 1);
@@ -636,11 +643,11 @@ body.no-nav .toast { bottom: calc(28px + env(safe-area-inset-bottom)); }
   -webkit-backdrop-filter: var(--blur);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
-  padding: 14px 16px;
+  padding: 16px 20px;
   color: var(--text);
-  font-size: 16px;
+  font-size: 17px;
   outline: none;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
   box-shadow: inset 0 1px 0 var(--glass-shine);
   touch-action: manipulation;
 }
