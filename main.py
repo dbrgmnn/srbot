@@ -26,51 +26,68 @@ async def main():
     """Initialize and start all system components."""
     config = load_config()
 
-    db = await init_db(config.db_path)
-
-    bot = Bot(token=config.bot_token)
-    dp = Dispatcher()
-
-    user_repo = UserRepo(db)
-    setup_handlers(dp, user_repo, config)
-
-    scheduler = await setup_scheduler(bot, db, config)
-    scheduler.start()
-
-    api_runner = await start_api_server(config, db, scheduler)
-    logger.info("Scheduler and API Server started")
-
-    polling_task = asyncio.create_task(dp.start_polling(bot))
-    logger.info("Starting...")
-
-    stop_event = asyncio.Event()
-
-    def handle_signal():
-        """Set the stop event on signal reception."""
-        stop_event.set()
-
-    loop = asyncio.get_running_loop()
-    loop.add_signal_handler(signal.SIGTERM, handle_signal)
-    loop.add_signal_handler(signal.SIGINT, handle_signal)
+    db = None
+    bot = None
+    scheduler = None
+    api_runner = None
+    polling_task = None
 
     try:
+        db = await init_db(config.db_path)
+
+        bot = Bot(token=config.bot_token)
+        dp = Dispatcher()
+
+        user_repo = UserRepo(db)
+        setup_handlers(dp, user_repo, config)
+
+        scheduler = await setup_scheduler(bot, db, config)
+        scheduler.start()
+
+        api_runner = await start_api_server(config, db, scheduler)
+        logger.info("Scheduler and API Server started")
+
+        polling_task = asyncio.create_task(dp.start_polling(bot))
+        logger.info("Starting...")
+
+        stop_event = asyncio.Event()
+
+        def handle_signal():
+            """Set the stop event on signal reception."""
+            stop_event.set()
+
+        loop = asyncio.get_running_loop()
+        loop.add_signal_handler(signal.SIGTERM, handle_signal)
+        loop.add_signal_handler(signal.SIGINT, handle_signal)
+
         await stop_event.wait()
+
+    except Exception as e:
+        logger.error(f"Error during initialization or execution: {e}")
+        raise
     finally:
         logger.info("Stopping...")
-        polling_task.cancel()
+        if polling_task:
+            polling_task.cancel()
         if scheduler:
             scheduler.shutdown(wait=False)
-        try:
-            await asyncio.wait_for(asyncio.gather(
-                api_runner.cleanup(),
-                db.close(),
-                bot.session.close(),
-                return_exceptions=True
-            ), timeout=5.0)
-        except asyncio.TimeoutError:
-            logger.warning("Cleanup timed out, forcing exit")
-        except Exception as e:
-            logger.error(f"Error during shutdown: {e}")
+        
+        cleanup_tasks = []
+        if api_runner:
+            cleanup_tasks.append(api_runner.cleanup())
+        if db:
+            cleanup_tasks.append(db.close())
+        if bot:
+            cleanup_tasks.append(bot.session.close())
+
+        if cleanup_tasks:
+            try:
+                await asyncio.wait_for(asyncio.gather(*cleanup_tasks, return_exceptions=True), timeout=5.0)
+            except asyncio.TimeoutError:
+                logger.warning("Cleanup timed out, forcing exit")
+            except Exception as e:
+                logger.error(f"Error during cleanup: {e}")
+        
         logger.info("Stopped.")
 
 if __name__ == "__main__":
