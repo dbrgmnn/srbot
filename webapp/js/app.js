@@ -2,7 +2,7 @@ import { loadHome, showScreen } from './ui.js';
 import { toast, T } from './toast.js';
 import { startPractice, exitPractice, undo, playAudio } from './practice.js';
 import { submitWords, handleFileUpload, onSearchInput, clearSearch, saveEdit, closeEdit, shareWords } from './dictionary.js';
-import { loadSettings, openPicker, closePicker, openDeleteAllSheet, closeDeleteAllSheet, openApiAccessSheet, closeApiAccessSheet } from './settings.js';
+import { loadSettings, openPicker, closePicker, openDeleteAllSheet, closeDeleteAllSheet, openApiAccessSheet, closeApiAccessSheet, openQuietHoursSheet, closeQuietHoursSheet, saveQuietHours } from './settings.js';
 
 const tg = window.Telegram.WebApp;
 tg.ready();
@@ -48,6 +48,9 @@ window.openDeleteAllSheet = openDeleteAllSheet;
 window.closeDeleteAllSheet = closeDeleteAllSheet;
 window.openApiAccessSheet = openApiAccessSheet;
 window.closeApiAccessSheet = closeApiAccessSheet;
+window.openQuietHoursSheet = openQuietHoursSheet;
+window.closeQuietHoursSheet = closeQuietHoursSheet;
+window.saveQuietHours = saveQuietHours;
 
 // ── Haptics ──────────────────────────────────────────────────────────────────────
 
