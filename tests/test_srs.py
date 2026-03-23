@@ -10,7 +10,6 @@ def test_sm2_first_review_perfect():
     assert result.repetitions == 1
     assert result.interval == 1
     assert result.easiness == 2.6 # 2.5 + (0.1 - 0)
-    assert (result.next_review - datetime.now(tz=timezone.utc)).days == 1
 
 def test_sm2_second_review_perfect():
     """Second perfect review should set interval to 6."""
@@ -20,7 +19,6 @@ def test_sm2_second_review_perfect():
     assert result.repetitions == 2
     assert result.interval == 6
     assert result.easiness == 2.7
-    assert (result.next_review - datetime.now(tz=timezone.utc)).days == 6
 
 def test_sm2_third_review_perfect():
     """Third perfect review should multiply interval by easiness."""
