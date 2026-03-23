@@ -12,7 +12,7 @@ load_dotenv()
 class Config:
     """Application configuration container."""
     bot_token: str
-    webapp_url: str = ""
+    webapp_url: str
     allowed_users: list[int]
     db_path: str
     api_port: int
