@@ -332,6 +332,12 @@ export function setPracticeMode(mode) {
 export function openDeleteAllSheet() {
   const input = document.getElementById('delete-confirm-input');
   const btn = document.getElementById('btn-delete-all-confirm');
+  const lang = state.currentLang ? state.currentLang.toUpperCase() : 'current';
+  
+  // Dynamic label in the sheet
+  const titleEl = document.querySelector('#delete-all-sheet .edit-sheet-title');
+  if (titleEl) titleEl.textContent = `Clear ${lang} Dictionary`;
+
   input.value = '';
   btn.classList.add('is-disabled');
   
@@ -344,12 +350,17 @@ export function openDeleteAllSheet() {
 export function closeDeleteAllSheet() {
   document.getElementById('delete-all-overlay').classList.remove('open');
   document.getElementById('delete-all-sheet').classList.remove('open');
+  // Reset state immediately on close
+  document.getElementById('delete-confirm-input').value = '';
+  document.getElementById('btn-delete-all-confirm').classList.add('is-disabled');
   _unlockScroll();
 }
 
 window.onDeleteAllInput = (val) => {
   const btn = document.getElementById('btn-delete-all-confirm');
-  const isMatch = val.trim().toLowerCase() === 'delete all';
+  // Exact match required (no trim to react on extra spaces)
+  const isMatch = val.toLowerCase() === 'delete all';
+  
   if (isMatch && btn.classList.contains('is-disabled')) {
     tg.HapticFeedback.selectionChanged();
   }
@@ -358,7 +369,7 @@ window.onDeleteAllInput = (val) => {
 
 window.executeDeleteAll = async () => {
   const input = document.getElementById('delete-confirm-input');
-  if (input.value.trim().toLowerCase() !== 'delete all') return;
+  if (input.value.toLowerCase() !== 'delete all') return;
 
   try {
     const { DELETE } = await import('./api.js');
