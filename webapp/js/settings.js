@@ -356,7 +356,9 @@ window.copyToken = async () => {
     tg.HapticFeedback.notificationOccurred("success");
     toast("Token copied to clipboard", "success");
   } catch (err) {
-    toast("Failed to copy", "error");
+    console.error("Copy failed:", err);
+    // Even if clipboard fails, we can show a toast that tells the user to copy manually
+    toast("Please copy the token manually", "error");
   }
 };
 
@@ -367,13 +369,23 @@ window.revokeToken = () => {
       if (ok) {
         try {
           const resp = await POST("/api/settings/token/revoke");
-          currentToken = resp.result.token;
+          const newToken = resp.result.token;
+          currentToken = newToken;
+
           const display = document.getElementById("api-token-display");
-          if (display) display.textContent = currentToken;
+          if (display) display.textContent = newToken;
+
           tg.HapticFeedback.notificationOccurred("success");
-          toast("New token generated and copied", "success");
-          await navigator.clipboard.writeText(currentToken);
+
+          try {
+            await navigator.clipboard.writeText(newToken);
+            toast("New token generated and copied", "success");
+          } catch (clipErr) {
+            console.error("Clipboard error:", clipErr);
+            toast("New token generated (copy failed)", "success");
+          }
         } catch (e) {
+          console.error("Revoke error:", e);
           toast("Failed to revoke", "error");
         }
       }
