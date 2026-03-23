@@ -336,6 +336,15 @@ body.no-nav {
   border-color: var(--glass-border);
   box-shadow: none;
 }
+.btn-destructive {
+  background: #ff453a;
+  border-color: #ff453a;
+  color: #ffffff;
+}
+.btn-destructive.is-disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
 
 /* ── Capsule ── */
 .capsule-wrapper {
@@ -560,6 +569,8 @@ body.no-nav {
 .settings-icon-limit { color: var(--color-known); filter: drop-shadow(0 0 4px rgba(48,209,88,0.3)); }
 .settings-icon-notify { color: var(--color-learning); filter: drop-shadow(0 0 4px rgba(255,159,10,0.3)); }
 .settings-icon-quiet { color: var(--color-new); filter: drop-shadow(0 0 4px rgba(142,142,147,0.3)); }
+.settings-icon-export { color: var(--accent); filter: drop-shadow(0 0 4px rgba(10,132,255,0.3)); }
+.settings-icon-delete { color: #ff453a; filter: drop-shadow(0 0 4px rgba(255,69,58,0.3)); }
 
 .settings-row:active, .word-row-content:active { opacity: 0.6; }
 .settings-row:last-child, .word-row:last-child { border-bottom: none; }

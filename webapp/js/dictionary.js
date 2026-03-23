@@ -168,15 +168,6 @@ export async function saveEdit() {
   } finally { isSubmitting = false; }
 }
 
-export function clearAllWords() {
-  tg.showConfirm(`Delete all ${state.currentLang.toUpperCase()} words?`, async (ok) => {
-    if (ok) {
-      try { await DEL('/api/words/all'); toast(T.CLEARED, 'success'); state.currentStats = null; }
-      catch(e) { toast(T.CLEAR_FAIL, 'error'); }
-    }
-  });
-}
-
 export async function shareWords() {
   try {
     const res = await fetch('/api/words/export', {

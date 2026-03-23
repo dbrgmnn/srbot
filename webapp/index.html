@@ -235,14 +235,23 @@
       </div>
     </div>
 
-    <div class="capsule-wrapper">
-      <div class="capsule" onclick="shareWords()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Export dictionary
+    <div class="card settings-group">
+      <div class="settings-row" onclick="shareWords()">
+        <div class="settings-row-left">
+          <div class="settings-icon settings-icon-export">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          </div>
+          <div class="settings-label">Export Dictionary</div>
+        </div>
+        <div class="picker-trigger-arrow">›</div>
       </div>
-      <div class="capsule capsule-danger" onclick="clearAllWords()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14H6L5 6"></path><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M9 6V4h6v2"></path></svg>
-        Clear all words
+      <div class="settings-row" onclick="openDeleteAllSheet()">
+        <div class="settings-row-left">
+          <div class="settings-icon settings-icon-delete">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14H6L5 6"></path><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M9 6V4h6v2"></path></svg>
+          </div>
+          <div class="settings-label-danger">Clear Dictionary</div>
+        </div>
       </div>
     </div>
   </div>
@@ -288,6 +297,19 @@
   <div id="picker-sheet" class="edit-sheet">
     <div class="edit-sheet-title" id="picker-title">Select</div>
     <div id="picker-list" class="picker-list"></div>
+  </div>
+
+  <!-- Delete All Confirmation Sheet -->
+  <div id="delete-all-overlay" class="edit-overlay" onclick="closeDeleteAllSheet()"></div>
+  <div id="delete-all-sheet" class="edit-sheet">
+    <div class="edit-sheet-title">Delete All Words</div>
+    <div style="text-align:center; color:var(--text-secondary); margin-bottom:20px; font-size:14px; line-height:1.5;">
+      This will permanently delete ALL words in the current dictionary. This action cannot be undone.<br><br>
+      To confirm, type <b>delete all</b> below:
+    </div>
+    <input type="text" id="delete-confirm-input" class="form-input" placeholder="type 'delete all' here" oninput="onDeleteAllInput(this.value)" autocomplete="off">
+    <button id="btn-delete-all-confirm" class="btn btn-destructive is-disabled" onclick="executeDeleteAll()">Delete Everything</button>
+    <button class="btn btn-secondary" onclick="closeDeleteAllSheet()">Cancel</button>
   </div>
 
   <canvas id="confetti-canvas" style="position:fixed; inset:0; width:100%; height:100%; pointer-events:none; z-index:2000;"></canvas>

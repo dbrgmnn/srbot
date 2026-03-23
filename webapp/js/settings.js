@@ -326,3 +326,51 @@ export function setPracticeMode(mode) {
   state.practiceMode = mode; // this will trigger any subscription on practiceMode
   saveSetting('practice_mode', mode);
 }
+
+// ── Delete All Words (Safe Confirmation) ──────────────────────────────────
+
+export function openDeleteAllSheet() {
+  const input = document.getElementById('delete-confirm-input');
+  const btn = document.getElementById('btn-delete-all-confirm');
+  input.value = '';
+  btn.classList.add('is-disabled');
+  
+  document.getElementById('delete-all-overlay').classList.add('open');
+  document.getElementById('delete-all-sheet').classList.add('open');
+  _lockScroll();
+  setTimeout(() => input.focus(), 300);
+}
+
+export function closeDeleteAllSheet() {
+  document.getElementById('delete-all-overlay').classList.remove('open');
+  document.getElementById('delete-all-sheet').classList.remove('open');
+  _unlockScroll();
+}
+
+window.onDeleteAllInput = (val) => {
+  const btn = document.getElementById('btn-delete-all-confirm');
+  const isMatch = val.trim().toLowerCase() === 'delete all';
+  if (isMatch && btn.classList.contains('is-disabled')) {
+    tg.HapticFeedback.selectionChanged();
+  }
+  btn.classList.toggle('is-disabled', !isMatch);
+};
+
+window.executeDeleteAll = async () => {
+  const input = document.getElementById('delete-confirm-input');
+  if (input.value.trim().toLowerCase() !== 'delete all') return;
+
+  try {
+    const { DELETE } = await import('./api.js');
+    await DELETE('/api/words/all');
+    
+    closeDeleteAllSheet();
+    tg.HapticFeedback.notificationOccurred('success');
+    toast('All words deleted successfully', 'success');
+    
+    // Refresh UI
+    setTimeout(() => location.reload(), 1500);
+  } catch (e) {
+    toast('Failed to delete words', 'error');
+  }
+};
