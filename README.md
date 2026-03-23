@@ -2,11 +2,18 @@
 
 A minimalist Telegram Mini App for learning foreign vocabulary using Spaced Repetition (SM-2 algorithm). Designed for personal use on a Raspberry Pi Zero 2W, accessed via Tailscale Funnel.
 
+### Native Telegram Integration
+- **SettingsButton:** Native Telegram entry point for app configuration.
+- **Haptic Patterns:** Advanced tactical feedback (Success/Error/Warning/Selection) for a premium feel.
+- **Native UI:** Telegram-style SnackBars (Pill design) and native Popups for session results.
+- **Visual Rewards:** Lightweight Canvas confetti effect upon session completion.
+- **Skeleton Screens:** Smooth loading experience using pulsing CSS placeholders.
+
 ### Performance & Interaction
-- **Optimized Taps:** Buttons use `touch-action: manipulation` and stable hit areas (no scale effects) for instant response on mobile.
-- **Immediate Haptics:** Tactical feedback triggers on `pointerdown` to feel native.
+- **Reactive State:** Modern observable state management using JS Proxies for instant UI updates.
+- **Optimized Taps:** Buttons use `touch-action: manipulation` and stable hit areas for instant response.
 - **Swipe Gestures:** SM-2 grading via intuitive swipes (Right: Good, Left: Again, Up: Hard).
-- **Zero-Build:** Pure ESM and CSS variables — refresh the page to see changes.
+- **Zero-Build:** Pure ESM and CSS variables — refresh the page to see changes immediately.
 
 ## 📁 Project Structure
 
@@ -28,81 +35,55 @@ srbot/
 │   └── repository.py    # All DB queries (UserRepo, WordRepo)
 ├── webapp/
 │   ├── index.html       # Single-page app shell
-│   ├── css/style.css    # Glass-morphism UI, Telegram themeParams
+│   ├── css/style.css    # Unified design system, Glass-morphism, Skeletons
 │   └── js/
-│       ├── app.js       # Entry point, window bindings, global haptics
-│       ├── api.js       # fetch wrapper, shared state, language sync
-│       ├── ui.js        # Screen switching, home screen, countdowns
-│       ├── practice.js  # Session logic, swipe gestures, audio, undo
-│       ├── dictionary.js# Add/edit/delete/search/CSV import/export
-│       ├── settings.js  # Settings screen, universal bottom sheet picker
-│       └── toast.js     # Toast notifications and message constants
-└── update.sh            # Deploy script for Raspberry Pi
+│       ├── app.js       # Entry point, theme detection, global haptics
+│       ├── state.js     # Observable state management (Proxy-based)
+│       ├── api.js       # HTTP client, auth headers, shared state access
+│       ├── ui.js        # Reactive screen management and statistics rendering
+│       ├── practice.js  # SRS Session logic, Swipe engine, Confetti
+│       ├── dictionary.js# Word management (search, edit, delete)
+│       ├── settings.js  # Universal picker, CSV import/export, auto-save
+│       └── toast.js     # Native-style Pill notifications
+├── tests/
+│   └── test_srs.py      # Automated tests for the SRS algorithm
+└── update.sh            # Secure deploy script with pre-deployment testing
 ```
 
 ## 🚀 Quick Start
 
-1. Create `.env` from `.env.example` and fill in `BOT_TOKEN`, `ALLOWED_USERS` and `GEMINI_API_KEY` (optional).
+1. Create `.env` from `.env.example` and fill in `BOT_TOKEN`, `ALLOWED_USERS`.
 2. Install dependencies: `pip install -r requirements.txt`
 3. Run: `python main.py`
 
-Frontend changes in `webapp/` are served immediately — no build step needed.
+## 🛠 Reliability & Quality
+- **Automated Testing:** Python core logic is covered by `pytest`.
+- **Pre-commit Hook:** Local git hook prevents committing code that fails tests.
+- **Server Guard:** `update.sh` automatically runs tests on the server before restarting the service.
 
 ## 🛠 User Guide
 
 ### Word Management
-- **Add tab:** Enter word, translation, optional example and level (A1–C2). Or upload a CSV with headers `word,translation,example,level`.
-- **Search tab:** Search from 2 characters with instant highlighting. Tap to edit, swipe/tap ✕ to delete.
+- **Search tab:** Instant search with highlighting. Tap to edit, tap ✕ to delete.
+- **Import:** Move to Settings → Import CSV. Supports `word,translation,example,level`.
 
 ### Practice Session
-- **Tap card** — flip to see translation.
 - **Swipe right** — Good ✅ (remembered well)
 - **Swipe left** — Again ❌ (forgotten)
 - **Swipe up** — Hard 🟡 (recalled with effort)
 - **🔊 button** — speaks the word (front) or example sentence (back)
-- **Undo button** — appears after first card, reverts last grade
-- On session end: toast shows `❌ N · 🟡 N · ✅ N`
-- Nav bar is hidden during practice to prevent accidental exits
+- **Undo button** — reverts last grade
+- **Completion:** Statistics shown as colored numbers in a Pill toast + Confetti.
 
-### Settings
-- **Timezone** — set your local timezone for accurate daily resets and notification scheduling.
+### Settings (Accessible via Native Telegram Menu)
 - **Active Dictionary** — switch between supported languages (DE/EN)
 - **Practice Mode** — Word→Translation or Translation→Word
-- **New words limit** — daily cap for new words (from config)
+- **New words limit** — daily cap for new cards
 - **Frequency** — notification interval
-- **Quiet hours** — start/end time for suppressing notifications
-- **Import default words** — load bundled vocabulary pack for current language
-- **Export dictionary** — share as CSV
-
-### Statistics (Home screen)
-- **Activity Grid** — 7-day visual chart of learning progress (new words and reviews).
-- **Review** — due for repetition today; countdown if none
-- **New** — available new words today; countdown until reset if limit reached; "Empty" if no words
-- **Queue / Learning / Known / Mastered / Total** — SM-2 progression buckets
-
-### Bot Commands
-- `/token` — show your API token (auto-deletes after 30s)
-- `/token_new` — revoke and regenerate API token
-
-### External API
-Add words from iOS Shortcuts, browser extensions, etc.:
-```bash
-# Option 1: Full manual data
-POST /api/external/words
-Authorization: Bearer <token>
-{"word": "Apfel", "translation": "apple", "example": "Der Apple ist rot.", "language": "de"}
-
-# Option 2: AI Enrichment (requires GEMINI_API_KEY)
-# Detects language, adds noun articles (e.g. "der Hund"), 
-# provides B1+ examples, and checks for duplicates.
-POST /api/external/words
-Authorization: Bearer <token>
-{"word": "Haus"}
-```
+- **Import / Export** — CSV management and dictionary backup.
 
 ## ⚙️ Tech Stack
-- **Backend:** Python 3.11+, aiohttp, aiosqlite, APScheduler, aiogram 3.x
-- **Frontend:** Vanilla JS (ES modules), CSS custom properties, Telegram WebApp SDK
-- **Database:** SQLite with WAL mode
-- **Auth:** HMAC-SHA256 Telegram initData + ALLOWED_USERS whitelist + Bearer token for external API
-- **Deployment:** Raspberry Pi Zero 2W, systemd service, Tailscale Funnel for HTTPS
+- **Backend:** Python 3.11+, aiohttp, aiosqlite, aiogram 3.x, pytest
+- **Frontend:** Vanilla JS (Reactive State), CSS Variables, Telegram WebApp SDK
+- **Auth:** HMAC-SHA256 Telegram initData verification
+- **Deployment:** Raspberry Pi Zero 2W, Tailscale Funnel, automated test validation
