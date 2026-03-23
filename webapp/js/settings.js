@@ -236,12 +236,70 @@ function _fillSettingsFromState() {
   }
 }
 
+// ── API Token ────────────────────────────────────────────────────────────
+
+let currentToken = '';
+let isTokenVisible = false;
+
+function _updateTokenDisplay() {
+  const tokenEl = document.getElementById('api-token');
+  if (!tokenEl) return;
+  
+  if (isTokenVisible && currentToken) {
+    tokenEl.textContent = currentToken;
+    tokenEl.classList.remove('masked-token');
+  } else {
+    tokenEl.textContent = '••••••••••••••••';
+    tokenEl.classList.add('masked-token');
+  }
+}
+
+window.toggleTokenVisibility = () => {
+  tg.HapticFeedback.selectionChanged();
+  isTokenVisible = !isTokenVisible;
+  _updateTokenDisplay();
+};
+
+window.copyToken = async () => {
+  if (!currentToken) return;
+  try {
+    await navigator.clipboard.writeText(currentToken);
+    tg.HapticFeedback.notificationOccurred('success');
+    toast('Token copied', 'success');
+  } catch (err) {
+    toast('Failed to copy', 'error');
+  }
+};
+
+window.revokeToken = () => {
+  tg.showConfirm('Are you sure you want to revoke the current API token? All apps using it will lose access.', async (ok) => {
+    if (ok) {
+      try {
+        const resp = await POST('/api/settings/token/revoke');
+        currentToken = resp.result.token;
+        isTokenVisible = true;
+        _updateTokenDisplay();
+        tg.HapticFeedback.notificationOccurred('success');
+        toast('Token revoked', 'success');
+      } catch (e) {
+        toast('Failed to revoke', 'error');
+      }
+    }
+  });
+};
+
 export async function loadSettings() {
   initSubscriptions();
   _fillSettingsFromState();
   try {
-    const resp = await GET('/api/settings');
-    const s = resp.result;
+    const [settingsResp, tokenResp] = await Promise.all([
+      GET('/api/settings'),
+      GET('/api/settings/token')
+    ]);
+    
+    const s = settingsResp.result;
+    currentToken = tokenResp.result.token;
+    _updateTokenDisplay();
     
     // Automatic sync timezone
     const deviceTz = Intl.DateTimeFormat().resolvedOptions().timeZone;

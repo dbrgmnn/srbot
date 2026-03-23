@@ -896,6 +896,70 @@ body.theme-light .skeleton { background: rgba(0, 0, 0, 0.06); }
 }
 body.theme-light .skeleton { animation: skeleton-pulse-light 1.8s ease-in-out infinite; }
 
+/* ── API Access ── */
+.settings-header {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 4px 0 12px;
+}
+.token-item {
+  padding: 16px 0;
+}
+.token-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 12px;
+}
+.masked-token {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 14px;
+  color: var(--text-secondary);
+  background: var(--cell-bg);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.2s, color 0.2s;
+}
+.masked-token:active {
+  background: var(--glass-mid);
+}
+.token-actions {
+  display: flex;
+  gap: 8px;
+}
+.icon-btn {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-subtle);
+  transition: opacity 0.2s, background 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.icon-btn:active {
+  opacity: 0.6;
+  background: var(--glass-mid);
+}
+.icon-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
 /* Practice card shadow */
 body.theme-light .word-card::before {
   box-shadow: 0 24px 48px rgba(0,0,0,0.10), inset 0 1px 0 var(--glass-shine);

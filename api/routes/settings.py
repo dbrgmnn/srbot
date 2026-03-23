@@ -146,6 +146,24 @@ def setup_routes_settings(app: web.Application, db: aiosqlite.Connection):
         settings = await user_repo.get_user_settings(telegram_id, lang, config)
         return web.json_response({"ok": True, "result": settings})
 
+    async def get_api_token(request: web.Request) -> web.Response:
+        """Return the user's current API token."""
+        telegram_id = request["telegram_id"]
+        user_repo = UserRepo(db)
+        token = await user_repo.get_api_token(telegram_id)
+        if not token:
+            token = await user_repo.generate_api_token(telegram_id)
+        return web.json_response({"ok": True, "result": {"token": token}})
+
+    async def revoke_api_token(request: web.Request) -> web.Response:
+        """Revoke old token and generate a new one."""
+        telegram_id = request["telegram_id"]
+        user_repo = UserRepo(db)
+        token = await user_repo.generate_api_token(telegram_id)
+        return web.json_response({"ok": True, "result": {"token": token}})
+
     app.router.add_get("/api/settings/languages", get_languages_list)
     app.router.add_get("/api/settings", get_settings)
+    app.router.add_get("/api/settings/token", get_api_token)
     app.router.add_post("/api/settings", update_settings)
+    app.router.add_post("/api/settings/token/revoke", revoke_api_token)
