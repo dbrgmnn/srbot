@@ -56,10 +56,30 @@ srbot/
 2. Install dependencies: `pip install -r requirements.txt`
 3. Run: `python main.py`
 
-## 🛠 Reliability & Quality
-- **Automated Testing:** Python core logic is covered by `pytest`.
-- **Pre-commit Hook:** Local git hook prevents committing code that fails tests.
-- **Server Guard:** `update.sh` automatically runs tests on the server before restarting the service.
+## 🛠 Development & Quality
+
+The project uses a modern automated linting and testing pipeline to ensure code consistency and reliability.
+
+### Setup Quality Tools
+1. Install development dependencies: `pip install -r requirements-dev.txt`
+2. Install git hooks: `pre-commit install`
+
+### Automated Checks
+The following tools run automatically on every `git commit`:
+- **Ruff:** Ultra-fast Python linter and formatter (replaces flake8, isort, black).
+- **Prettier:** Standard formatter for `webapp/` (JS, CSS, HTML).
+- **Pytest:** Local test suite for core logic.
+- **Sanity Checks:** Trailing whitespace, end-of-file consistency, and YAML validation.
+
+### Manual Usage
+You can run all checks manually on all files without committing:
+```bash
+# Run all hooks
+pre-commit run --all-files
+
+# Run only Python ruff
+pre-commit run ruff --all-files
+```
 
 ## 🛠 User Guide
 
