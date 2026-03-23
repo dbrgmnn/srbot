@@ -372,8 +372,8 @@ window.executeDeleteAll = async () => {
   if (input.value.toLowerCase() !== 'delete all') return;
 
   try {
-    const { DELETE } = await import('./api.js');
-    await DELETE('/api/words/all');
+    const { DEL } = await import('./api.js');
+    await DEL('/api/words/all');
     
     closeDeleteAllSheet();
     tg.HapticFeedback.notificationOccurred('success');
