@@ -162,6 +162,7 @@
       <div class="header-title">Settings</div>
     </div>
 
+    <!-- Group 1: Learning -->
     <div class="card settings-group">
       <div class="settings-row" onclick="openPicker('language')">
         <div class="settings-row-left">
@@ -188,11 +189,14 @@
           <div class="settings-icon settings-icon-limit">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
           </div>
-          <div class="settings-label">New words limit</div>
+          <div class="settings-label">Daily Limit</div>
         </div>
         <div class="picker-value" id="set-limit-val">—</div>
       </div>
+    </div>
 
+    <!-- Group 2: Notifications -->
+    <div class="card settings-group">
       <div class="settings-row" onclick="openPicker('notification_interval_minutes')">
         <div class="settings-row-left">
           <div class="settings-icon settings-icon-notify">
@@ -208,7 +212,7 @@
           <div class="settings-icon settings-icon-quiet">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
           </div>
-          <div class="settings-label">Quiet hours</div>
+          <div class="settings-label">Quiet Hours</div>
         </div>
         <div class="picker-value" id="quiet-hours-display">—</div>
       </div>
@@ -216,25 +220,7 @@
       <input type="hidden" id="set-quiet-end" value="08:00">
     </div>
 
-    <div class="card settings-group">
-      <div class="settings-row no-click">
-        <div class="settings-row-left">
-          <div class="settings-icon settings-icon-api">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3y-2.5z"></path></svg>
-          </div>
-          <div class="settings-label">API Access</div>
-        </div>
-        <div class="settings-row-actions">
-          <button class="row-btn" onclick="copyToken()" title="Copy Token">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
-          </button>
-          <button class="row-btn row-btn-danger" onclick="revokeToken()" title="Revoke Token">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
-          </button>
-        </div>
-      </div>
-    </div>
-
+    <!-- Group 3: Data & Tools -->
     <div class="card settings-group">
       <div class="settings-row" onclick="shareWords()">
         <div class="settings-row-left">
@@ -245,6 +231,17 @@
         </div>
         <div class="picker-trigger-arrow">›</div>
       </div>
+
+      <div class="settings-row" onclick="openApiAccessSheet()">
+        <div class="settings-row-left">
+          <div class="settings-icon settings-icon-api">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3y-2.5z"></path></svg>
+          </div>
+          <div class="settings-label">API Access</div>
+        </div>
+        <div class="picker-trigger-arrow">›</div>
+      </div>
+
       <div class="settings-row" onclick="openDeleteAllSheet()">
         <div class="settings-row-left">
           <div class="settings-icon settings-icon-delete">
@@ -254,6 +251,21 @@
         </div>
       </div>
     </div>
+  </div>
+
+  <!-- API Access Sheet -->
+  <div id="api-overlay" class="edit-overlay" onclick="closeApiAccessSheet()"></div>
+  <div id="api-sheet" class="edit-sheet">
+    <div class="edit-sheet-title">API Access</div>
+    <div style="text-align:center; color:var(--text-secondary); margin-bottom:24px; font-size:14px; line-height:1.5;">
+      Use this token to access the API from external apps. Keep it secret!
+    </div>
+    <div class="card settings-group" style="padding:16px; margin-bottom:24px; background:var(--glass-mid);">
+      <div id="api-token-display" style="word-break:break-all; font-family:monospace; font-size:14px; text-align:center; color:var(--text); letter-spacing:0.05em;">—</div>
+    </div>
+    <button class="btn" onclick="copyToken()">Copy Token</button>
+    <button class="btn btn-secondary" onclick="revokeToken()" style="color:#ff453a; border-color:rgba(255,69,58,0.2);">Revoke & Regenerate</button>
+    <button class="btn btn-secondary" onclick="closeApiAccessSheet()" style="margin-top:8px;">Close</button>
   </div>
 
   <!-- Nav -->

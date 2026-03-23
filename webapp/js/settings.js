@@ -205,6 +205,23 @@ function _unlockScroll() {
 window._lockScroll = _lockScroll;
 window._unlockScroll = _unlockScroll;
 
+// ── API Access Sheet ─────────────────────────────────────────────────────
+
+export function openApiAccessSheet() {
+  const display = document.getElementById('api-token-display');
+  display.textContent = currentToken || '—';
+  
+  document.getElementById('api-overlay').classList.add('open');
+  document.getElementById('api-sheet').classList.add('open');
+  _lockScroll();
+}
+
+export function closeApiAccessSheet() {
+  document.getElementById('api-overlay').classList.remove('open');
+  document.getElementById('api-sheet').classList.remove('open');
+  _unlockScroll();
+}
+
 // ── Settings load / save ──────────────────────────────────────────────────
 
 function _fillSettingsFromState() {
@@ -215,7 +232,7 @@ function _fillSettingsFromState() {
   if (modeDisplay && s.practice_mode) modeDisplay.textContent = MODE_LABELS[s.practice_mode] || s.practice_mode;
 
   const limitEl = document.getElementById('set-limit-val');
-  if (limitEl && s.daily_limit) limitEl.textContent = s.daily_limit;
+  if (limitEl && s.daily_limit) limitEl.textContent = `${s.daily_limit} words`;
 
   const quietStart = document.getElementById('set-quiet-start');
   const quietEnd = document.getElementById('set-quiet-end');
@@ -232,7 +249,12 @@ function _fillSettingsFromState() {
   const langDisplay = document.getElementById('language-display');
   if (langDisplay && s.language) {
     const meta = getLanguages()[s.language];
-    langDisplay.textContent = meta ? `${meta.flag} ${meta.name}` : s.language.toUpperCase();
+    let label = s.language.toUpperCase();
+    if (meta) {
+      label = `${meta.flag} ${meta.name}`;
+      if (meta.word_count !== undefined) label += ` (${meta.word_count})`;
+    }
+    langDisplay.textContent = label;
   }
 }
 
@@ -258,6 +280,8 @@ window.revokeToken = () => {
       try {
         const resp = await POST('/api/settings/token/revoke');
         currentToken = resp.result.token;
+        const display = document.getElementById('api-token-display');
+        if (display) display.textContent = currentToken;
         tg.HapticFeedback.notificationOccurred('success');
         toast('New token generated and copied', 'success');
         await navigator.clipboard.writeText(currentToken);
