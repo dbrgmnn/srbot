@@ -15,6 +15,7 @@ from api.routes.words import setup_routes_words
 from api.routes.practice import setup_routes_practice
 from api.routes.settings import setup_routes_settings
 from core.languages import LANGUAGES
+from core.translator import Translator
 from db.repository import UserRepo
 
 logger = logging.getLogger(__name__)
