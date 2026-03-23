@@ -257,6 +257,8 @@ function _updateTokenDisplay() {
 window.toggleTokenVisibility = () => {
   tg.HapticFeedback.selectionChanged();
   isTokenVisible = !isTokenVisible;
+  const tokenEl = document.getElementById('api-token');
+  if (tokenEl) tokenEl.classList.toggle('revealed', isTokenVisible);
   _updateTokenDisplay();
 };
 
