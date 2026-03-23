@@ -1,7 +1,9 @@
 const initialData = {
-  currentLang: localStorage.getItem('currentLang') || (navigator.language || 'en').split('-')[0],
+  currentLang:
+    localStorage.getItem("currentLang") ||
+    (navigator.language || "en").split("-")[0],
   practiceMode: null,
-  ttsCode: 'en-US',
+  ttsCode: "en-US",
   languages: null,
   min_daily_limit: null,
   max_daily_limit: null,
@@ -9,7 +11,7 @@ const initialData = {
   max_notify_interval: null,
   currentStats: null,
   currentSettings: null,
-  sessionTotal: 0
+  sessionTotal: 0,
 };
 
 class ObservableState {
@@ -27,24 +29,26 @@ class ObservableState {
           target[prop] = value;
           return true;
         }
-        
+
         const oldValue = target._data[prop];
         if (oldValue === value) return true;
 
         target._data[prop] = value;
-        
+
         // Notify subscribers for this specific key
         if (target._subscribers.has(prop)) {
-          target._subscribers.get(prop).forEach(cb => cb(value, oldValue));
+          target._subscribers.get(prop).forEach((cb) => cb(value, oldValue));
         }
-        
+
         // Notify global subscribers (if needed)
-        if (target._subscribers.has('*')) {
-          target._subscribers.get('*').forEach(cb => cb(prop, value, oldValue));
+        if (target._subscribers.has("*")) {
+          target._subscribers
+            .get("*")
+            .forEach((cb) => cb(prop, value, oldValue));
         }
 
         return true;
-      }
+      },
     });
   }
 
@@ -53,12 +57,16 @@ class ObservableState {
       this._subscribers.set(key, []);
     }
     this._subscribers.get(key).push(callback);
-    
+
     // Immediately call with current value if it exists
-    if (key !== '*' && this._data[key] !== undefined && this._data[key] !== null) {
+    if (
+      key !== "*" &&
+      this._data[key] !== undefined &&
+      this._data[key] !== null
+    ) {
       callback(this._data[key], null);
     }
-    
+
     return () => {
       const subs = this._subscribers.get(key);
       const idx = subs.indexOf(callback);
@@ -71,5 +79,5 @@ export const state = new ObservableState(initialData);
 
 export function setLanguage(lang) {
   state.currentLang = lang;
-  localStorage.setItem('currentLang', lang);
+  localStorage.setItem("currentLang", lang);
 }

@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 
 @dataclass
@@ -11,10 +11,10 @@ class ReviewResult:
 
 
 def sm2(
-    quality: int,     # 0-2 = fail, 3 = hard, 4 = good, 5 = perfect
+    quality: int,  # 0-2 = fail, 3 = hard, 4 = good, 5 = perfect
     repetitions: int,
     easiness: float,
-    interval: int,    # Days
+    interval: int,  # Days
 ) -> ReviewResult:
     """Implementation of the SM-2 Spaced Repetition Algorithm."""
     if quality < 3:
@@ -35,7 +35,7 @@ def sm2(
     easiness = easiness + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02))
     easiness = max(1.3, easiness)
 
-    now = datetime.now(tz=timezone.utc)
+    now = datetime.now(tz=UTC)
     delta = timedelta(days=interval)
     next_review = now + delta
 

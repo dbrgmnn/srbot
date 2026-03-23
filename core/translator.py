@@ -1,12 +1,16 @@
 import json
 import logging
+
 import aiohttp
+
 from core.languages import LANGUAGES
 
 logger = logging.getLogger(__name__)
 
+
 class Translator:
     """Handles interaction with Gemini API for translation and word enrichment."""
+
     def __init__(self, api_key: str):
         self.api_key = api_key
         self.url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent"
@@ -25,8 +29,8 @@ class Translator:
             "generationConfig": {
                 "responseMimeType": "application/json",
                 "temperature": temperature,
-                "maxOutputTokens": max_tokens
-            }
+                "maxOutputTokens": max_tokens,
+            },
         }
 
         content_text = ""
@@ -38,15 +42,15 @@ class Translator:
                     err_text = await resp.text()
                     logger.error(f"Gemini API error {resp.status}: {err_text}")
                     return None
-                
+
                 result = await resp.json()
-                
-                if 'candidates' not in result or not result['candidates']:
+
+                if "candidates" not in result or not result["candidates"]:
                     logger.error(f"Gemini returned empty candidates: {result}")
                     return None
-                    
-                content_text = result['candidates'][0]['content']['parts'][0]['text'].strip()
-                
+
+                content_text = result["candidates"][0]["content"]["parts"][0]["text"].strip()
+
                 # Robust JSON extraction
                 if content_text.startswith("```"):
                     lines = content_text.splitlines()
@@ -64,15 +68,21 @@ class Translator:
     async def translate_and_enrich(self, text: str, source_lang: str) -> dict | None:
         """Translate word and generate example + CEFR level via Gemini."""
         lang_name = LANGUAGES.get(source_lang, {}).get("name", source_lang)
-        
-        article_rule = "Nouns: lowercase article + Capitalized noun (e.g. der Hund)." if source_lang == "de" else "All words: lowercase."
+
+        article_rule = (
+            "Nouns: lowercase article + Capitalized noun (e.g. der Hund)."
+            if source_lang == "de"
+            else "All words: lowercase."
+        )
         prompt = f"""Translate "{text}" between {lang_name} ({source_lang}) and Russian.
 
 Rules:
 - word: {lang_name} form. {article_rule}
 - translation: Russian lowercase.
 - level: CEFR level of the word (A1-C2).
-- example: natural {lang_name} sentence using the word. Match complexity to the word's level: simple present tense and basic vocabulary for A1-A2, moderate grammar for B1-B2, complex structures for C1-C2.
+- example: natural {lang_name} sentence using the word. Match complexity to the word's level:
+  simple present tense and basic vocabulary for A1-A2, moderate grammar for B1-B2,
+  complex structures for C1-C2.
 - is_valid: false if input is gibberish, else true.
 
 Return JSON only: {{"word": "", "translation": "", "example": "", "level": "", "is_valid": true}}"""

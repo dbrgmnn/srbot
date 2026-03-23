@@ -1,10 +1,11 @@
-from aiohttp import web
 import aiosqlite
-from db.repository import UserRepo, WordRepo
-from core.srs import sm2
+from aiohttp import web
 
+from core.srs import sm2
+from db.repository import UserRepo, WordRepo
 
 # --- Routes ---
+
 
 def setup_routes_practice(app: web.Application, db: aiosqlite.Connection):
     """Register practice-related routes."""
@@ -13,7 +14,7 @@ def setup_routes_practice(app: web.Application, db: aiosqlite.Connection):
         """Return a session of words for practice, respecting user limits."""
         user_id = request["user_id"]
         telegram_id = request["telegram_id"]
-        lang = request['language']
+        lang = request["language"]
 
         user_repo = UserRepo(db)
         word_repo = WordRepo(db)
@@ -25,7 +26,7 @@ def setup_routes_practice(app: web.Application, db: aiosqlite.Connection):
         today_done = await user_repo.get_today_new_count(user_id, lang, tz_name)
         daily_limit = settings.get("daily_limit", config.max_daily_limit // 2)
         remaining = max(0, daily_limit - today_done)
-        
+
         words = await word_repo.get_session_words(user_id, lang, new_limit=remaining)
         return web.json_response({"ok": True, "result": {"words": words}})
 
@@ -35,7 +36,7 @@ def setup_routes_practice(app: web.Application, db: aiosqlite.Connection):
         body = await request.json()
         word_id = body.get("word_id")
         quality = body.get("quality")
-        
+
         if word_id is None or quality is None:
             return web.json_response({"ok": False, "error": "missing_fields"}, status=400)
 
@@ -61,7 +62,7 @@ def setup_routes_practice(app: web.Application, db: aiosqlite.Connection):
         user_repo = UserRepo(db)
         settings = await user_repo.get_user_settings(telegram_id, word["language"], config)
         tz_name = settings.get("timezone", config.default_timezone)
-        
+
         await word_repo.increment_daily_stat(user_id, word["language"], is_new, tz_name)
 
         await word_repo.update_word_after_review(
@@ -79,7 +80,7 @@ def setup_routes_practice(app: web.Application, db: aiosqlite.Connection):
         body = await request.json()
         word_id = body.get("word_id")
         old_state = body.get("old_state")
-        
+
         if word_id is None or old_state is None:
             return web.json_response({"ok": False, "error": "missing_fields"}, status=400)
 

@@ -2,15 +2,19 @@
 Configuration management for the SRBot application.
 Handles environment variables and application-wide settings.
 """
+
 import os
 from dataclasses import dataclass
+
 from dotenv import load_dotenv
 
 load_dotenv()
 
+
 @dataclass
 class Config:
     """Application configuration container."""
+
     bot_token: str
     webapp_url: str
     allowed_users: list[int]

@@ -1,349 +1,709 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>SRbot</title>
-  <link rel="stylesheet" href="static/css/style.css">
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <title>SRbot</title>
+    <link rel="stylesheet" href="static/css/style.css" />
+  </head>
+  <body>
+    <div id="toast" class="toast"></div>
 
-  <div id="toast" class="toast"></div>
-
-  <!-- Screen: Home -->
-  <div id="screen-home" class="screen active loading">
-    <div class="header">
-      <div class="header-title">Overview</div>
-    </div>
-
-    <div class="stats-grid">
-      <div class="stat-pill">
-        <div class="stat-pill-left">
-          <div class="skeleton skeleton-val"></div>
-          <div class="stat-val" id="stat-due">0</div>
-        </div>
-        <div class="skeleton skeleton-val" style="width:38px;height:38px;border-radius:var(--radius-pill)"></div>
-        <div class="stat-pill-icon stat-pill-icon-review">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        </div>
-      </div>
-      <div class="stat-pill">
-        <div class="stat-pill-left">
-          <div class="skeleton skeleton-val"></div>
-          <div class="stat-val" id="stat-new">0</div>
-        </div>
-        <div class="skeleton skeleton-val" style="width:38px;height:38px;border-radius:var(--radius-pill)"></div>
-        <div class="stat-pill-icon stat-pill-icon-new">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="skeleton skeleton-total"></div>
-      <div class="progress-total">TOTAL <span id="count-total">0</span></div>
-      
-      <div class="skeleton skeleton-bar"></div>
-      <div class="progress-bar">
-        <div class="progress-bar-seg" id="bar-new"></div>
-        <div class="progress-bar-seg" id="bar-learning"></div>
-        <div class="progress-bar-seg" id="bar-known"></div>
-        <div class="progress-bar-seg" id="bar-mastered"></div>
+    <!-- Screen: Home -->
+    <div id="screen-home" class="screen active loading">
+      <div class="header">
+        <div class="header-title">Overview</div>
       </div>
 
-      <div class="skeleton skeleton-bar" style="width:100%; height:30px; margin-top:10px; border-radius:var(--radius-sm)"></div>
-      <div class="progress-legend">
-        <div class="progress-legend-item">
-          <b class="progress-legend-num text-new" id="count-new">0</b>
-          <span class="progress-legend-lbl">QUEUE</span>
-        </div>
-        <div class="progress-legend-item">
-          <b class="progress-legend-num text-learning" id="count-learning">0</b>
-          <span class="progress-legend-lbl">LEARNING</span>
-        </div>
-        <div class="progress-legend-item">
-          <b class="progress-legend-num text-known" id="count-known">0</b>
-          <span class="progress-legend-lbl">KNOWN</span>
-        </div>
-        <div class="progress-legend-item">
-          <b class="progress-legend-num text-mastered" id="count-mastered">0</b>
-          <span class="progress-legend-lbl">MASTERED</span>
-        </div>
-      </div>
-      <div class="card-sep"></div>
-      
-      <div class="skeleton skeleton-bar" style="margin-top:10px"></div>
-      <div class="week-grid" id="week-grid"></div>
-    </div>
-
-    <button id="btn-practice" class="btn" onclick="startPractice()">Practice</button>
-  </div>
-
-  <!-- Screen: Practice -->
-  <div id="screen-practice" class="screen">
-    <div class="practice-screen-content">
-      <div class="practice-info-row">
-        <div class="practice-badge practice-badge-info" id="practice-progress">0 / 0</div>
-      </div>
-
-      <div class="word-card-container">
-        <div id="word-card" class="word-card">
-          <div class="word-face word-front">
-            <div class="practice-badge" id="practice-type"></div>
-            <div class="word-main" id="word-front"></div>
+      <div class="stats-grid">
+        <div class="stat-pill">
+          <div class="stat-pill-left">
+            <div class="skeleton skeleton-val"></div>
+            <div class="stat-val" id="stat-due">0</div>
           </div>
-          <div class="word-face word-back">
-            <div class="word-level-badge" id="word-back-level"></div>
-            <div class="word-trans" id="word-translation"></div>
-            <div class="word-example" id="word-ex"></div>
+          <div
+            class="skeleton skeleton-val"
+            style="width: 38px; height: 38px; border-radius: var(--radius-pill)"
+          ></div>
+          <div class="stat-pill-icon stat-pill-icon-review">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <polyline points="12 6 12 12 16 14" />
+            </svg>
+          </div>
+        </div>
+        <div class="stat-pill">
+          <div class="stat-pill-left">
+            <div class="skeleton skeleton-val"></div>
+            <div class="stat-val" id="stat-new">0</div>
+          </div>
+          <div
+            class="skeleton skeleton-val"
+            style="width: 38px; height: 38px; border-radius: var(--radius-pill)"
+          ></div>
+          <div class="stat-pill-icon stat-pill-icon-new">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+            </svg>
           </div>
         </div>
       </div>
 
-      <div class="practice-footer">
-        <div class="practice-footer-row">
-          <button class="btn-round" onclick="exitPractice()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          </button>
-          <button id="btn-undo" class="btn-round" onclick="undo()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.95"/></svg>
-          </button>
-          <button class="btn-round" onclick="playAudio(event)">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
-          </button>
+      <div class="card">
+        <div class="skeleton skeleton-total"></div>
+        <div class="progress-total">TOTAL <span id="count-total">0</span></div>
+
+        <div class="skeleton skeleton-bar"></div>
+        <div class="progress-bar">
+          <div class="progress-bar-seg" id="bar-new"></div>
+          <div class="progress-bar-seg" id="bar-learning"></div>
+          <div class="progress-bar-seg" id="bar-known"></div>
+          <div class="progress-bar-seg" id="bar-mastered"></div>
         </div>
-      </div>
-    </div>
-  </div>
 
-  <!-- Screen: Add -->
-  <div id="screen-add" class="screen">
-    <div class="header">
-      <div class="header-title">Add Word</div>
-    </div>
-    <div class="card settings-group">
-      <div class="add-form">
-        <input type="text" id="add-word" class="form-input" placeholder="Word">
-        <input type="text" id="add-translation" class="form-input" placeholder="Translate">
-        <input type="text" id="add-example" class="form-input" placeholder="Example">
-        <div id="add-level-trigger" class="form-input picker-trigger" onclick="openPicker('level', 'add')">
-          <span id="add-level-display" class="picker-trigger-placeholder">Level</span>
-          <span class="picker-trigger-arrow">›</span>
-        </div>
-        <input type="hidden" id="add-level" value="">
-      </div>
-    </div>
-    <button class="btn" onclick="submitWords()">Add</button>
-    
-    <div class="capsule-wrapper">
-      <label class="capsule" for="file-input">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-        Upload CSV
-      </label>
-    </div>
-    <input type="file" id="file-input" accept=".csv,.txt" onchange="handleFileUpload(this)">
-  </div>
-
-  <!-- Screen: Search -->
-  <div id="screen-search" class="screen">
-    <div class="header">
-      <div class="header-title">Dictionary</div>
-    </div>
-    <div class="search-wrapper">
-      <input type="text" id="search-input" class="form-input" placeholder="Search words..." oninput="onSearchInput(this.value)">
-      <button class="search-clear" id="search-clear" onclick="clearSearch()" style="display:none">✕</button>
-    </div>
-    <div id="search-results"></div>
-  </div>
-
-  <!-- Screen: Settings -->
-  <div id="screen-settings" class="screen">
-    <div class="header">
-      <div class="header-title">Settings</div>
-    </div>
-
-    <!-- Group 1: Learning -->
-    <div class="card settings-group">
-      <div class="settings-row" onclick="openPicker('language')">
-        <div class="settings-row-left">
-          <div class="settings-icon settings-icon-lang">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+        <div
+          class="skeleton skeleton-bar"
+          style="
+            width: 100%;
+            height: 30px;
+            margin-top: 10px;
+            border-radius: var(--radius-sm);
+          "
+        ></div>
+        <div class="progress-legend">
+          <div class="progress-legend-item">
+            <b class="progress-legend-num text-new" id="count-new">0</b>
+            <span class="progress-legend-lbl">QUEUE</span>
           </div>
-          <div class="settings-label">Active Dictionary</div>
+          <div class="progress-legend-item">
+            <b class="progress-legend-num text-learning" id="count-learning"
+              >0</b
+            >
+            <span class="progress-legend-lbl">LEARNING</span>
+          </div>
+          <div class="progress-legend-item">
+            <b class="progress-legend-num text-known" id="count-known">0</b>
+            <span class="progress-legend-lbl">KNOWN</span>
+          </div>
+          <div class="progress-legend-item">
+            <b class="progress-legend-num text-mastered" id="count-mastered"
+              >0</b
+            >
+            <span class="progress-legend-lbl">MASTERED</span>
+          </div>
         </div>
-        <div class="picker-value" id="language-display">—</div>
+        <div class="card-sep"></div>
+
+        <div class="skeleton skeleton-bar" style="margin-top: 10px"></div>
+        <div class="week-grid" id="week-grid"></div>
       </div>
 
-      <div class="settings-row" onclick="openPicker('practice_mode')">
-        <div class="settings-row-left">
-          <div class="settings-icon settings-icon-mode">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-          </div>
-          <div class="settings-label">Practice Mode</div>
-        </div>
-        <div class="picker-value" id="practice-mode-display">—</div>
-      </div>
+      <button id="btn-practice" class="btn" onclick="startPractice()">
+        Practice
+      </button>
+    </div>
 
-      <div class="settings-row" onclick="openPicker('daily_limit')">
-        <div class="settings-row-left">
-          <div class="settings-icon settings-icon-limit">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+    <!-- Screen: Practice -->
+    <div id="screen-practice" class="screen">
+      <div class="practice-screen-content">
+        <div class="practice-info-row">
+          <div
+            class="practice-badge practice-badge-info"
+            id="practice-progress"
+          >
+            0 / 0
           </div>
-          <div class="settings-label">Daily Limit</div>
         </div>
-        <div class="picker-value" id="set-limit-val">—</div>
+
+        <div class="word-card-container">
+          <div id="word-card" class="word-card">
+            <div class="word-face word-front">
+              <div class="practice-badge" id="practice-type"></div>
+              <div class="word-main" id="word-front"></div>
+            </div>
+            <div class="word-face word-back">
+              <div class="word-level-badge" id="word-back-level"></div>
+              <div class="word-trans" id="word-translation"></div>
+              <div class="word-example" id="word-ex"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="practice-footer">
+          <div class="practice-footer-row">
+            <button class="btn-round" onclick="exitPractice()">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+            <button id="btn-undo" class="btn-round" onclick="undo()">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="1 4 1 10 7 10" />
+                <path d="M3.51 15a9 9 0 1 0 .49-4.95" />
+              </svg>
+            </button>
+            <button class="btn-round" onclick="playAudio(event)">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+                <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+              </svg>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- Group 2: Notifications -->
-    <div class="card settings-group">
-      <div class="settings-row" onclick="openPicker('notification_interval_minutes')">
-        <div class="settings-row-left">
-          <div class="settings-icon settings-icon-notify">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-          </div>
-          <div class="settings-label">Frequency</div>
-        </div>
-        <div class="picker-value" id="set-notify-interval">—</div>
+    <!-- Screen: Add -->
+    <div id="screen-add" class="screen">
+      <div class="header">
+        <div class="header-title">Add Word</div>
       </div>
-
-      <div class="settings-row" onclick="openQuietHoursSheet()">
-        <div class="settings-row-left">
-          <div class="settings-icon settings-icon-quiet">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
-          </div>
-          <div class="settings-label">Quiet Hours</div>
-        </div>
-        <div class="picker-value" id="quiet-hours-display">—</div>
-      </div>
-      <input type="hidden" id="set-quiet-start" value="23:00">
-      <input type="hidden" id="set-quiet-end" value="08:00">
-    </div>
-
-    <!-- Group 3: Data & Tools -->
-    <div class="card settings-group">
-      <div class="settings-row" onclick="shareWords()">
-        <div class="settings-row-left">
-          <div class="settings-icon settings-icon-export">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          </div>
-          <div class="settings-label">Export Dictionary</div>
-        </div>
-        <div class="picker-trigger-arrow">›</div>
-      </div>
-
-      <div class="settings-row" onclick="openApiAccessSheet()">
-        <div class="settings-row-left">
-          <div class="settings-icon settings-icon-api">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3y-2.5z"></path></svg>
-          </div>
-          <div class="settings-label">API Access</div>
-        </div>
-        <div class="picker-trigger-arrow">›</div>
-      </div>
-
-      <div class="settings-row" onclick="openDeleteAllSheet()">
-        <div class="settings-row-left">
-          <div class="settings-icon settings-icon-delete">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14H6L5 6"></path><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M9 6V4h6v2"></path></svg>
-          </div>
-          <div class="settings-label-danger">Clear Dictionary</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- API Access Sheet -->
-  <div id="api-overlay" class="edit-overlay" onclick="closeApiAccessSheet()"></div>
-  <div id="api-sheet" class="edit-sheet">
-    <div class="edit-sheet-title">API Access</div>
-    <div style="text-align:center; color:var(--text-secondary); margin-bottom:24px; font-size:14px; line-height:1.5;">
-      Use this token to access the API from external apps. Keep it secret!
-    </div>
-    <div class="card settings-group" style="padding:16px; margin-bottom:24px; background:var(--glass-mid);">
-      <div id="api-token-display" style="word-break:break-all; font-family:monospace; font-size:14px; text-align:center; color:var(--text); letter-spacing:0.05em;">—</div>
-    </div>
-    <button class="btn" onclick="copyToken()">Copy Token</button>
-    <button class="btn btn-secondary" onclick="revokeToken()" style="color:#ff453a; border-color:rgba(255,69,58,0.2);">Revoke</button>
-    <button class="btn btn-secondary" onclick="closeApiAccessSheet()" style="margin-top:8px;">Close</button>
-  </div>
-
-  <!-- Quiet Hours Sheet -->
-  <div id="quiet-hours-overlay" class="edit-overlay" onclick="closeQuietHoursSheet()"></div>
-  <div id="quiet-hours-sheet" class="edit-sheet">
-    <div class="edit-sheet-title">Quiet Hours</div>
-    <div class="picker-double">
-      <div class="picker-column">
-        <div class="picker-column-title">Starts at</div>
-        <div id="quiet-start-list" class="picker-list-mini"></div>
-      </div>
-      <div class="picker-column">
-        <div class="picker-column-title">Ends at</div>
-        <div id="quiet-end-list" class="picker-list-mini"></div>
-      </div>
-    </div>
-    <button class="btn" onclick="saveQuietHours()">Save Range</button>
-    <button class="btn btn-secondary" onclick="closeQuietHoursSheet()">Cancel</button>
-  </div>
-
-  <!-- Nav -->
-  <div class="nav">
-    <button id="nav-home" class="nav-btn active" onclick="showScreen('home')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-    </button>
-    <button id="nav-add" class="nav-btn" onclick="showScreen('add')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
-    </button>
-    <button id="nav-search" class="nav-btn" onclick="showScreen('search')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-    </button>
-    <button id="nav-settings" class="nav-btn" onclick="showScreen('settings')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-    </button>
-  </div>
-
-  <!-- Edit Sheet -->
-  <div id="edit-overlay" class="edit-overlay" onclick="closeEdit()"></div>
-  <div id="edit-sheet" class="edit-sheet">
-    <div class="edit-sheet-title">Edit Word</div>
-    <div class="card settings-group">
-      <div class="add-form">
-        <input type="text" id="edit-word" class="form-input" placeholder="Word">
-        <input type="text" id="edit-translation" class="form-input" placeholder="Translate">
-        <input type="text" id="edit-example" class="form-input" placeholder="Example">
-        <div id="edit-level-trigger" class="form-input picker-trigger" onclick="openPicker('level', 'edit')">
-            <span id="edit-level-display" class="picker-trigger-placeholder">Level</span>
+      <div class="card settings-group">
+        <div class="add-form">
+          <input
+            type="text"
+            id="add-word"
+            class="form-input"
+            placeholder="Word"
+          />
+          <input
+            type="text"
+            id="add-translation"
+            class="form-input"
+            placeholder="Translate"
+          />
+          <input
+            type="text"
+            id="add-example"
+            class="form-input"
+            placeholder="Example"
+          />
+          <div
+            id="add-level-trigger"
+            class="form-input picker-trigger"
+            onclick="openPicker('level', 'add')"
+          >
+            <span id="add-level-display" class="picker-trigger-placeholder"
+              >Level</span
+            >
             <span class="picker-trigger-arrow">›</span>
+          </div>
+          <input type="hidden" id="add-level" value="" />
         </div>
-        <input type="hidden" id="edit-level" value="">
+      </div>
+      <button class="btn" onclick="submitWords()">Add</button>
+
+      <div class="capsule-wrapper">
+        <label class="capsule" for="file-input">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="17 8 12 3 7 8" />
+            <line x1="12" y1="3" x2="12" y2="15" />
+          </svg>
+          Upload CSV
+        </label>
+      </div>
+      <input
+        type="file"
+        id="file-input"
+        accept=".csv,.txt"
+        onchange="handleFileUpload(this)"
+      />
+    </div>
+
+    <!-- Screen: Search -->
+    <div id="screen-search" class="screen">
+      <div class="header">
+        <div class="header-title">Dictionary</div>
+      </div>
+      <div class="search-wrapper">
+        <input
+          type="text"
+          id="search-input"
+          class="form-input"
+          placeholder="Search words..."
+          oninput="onSearchInput(this.value)"
+        />
+        <button
+          class="search-clear"
+          id="search-clear"
+          onclick="clearSearch()"
+          style="display: none"
+        >
+          ✕
+        </button>
+      </div>
+      <div id="search-results"></div>
+    </div>
+
+    <!-- Screen: Settings -->
+    <div id="screen-settings" class="screen">
+      <div class="header">
+        <div class="header-title">Settings</div>
+      </div>
+
+      <!-- Group 1: Learning -->
+      <div class="card settings-group">
+        <div class="settings-row" onclick="openPicker('language')">
+          <div class="settings-row-left">
+            <div class="settings-icon settings-icon-lang">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="2" y1="12" x2="22" y2="12"></line>
+                <path
+                  d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"
+                ></path>
+              </svg>
+            </div>
+            <div class="settings-label">Active Dictionary</div>
+          </div>
+          <div class="picker-value" id="language-display">—</div>
+        </div>
+
+        <div class="settings-row" onclick="openPicker('practice_mode')">
+          <div class="settings-row-left">
+            <div class="settings-icon settings-icon-mode">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+              </svg>
+            </div>
+            <div class="settings-label">Practice Mode</div>
+          </div>
+          <div class="picker-value" id="practice-mode-display">—</div>
+        </div>
+
+        <div class="settings-row" onclick="openPicker('daily_limit')">
+          <div class="settings-row-left">
+            <div class="settings-icon settings-icon-limit">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+              </svg>
+            </div>
+            <div class="settings-label">Daily Limit</div>
+          </div>
+          <div class="picker-value" id="set-limit-val">—</div>
+        </div>
+      </div>
+
+      <!-- Group 2: Notifications -->
+      <div class="card settings-group">
+        <div
+          class="settings-row"
+          onclick="openPicker('notification_interval_minutes')"
+        >
+          <div class="settings-row-left">
+            <div class="settings-icon settings-icon-notify">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+              </svg>
+            </div>
+            <div class="settings-label">Frequency</div>
+          </div>
+          <div class="picker-value" id="set-notify-interval">—</div>
+        </div>
+
+        <div class="settings-row" onclick="openQuietHoursSheet()">
+          <div class="settings-row-left">
+            <div class="settings-icon settings-icon-quiet">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"
+                ></path>
+              </svg>
+            </div>
+            <div class="settings-label">Quiet Hours</div>
+          </div>
+          <div class="picker-value" id="quiet-hours-display">—</div>
+        </div>
+        <input type="hidden" id="set-quiet-start" value="23:00" />
+        <input type="hidden" id="set-quiet-end" value="08:00" />
+      </div>
+
+      <!-- Group 3: Data & Tools -->
+      <div class="card settings-group">
+        <div class="settings-row" onclick="shareWords()">
+          <div class="settings-row-left">
+            <div class="settings-icon settings-icon-export">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+              </svg>
+            </div>
+            <div class="settings-label">Export Dictionary</div>
+          </div>
+          <div class="picker-trigger-arrow">›</div>
+        </div>
+
+        <div class="settings-row" onclick="openApiAccessSheet()">
+          <div class="settings-row-left">
+            <div class="settings-icon settings-icon-api">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3y-2.5z"
+                ></path>
+              </svg>
+            </div>
+            <div class="settings-label">API Access</div>
+          </div>
+          <div class="picker-trigger-arrow">›</div>
+        </div>
+
+        <div class="settings-row" onclick="openDeleteAllSheet()">
+          <div class="settings-row-left">
+            <div class="settings-icon settings-icon-delete">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6l-1 14H6L5 6"></path>
+                <path d="M10 11v6"></path>
+                <path d="M14 11v6"></path>
+                <path d="M9 6V4h6v2"></path>
+              </svg>
+            </div>
+            <div class="settings-label-danger">Clear Dictionary</div>
+          </div>
+        </div>
       </div>
     </div>
-    <button id="edit-save-btn" class="btn" onclick="saveEdit()">Save</button>
-    <button class="btn btn-secondary" onclick="closeEdit()">Cancel</button>
-  </div>
 
-  <!-- Universal Picker Sheet -->
-  <div id="picker-overlay" class="edit-overlay" onclick="closePicker()"></div>
-  <div id="picker-sheet" class="edit-sheet">
-    <div class="edit-sheet-title" id="picker-title">Select</div>
-    <div id="picker-list" class="picker-list"></div>
-  </div>
-
-  <!-- Delete All Confirmation Sheet -->
-  <div id="delete-all-overlay" class="edit-overlay" onclick="closeDeleteAllSheet()"></div>
-  <div id="delete-all-sheet" class="edit-sheet">
-    <div class="edit-sheet-title">Clear Dictionary</div>
-    <div style="text-align:center; color:var(--text-secondary); margin-bottom:20px; font-size:14px; line-height:1.5;">
-      This will permanently delete ALL words in your <b>active dictionary</b>. This action cannot be undone.<br><br>
-      To confirm, type <b>delete all</b> below:
+    <!-- API Access Sheet -->
+    <div
+      id="api-overlay"
+      class="edit-overlay"
+      onclick="closeApiAccessSheet()"
+    ></div>
+    <div id="api-sheet" class="edit-sheet">
+      <div class="edit-sheet-title">API Access</div>
+      <div
+        style="
+          text-align: center;
+          color: var(--text-secondary);
+          margin-bottom: 24px;
+          font-size: 14px;
+          line-height: 1.5;
+        "
+      >
+        Use this token to access the API from external apps. Keep it secret!
+      </div>
+      <div
+        class="card settings-group"
+        style="padding: 16px; margin-bottom: 24px; background: var(--glass-mid)"
+      >
+        <div
+          id="api-token-display"
+          style="
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 14px;
+            text-align: center;
+            color: var(--text);
+            letter-spacing: 0.05em;
+          "
+        >
+          —
+        </div>
+      </div>
+      <button class="btn" onclick="copyToken()">Copy Token</button>
+      <button
+        class="btn btn-secondary"
+        onclick="revokeToken()"
+        style="color: #ff453a; border-color: rgba(255, 69, 58, 0.2)"
+      >
+        Revoke
+      </button>
+      <button
+        class="btn btn-secondary"
+        onclick="closeApiAccessSheet()"
+        style="margin-top: 8px"
+      >
+        Close
+      </button>
     </div>
-    <input type="text" id="delete-confirm-input" class="form-input" placeholder="type 'delete all' here" oninput="onDeleteAllInput(this.value)" autocomplete="off">
-    <button id="btn-delete-all-confirm" class="btn btn-destructive is-disabled" onclick="executeDeleteAll()">Delete Everything</button>
-    <button class="btn btn-secondary" onclick="closeDeleteAllSheet()">Cancel</button>
-  </div>
 
-  <canvas id="confetti-canvas" style="position:fixed; inset:0; width:100%; height:100%; pointer-events:none; z-index:2000;"></canvas>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <script type="module" src="static/js/app.js"></script>
-</body>
+    <!-- Quiet Hours Sheet -->
+    <div
+      id="quiet-hours-overlay"
+      class="edit-overlay"
+      onclick="closeQuietHoursSheet()"
+    ></div>
+    <div id="quiet-hours-sheet" class="edit-sheet">
+      <div class="edit-sheet-title">Quiet Hours</div>
+      <div class="picker-double">
+        <div class="picker-column">
+          <div class="picker-column-title">Starts at</div>
+          <div id="quiet-start-list" class="picker-list-mini"></div>
+        </div>
+        <div class="picker-column">
+          <div class="picker-column-title">Ends at</div>
+          <div id="quiet-end-list" class="picker-list-mini"></div>
+        </div>
+      </div>
+      <button class="btn" onclick="saveQuietHours()">Save Range</button>
+      <button class="btn btn-secondary" onclick="closeQuietHoursSheet()">
+        Cancel
+      </button>
+    </div>
+
+    <!-- Nav -->
+    <div class="nav">
+      <button id="nav-home" class="nav-btn active" onclick="showScreen('home')">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+          <polyline points="9 22 9 12 15 12 15 22"></polyline>
+        </svg>
+      </button>
+      <button id="nav-add" class="nav-btn" onclick="showScreen('add')">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="12" y1="8" x2="12" y2="16"></line>
+          <line x1="8" y1="12" x2="16" y2="12"></line>
+        </svg>
+      </button>
+      <button id="nav-search" class="nav-btn" onclick="showScreen('search')">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+      </button>
+      <button
+        id="nav-settings"
+        class="nav-btn"
+        onclick="showScreen('settings')"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="12" cy="12" r="3"></circle>
+          <path
+            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"
+          ></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Edit Sheet -->
+    <div id="edit-overlay" class="edit-overlay" onclick="closeEdit()"></div>
+    <div id="edit-sheet" class="edit-sheet">
+      <div class="edit-sheet-title">Edit Word</div>
+      <div class="card settings-group">
+        <div class="add-form">
+          <input
+            type="text"
+            id="edit-word"
+            class="form-input"
+            placeholder="Word"
+          />
+          <input
+            type="text"
+            id="edit-translation"
+            class="form-input"
+            placeholder="Translate"
+          />
+          <input
+            type="text"
+            id="edit-example"
+            class="form-input"
+            placeholder="Example"
+          />
+          <div
+            id="edit-level-trigger"
+            class="form-input picker-trigger"
+            onclick="openPicker('level', 'edit')"
+          >
+            <span id="edit-level-display" class="picker-trigger-placeholder"
+              >Level</span
+            >
+            <span class="picker-trigger-arrow">›</span>
+          </div>
+          <input type="hidden" id="edit-level" value="" />
+        </div>
+      </div>
+      <button id="edit-save-btn" class="btn" onclick="saveEdit()">Save</button>
+      <button class="btn btn-secondary" onclick="closeEdit()">Cancel</button>
+    </div>
+
+    <!-- Universal Picker Sheet -->
+    <div id="picker-overlay" class="edit-overlay" onclick="closePicker()"></div>
+    <div id="picker-sheet" class="edit-sheet">
+      <div class="edit-sheet-title" id="picker-title">Select</div>
+      <div id="picker-list" class="picker-list"></div>
+    </div>
+
+    <!-- Delete All Confirmation Sheet -->
+    <div
+      id="delete-all-overlay"
+      class="edit-overlay"
+      onclick="closeDeleteAllSheet()"
+    ></div>
+    <div id="delete-all-sheet" class="edit-sheet">
+      <div class="edit-sheet-title">Clear Dictionary</div>
+      <div
+        style="
+          text-align: center;
+          color: var(--text-secondary);
+          margin-bottom: 20px;
+          font-size: 14px;
+          line-height: 1.5;
+        "
+      >
+        This will permanently delete ALL words in your <b>active dictionary</b>.
+        This action cannot be undone.<br /><br />
+        To confirm, type <b>delete all</b> below:
+      </div>
+      <input
+        type="text"
+        id="delete-confirm-input"
+        class="form-input"
+        placeholder="type 'delete all' here"
+        oninput="onDeleteAllInput(this.value)"
+        autocomplete="off"
+      />
+      <button
+        id="btn-delete-all-confirm"
+        class="btn btn-destructive is-disabled"
+        onclick="executeDeleteAll()"
+      >
+        Delete Everything
+      </button>
+      <button class="btn btn-secondary" onclick="closeDeleteAllSheet()">
+        Cancel
+      </button>
+    </div>
+
+    <canvas
+      id="confetti-canvas"
+      style="
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 2000;
+      "
+    ></canvas>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script type="module" src="static/js/app.js"></script>
+  </body>
 </html>

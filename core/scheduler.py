@@ -1,14 +1,14 @@
 import logging
-from datetime import datetime, timezone
-from zoneinfo import ZoneInfo
-import aiosqlite
+from datetime import UTC, datetime
 
+import aiosqlite
 from aiogram import Bot
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.interval import IntervalTrigger
+
+from core.scheduler_utils import build_notification_text, is_quiet_time
 from db.models import apply_pragmas
 from db.repository import UserRepo, WordRepo, _safe_zoneinfo
-from core.scheduler_utils import build_notification_text, is_quiet_time
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +21,7 @@ async def check_and_send_notifications(bot: Bot, db_path: str, config):
         db.row_factory = aiosqlite.Row
         await apply_pragmas(db)
 
-        now = datetime.now(tz=timezone.utc)
+        now = datetime.now(tz=UTC)
         user_repo = UserRepo(db)
         word_repo = WordRepo(db)
         candidates = await user_repo.get_users_with_due_words()
@@ -33,7 +33,12 @@ async def check_and_send_notifications(bot: Bot, db_path: str, config):
             user_tz = _safe_zoneinfo(user_tz_name, config.default_timezone)
 
             # Get real stats to know due count and remaining daily quota
-            stats = await word_repo.get_full_stats(row["user_id"], row["language"], tz_name=user_tz_name, fallback_tz=config.default_timezone)
+            stats = await word_repo.get_full_stats(
+                row["user_id"],
+                row["language"],
+                tz_name=user_tz_name,
+                fallback_tz=config.default_timezone,
+            )
 
             due_count = stats["due"]
             daily_remaining = max(0, row["daily_limit"] - stats["today_new"])
@@ -43,7 +48,9 @@ async def check_and_send_notifications(bot: Bot, db_path: str, config):
             if due_count == 0 and new_to_show == 0:
                 continue
 
-            logger.info(f"[scheduler] checking {telegram_id} ({row['language']}) — due={due_count} new_left={new_to_show}")
+            logger.info(
+                f"[scheduler] checking {telegram_id} ({row['language']}) — due={due_count} new_left={new_to_show}"
+            )
 
             if is_quiet_time(now, row["quiet_start"], row["quiet_end"], user_tz):
                 logger.info(f"[scheduler] {telegram_id} — quiet time, skip")
@@ -79,7 +86,7 @@ async def reschedule(scheduler: AsyncIOScheduler, db: aiosqlite.Connection, conf
 
 async def setup_scheduler(bot: Bot, db: aiosqlite.Connection, config) -> AsyncIOScheduler:
     """Initialize the APScheduler and add the notification job."""
-    scheduler = AsyncIOScheduler(timezone=timezone.utc)
+    scheduler = AsyncIOScheduler(timezone=UTC)
     user_repo = UserRepo(db)
     interval = await user_repo.get_min_notification_interval(config)
     scheduler.add_job(

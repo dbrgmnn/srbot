@@ -39,16 +39,16 @@ async def verify_bearer_token(request, db) -> int | None:
     auth_header = request.headers.get("Authorization")
     if not auth_header or not auth_header.startswith("Bearer "):
         return None
-    
+
     token = auth_header.split(" ")[1]
     user_repo = UserRepo(db)
     result = await user_repo.get_user_by_token(token)
     if not result:
         return None
-    
+
     user_id, telegram_id = result
     config = request.app["config"]
     if telegram_id not in config.allowed_users:
         return None
-    
+
     return user_id

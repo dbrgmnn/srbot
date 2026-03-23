@@ -2,18 +2,19 @@
 Main entry point for the SRBot application.
 Initializes the database, Telegram bot, scheduler, and API server.
 """
+
 import asyncio
 import logging
 import signal
 
 from aiogram import Bot, Dispatcher
 
+from api.server import start_api_server
 from config import load_config
+from core.bot_handlers import setup_handlers
+from core.scheduler import setup_scheduler
 from db.models import init_db
 from db.repository import UserRepo
-from core.scheduler import setup_scheduler
-from core.bot_handlers import setup_handlers
-from api.server import start_api_server
 
 logging.basicConfig(
     level=logging.INFO,
@@ -71,7 +72,7 @@ async def main():
             polling_task.cancel()
         if scheduler:
             scheduler.shutdown(wait=False)
-        
+
         cleanup_tasks = []
         if api_runner:
             cleanup_tasks.append(api_runner.cleanup())
@@ -83,12 +84,13 @@ async def main():
         if cleanup_tasks:
             try:
                 await asyncio.wait_for(asyncio.gather(*cleanup_tasks, return_exceptions=True), timeout=5.0)
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 logger.warning("Cleanup timed out, forcing exit")
             except Exception as e:
                 logger.error(f"Error during cleanup: {e}")
-        
+
         logger.info("Stopped.")
+
 
 if __name__ == "__main__":
     asyncio.run(main())

@@ -1,6 +1,8 @@
 from datetime import datetime
 from zoneinfo import ZoneInfo
+
 from core.languages import LANGUAGES
+
 
 def build_notification_text(due: int, new: int, lang: str) -> str:
     """Build the text for the notification message."""
@@ -9,7 +11,7 @@ def build_notification_text(due: int, new: int, lang: str) -> str:
         parts.append(f"{due} review")
     if new > 0:
         parts.append(f"{new} new")
-    
+
     meta = LANGUAGES.get(lang.lower(), {})
     flag = meta.get("flag", "🌐")
     return f"{flag} " + " · ".join(parts)

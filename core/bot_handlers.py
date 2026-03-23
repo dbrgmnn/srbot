@@ -1,6 +1,9 @@
 import asyncio
-from aiogram import Dispatcher, types, filters
+
+from aiogram import Dispatcher, filters, types
+
 from db.repository import UserRepo
+
 
 def setup_handlers(dp: Dispatcher, user_repo: UserRepo, config):
     """Register all Telegram bot command handlers."""
@@ -11,19 +14,17 @@ def setup_handlers(dp: Dispatcher, user_repo: UserRepo, config):
         if message.from_user.id not in config.allowed_users:
             return
 
-        kb = types.InlineKeyboardMarkup(inline_keyboard=[[
-            types.InlineKeyboardButton(
-                text="🚀 Open App",
-                web_app=types.WebAppInfo(url=config.webapp_url)
-            )
-        ]])
+        kb = types.InlineKeyboardMarkup(
+            inline_keyboard=[
+                [types.InlineKeyboardButton(text="🚀 Open App", web_app=types.WebAppInfo(url=config.webapp_url))]
+            ]
+        )
 
         msg = await message.answer("Ready to study?", reply_markup=kb)
-        
+
         await asyncio.sleep(30)
         try:
             await msg.delete()
             await message.delete()
         except Exception:
             pass
-

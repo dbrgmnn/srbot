@@ -2,18 +2,20 @@
 API server setup and lifecycle management.
 Uses aiohttp to serve the web application and API endpoints.
 """
-import logging
-import json
-from pathlib import Path
-from aiohttp import web
-import aiosqlite
 
-from config import Config
+import json
+import logging
+from pathlib import Path
+
+import aiosqlite
+from aiohttp import web
+
 from api.auth import verify_init_data
 from api.routes.init import setup_routes_init
-from api.routes.words import setup_routes_words
 from api.routes.practice import setup_routes_practice
 from api.routes.settings import setup_routes_settings
+from api.routes.words import setup_routes_words
+from config import Config
 from core.languages import LANGUAGES
 from core.translator import Translator
 from db.repository import UserRepo
@@ -25,14 +27,18 @@ WEBAPP_DIR = Path(__file__).parent.parent / "webapp"
 
 async def create_app(config: Config, db: aiosqlite.Connection, scheduler=None) -> web.Application:
     """Create and configure the aiohttp web application."""
+
     @web.middleware
     async def cors_middleware(request: web.Request, handler):
         if request.method == "OPTIONS":
-            return web.Response(status=200, headers={
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Headers": "Content-Type, X-Init-Data",
-                "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
-            })
+            return web.Response(
+                status=200,
+                headers={
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Headers": "Content-Type, X-Init-Data",
+                    "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
+                },
+            )
         response = await handler(request)
         response.headers["Access-Control-Allow-Origin"] = "*"
         response.headers["Access-Control-Allow-Headers"] = "Content-Type, X-Init-Data"
@@ -44,11 +50,11 @@ async def create_app(config: Config, db: aiosqlite.Connection, scheduler=None) -
         # Skip auth for static files, root, and external api endpoints
         if not request.path.startswith("/api/") or request.path.startswith("/api/external/"):
             return await handler(request)
-        
+
         params = verify_init_data(request.headers.get("X-Init-Data", ""), config.bot_token, config.token_expiry)
         if not params:
             return web.json_response({"ok": False, "error": "unauthorized"}, status=401)
-        
+
         try:
             user = json.loads(params.get("user", "{}"))
             telegram_id = int(user["id"])
@@ -57,7 +63,7 @@ async def create_app(config: Config, db: aiosqlite.Connection, scheduler=None) -
 
         if telegram_id not in config.allowed_users:
             return web.json_response({"ok": False, "error": "forbidden"}, status=403)
-        
+
         # Get language from header, fall back to default if unsupported
         lang = request.headers.get("X-Language", config.default_lang).lower()
         if lang not in LANGUAGES:
@@ -72,7 +78,7 @@ async def create_app(config: Config, db: aiosqlite.Connection, scheduler=None) -
             user_repo = UserRepo(db)
             user_id = await user_repo.get_or_create(telegram_id, lang, tz, config)
             request.app["user_cache"][cache_key] = user_id
-        
+
         request["telegram_id"] = telegram_id
         request["user_id"] = user_id
         request["language"] = lang
@@ -90,7 +96,7 @@ async def create_app(config: Config, db: aiosqlite.Connection, scheduler=None) -
     async def on_shutdown(app: web.Application):
         if "translator" in app:
             await app["translator"].close()
-    
+
     app.on_shutdown.append(on_shutdown)
 
     setup_routes_init(app, db)

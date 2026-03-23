@@ -1,11 +1,12 @@
-from aiohttp import web
 import aiosqlite
-from db.repository import UserRepo, WordRepo
-from core.scheduler import reschedule
-from core.languages import LANGUAGES
+from aiohttp import web
 
+from core.languages import LANGUAGES
+from core.scheduler import reschedule
+from db.repository import UserRepo, WordRepo
 
 # --- Helpers ---
+
 
 def _is_valid_time(value: str) -> bool:
     """Validate time format (HH:MM)."""
@@ -21,6 +22,7 @@ def _is_valid_time(value: str) -> bool:
 
 # --- Routes ---
 
+
 def setup_routes_settings(app: web.Application, db: aiosqlite.Connection):
     """Register user settings routes."""
 
@@ -29,41 +31,40 @@ def setup_routes_settings(app: web.Application, db: aiosqlite.Connection):
         user_id = request["user_id"]
         user_repo = UserRepo(db)
         counts = await user_repo.get_words_count_per_language(user_id)
-        languages = {
-            code: {**meta, "word_count": counts.get(code, 0)}
-            for code, meta in LANGUAGES.items()
-        }
+        languages = {code: {**meta, "word_count": counts.get(code, 0)} for code, meta in LANGUAGES.items()}
         return web.json_response({"ok": True, "result": {"languages": languages}})
 
     async def get_settings(request: web.Request) -> web.Response:
         """Return user settings for the current language."""
         user_id = request["user_id"]
         telegram_id = request["telegram_id"]
-        lang = request['language']
+        lang = request["language"]
         user_repo = UserRepo(db)
         word_repo = WordRepo(db)
         config = request.app["config"]
         settings = await user_repo.get_user_settings(telegram_id, lang, config)
         stats = await word_repo.get_full_stats(user_id, lang, tz_name=settings.get("timezone", "UTC"))
-        
-        return web.json_response({
-            "ok": True,
-            "result": {
-                **settings,
-                "total_words": stats["total"],
-                "limits": {
-                    "min_daily_limit": config.min_daily_limit,
-                    "max_daily_limit": config.max_daily_limit,
-                    "min_notify_interval": config.min_notify_interval,
-                    "max_notify_interval": config.max_notify_interval,
-                }
+
+        return web.json_response(
+            {
+                "ok": True,
+                "result": {
+                    **settings,
+                    "total_words": stats["total"],
+                    "limits": {
+                        "min_daily_limit": config.min_daily_limit,
+                        "max_daily_limit": config.max_daily_limit,
+                        "min_notify_interval": config.min_notify_interval,
+                        "max_notify_interval": config.max_notify_interval,
+                    },
+                },
             }
-        })
+        )
 
     async def update_settings(request: web.Request) -> web.Response:
         """Update user settings (language, timezone, daily limit, etc.)."""
         telegram_id = request["telegram_id"]
-        lang = request['language']
+        lang = request["language"]
         body = await request.json()
         user_repo = UserRepo(db)
 
@@ -85,7 +86,7 @@ def setup_routes_settings(app: web.Application, db: aiosqlite.Connection):
                     {"ok": False, "error": "invalid_number"},
                     status=400,
                 )
-            
+
             config = request.app["config"]
             if config.min_daily_limit <= limit <= config.max_daily_limit:
                 await user_repo.update_daily_limit(telegram_id, limit, lang)
@@ -100,7 +101,7 @@ def setup_routes_settings(app: web.Application, db: aiosqlite.Connection):
                     {"ok": False, "error": "invalid_number"},
                     status=400,
                 )
-            
+
             config = request.app["config"]
             if config.min_notify_interval <= interval <= config.max_notify_interval:
                 await user_repo.update_notification_interval(telegram_id, interval, lang)
@@ -135,12 +136,7 @@ def setup_routes_settings(app: web.Application, db: aiosqlite.Connection):
                     status=400,
                 )
 
-            await user_repo.update_quiet_hours(
-                telegram_id,
-                quiet_start=quiet_start,
-                quiet_end=quiet_end,
-                language=lang
-            )
+            await user_repo.update_quiet_hours(telegram_id, quiet_start=quiet_start, quiet_end=quiet_end, language=lang)
 
         config = request.app["config"]
         settings = await user_repo.get_user_settings(telegram_id, lang, config)
