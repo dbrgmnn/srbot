@@ -30,18 +30,19 @@ async def create_app(config: Config, db: aiosqlite.Connection, scheduler=None) -
 
     @web.middleware
     async def cors_middleware(request: web.Request, handler):
+        allowed_headers = "Content-Type, X-Init-Data, X-Language, X-Timezone"
         if request.method == "OPTIONS":
             return web.Response(
                 status=200,
                 headers={
                     "Access-Control-Allow-Origin": "*",
-                    "Access-Control-Allow-Headers": "Content-Type, X-Init-Data",
+                    "Access-Control-Allow-Headers": allowed_headers,
                     "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
                 },
             )
         response = await handler(request)
         response.headers["Access-Control-Allow-Origin"] = "*"
-        response.headers["Access-Control-Allow-Headers"] = "Content-Type, X-Init-Data"
+        response.headers["Access-Control-Allow-Headers"] = allowed_headers
         response.headers["Access-Control-Allow-Methods"] = "GET, POST, DELETE, OPTIONS"
         return response
 
