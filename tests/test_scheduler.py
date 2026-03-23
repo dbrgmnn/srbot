@@ -1,7 +1,7 @@
 import pytest
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
-from core.scheduler import build_notification_text, is_quiet_time
+from core.scheduler_utils import build_notification_text, is_quiet_time
 
 def test_build_notification_text_both():
     """Text should contain both review and new counts with flag."""
