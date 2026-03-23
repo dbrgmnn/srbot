@@ -207,7 +207,7 @@
         <div class="picker-value" id="set-notify-interval">—</div>
       </div>
 
-      <div class="settings-row" onclick="openPicker('quiet_hours')">
+      <div class="settings-row" onclick="openQuietHoursSheet()">
         <div class="settings-row-left">
           <div class="settings-icon settings-icon-quiet">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
@@ -264,8 +264,26 @@
       <div id="api-token-display" style="word-break:break-all; font-family:monospace; font-size:14px; text-align:center; color:var(--text); letter-spacing:0.05em;">—</div>
     </div>
     <button class="btn" onclick="copyToken()">Copy Token</button>
-    <button class="btn btn-secondary" onclick="revokeToken()" style="color:#ff453a; border-color:rgba(255,69,58,0.2);">Revoke & Regenerate</button>
+    <button class="btn btn-secondary" onclick="revokeToken()" style="color:#ff453a; border-color:rgba(255,69,58,0.2);">Revoke</button>
     <button class="btn btn-secondary" onclick="closeApiAccessSheet()" style="margin-top:8px;">Close</button>
+  </div>
+
+  <!-- Quiet Hours Sheet -->
+  <div id="quiet-hours-overlay" class="edit-overlay" onclick="closeQuietHoursSheet()"></div>
+  <div id="quiet-hours-sheet" class="edit-sheet">
+    <div class="edit-sheet-title">Quiet Hours</div>
+    <div class="picker-double">
+      <div class="picker-column">
+        <div class="picker-column-title">Starts at</div>
+        <div id="quiet-start-list" class="picker-list-mini"></div>
+      </div>
+      <div class="picker-column">
+        <div class="picker-column-title">Ends at</div>
+        <div id="quiet-end-list" class="picker-list-mini"></div>
+      </div>
+    </div>
+    <button class="btn" onclick="saveQuietHours()">Save Range</button>
+    <button class="btn btn-secondary" onclick="closeQuietHoursSheet()">Cancel</button>
   </div>
 
   <!-- Nav -->

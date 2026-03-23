@@ -57,7 +57,7 @@ export function openPicker(type, context = null) {
   else if (type === 'level')                    _openLevelPicker(context);
   else if (type === 'daily_limit')              _openLimitPicker();
   else if (type === 'notification_interval_minutes') _openIntervalPicker();
-  else if (type === 'quiet_hours')              _openQuietStartPicker();
+  else if (type === 'quiet_hours')              openQuietHoursSheet();
 }
 
 async function _openLanguagePicker() {
@@ -122,34 +122,6 @@ function _openIntervalPicker() {
   });
 }
 
-function _openQuietStartPicker() {
-  const options = Array.from({ length: 24 }, (_, i) => {
-    const h = String(23 - i).padStart(2, '0');
-    return { value: `${h}:00`, label: `${h}:00` };
-  });
-  const currentVal = document.getElementById('set-quiet-start').value;
-  _showPickerSheet('Quiet hours (Start)', options, currentVal, (val) => {
-    document.getElementById('set-quiet-start').value = val;
-    setTimeout(() => _openQuietEndPicker(val), 100);
-  });
-}
-
-function _openQuietEndPicker(startVal) {
-  const options = Array.from({ length: 24 }, (_, i) => {
-    const h = String(i).padStart(2, '0');
-    return { value: `${h}:00`, label: `${h}:00` };
-  });
-  const currentEndVal = document.getElementById('set-quiet-end').value;
-  const currentStartVal = document.getElementById('set-quiet-start').value;
-
-  _showPickerSheet('Quiet hours (End)', options, currentEndVal, (val) => {
-    if (val === currentEndVal && startVal === currentStartVal) return;
-    document.getElementById('set-quiet-end').value = val;
-    document.getElementById('quiet-hours-display').textContent = `${startVal} — ${val}`;
-    saveSetting('quiet_hours', { quiet_start: startVal, quiet_end: val });
-  });
-}
-
 function _showPickerSheet(title, options, currentValue, onSelect) {
   document.getElementById('picker-title').textContent = title;
 
@@ -204,6 +176,65 @@ function _unlockScroll() {
 
 window._lockScroll = _lockScroll;
 window._unlockScroll = _unlockScroll;
+
+// ── Quiet Hours Sheet ────────────────────────────────────────────────────
+
+export function openQuietHoursSheet() {
+  const startList = document.getElementById('quiet-start-list');
+  const endList = document.getElementById('quiet-end-list');
+  
+  const currentStart = document.getElementById('set-quiet-start').value;
+  const currentEnd = document.getElementById('set-quiet-end').value;
+
+  const hours = Array.from({ length: 24 }, (_, i) => {
+    const h = String(i).padStart(2, '0');
+    return `${h}:00`;
+  });
+
+  const renderColumn = (el, currentVal, onSelect) => {
+    el.innerHTML = hours.map(h => `
+      <div class="picker-item ${h === currentVal ? 'selected' : ''}" data-value="${h}">
+        <span>${h}</span>
+      </div>
+    `).join('');
+
+    el.querySelectorAll('.picker-item').forEach(item => {
+      item.onclick = () => {
+        tg.HapticFeedback.selectionChanged();
+        el.querySelectorAll('.picker-item').forEach(i => i.classList.remove('selected'));
+        item.classList.add('selected');
+        onSelect(item.dataset.value);
+      };
+    });
+
+    // Auto scroll to selected
+    setTimeout(() => {
+      const selected = el.querySelector('.picker-item.selected');
+      if (selected) selected.scrollIntoView({ block: 'center' });
+    }, 300);
+  };
+
+  renderColumn(startList, currentStart, (val) => { document.getElementById('set-quiet-start').value = val; });
+  renderColumn(endList, currentEnd, (val) => { document.getElementById('set-quiet-end').value = val; });
+
+  document.getElementById('quiet-hours-overlay').classList.add('open');
+  document.getElementById('quiet-hours-sheet').classList.add('open');
+  _lockScroll();
+}
+
+export function closeQuietHoursSheet() {
+  document.getElementById('quiet-hours-overlay').classList.remove('open');
+  document.getElementById('quiet-hours-sheet').classList.remove('open');
+  _unlockScroll();
+}
+
+export async function saveQuietHours() {
+  const start = document.getElementById('set-quiet-start').value;
+  const end = document.getElementById('set-quiet-end').value;
+  
+  await saveSetting('quiet_hours', { quiet_start: start, quiet_end: end });
+  closeQuietHoursSheet();
+}
 
 // ── API Access Sheet ─────────────────────────────────────────────────────
 
