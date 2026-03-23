@@ -12,6 +12,7 @@ load_dotenv()
 class Config:
     """Application configuration container."""
     bot_token: str
+    webapp_url: str = ""
     allowed_users: list[int]
     db_path: str
     api_port: int
@@ -23,7 +24,6 @@ class Config:
     max_notify_interval: int = 480
     default_lang: str = "en"
     default_timezone: str = "UTC"
-    webapp_url: str = "https://example.com"
 
 
 def load_config() -> Config:
@@ -40,6 +40,7 @@ def load_config() -> Config:
 
     return Config(
         bot_token=token,
+        webapp_url=os.getenv("WEBAPP_URL", ""),
         allowed_users=allowed_users,
         db_path=os.getenv("DB_PATH", "srbot.db"),
         api_port=int(os.getenv("API_PORT", "8080")),
@@ -51,5 +52,4 @@ def load_config() -> Config:
         max_notify_interval=int(os.getenv("MAX_NOTIFY_INTERVAL", "480")),
         default_lang=os.getenv("DEFAULT_LANG", "en"),
         default_timezone=os.getenv("DEFAULT_TIMEZONE", "UTC"),
-        webapp_url=os.getenv("WEBAPP_URL", "https://example.com"),
     )
