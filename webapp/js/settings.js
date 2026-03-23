@@ -354,11 +354,10 @@ window.copyToken = async () => {
   try {
     await navigator.clipboard.writeText(currentToken);
     tg.HapticFeedback.notificationOccurred("success");
-    toast("Token copied to clipboard", "success");
+    toast(T.COPIED, "success");
   } catch (err) {
     console.error("Copy failed:", err);
-    // Even if clipboard fails, we can show a toast that tells the user to copy manually
-    toast("Please copy the token manually", "error");
+    toast(T.COPY_FAIL, "error");
   }
 };
 
@@ -376,17 +375,10 @@ window.revokeToken = () => {
           if (display) display.textContent = newToken;
 
           tg.HapticFeedback.notificationOccurred("success");
-
-          try {
-            await navigator.clipboard.writeText(newToken);
-            toast("New token generated and copied", "success");
-          } catch (clipErr) {
-            console.error("Clipboard error:", clipErr);
-            toast("New token generated (copy failed)", "success");
-          }
+          toast(T.TOKEN_REVOKED, "success");
         } catch (e) {
           console.error("Revoke error:", e);
-          toast("Failed to revoke", "error");
+          toast(T.REVOKE_FAIL, "error");
         }
       }
     },
@@ -514,11 +506,11 @@ window.executeDeleteAll = async () => {
 
     closeDeleteAllSheet();
     tg.HapticFeedback.notificationOccurred("success");
-    toast("All words deleted successfully", "success");
+    toast(T.CLEARED, "success");
 
     // Refresh UI
     setTimeout(() => location.reload(), 1500);
   } catch (e) {
-    toast("Failed to delete words", "error");
+    toast(T.CLEAR_FAIL, "error");
   }
 };

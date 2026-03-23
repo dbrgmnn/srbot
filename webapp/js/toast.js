@@ -71,6 +71,7 @@ export const T = {
   CLEARED: "Dictionary cleared",
   CLEAR_FAIL: _fail("clear"),
   COPIED: "Copied to clipboard",
+  COPY_FAIL: "Please copy the token manually",
   EXPORT_FAIL: _fail("export"),
   SEARCH_FAIL: "Search error",
 
@@ -79,6 +80,8 @@ export const T = {
   SAVE_FAIL: _fail("save"),
   LANG_SWITCHED: (l) => `Switched to ${l}`,
   LANG_FAIL: _fail("switch language"),
+  TOKEN_REVOKED: "New token generated",
+  REVOKE_FAIL: _fail("revoke token"),
 
   // App
   INIT_FAIL: _fail("load app"),
