@@ -11,6 +11,10 @@ from db.repository import UserRepo, WordRepo, _safe_zoneinfo
 from core.scheduler_utils import build_notification_text, is_quiet_time
 
 logger = logging.getLogger(__name__)
+
+JOB_ID = "check_notifications"
+
+
 async def check_and_send_notifications(bot: Bot, db_path: str, config):
     """Periodic job to check for due words and send notifications."""
     async with aiosqlite.connect(db_path) as db:
