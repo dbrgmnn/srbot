@@ -9,9 +9,12 @@ class IntegrityHTMLParser(HTMLParser):
         self.tags_stack = []
         self.ids = set()
         self.errors = []
+        # Tags that don't need a closing tag in HTML5
+        self.self_closing = {'img', 'br', 'hr', 'input', 'meta', 'link'}
 
     def handle_starttag(self, tag, attrs):
-        self.tags_stack.append(tag)
+        if tag not in self.self_closing:
+            self.tags_stack.append(tag)
         for attr, value in attrs:
             if attr == 'id':
                 if value in self.ids:
@@ -19,15 +22,20 @@ class IntegrityHTMLParser(HTMLParser):
                 self.ids.add(value)
 
     def handle_endtag(self, tag):
+        if tag in self.self_closing:
+            return
         if not self.tags_stack:
             self.errors.append(f"Unexpected end tag: </{tag}>")
             return
+        
         last_tag = self.tags_stack.pop()
         if last_tag != tag:
-            # Note: common tags like <img> or <br> don't have end tags, 
-            # but we assume index.html uses valid self-closing or standard tags.
-            # This is a simple check.
-            pass
+            self.errors.append(f"Tag mismatch: opened <{last_tag}>, closed </{tag}>")
+
+    def close(self):
+        super().close()
+        if self.tags_stack:
+            self.errors.append(f"Unclosed tags remain: {', '.join(self.tags_stack)}")
 
 def get_webapp_path():
     return os.path.join(os.path.dirname(__file__), '..', 'webapp')
@@ -40,6 +48,7 @@ def test_html_validity_and_ids():
 
     parser = IntegrityHTMLParser()
     parser.feed(content)
+    parser.close()
     
     if parser.errors:
         pytest.fail("\n".join(parser.errors))
