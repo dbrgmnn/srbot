@@ -905,8 +905,40 @@ body.theme-light .skeleton { animation: skeleton-pulse-light 1.8s ease-in-out in
   letter-spacing: 0.05em;
   margin: 4px 0 12px;
 }
-.settings-icon-copy { color: var(--accent); filter: drop-shadow(0 0 4px rgba(10,132,255,0.3)); }
-.settings-icon-revoke { color: #ff453a; filter: drop-shadow(0 0 4px rgba(255,69,58,0.3)); }
+.settings-icon-api { color: var(--color-learning); filter: drop-shadow(0 0 4px rgba(255,159,10,0.3)); }
+
+.settings-row-actions {
+  display: flex;
+  gap: 8px;
+}
+.row-btn {
+  background: var(--glass-mid);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: all 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.row-btn:active {
+  background: var(--glass-shine);
+  transform: scale(0.92);
+}
+.row-btn svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2.2;
+}
+.row-btn-danger {
+  color: #ff453a;
+}
+.settings-row.no-click { cursor: default; }
+.settings-row.no-click:active { opacity: 1; }
 
 /* Practice card shadow */
 body.theme-light .word-card::before {
