@@ -239,35 +239,14 @@ function _fillSettingsFromState() {
 // ── API Token ────────────────────────────────────────────────────────────
 
 let currentToken = '';
-let isTokenVisible = false;
-
-function _updateTokenDisplay() {
-  const tokenEl = document.getElementById('api-token');
-  if (!tokenEl) return;
-  
-  if (isTokenVisible && currentToken) {
-    tokenEl.textContent = currentToken;
-    tokenEl.classList.remove('masked-token');
-  } else {
-    tokenEl.textContent = '••••••••••••••••';
-    tokenEl.classList.add('masked-token');
-  }
-}
-
-window.toggleTokenVisibility = () => {
-  tg.HapticFeedback.selectionChanged();
-  isTokenVisible = !isTokenVisible;
-  const tokenEl = document.getElementById('api-token');
-  if (tokenEl) tokenEl.classList.toggle('revealed', isTokenVisible);
-  _updateTokenDisplay();
-};
 
 window.copyToken = async () => {
   if (!currentToken) return;
+  tg.HapticFeedback.selectionChanged();
   try {
     await navigator.clipboard.writeText(currentToken);
     tg.HapticFeedback.notificationOccurred('success');
-    toast('Token copied', 'success');
+    toast('Token copied to clipboard', 'success');
   } catch (err) {
     toast('Failed to copy', 'error');
   }
@@ -279,10 +258,9 @@ window.revokeToken = () => {
       try {
         const resp = await POST('/api/settings/token/revoke');
         currentToken = resp.result.token;
-        isTokenVisible = true;
-        _updateTokenDisplay();
         tg.HapticFeedback.notificationOccurred('success');
-        toast('Token revoked', 'success');
+        toast('New token generated and copied', 'success');
+        await navigator.clipboard.writeText(currentToken);
       } catch (e) {
         toast('Failed to revoke', 'error');
       }
@@ -301,7 +279,6 @@ export async function loadSettings() {
     
     const s = settingsResp.result;
     currentToken = tokenResp.result.token;
-    _updateTokenDisplay();
     
     // Automatic sync timezone
     const deviceTz = Intl.DateTimeFormat().resolvedOptions().timeZone;

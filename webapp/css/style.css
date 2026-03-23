@@ -905,76 +905,8 @@ body.theme-light .skeleton { animation: skeleton-pulse-light 1.8s ease-in-out in
   letter-spacing: 0.05em;
   margin: 4px 0 12px;
 }
-.token-item {
-  padding: 12px 0;
-}
-.token-container {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  width: 100%;
-}
-.masked-token {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 13px;
-  color: var(--text-secondary);
-  background: var(--cell-bg);
-  padding: 12px 16px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--glass-border);
-  text-align: center;
-  cursor: pointer;
-  user-select: none;
-  transition: all 0.2s ease;
-  word-break: break-all;
-  white-space: normal;
-  line-height: 1.4;
-  min-height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.masked-token.revealed {
-  background: var(--glass-mid);
-  color: var(--text);
-  border-color: var(--accent);
-  box-shadow: 0 0 10px rgba(10, 132, 255, 0.2);
-}
-.masked-token:active {
-  opacity: 0.7;
-}
-.token-actions {
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-}
-.icon-btn {
-  flex: 1;
-  max-width: 120px;
-  background: var(--glass);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-sm);
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  cursor: pointer;
-  color: var(--text-subtle);
-  font-size: 13px;
-  font-weight: 600;
-  transition: all 0.2s;
-  -webkit-tap-highlight-color: transparent;
-}
-.icon-btn:active {
-  background: var(--glass-mid);
-  transform: scale(0.98);
-}
-.icon-btn svg {
-  width: 16px;
-  height: 16px;
-  opacity: 0.8;
-}
+.settings-icon-copy { color: var(--accent); filter: drop-shadow(0 0 4px rgba(10,132,255,0.3)); }
+.settings-icon-revoke { color: #ff453a; filter: drop-shadow(0 0 4px rgba(255,69,58,0.3)); }
 
 /* Practice card shadow */
 body.theme-light .word-card::before {
