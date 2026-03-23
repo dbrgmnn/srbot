@@ -83,6 +83,15 @@ async def create_app(config: Config, db: aiosqlite.Connection, scheduler=None) -
     app["scheduler"] = scheduler
     app["user_cache"] = {}  # (telegram_id, lang) -> user_id
 
+    if config.gemini_api_key:
+        app["translator"] = Translator(config.gemini_api_key)
+
+    async def on_shutdown(app: web.Application):
+        if "translator" in app:
+            await app["translator"].close()
+    
+    app.on_shutdown.append(on_shutdown)
+
     setup_routes_init(app, db)
     setup_routes_words(app, db)
     setup_routes_practice(app, db)

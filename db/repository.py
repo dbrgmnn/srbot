@@ -24,36 +24,25 @@ class UserRepo:
 
     async def get_or_create(self, telegram_id: int, language: str, tz_name: str, config=None) -> int:
         """Get an existing user's ID or create a new user record with default settings."""
+        # Use ON CONFLICT to ensure atomic creation or ignore if exists
+        await self.db.execute(
+            "INSERT INTO users (telegram_id) VALUES (?) ON CONFLICT(telegram_id) DO NOTHING",
+            (telegram_id,)
+        )
+        
         cursor = await self.db.execute(
             "SELECT id FROM users WHERE telegram_id = ?", (telegram_id,)
         )
         row = await cursor.fetchone()
-        
-        if row:
-            user_id = row['id']
-            # Check if settings for this language exist
-            cursor = await self.db.execute(
-                "SELECT 1 FROM user_settings WHERE user_id = ? AND language = ?",
-                (user_id, language)
-            )
-            if not await cursor.fetchone():
-                await self._create_settings(user_id, language, tz_name, config)
-                await self.db.commit()
-            return user_id
-
-        # New user — create record and default settings
-        cursor = await self.db.execute(
-            "INSERT INTO users (telegram_id) VALUES (?) RETURNING id", (telegram_id,)
-        )
-        row = await cursor.fetchone()
         user_id = row['id']
         
+        # Initialize settings for this language if not already present
         await self._create_settings(user_id, language, tz_name, config)
         await self.db.commit()
         return user_id
 
     async def _create_settings(self, user_id: int, language: str, tz_name: str, config=None):
-        """Create default settings for a user and language."""
+        """Create default settings for a user and language if they don't exist."""
         limit = config.max_daily_limit // 2 if config else 20
         interval = config.max_notify_interval // 2 if config else 240
 

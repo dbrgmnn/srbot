@@ -6,7 +6,6 @@ import aiosqlite
 from db.repository import UserRepo, WordRepo
 from api.auth import verify_bearer_token
 from core.languages import LANGUAGES
-from core.translator import Translator
 
 logger = logging.getLogger(__name__)
 
@@ -64,14 +63,15 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
             return web.json_response({"ok": True, "result": {"added": 0, "status": "duplicate", "word": match["word"], "translation": match["translation"], "example": match.get("example"), "level": match.get("level"), "language": lang}})
 
         # Call Gemini for translation and enrichment
-        if not config.gemini_api_key:
-            return web.json_response({"ok": False, "error": "no_gemini_api_key"}, status=400)
+        translator = request.app.get("translator")
+        if not translator:
+            return web.json_response({"ok": False, "error": "no_gemini_api_key_or_translator"}, status=400)
         
-        translator = Translator(config.gemini_api_key)
         try:
             ai_data = await translator.translate_and_enrich(raw_word, lang)
-        finally:
-            await translator.close()
+        except Exception as e:
+            logger.error(f"AI translation failed: {e}")
+            return web.json_response({"ok": False, "error": "ai_translation_failed"}, status=422)
         
         if not ai_data or ai_data.get("is_valid") is False:
             return web.json_response({"ok": False, "error": "ai_translation_failed"}, status=422)
