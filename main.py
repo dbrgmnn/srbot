@@ -5,7 +5,6 @@ Initializes the database, Telegram bot, scheduler, and API server.
 
 import asyncio
 import logging
-import signal
 
 from aiogram import Bot, Dispatcher
 
@@ -27,70 +26,57 @@ async def main():
     """Initialize and start all system components."""
     config = load_config()
 
-    db = None
-    bot = None
-    scheduler = None
-    api_runner = None
-    polling_task = None
+    db = await init_db(config.db_path)
+    bot = Bot(token=config.bot_token)
+    dp = Dispatcher()
+
+    user_repo = UserRepo(db)
+    setup_handlers(dp, user_repo, config)
+
+    scheduler = await setup_scheduler(bot, db, config)
+    scheduler.start()
+
+    # Start API server in the background
+    api_runner = await start_api_server(config, db, scheduler)
+    logger.info("Scheduler and API Server started")
 
     try:
-        db = await init_db(config.db_path)
-
-        bot = Bot(token=config.bot_token)
-        dp = Dispatcher()
-
-        user_repo = UserRepo(db)
-        setup_handlers(dp, user_repo, config)
-
-        scheduler = await setup_scheduler(bot, db, config)
-        scheduler.start()
-
-        api_runner = await start_api_server(config, db, scheduler)
-        logger.info("Scheduler and API Server started")
-
-        polling_task = asyncio.create_task(dp.start_polling(bot))
-        logger.info("Starting...")
-
-        stop_event = asyncio.Event()
-
-        def handle_signal():
-            """Set the stop event on signal reception."""
-            stop_event.set()
-
-        loop = asyncio.get_running_loop()
-        loop.add_signal_handler(signal.SIGTERM, handle_signal)
-        loop.add_signal_handler(signal.SIGINT, handle_signal)
-
-        await stop_event.wait()
-
+        logger.info("Starting bot polling...")
+        # Aiogram handles SIGTERM and SIGINT by default
+        await dp.start_polling(bot)
     except Exception as e:
-        logger.error(f"Error during initialization or execution: {e}")
-        raise
+        logger.error(f"Error during execution: {e}")
     finally:
-        logger.info("Stopping...")
-        if polling_task:
-            polling_task.cancel()
+        logger.info("Shutting down gracefully...")
+
+        # 1. Stop API server (no longer accepting new requests)
+        if api_runner:
+            logger.info("Stopping API server...")
+            await api_runner.cleanup()
+
+        # 2. Shutdown scheduler
         if scheduler:
+            logger.info("Shutting down scheduler...")
             scheduler.shutdown(wait=False)
 
-        cleanup_tasks = []
-        if api_runner:
-            cleanup_tasks.append(api_runner.cleanup())
-        if db:
-            cleanup_tasks.append(db.close())
-        if bot:
-            cleanup_tasks.append(bot.session.close())
+        # 3. Close resources
+        logger.info("Closing database and bot sessions...")
+        cleanup_tasks = [
+            db.close(),
+            bot.session.close(),
+        ]
 
-        if cleanup_tasks:
-            try:
-                await asyncio.wait_for(asyncio.gather(*cleanup_tasks, return_exceptions=True), timeout=5.0)
-            except TimeoutError:
-                logger.warning("Cleanup timed out, forcing exit")
-            except Exception as e:
-                logger.error(f"Error during cleanup: {e}")
+        # Wait for all cleanup tasks with a reasonable timeout
+        try:
+            await asyncio.wait_for(asyncio.gather(*cleanup_tasks, return_exceptions=True), timeout=10.0)
+        except TimeoutError:
+            logger.warning("Cleanup timed out, some resources might not have closed properly")
 
         logger.info("Stopped.")
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except (KeyboardInterrupt, SystemExit):
+        pass
