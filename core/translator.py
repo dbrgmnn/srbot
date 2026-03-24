@@ -78,13 +78,13 @@ class Translator:
             "nouns: lowercase article + Capitalized noun (e.g. der Hund)." if source_lang == "de" else "lowercase."
         )
 
-        system_prompt = f"""You are an expert lexicographer. Translate words between {lang_name} and Russian.
+        system_prompt = f"""You are an expert lexicographer.
+Translate words from word:{lang_name} into translation:Russian or translation:Russian to word:{lang_name}.
 Rules:
 - word: the input word itself in its base {lang_name} form, {article_rule}
-Strict Translation and do NOT change the input word unless it is a clear typo.
 Ensure the translated 'word' matches the Part of Speech of the input.
 
-- translation: MOST common primary Russian translation in lowercase.
+- translation: MOST common Russian translation in lowercase.
 - level: CEFR level (A1-C2).
 - example: natural {lang_name} sentence. Complexity MUST match the level.
 - is_valid: false if input is gibberish, else true.
