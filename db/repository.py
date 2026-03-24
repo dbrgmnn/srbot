@@ -207,16 +207,19 @@ class UserRepo:
 
         cursor = await self.db.execute(
             """SELECT u.id as user_id, u.telegram_id,
-                        w.language,
+                        s.language,
                         s.quiet_start, s.quiet_end, s.daily_limit, s.timezone,
                         s.notification_interval_minutes, s.last_notified_at
                 FROM users u
-                JOIN words w ON w.user_id = u.id
-                JOIN user_settings s ON s.user_id = u.id AND s.language = w.language
-                GROUP BY u.id, w.language
-                HAVING
-                    SUM(CASE WHEN w.started_at IS NOT NULL AND w.next_review <= ? THEN 1 ELSE 0 END) > 0
-                    OR SUM(CASE WHEN w.started_at IS NULL THEN 1 ELSE 0 END) > 0""",
+                JOIN user_settings s ON s.user_id = u.id
+                WHERE EXISTS (
+                    SELECT 1 FROM words w
+                    WHERE w.user_id = u.id AND w.language = s.language
+                      AND (
+                          (w.started_at IS NOT NULL AND w.next_review <= ?)
+                          OR w.started_at IS NULL
+                      )
+                )""",
             (now_utc,),
         )
         rows = await cursor.fetchall()

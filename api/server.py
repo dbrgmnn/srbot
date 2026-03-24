@@ -8,6 +8,7 @@ import logging
 from collections import OrderedDict
 from pathlib import Path
 
+import aiohttp
 import aiosqlite
 from aiohttp import web
 
@@ -98,12 +99,14 @@ async def create_app(config: Config, db: aiosqlite.Connection, scheduler=None) -
     app["scheduler"] = scheduler
     app["user_cache"] = OrderedDict()  # (telegram_id, lang) -> user_id
 
+    app["http_session"] = aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=15))
+
     if config.gemini_api_key:
-        app["translator"] = Translator(config.gemini_api_key, config.gemini_model)
+        app["translator"] = Translator(config.gemini_api_key, config.gemini_model, app["http_session"])
 
     async def on_shutdown(app: web.Application):
-        if "translator" in app:
-            await app["translator"].close()
+        if "http_session" in app:
+            await app["http_session"].close()
 
     app.on_shutdown.append(on_shutdown)
 

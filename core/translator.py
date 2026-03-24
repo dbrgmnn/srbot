@@ -1,3 +1,4 @@
+import asyncio
 import json
 import logging
 
@@ -11,17 +12,11 @@ logger = logging.getLogger(__name__)
 class Translator:
     """Handles interaction with Gemini API for translation and word enrichment."""
 
-    def __init__(self, api_key: str, model_name: str):
+    def __init__(self, api_key: str, model_name: str, session: aiohttp.ClientSession):
         self.api_key = api_key
         self.model_name = model_name
         self.url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.model_name}:generateContent"
-        self._session = None
-
-    async def _get_session(self) -> aiohttp.ClientSession:
-        """Return existing session or create a new one."""
-        if self._session is None or self._session.closed:
-            self._session = aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=15))
-        return self._session
+        self.session = session
 
     async def _call_gemini(
         self, system_prompt: str, user_prompt: str, temperature: float = 0.1, max_tokens: int = 256
@@ -37,37 +32,59 @@ class Translator:
             },
         }
 
+        url_with_key = f"{self.url}?key={self.api_key}"
         content_text = ""
-        try:
-            session = await self._get_session()
-            url_with_key = f"{self.url}?key={self.api_key}"
-            async with session.post(url_with_key, json=payload) as resp:
-                if resp.status != 200:
-                    err_text = await resp.text()
-                    logger.error(f"Gemini API error {resp.status}: {err_text}")
-                    return None
 
-                result = await resp.json()
+        max_retries = 3
+        base_delay = 1.0
 
-                if "candidates" not in result or not result["candidates"]:
-                    logger.error(f"Gemini returned empty candidates: {result}")
-                    return None
+        for attempt in range(max_retries):
+            try:
+                async with self.session.post(url_with_key, json=payload) as resp:
+                    if resp.status == 429 or resp.status >= 500:
+                        err_text = await resp.text()
+                        logger.warning(
+                            f"Gemini API error {resp.status} (attempt {attempt + 1}/{max_retries}): {err_text}"
+                        )
+                        if attempt < max_retries - 1:
+                            await asyncio.sleep(base_delay * (2**attempt))
+                            continue
+                        return None
 
-                content_text = result["candidates"][0]["content"]["parts"][0]["text"].strip()
+                    if resp.status != 200:
+                        err_text = await resp.text()
+                        logger.error(f"Gemini API error {resp.status}: {err_text}")
+                        return None
 
-                # Robust JSON extraction
-                if content_text.startswith("```"):
-                    lines = content_text.splitlines()
-                    if lines[0].startswith("```"):
-                        lines = lines[1:]
-                    if lines and lines[-1].startswith("```"):
-                        lines = lines[:-1]
-                    content_text = "\n".join(lines).strip()
+                    result = await resp.json()
 
-                return json.loads(content_text)
-        except Exception as e:
-            logger.error(f"Gemini call failed: {e}. Raw content: {content_text[:200]}")
-            return None
+                    if "candidates" not in result or not result["candidates"]:
+                        logger.error(f"Gemini returned empty candidates: {result}")
+                        return None
+
+                    content_text = result["candidates"][0]["content"]["parts"][0]["text"].strip()
+
+                    # Robust JSON extraction
+                    if content_text.startswith("```"):
+                        lines = content_text.splitlines()
+                        if lines[0].startswith("```"):
+                            lines = lines[1:]
+                        if lines and lines[-1].startswith("```"):
+                            lines = lines[:-1]
+                        content_text = "\n".join(lines).strip()
+
+                    return json.loads(content_text)
+            except (TimeoutError, aiohttp.ClientError) as e:
+                logger.warning(f"Gemini call network error (attempt {attempt + 1}/{max_retries}): {e}")
+                if attempt < max_retries - 1:
+                    await asyncio.sleep(base_delay * (2**attempt))
+                    continue
+                return None
+            except Exception as e:
+                logger.error(f"Gemini call failed: {e}. Raw content: {content_text[:200]}")
+                return None
+
+        return None
 
     async def translate_and_enrich(self, text: str, source_lang: str) -> dict | None:
         """Translate word and generate example + CEFR level via Gemini."""
@@ -92,8 +109,3 @@ Return JSON: {{"word": "", "translation": "", "example": "", "level": "", "is_va
 
         user_prompt = f'Translate "{text}"'
         return await self._call_gemini(system_prompt, user_prompt, max_tokens=256)
-
-    async def close(self):
-        """Close the aiohttp session."""
-        if self._session and not self._session.closed:
-            await self._session.close()
