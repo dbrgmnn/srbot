@@ -1,5 +1,4 @@
-import { GET, POST, setLanguage, state } from "./api.js";
-import { loadHome } from "./ui.js";
+import { GET, POST, DEL, setLanguage, state } from "./api.js";
 import { toast, T } from "./toast.js";
 
 const tg = window.Telegram.WebApp;
@@ -501,7 +500,6 @@ window.executeDeleteAll = async () => {
   if (input.value.toLowerCase() !== "delete all") return;
 
   try {
-    const { DEL } = await import("./api.js");
     await DEL("/api/words/all");
 
     closeDeleteAllSheet();

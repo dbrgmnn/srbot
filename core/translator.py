@@ -22,10 +22,13 @@ class Translator:
             self._session = aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=15))
         return self._session
 
-    async def _call_gemini(self, prompt: str, temperature: float = 0.3, max_tokens: int = 512) -> dict | None:
-        """Call Gemini API and return parsed JSON response."""
+    async def _call_gemini(
+        self, system_prompt: str, user_prompt: str, temperature: float = 0.1, max_tokens: int = 256
+    ) -> dict | None:
+        """Call Gemini API with system instructions and return parsed JSON response."""
         payload = {
-            "contents": [{"parts": [{"text": prompt}]}],
+            "system_instruction": {"parts": [{"text": system_prompt}]},
+            "contents": [{"parts": [{"text": user_prompt}]}],
             "generationConfig": {
                 "responseMimeType": "application/json",
                 "temperature": temperature,
@@ -70,24 +73,21 @@ class Translator:
         lang_name = LANGUAGES.get(source_lang, {}).get("name", source_lang)
 
         article_rule = (
-            "Nouns: lowercase article + Capitalized noun (e.g. der Hund)."
-            if source_lang == "de"
-            else "All words: lowercase."
+            "nouns: lowercase article + Capitalized noun (e.g. der Hund)." if source_lang == "de" else "lowercase."
         )
-        prompt = f"""Translate "{text}" between {lang_name} ({source_lang}) and Russian.
 
+        system_prompt = f"""You are an expert lexicographer. Translate words between {lang_name} and Russian.
 Rules:
-- word: {lang_name} form. {article_rule}
-- translation: Russian lowercase.
-- level: CEFR level of the word (A1-C2).
-- example: natural {lang_name} sentence using the word. Match complexity to the word's level:
-  simple present tense and basic vocabulary for A1-A2, moderate grammar for B1-B2,
-  complex structures for C1-C2.
+- word: exact {lang_name} lemma form, {article_rule}
+- translation: MOST common primary Russian translation in lowercase.
+- level: CEFR level (A1-C2).
+- example: natural {lang_name} sentence. Complexity MUST match the level.
 - is_valid: false if input is gibberish, else true.
 
-Return JSON only: {{"word": "", "translation": "", "example": "", "level": "", "is_valid": true}}"""
+Return JSON: {{"word": "", "translation": "", "example": "", "level": "", "is_valid": true}}"""
 
-        return await self._call_gemini(prompt, max_tokens=256)
+        user_prompt = f'Translate "{text}"'
+        return await self._call_gemini(system_prompt, user_prompt, max_tokens=256)
 
     async def close(self):
         """Close the aiohttp session."""
