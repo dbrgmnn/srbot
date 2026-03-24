@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from datetime import UTC, datetime
 
@@ -8,7 +9,7 @@ from apscheduler.triggers.interval import IntervalTrigger
 
 from core.scheduler_utils import build_notification_text, is_quiet_time
 from db.models import apply_pragmas
-from db.repository import UserRepo, WordRepo, _safe_zoneinfo
+from db.repository import UserRepo, _safe_zoneinfo
 
 logger = logging.getLogger(__name__)
 
@@ -23,57 +24,57 @@ async def check_and_send_notifications(bot: Bot, db_path: str, config):
 
         now = datetime.now(tz=UTC)
         user_repo = UserRepo(db)
-        word_repo = WordRepo(db)
-        candidates = await user_repo.get_users_with_due_words()
+        candidates = await user_repo.get_users_with_due_words(default_tz=config.default_timezone)
         logger.info(f"[scheduler] tick — candidates: {len(candidates)}")
 
-        for row in candidates:
-            telegram_id = row["telegram_id"]
-            user_tz_name = row.get("timezone", config.default_timezone)
-            user_tz = _safe_zoneinfo(user_tz_name, config.default_timezone)
+        sem = asyncio.Semaphore(20)
 
-            # Get real stats to know due count and remaining daily quota
-            stats = await word_repo.get_full_stats(
-                row["user_id"],
-                row["language"],
-                tz_name=user_tz_name,
-                fallback_tz=config.default_timezone,
-            )
+        async def _process_user(row):
+            async with sem:
+                telegram_id = row["telegram_id"]
+                user_tz_name = row.get("timezone", config.default_timezone)
+                user_tz = _safe_zoneinfo(user_tz_name, config.default_timezone)
 
-            due_count = stats["due"]
-            daily_remaining = max(0, row["daily_limit"] - stats["today_new"])
-            new_to_show = min(stats["new"], daily_remaining)
+                due_count = row.get("due_count", 0)
+                new_count = row.get("new_count", 0)
+                today_new = row.get("today_new", 0)
 
-            # Skip if nothing due and daily quota already reached
-            if due_count == 0 and new_to_show == 0:
-                continue
+                daily_remaining = max(0, row["daily_limit"] - today_new)
+                new_to_show = min(new_count, daily_remaining)
 
-            logger.info(
-                f"[scheduler] checking {telegram_id} ({row['language']}) — due={due_count} new_left={new_to_show}"
-            )
+                if due_count == 0 and new_to_show == 0:
+                    return
 
-            if is_quiet_time(now, row["quiet_start"], row["quiet_end"], user_tz):
-                logger.info(f"[scheduler] {telegram_id} — quiet time, skip")
-                continue
+                logger.info(
+                    f"[scheduler] checking {telegram_id} ({row['language']}) — due={due_count} new_left={new_to_show}"
+                )
 
-            last_notified_raw = row["last_notified_at"]
-            if last_notified_raw:
+                if is_quiet_time(now, row["quiet_start"], row["quiet_end"], user_tz):
+                    logger.info(f"[scheduler] {telegram_id} — quiet time, skip")
+                    return
+
+                last_notified_raw = row["last_notified_at"]
+                if last_notified_raw:
+                    try:
+                        last_notified = datetime.fromisoformat(last_notified_raw)
+                        elapsed = (now - last_notified).total_seconds() / 60
+                        if elapsed < row["notification_interval_minutes"] - 0.1:
+                            return
+                    except ValueError:
+                        pass
+
+                text = build_notification_text(due_count, new_to_show, row["language"])
+
                 try:
-                    last_notified = datetime.fromisoformat(last_notified_raw)
-                    elapsed = (now - last_notified).total_seconds() / 60
-                    if elapsed < row["notification_interval_minutes"] - 0.1:
-                        continue
-                except ValueError:
-                    pass
+                    await bot.send_message(chat_id=telegram_id, text=text)
+                    await user_repo.set_last_notified_at(telegram_id, language=row["language"])
+                    logger.info(f"[scheduler] Notified {telegram_id} ({row['language']}): {text!r}")
+                except Exception as e:
+                    logger.warning(f"[scheduler] Notification failed for {telegram_id}: {e}")
 
-            text = build_notification_text(due_count, new_to_show, row["language"])
-
-            try:
-                await bot.send_message(chat_id=telegram_id, text=text)
-                await user_repo.set_last_notified_at(telegram_id, language=row["language"])
-                logger.info(f"[scheduler] Notified {telegram_id} ({row['language']}): {text!r}")
-            except Exception as e:
-                logger.warning(f"[scheduler] Notification failed for {telegram_id}: {e}")
+        tasks = [_process_user(row) for row in candidates]
+        if tasks:
+            await asyncio.gather(*tasks)
 
 
 async def reschedule(scheduler: AsyncIOScheduler, db: aiosqlite.Connection, config=None):

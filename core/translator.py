@@ -40,40 +40,41 @@ class Translator:
 
         for attempt in range(max_retries):
             try:
-                async with self.session.post(url_with_key, json=payload) as resp:
-                    if resp.status == 429 or resp.status >= 500:
-                        err_text = await resp.text()
-                        logger.warning(
-                            f"Gemini API error {resp.status} (attempt {attempt + 1}/{max_retries}): {err_text}"
-                        )
-                        if attempt < max_retries - 1:
-                            await asyncio.sleep(base_delay * (2**attempt))
-                            continue
-                        return None
+                async with asyncio.timeout(10.0):
+                    async with self.session.post(url_with_key, json=payload) as resp:
+                        if resp.status == 429 or resp.status >= 500:
+                            err_text = await resp.text()
+                            logger.warning(
+                                f"Gemini API error {resp.status} (attempt {attempt + 1}/{max_retries}): {err_text}"
+                            )
+                            if attempt < max_retries - 1:
+                                await asyncio.sleep(base_delay * (2**attempt))
+                                continue
+                            return None
 
-                    if resp.status != 200:
-                        err_text = await resp.text()
-                        logger.error(f"Gemini API error {resp.status}: {err_text}")
-                        return None
+                        if resp.status != 200:
+                            err_text = await resp.text()
+                            logger.error(f"Gemini API error {resp.status}: {err_text}")
+                            return None
 
-                    result = await resp.json()
+                        result = await resp.json()
 
-                    if "candidates" not in result or not result["candidates"]:
-                        logger.error(f"Gemini returned empty candidates: {result}")
-                        return None
+                        if "candidates" not in result or not result["candidates"]:
+                            logger.error(f"Gemini returned empty candidates: {result}")
+                            return None
 
-                    content_text = result["candidates"][0]["content"]["parts"][0]["text"].strip()
+                        content_text = result["candidates"][0]["content"]["parts"][0]["text"].strip()
 
-                    # Robust JSON extraction
-                    if content_text.startswith("```"):
-                        lines = content_text.splitlines()
-                        if lines[0].startswith("```"):
-                            lines = lines[1:]
-                        if lines and lines[-1].startswith("```"):
-                            lines = lines[:-1]
-                        content_text = "\n".join(lines).strip()
+                        # Robust JSON extraction
+                        if content_text.startswith("```"):
+                            lines = content_text.splitlines()
+                            if lines[0].startswith("```"):
+                                lines = lines[1:]
+                            if lines and lines[-1].startswith("```"):
+                                lines = lines[:-1]
+                            content_text = "\n".join(lines).strip()
 
-                    return json.loads(content_text)
+                        return json.loads(content_text)
             except (TimeoutError, aiohttp.ClientError) as e:
                 logger.warning(f"Gemini call network error (attempt {attempt + 1}/{max_retries}): {e}")
                 if attempt < max_retries - 1:

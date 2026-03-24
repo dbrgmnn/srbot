@@ -201,29 +201,61 @@ class UserRepo:
         row = await cursor.fetchone()
         return int(row["cnt"]) if row else 0
 
-    async def get_users_with_due_words(self) -> list[dict]:
-        """Find users who have words due for review or new words available."""
-        now_utc = datetime.now(tz=UTC).isoformat()
+    async def get_users_with_due_words(self, default_tz: str = "UTC") -> list[dict]:
+        """Find users who have words due for review or new words available, with aggregated stats."""
+        now = datetime.now(tz=UTC)
+        now_iso = now.isoformat()
 
         cursor = await self.db.execute(
             """SELECT u.id as user_id, u.telegram_id,
                         s.language,
                         s.quiet_start, s.quiet_end, s.daily_limit, s.timezone,
-                        s.notification_interval_minutes, s.last_notified_at
+                        s.notification_interval_minutes, s.last_notified_at,
+                        COUNT(CASE WHEN w.started_at IS NOT NULL AND w.next_review <= ? THEN 1 END) as due_count,
+                        COUNT(CASE WHEN w.started_at IS NULL THEN 1 END) as new_count
                 FROM users u
                 JOIN user_settings s ON s.user_id = u.id
-                WHERE EXISTS (
-                    SELECT 1 FROM words w
-                    WHERE w.user_id = u.id AND w.language = s.language
-                      AND (
-                          (w.started_at IS NOT NULL AND w.next_review <= ?)
-                          OR w.started_at IS NULL
-                      )
-                )""",
-            (now_utc,),
+                JOIN words w ON w.user_id = u.id AND w.language = s.language
+                GROUP BY u.id, s.language
+                HAVING due_count > 0 OR new_count > 0""",
+            (now_iso,),
         )
         rows = await cursor.fetchall()
-        return [dict(row) for row in rows]
+        candidates = [dict(row) for row in rows]
+
+        if not candidates:
+            return []
+
+        tz_groups = {}
+        for c in candidates:
+            tz_name = c.get("timezone") or default_tz
+            tz_groups.setdefault(tz_name, []).append(c)
+
+        for tz_name, group in tz_groups.items():
+            tz_info = _safe_zoneinfo(tz_name, default_tz)
+            local_now = now.astimezone(tz_info)
+            today_start_utc = local_now.replace(hour=0, minute=0, second=0, microsecond=0).astimezone(UTC).isoformat()
+
+            chunk_size = 400
+            for i in range(0, len(group), chunk_size):
+                chunk = group[i : i + chunk_size]
+                conditions = " OR ".join(["(user_id = ? AND language = ?)"] * len(chunk))
+                params = [today_start_utc]
+                for c in chunk:
+                    params.extend([c["user_id"], c["language"]])
+
+                query = f"""SELECT user_id, language, COUNT(*) as today_new
+                            FROM words
+                            WHERE started_at >= ? AND ({conditions})
+                            GROUP BY user_id, language"""
+
+                cur = await self.db.execute(query, params)
+                today_counts = {(r["user_id"], r["language"]): r["today_new"] for r in await cur.fetchall()}
+
+                for c in chunk:
+                    c["today_new"] = today_counts.get((c["user_id"], c["language"]), 0)
+
+        return candidates
 
 
 class WordRepo:
