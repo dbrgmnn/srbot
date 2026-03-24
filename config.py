@@ -21,6 +21,7 @@ class Config:
     db_path: str
     api_port: int
     gemini_api_key: str | None = None
+    gemini_model: str
     token_expiry: int = 3600
     min_daily_limit: int = 5
     max_daily_limit: int = 50
@@ -49,6 +50,7 @@ def load_config() -> Config:
         db_path=os.getenv("DB_PATH", "srbot.db"),
         api_port=int(os.getenv("API_PORT", "8080")),
         gemini_api_key=os.getenv("GEMINI_API_KEY"),
+        gemini_model=os.getenv("GEMINI_MODEL", ""),
         token_expiry=int(os.getenv("TOKEN_EXPIRY", "3600")),
         min_daily_limit=int(os.getenv("MIN_DAILY_LIMIT", "5")),
         max_daily_limit=int(os.getenv("MAX_DAILY_LIMIT", "50")),

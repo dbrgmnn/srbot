@@ -92,7 +92,7 @@ async def create_app(config: Config, db: aiosqlite.Connection, scheduler=None) -
     app["user_cache"] = {}  # (telegram_id, lang) -> user_id
 
     if config.gemini_api_key:
-        app["translator"] = Translator(config.gemini_api_key)
+        app["translator"] = Translator(config.gemini_api_key, config.gemini_model)
 
     async def on_shutdown(app: web.Application):
         if "translator" in app:

@@ -52,7 +52,7 @@ srbot/
 
 ## 🚀 Quick Start
 
-1. Create `.env` from `.env.example` and fill in `BOT_TOKEN`, `ALLOWED_USERS`.
+1. Create `.env` from `.env.example` and fill in `BOT_TOKEN`, `ALLOWED_USERS`, `GEMINI_API_KEY`, and `GEMINI_MODEL`.
 2. Install dependencies: `pip install -r requirements.txt`
 3. Run: `python main.py`
 
