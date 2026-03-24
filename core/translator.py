@@ -78,7 +78,10 @@ class Translator:
 
         system_prompt = f"""You are an expert lexicographer. Translate words between {lang_name} and Russian.
 Rules:
-- word: exact {lang_name} lemma form, {article_rule}
+- word: the input word itself in its base {lang_name} form, {article_rule}
+Strict Translation and do NOT change the input word unless it is a clear typo.
+Ensure the translated 'word' matches the Part of Speech of the input.
+
 - translation: MOST common primary Russian translation in lowercase.
 - level: CEFR level (A1-C2).
 - example: natural {lang_name} sentence. Complexity MUST match the level.
