@@ -1,9 +1,13 @@
+import logging
+
 import aiosqlite
 from aiohttp import web
 
 from core.languages import LANGUAGES
 from core.scheduler import reschedule
 from db.repository import UserRepo, WordRepo
+
+logger = logging.getLogger(__name__)
 
 # --- Helpers ---
 
@@ -140,6 +144,7 @@ def setup_routes_settings(app: web.Application, db: aiosqlite.Connection):
 
         config = request.app["config"]
         settings = await user_repo.get_user_settings(telegram_id, lang, config)
+        logger.info(f"User {telegram_id} updated settings for language '{lang}'")
         return web.json_response({"ok": True, "result": settings})
 
     async def get_api_token(request: web.Request) -> web.Response:
@@ -149,6 +154,7 @@ def setup_routes_settings(app: web.Application, db: aiosqlite.Connection):
         token = await user_repo.get_api_token(telegram_id)
         if not token:
             token = await user_repo.generate_api_token(telegram_id)
+            logger.info(f"User {telegram_id} generated initial API token")
         return web.json_response({"ok": True, "result": {"token": token}})
 
     async def revoke_api_token(request: web.Request) -> web.Response:
@@ -156,6 +162,7 @@ def setup_routes_settings(app: web.Application, db: aiosqlite.Connection):
         telegram_id = request["telegram_id"]
         user_repo = UserRepo(db)
         token = await user_repo.generate_api_token(telegram_id)
+        logger.info(f"User {telegram_id} revoked and regenerated API token")
         return web.json_response({"ok": True, "result": {"token": token}})
 
     app.router.add_get("/api/settings/languages", get_languages_list)

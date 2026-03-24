@@ -1,8 +1,12 @@
+import logging
+
 import aiosqlite
 from aiohttp import web
 
 from core.languages import LANGUAGES
 from db.repository import UserRepo, WordRepo
+
+logger = logging.getLogger(__name__)
 
 # --- Routes ---
 
@@ -29,6 +33,8 @@ def setup_routes_init(app: web.Application, db: aiosqlite.Connection):
         tts_code = lang_meta.get("tts", "en-US")
 
         languages = {code: {**meta} for code, meta in LANGUAGES.items()}
+
+        logger.info(f"User {telegram_id} initialized WebApp (lang: {lang})")
 
         return web.json_response(
             {

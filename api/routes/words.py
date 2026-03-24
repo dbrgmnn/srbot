@@ -124,6 +124,8 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         words_to_add = [{"word": word, "translation": trans, "example": example, "level": level}]
         added_count = await word_repo.add_words_batch(user_id, lang, words_to_add)
 
+        logger.info(f"External API: User {user_id} added enriched word '{word}' (lang: {lang})")
+
         return web.json_response(
             {
                 "ok": True,
@@ -149,11 +151,13 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
 
         word_repo = WordRepo(db)
         added_count = await word_repo.add_words_batch(user_id, lang, words_data)
+        logger.info(f"User {request['telegram_id']} batch added {added_count} words (lang: {lang})")
         return web.json_response({"ok": True, "result": {"added": added_count}})
 
     async def patch_word(request: web.Request) -> web.Response:
         """Update an existing word's text, translation, example, or level."""
         user_id = request["user_id"]
+        telegram_id = request["telegram_id"]
         try:
             word_id = int(request.match_info["word_id"])
         except ValueError:
@@ -168,6 +172,7 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         word_repo = WordRepo(db)
         try:
             await word_repo.update_word_text(word_id, user_id, word, translation, example, level)
+            logger.info(f"User {telegram_id} updated word {word_id}: '{word}'")
         except aiosqlite.IntegrityError:
             return web.json_response({"ok": False, "error": "duplicate"}, status=409)
         return web.json_response({"ok": True})
@@ -175,20 +180,24 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
     async def delete_all_words(request: web.Request) -> web.Response:
         """Delete all words for the user's current language."""
         user_id = request["user_id"]
+        telegram_id = request["telegram_id"]
         lang = request["language"]
         word_repo = WordRepo(db)
         await word_repo.delete_all_words(user_id, lang)
+        logger.info(f"User {telegram_id} deleted ALL words for language '{lang}'")
         return web.json_response({"ok": True})
 
     async def delete_word(request: web.Request) -> web.Response:
         """Delete a specific word by its ID."""
         user_id = request["user_id"]
+        telegram_id = request["telegram_id"]
         try:
             word_id = int(request.match_info["word_id"])
         except ValueError:
             return web.json_response({"ok": False, "error": "invalid_id"}, status=400)
         word_repo = WordRepo(db)
         await word_repo.delete_word(word_id, user_id)
+        logger.info(f"User {telegram_id} deleted word {word_id}")
         return web.json_response({"ok": True})
 
     async def search_words(request: web.Request) -> web.Response:
