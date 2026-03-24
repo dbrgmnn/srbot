@@ -59,9 +59,16 @@ async def main():
 
         # 3. Close resources
         logger.info("Closing database and bot sessions...")
+
+        # Cancel all other pending tasks
+        pending = [t for t in asyncio.all_tasks() if t is not asyncio.current_task()]
+        for task in pending:
+            task.cancel()
+
         cleanup_tasks = [
             db.close(),
             bot.session.close(),
+            asyncio.gather(*pending, return_exceptions=True),
         ]
 
         # Wait for all cleanup tasks with a reasonable timeout

@@ -33,6 +33,8 @@ class UserRepo:
 
         cursor = await self.db.execute("SELECT id FROM users WHERE telegram_id = ?", (telegram_id,))
         row = await cursor.fetchone()
+        if not row:
+            return None
         user_id = row["id"]
 
         # Initialize settings for this language if not already present
@@ -87,11 +89,7 @@ class UserRepo:
 
         if row:
             data = dict(row)
-            # Replace any None values from DB with defaults
-            for k, v in defaults.items():
-                if data.get(k) is None:
-                    data[k] = v
-            return data
+            return {**defaults, **{k: v for k, v in data.items() if v is not None}}
 
         return defaults
 
@@ -404,10 +402,7 @@ class WordRepo:
             "next_day_start_utc": next_day_start_utc.isoformat(),
         }
         if row:
-            res = dict(row)
-            for k, v in res.items():
-                if v is None and k in defaults:
-                    res[k] = defaults[k]
+            res = {**defaults, **{k: v for k, v in dict(row).items() if v is not None}}
             res["next_day_start_utc"] = next_day_start_utc.isoformat()
             return res
         return defaults
