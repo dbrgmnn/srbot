@@ -21,15 +21,24 @@ A minimalist Telegram Mini App for learning foreign vocabulary using Spaced Repe
 srbot/
 ├── main.py              # Entry point: bot polling, scheduler, API server
 ├── config.py            # Configuration loaded from .env
+├── pyproject.toml       # Ruff linter and formatter configuration
+├── .pre-commit-config.yaml # Pre-commit hooks for automated checks
 ├── api/
 │   ├── server.py        # aiohttp server, auth middleware, static serving
 │   ├── auth.py          # HMAC-SHA256 initData verification, Bearer token auth
-│   └── routes/          # API routes: init, words, practice, settings
+│   └── routes/          # API routes
+│       ├── init.py      # User session initialization
+│       ├── practice.py  # Practice sessions and grading
+│       ├── settings.py  # User settings management
+│       └── words.py     # Word dictionary operations
 ├── core/
+│   ├── bot_handlers.py  # /start command and WebApp entry point
 │   ├── languages.py     # Supported languages (EN, DE) with flags and TTS codes
-│   ├── srs.py           # SM-2 spaced repetition algorithm
+│   ├── logger.py        # Custom ANSI color logger
 │   ├── scheduler.py     # APScheduler notification job
-│   └── bot_handlers.py  # /token, /token_new commands
+│   ├── scheduler_utils.py# Quiet hours and notification text utilities
+│   ├── srs.py           # SM-2 spaced repetition algorithm
+│   └── translator.py    # Gemini API interaction for translations
 ├── db/
 │   ├── models.py        # SQLite schema (users, user_settings, words, daily_stats)
 │   └── repository.py    # All DB queries (UserRepo, WordRepo)
@@ -37,16 +46,18 @@ srbot/
 │   ├── index.html       # Single-page app shell
 │   ├── css/style.css    # Unified design system, Glass-morphism, Skeletons
 │   └── js/
-│       ├── app.js       # Entry point, theme detection, global haptics
-│       ├── state.js     # Observable state management (Proxy-based)
 │       ├── api.js       # HTTP client, auth headers, shared state access
-│       ├── ui.js        # Reactive screen management and statistics rendering
-│       ├── practice.js  # SRS Session logic, Swipe engine, Confetti
+│       ├── app.js       # Entry point, theme detection, global haptics
 │       ├── dictionary.js# Word management (search, edit, delete)
+│       ├── practice.js  # SRS Session logic, Swipe engine, Confetti
 │       ├── settings.js  # Universal picker, CSV import/export, auto-save
-│       └── toast.js     # Native-style Pill notifications
+│       ├── state.js     # Observable state management (Proxy-based)
+│       ├── toast.js     # Native-style Pill notifications
+│       └── ui.js        # Reactive screen management and statistics rendering
 ├── tests/
-│   └── test_srs.py      # Automated tests for the SRS algorithm
+│   ├── test_scheduler.py   # Tests for scheduler utilities (quiet hours)
+│   ├── test_srs.py         # Automated tests for the SRS algorithm
+│   └── test_ui_integrity.py# Tests for HTML/JS references and structure
 └── update.sh            # Secure deploy script with pre-deployment testing
 ```
 
@@ -100,10 +111,12 @@ pre-commit run ruff --all-files
 - **Practice Mode** — Word→Translation or Translation→Word
 - **New words limit** — daily cap for new cards
 - **Frequency** — notification interval
+- **API Token** — generate or revoke a Bearer token for adding words via the `/api/external/words` external API.
 - **Import / Export** — CSV management and dictionary backup.
 
 ## ⚙️ Tech Stack
 - **Backend:** Python 3.11+, aiohttp, aiosqlite, aiogram 3.x, pytest
 - **Frontend:** Vanilla JS (Reactive State), CSS Variables, Telegram WebApp SDK
+- **AI / NLP:** Google Gemini API (translation, CEFR level, example generation)
 - **Auth:** HMAC-SHA256 Telegram initData verification
 - **Deployment:** Raspberry Pi Zero 2W, Tailscale Funnel, automated test validation
