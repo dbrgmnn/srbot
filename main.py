@@ -11,14 +11,12 @@ from aiogram import Bot, Dispatcher
 from api.server import start_api_server
 from config import load_config
 from core.bot_handlers import setup_handlers
+from core.logger import setup_logging
 from core.scheduler import setup_scheduler
 from db.models import init_db
 from db.repository import UserRepo
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-)
+setup_logging()
 logger = logging.getLogger(__name__)
 
 
