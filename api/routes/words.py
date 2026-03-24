@@ -89,10 +89,13 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
             ai_data = await translator.translate_and_enrich(raw_word, lang)
         except Exception as e:
             logger.error(f"AI translation failed: {e}")
-            return web.json_response({"ok": False, "error": "ai_translation_failed"}, status=422)
+            return web.json_response({"ok": False, "error": "ai_service_unavailable"}, status=503)
 
-        if not ai_data or ai_data.get("is_valid") is False:
-            return web.json_response({"ok": False, "error": "ai_translation_failed"}, status=422)
+        if not ai_data:
+            return web.json_response({"ok": False, "error": "ai_service_unavailable"}, status=503)
+
+        if ai_data.get("is_valid") is False:
+            return web.json_response({"ok": False, "error": "word_not_recognized"}, status=422)
 
         word = ai_data["word"]
         trans = ai_data["translation"]
