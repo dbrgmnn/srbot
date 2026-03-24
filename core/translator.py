@@ -13,7 +13,9 @@ class Translator:
 
     def __init__(self, api_key: str):
         self.api_key = api_key
-        self.url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
+        self.url = (
+            "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent"
+        )
         self._session = None
 
     async def _get_session(self) -> aiohttp.ClientSession:

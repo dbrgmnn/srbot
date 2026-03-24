@@ -8,7 +8,12 @@ NC='\033[0m'
 cd /home/pi/srbot
 
 echo -e "${GREEN}[1/5] Updating code...${NC}"
-git pull origin main
+PULL_OUTPUT=$(git pull origin main)
+echo "$PULL_OUTPUT"
+if [[ "$PULL_OUTPUT" == *"Already up to date"* ]]; then
+    echo -e "${GREEN}No changes detected. Skipping update.${NC}"
+    exit 0
+fi
 
 echo -e "${GREEN}[2/5] Updating dependencies...${NC}"
 if [ -f "requirements.txt" ]; then
