@@ -5,6 +5,7 @@ async def apply_pragmas(db: aiosqlite.Connection):
     """Apply standard PRAGMAs to every new connection (WAL mode and NORMAL sync)."""
     await db.execute("PRAGMA journal_mode=WAL")
     await db.execute("PRAGMA synchronous=NORMAL")
+    await db.execute("PRAGMA foreign_keys=ON")
 
 
 async def init_db(db_path: str = "srbot.db") -> aiosqlite.Connection:

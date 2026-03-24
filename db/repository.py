@@ -246,15 +246,14 @@ class WordRepo:
             )
             for w in words
         ]
-        await self.db.executemany(
+        cursor = await self.db.executemany(
             """INSERT OR IGNORE INTO words
                 (user_id, word, translation, language, example, level, next_review, created_at)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
             data,
         )
-        row = await (await self.db.execute("SELECT changes()")).fetchone()
         await self.db.commit()
-        return int(row[0]) if row else 0
+        return cursor.rowcount
 
     async def get_session_words(self, user_id: int, language: str, new_limit: int) -> list[dict]:
         """Get words for a practice session, including due reviews and new words."""

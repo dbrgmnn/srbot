@@ -5,6 +5,7 @@ Uses aiohttp to serve the web application and API endpoints.
 
 import json
 import logging
+from collections import OrderedDict
 from pathlib import Path
 
 import aiosqlite
@@ -74,11 +75,17 @@ async def create_app(config: Config, db: aiosqlite.Connection, scheduler=None) -
         cache_key = (telegram_id, lang)
         if cache_key in request.app["user_cache"]:
             user_id = request.app["user_cache"][cache_key]
+            # Move to end to mark as recently used
+            request.app["user_cache"].move_to_end(cache_key)
         else:
             tz = request.headers.get("X-Timezone", config.default_timezone)
             user_repo = UserRepo(db)
             user_id = await user_repo.get_or_create(telegram_id, lang, tz, config)
             request.app["user_cache"][cache_key] = user_id
+
+            # Simple LRU logic to prevent memory leaks
+            if len(request.app["user_cache"]) > 1000:
+                request.app["user_cache"].popitem(last=False)
 
         request["telegram_id"] = telegram_id
         request["user_id"] = user_id
@@ -89,7 +96,7 @@ async def create_app(config: Config, db: aiosqlite.Connection, scheduler=None) -
     app["config"] = config
     app["db"] = db
     app["scheduler"] = scheduler
-    app["user_cache"] = {}  # (telegram_id, lang) -> user_id
+    app["user_cache"] = OrderedDict()  # (telegram_id, lang) -> user_id
 
     if config.gemini_api_key:
         app["translator"] = Translator(config.gemini_api_key, config.gemini_model)
