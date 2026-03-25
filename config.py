@@ -47,7 +47,7 @@ def load_config() -> Config:
         bot_token=token,
         webapp_url=os.getenv("WEBAPP_URL", ""),
         allowed_users=allowed_users,
-        db_path=os.getenv("DB_PATH", "srbot.db"),
+        db_path=os.getenv("DB_PATH"),
         api_port=int(os.getenv("API_PORT", "8080")),
         gemini_api_key=os.getenv("GEMINI_API_KEY"),
         gemini_model=os.getenv("GEMINI_MODEL", "gemini-2.0-flash-lite-preview-02-05"),
