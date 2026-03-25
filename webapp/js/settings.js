@@ -1,22 +1,23 @@
-import { GET, POST, DEL, setLanguage, state } from "./api.js";
-import { toast, T } from "./toast.js";
+import { DEL, GET, POST, setLanguage, state } from "./api.js";
+import { T, toast } from "./toast.js";
+import { lockScroll, unlockScroll } from "./utils.js";
 
 const tg = window.Telegram.WebApp;
 
-// ── Languages from state (loaded at init) ────────────────────────────────
+/** --- Languages from State --- */
 
 function getLanguages() {
   return state.languages || {};
 }
 
-// ── Shared constants ──────────────────────────────────────────────────────
+/** --- Shared Constants --- */
 
 const MODE_LABELS = {
   word_to_translation: "Word → Translation",
   translation_to_word: "Translation → Word",
 };
 
-// ── State Subscriptions ───────────────────────────────────────────────────
+/** --- State Subscriptions --- */
 
 function initSubscriptions() {
   if (window._settingsSubsInit) return;
@@ -40,7 +41,7 @@ function initSubscriptions() {
   });
 }
 
-// ── Shared render helpers ─────────────────────────────────────────────────
+/** --- Shared Render Helpers --- */
 
 function _renderIntervalEl(el, val) {
   el.dataset.value = val;
@@ -49,7 +50,7 @@ function _renderIntervalEl(el, val) {
   else el.textContent = `Every ${val / 60} hours`;
 }
 
-// ── Universal Picker ──────────────────────────────────────────────────────
+/** --- Universal Picker --- */
 
 export function openPicker(type, context = null) {
   initSubscriptions();
@@ -179,7 +180,7 @@ function _showPickerSheet(title, options, currentValue, onSelect) {
 
   document.getElementById("picker-overlay").classList.add("open");
   document.getElementById("picker-sheet").classList.add("open");
-  _lockScroll();
+  lockScroll();
 
   setTimeout(() => {
     const selected = list.querySelector(".picker-item.selected");
@@ -190,35 +191,10 @@ function _showPickerSheet(title, options, currentValue, onSelect) {
 export function closePicker() {
   document.getElementById("picker-overlay").classList.remove("open");
   document.getElementById("picker-sheet").classList.remove("open");
-  _unlockScroll();
+  unlockScroll();
 }
 
-// ── Scroll lock (exposed via window for use in dictionary.js) ─────────────
-
-function _lockScroll() {
-  document.body.dataset.sheetCount = (
-    parseInt(document.body.dataset.sheetCount || "0") + 1
-  ).toString();
-  document.body.style.overflow = "hidden";
-  document.body.style.touchAction = "none";
-}
-
-function _unlockScroll() {
-  const count = Math.max(
-    0,
-    parseInt(document.body.dataset.sheetCount || "0") - 1,
-  );
-  document.body.dataset.sheetCount = count.toString();
-  if (count === 0) {
-    document.body.style.overflow = "";
-    document.body.style.touchAction = "";
-  }
-}
-
-window._lockScroll = _lockScroll;
-window._unlockScroll = _unlockScroll;
-
-// ── Quiet Hours Sheet ────────────────────────────────────────────────────
+/** --- Quiet Hours Sheet --- */
 
 export function openQuietHoursSheet() {
   const startList = document.getElementById("quiet-start-list");
@@ -272,13 +248,13 @@ export function openQuietHoursSheet() {
 
   document.getElementById("quiet-hours-overlay").classList.add("open");
   document.getElementById("quiet-hours-sheet").classList.add("open");
-  _lockScroll();
+  lockScroll();
 }
 
 export function closeQuietHoursSheet() {
   document.getElementById("quiet-hours-overlay").classList.remove("open");
   document.getElementById("quiet-hours-sheet").classList.remove("open");
-  _unlockScroll();
+  unlockScroll();
 }
 
 export async function saveQuietHours() {
@@ -289,7 +265,7 @@ export async function saveQuietHours() {
   closeQuietHoursSheet();
 }
 
-// ── API Access Sheet ─────────────────────────────────────────────────────
+/** --- API Access Sheet --- */
 
 export function openApiAccessSheet() {
   const display = document.getElementById("api-token-display");
@@ -297,16 +273,16 @@ export function openApiAccessSheet() {
 
   document.getElementById("api-overlay").classList.add("open");
   document.getElementById("api-sheet").classList.add("open");
-  _lockScroll();
+  lockScroll();
 }
 
 export function closeApiAccessSheet() {
   document.getElementById("api-overlay").classList.remove("open");
   document.getElementById("api-sheet").classList.remove("open");
-  _unlockScroll();
+  unlockScroll();
 }
 
-// ── Settings load / save ──────────────────────────────────────────────────
+/** --- Settings Load / Save --- */
 
 function _fillSettingsFromState() {
   const s = state.currentSettings;
@@ -343,7 +319,7 @@ function _fillSettingsFromState() {
   }
 }
 
-// ── API Token ────────────────────────────────────────────────────────────
+/** --- API Token --- */
 
 let currentToken = "";
 
@@ -432,7 +408,7 @@ export async function saveSetting(key, val, showToast = true) {
   }
 }
 
-// ── Settings actions ──────────────────────────────────────────────────────
+// --- Settings Actions ---
 
 export async function switchLanguage(lang) {
   if (state.currentLang === lang) return;
@@ -453,7 +429,7 @@ export function setPracticeMode(mode) {
   saveSetting("practice_mode", mode);
 }
 
-// ── Delete All Words (Safe Confirmation) ──────────────────────────────────
+/** --- Delete All Words (Safe Confirmation) --- */
 
 export function openDeleteAllSheet() {
   const input = document.getElementById("delete-confirm-input");
@@ -469,7 +445,7 @@ export function openDeleteAllSheet() {
 
   document.getElementById("delete-all-overlay").classList.add("open");
   document.getElementById("delete-all-sheet").classList.add("open");
-  _lockScroll();
+  lockScroll();
   setTimeout(() => input.focus(), 300);
 }
 
@@ -481,7 +457,7 @@ export function closeDeleteAllSheet() {
   document
     .getElementById("btn-delete-all-confirm")
     .classList.add("is-disabled");
-  _unlockScroll();
+  unlockScroll();
 }
 
 window.onDeleteAllInput = (val) => {

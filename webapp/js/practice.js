@@ -1,10 +1,10 @@
 import { GET, POST, state } from "./api.js";
+import { T, toast } from "./toast.js";
 import { showScreen } from "./ui.js";
-import { toast, T } from "./toast.js";
 
 const tg = window.Telegram.WebApp;
 
-// ── State ──────────────────────────────────────────────────────────────────────
+/** --- State --- */
 
 let sessionWords = [];
 let sessionIdx = 0;
@@ -17,7 +17,7 @@ let pointerStartX = 0,
   pointerStartTime = 0;
 let rafId = null;
 
-// ── Session ───────────────────────────────────────────────────────────────────
+/** --- Session --- */
 
 export async function startPractice() {
   try {
@@ -37,7 +37,7 @@ export async function startPractice() {
   }
 }
 
-// ── Swipe handlers ───────────────────────────────────────────────────────────
+/** --- Swipe Handlers --- */
 
 function handleStart(x, y) {
   if (isGrading) return;
@@ -132,7 +132,7 @@ function handleEnd(x, y) {
   pointerStartY = 0;
 }
 
-// ── Swipe init ───────────────────────────────────────────────────────────────
+/** --- Swipe Initialization --- */
 
 function initSwipe() {
   const card = document.getElementById("word-card");
@@ -156,7 +156,7 @@ function initSwipe() {
   };
 }
 
-// ── Render ───────────────────────────────────────────────────────────────────
+/** --- Render --- */
 
 function renderWord() {
   if (sessionIdx >= sessionWords.length) {
@@ -203,7 +203,7 @@ function renderWord() {
   card.style.opacity = "1";
 }
 
-// ── Grading ──────────────────────────────────────────────────────────────────
+/** --- Grading --- */
 
 async function grade(quality) {
   if (isGrading) return;
@@ -251,7 +251,7 @@ async function grade(quality) {
   }
 }
 
-// ── Undo ─────────────────────────────────────────────────────────────────────
+/** --- Undo --- */
 
 export async function undo() {
   if (isGrading) return;
@@ -280,7 +280,7 @@ export async function undo() {
   renderWord();
 }
 
-// ── Audio ───────────────────────────────────────────────────────────────────
+/** --- Audio --- */
 
 export function playAudio(e) {
   if (e) e.stopPropagation();
@@ -299,7 +299,7 @@ export function playAudio(e) {
   synth.speak(msg);
 }
 
-// ── Confetti effect ──────────────────────────────────────────────────────────
+/** --- Confetti Effect --- */
 
 function launchConfetti() {
   const canvas = document.getElementById("confetti-canvas");
@@ -362,7 +362,7 @@ function launchConfetti() {
   requestAnimationFrame(draw);
 }
 
-// ── Exit ─────────────────────────────────────────────────────────────────────
+// --- Exit ---
 
 export function exitPractice() {
   isGrading = false;

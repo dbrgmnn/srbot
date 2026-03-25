@@ -42,32 +42,32 @@ export function toast(msg, type = "info") {
   }, duration);
 }
 
-// ── Shared base messages ──────────────────────────────────────────────────
+/** --- Shared Base Messages --- */
 
 const _saved = "Saved";
 const _fail = (what) => `Failed to ${what}`;
 const _added = (n) => `Added ${n} words`;
 
-// ── Message constants ─────────────────────────────────────────────────────
+/** --- Message Constants --- */
 
 export const T = {
-  // Dictionary — add
+  // Dictionary — Add
   WORD_REQUIRED: "Fill in word and translation",
   WORD_ADDED: (w) => `Added: ${w}`,
   WORD_ADD_FAIL: _fail("add word"),
 
-  // Dictionary — CSV upload
+  // Dictionary — CSV Upload
   NO_WORDS_CSV: "No words found in file",
   CSV_ADDED: _added,
   CSV_FAIL: _fail("upload file"),
 
-  // Dictionary — edit / delete
+  // Dictionary — Edit / Delete
   WORD_SAVED: _saved,
   WORD_SAVE_FAIL: _fail("save"),
   WORD_DUPLICATE: "Word already exists",
   DELETE_FAIL: _fail("delete"),
 
-  // Dictionary — clear / export / search
+  // Dictionary — Clear / Export / Search
   CLEARED: "Dictionary cleared",
   CLEAR_FAIL: _fail("clear"),
   COPIED: "Copied to clipboard",

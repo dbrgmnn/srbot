@@ -1,27 +1,27 @@
-import { loadHome, showScreen } from "./ui.js";
-import { toast, T } from "./toast.js";
-import { startPractice, exitPractice, undo, playAudio } from "./practice.js";
 import {
-  submitWords,
+  clearSearch,
+  closeEdit,
   handleFileUpload,
   onSearchInput,
-  clearSearch,
   saveEdit,
-  closeEdit,
   shareWords,
+  submitWords,
 } from "./dictionary.js";
+import { exitPractice, playAudio, startPractice, undo } from "./practice.js";
 import {
-  loadSettings,
-  openPicker,
-  closePicker,
-  openDeleteAllSheet,
-  closeDeleteAllSheet,
-  openApiAccessSheet,
   closeApiAccessSheet,
-  openQuietHoursSheet,
+  closeDeleteAllSheet,
+  closePicker,
   closeQuietHoursSheet,
+  loadSettings,
+  openApiAccessSheet,
+  openDeleteAllSheet,
+  openPicker,
+  openQuietHoursSheet,
   saveQuietHours,
 } from "./settings.js";
+import { T, toast } from "./toast.js";
+import { loadHome, showScreen } from "./ui.js";
 
 const tg = window.Telegram.WebApp;
 tg.ready();
@@ -29,7 +29,7 @@ tg.expand();
 tg.isVerticalSwipesEnabled = false;
 if (tg.lockOrientation) tg.lockOrientation();
 
-// ── Theme detection ──────────────────────────────────────────────────────────────
+// --- Theme Detection ---
 
 function applyTheme() {
   const bg = tg.themeParams?.bg_color || "#111113";
@@ -43,19 +43,21 @@ function applyTheme() {
 tg.onEvent("themeChanged", applyTheme);
 applyTheme();
 
-// ── Window bindings (HTML onclick attributes) ────────────────────────────────────
+// --- Window Bindings (HTML onclick attributes) ---
 
-// ui
+// UI
 window.showScreen = (name) => {
   showScreen(name);
   if (name === "settings") loadSettings();
 };
-// practice
+
+// Practice
 window.startPractice = startPractice;
 window.exitPractice = exitPractice;
 window.undo = undo;
 window.playAudio = playAudio;
-// dictionary
+
+// Dictionary
 window.submitWords = submitWords;
 window.handleFileUpload = handleFileUpload;
 window.onSearchInput = onSearchInput;
@@ -63,7 +65,8 @@ window.clearSearch = clearSearch;
 window.saveEdit = saveEdit;
 window.closeEdit = closeEdit;
 window.shareWords = shareWords;
-// settings
+
+// Settings
 window.openPicker = openPicker;
 window.closePicker = closePicker;
 window.openDeleteAllSheet = openDeleteAllSheet;
@@ -74,7 +77,7 @@ window.openQuietHoursSheet = openQuietHoursSheet;
 window.closeQuietHoursSheet = closeQuietHoursSheet;
 window.saveQuietHours = saveQuietHours;
 
-// ── Haptics ──────────────────────────────────────────────────────────────────────
+// --- Haptics ---
 
 function initGlobalHaptics() {
   const selector =
@@ -88,7 +91,7 @@ function initGlobalHaptics() {
   );
 }
 
-// ── Init ────────────────────────────────────────────────────────────────────────
+// --- Initialization ---
 
 async function init() {
   try {

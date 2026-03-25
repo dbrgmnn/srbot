@@ -1,12 +1,12 @@
-import { GET, POST, DEL, PATCH, state } from "./api.js";
-import { loadHome } from "./ui.js";
-import { toast, T } from "./toast.js";
+import { DEL, GET, PATCH, POST, state } from "./api.js";
+import { T, toast } from "./toast.js";
+import { lockScroll, unlockScroll } from "./utils.js";
 
 const tg = window.Telegram.WebApp;
 let searchTimer = null;
 let editWordId = null;
 
-// ── Internal helpers ──────────────────────────────────────────────────────
+// --- Internal Helpers ---
 
 function esc(str) {
   return String(str)
@@ -71,7 +71,7 @@ function parseText(text) {
     .filter((x) => x);
 }
 
-// ── Public functions ──────────────────────────────────────────────────────
+// --- Public Functions ---
 
 let isSubmitting = false;
 
@@ -181,13 +181,13 @@ export function openEdit(w) {
 
   document.getElementById("edit-overlay").classList.add("open");
   document.getElementById("edit-sheet").classList.add("open");
-  window._lockScroll();
+  lockScroll();
 }
 
 export function closeEdit() {
   document.getElementById("edit-overlay").classList.remove("open");
   document.getElementById("edit-sheet").classList.remove("open");
-  window._unlockScroll();
+  unlockScroll();
 }
 
 export async function saveEdit() {
@@ -242,7 +242,7 @@ export async function shareWords() {
   }
 }
 
-// ── Internal async ────────────────────────────────────────────────────────
+// --- Internal Async ---
 
 async function loadSearch(q) {
   const el = document.getElementById("search-results");

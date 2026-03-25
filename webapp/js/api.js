@@ -1,7 +1,7 @@
 const tg = window.Telegram.WebApp;
 import { state } from "./state.js";
 
-// ── HTTP client ───────────────────────────────────────────────────────────────────
+// --- HTTP Client ---
 
 async function api(method, path, body) {
   const opts = {
@@ -19,18 +19,21 @@ async function api(method, path, body) {
     const res = await fetch(path, opts);
     if (res.status === 401 || res.status === 403)
       throw new Error("Please open the app from Telegram");
+
     const contentType = res.headers.get("content-type");
     const isJson = contentType && contentType.includes("application/json");
     const data = isJson ? await res.json() : null;
+
+    if (!res.ok) {
+      if (isJson && data && data.error) throw new Error(data.error);
+      throw new Error(`Error ${res.status}`);
+    }
 
     if (isJson && data && data.ok === false) {
       if (res.status === 409) throw new Error("409");
       throw new Error(data.error || `Error ${res.status}`);
     }
 
-    if (!res.ok) {
-      throw new Error(`Error ${res.status}`);
-    }
     return data;
   } catch (e) {
     if (e.name === "TypeError") throw new Error("Network error");
@@ -38,7 +41,7 @@ async function api(method, path, body) {
   }
 }
 
-// ── Exports ───────────────────────────────────────────────────────────────────────────
+// --- Exports ---
 
 export const GET = (path) => api("GET", path);
 export const POST = (path, body) => api("POST", path, body);

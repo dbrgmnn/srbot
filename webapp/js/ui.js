@@ -1,9 +1,8 @@
-import { GET, state, setLanguage } from "./api.js";
-import { toast } from "./toast.js";
+import { GET, state } from "./api.js";
 
 const tg = window.Telegram.WebApp;
 
-// ── Screen switching ──────────────────────────────────────────────────────
+/** --- Screen Switching --- */
 
 export function showScreen(name) {
   document
@@ -34,7 +33,7 @@ export function showScreen(name) {
   }
 }
 
-// ── Countdown helpers ─────────────────────────────────────────────────────
+/** --- Countdown Helpers --- */
 
 let countdownInterval = null;
 
@@ -83,12 +82,12 @@ function updateCountdowns() {
   }
 }
 
-// ── Week activity ────────────────────────────────────────────────────────
+/** --- Week Activity --- */
 
 function renderWeek(data) {
   const DAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 
-  // build lookup: date string → count
+  // Build lookup: date string → count
   const lookup = {};
   data.forEach(({ date, count }) => {
     lookup[date] = count;
@@ -99,12 +98,12 @@ function renderWeek(data) {
   grid.innerHTML = "";
 
   const today = new Date();
-  // todayKey для определения сегодняшней ячейки
+  // todayKey to identify the current day cell
   const todayKey = `${today.getFullYear()}-${String(
     today.getMonth() + 1,
   ).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 
-  // последние 7 дней: i=0 → 6 дней назад, i=6 → сегодня
+  // Last 7 days: i=0 → 6 days ago, i=6 → today
   for (let i = 0; i < 7; i++) {
     const d = new Date(today);
     d.setDate(d.getDate() - 6 + i);
@@ -144,7 +143,7 @@ function renderWeek(data) {
   }
 }
 
-// ── State Subscriptions ───────────────────────────────────────────────────
+/** --- State Subscriptions --- */
 
 function initSubscriptions() {
   if (window._subsInit) return;
@@ -212,7 +211,7 @@ function renderStats() {
   const elTotal = document.getElementById("count-total");
   if (elTotal) elTotal.textContent = total;
 
-  // bar widths
+  // Bar widths
   const pct = (n) => (total > 0 ? `${((n / total) * 100).toFixed(1)}%` : "0%");
   const barNew = document.getElementById("bar-new");
   if (barNew) {
@@ -236,7 +235,7 @@ function renderStats() {
   }
 }
 
-// ── Home screen ───────────────────────────────────────────────────────────
+/** --- Home Screen --- */
 
 export async function loadHome() {
   initSubscriptions();
@@ -266,7 +265,7 @@ export async function loadHome() {
     const availableNew = Math.max(0, limit - todayDone);
 
     state.sessionTotal = due + Math.min(newWords, availableNew);
-    state.currentStats = stats; // triggers renderStats and updateCountdowns
+    state.currentStats = stats; // Triggers renderStats and updateCountdowns
 
     if (!countdownInterval) {
       countdownInterval = setInterval(updateCountdowns, 30000);

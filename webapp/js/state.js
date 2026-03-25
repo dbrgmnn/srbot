@@ -14,6 +14,9 @@ const initialData = {
   sessionTotal: 0,
 };
 
+/**
+ * Observable State with Proxy-based reactivity.
+ */
 class ObservableState {
   constructor(data) {
     this._data = data;
@@ -34,6 +37,11 @@ class ObservableState {
         if (oldValue === value) return true;
 
         target._data[prop] = value;
+
+        // Auto-persist key settings to localStorage
+        if (prop === "currentLang") {
+          localStorage.setItem("currentLang", value);
+        }
 
         // Notify subscribers for this specific key
         if (target._subscribers.has(prop)) {
@@ -79,5 +87,4 @@ export const state = new ObservableState(initialData);
 
 export function setLanguage(lang) {
   state.currentLang = lang;
-  localStorage.setItem("currentLang", lang);
 }
