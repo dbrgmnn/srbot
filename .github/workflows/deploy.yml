@@ -37,4 +37,4 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /home/pi/srbot
-            ./update.sh
+            bash update.sh
