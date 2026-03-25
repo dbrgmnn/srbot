@@ -109,3 +109,35 @@ def test_static_files_existence():
 
     if missing_files:
         pytest.fail("\n".join(missing_files))
+
+
+def test_js_esm_order():
+    """Ensure all 'import' statements appear at the top of JS files."""
+    js_dir = os.path.join(get_webapp_path(), "js")
+    for js_file in os.listdir(js_dir):
+        if not js_file.endswith(".js"):
+            continue
+        with open(os.path.join(js_dir, js_file), encoding="utf-8") as f:
+            lines = f.readlines()
+            found_code = False
+            for line_no, line in enumerate(lines, 1):
+                stripped = line.strip()
+                # Skip empty lines, comments, and opening brackets
+                if not stripped or stripped.startswith(("//", "/*", "*", "{")):
+                    continue
+
+                # If we are inside an import statement (starts with 'import' or ends with 'from')
+                if (
+                    stripped.startswith("import ")
+                    or stripped.endswith('from "./dictionary.js";')
+                    or stripped.endswith('from "./practice.js";')
+                    or stripped.endswith('from "./toast.js";')
+                    or stripped.endswith('from "./ui.js";')
+                ):
+                    continue
+
+                if stripped.startswith("import "):
+                    if found_code:
+                        pytest.fail(f"Invalid import order in {js_file}:{line_no}: 'import' after code")
+                else:
+                    found_code = True

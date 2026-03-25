@@ -1,5 +1,6 @@
-const tg = window.Telegram.WebApp;
 import { state } from "./state.js";
+
+const tg = window.Telegram.WebApp;
 
 // --- HTTP Client ---
 
