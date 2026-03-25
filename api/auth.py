@@ -4,6 +4,7 @@ import logging
 import time
 from urllib.parse import parse_qsl
 
+from api.app_keys import CONFIG_KEY
 from db.repository import UserRepo
 
 logger = logging.getLogger(__name__)
@@ -54,7 +55,7 @@ async def verify_bearer_token(request, db) -> int | None:
         return None
 
     user_id, telegram_id = result
-    config = request.app["config"]
+    config = request.app[CONFIG_KEY]
     if telegram_id not in config.allowed_users:
         return None
 

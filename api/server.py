@@ -12,6 +12,14 @@ import aiohttp
 import aiosqlite
 from aiohttp import web
 
+from api.app_keys import (
+    CONFIG_KEY,
+    DB_KEY,
+    HTTP_SESSION_KEY,
+    SCHEDULER_KEY,
+    TRANSLATOR_KEY,
+    USER_CACHE_KEY,
+)
 from api.auth import verify_init_data
 from api.routes.init import setup_routes_init
 from api.routes.practice import setup_routes_practice
@@ -74,19 +82,19 @@ async def create_app(config: Config, db: aiosqlite.Connection, scheduler=None) -
 
         # Check cache first to avoid DB hit on every request
         cache_key = (telegram_id, lang)
-        if cache_key in request.app["user_cache"]:
-            user_id = request.app["user_cache"][cache_key]
+        if cache_key in request.app[USER_CACHE_KEY]:
+            user_id = request.app[USER_CACHE_KEY][cache_key]
             # Move to end to mark as recently used
-            request.app["user_cache"].move_to_end(cache_key)
+            request.app[USER_CACHE_KEY].move_to_end(cache_key)
         else:
             tz = request.headers.get("X-Timezone", config.default_timezone)
             user_repo = UserRepo(db)
             user_id = await user_repo.get_or_create(telegram_id, lang, tz, config)
-            request.app["user_cache"][cache_key] = user_id
+            request.app[USER_CACHE_KEY][cache_key] = user_id
 
             # Simple LRU logic to prevent memory leaks
-            if len(request.app["user_cache"]) > 1000:
-                request.app["user_cache"].popitem(last=False)
+            if len(request.app[USER_CACHE_KEY]) > 1000:
+                request.app[USER_CACHE_KEY].popitem(last=False)
 
         request["telegram_id"] = telegram_id
         request["user_id"] = user_id
@@ -94,19 +102,19 @@ async def create_app(config: Config, db: aiosqlite.Connection, scheduler=None) -
         return await handler(request)
 
     app = web.Application(middlewares=[cors_middleware, auth_middleware])
-    app["config"] = config
-    app["db"] = db
-    app["scheduler"] = scheduler
-    app["user_cache"] = OrderedDict()  # (telegram_id, lang) -> user_id
+    app[CONFIG_KEY] = config
+    app[DB_KEY] = db
+    app[SCHEDULER_KEY] = scheduler
+    app[USER_CACHE_KEY] = OrderedDict()  # (telegram_id, lang) -> user_id
 
-    app["http_session"] = aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=15))
+    app[HTTP_SESSION_KEY] = aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=15))
 
     if config.gemini_api_key:
-        app["translator"] = Translator(config.gemini_api_key, config.gemini_model, app["http_session"])
+        app[TRANSLATOR_KEY] = Translator(config.gemini_api_key, config.gemini_model, app[HTTP_SESSION_KEY])
 
     async def on_shutdown(app: web.Application):
-        if "http_session" in app:
-            await app["http_session"].close()
+        if HTTP_SESSION_KEY in app:
+            await app[HTTP_SESSION_KEY].close()
 
     app.on_shutdown.append(on_shutdown)
 

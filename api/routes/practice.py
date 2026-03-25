@@ -3,6 +3,7 @@ import logging
 import aiosqlite
 from aiohttp import web
 
+from api.app_keys import CONFIG_KEY
 from core.srs import sm2
 from db.repository import UserRepo, WordRepo
 
@@ -22,7 +23,7 @@ def setup_routes_practice(app: web.Application, db: aiosqlite.Connection):
 
         user_repo = UserRepo(db)
         word_repo = WordRepo(db)
-        config = request.app["config"]
+        config = request.app[CONFIG_KEY]
         settings = await user_repo.get_user_settings(telegram_id, lang, config)
 
         # Remaining new words for today in user's timezone
@@ -63,7 +64,7 @@ def setup_routes_practice(app: web.Application, db: aiosqlite.Connection):
 
         # Record activity in user's timezone
         is_new = word["started_at"] is None
-        config = request.app["config"]
+        config = request.app[CONFIG_KEY]
         user_repo = UserRepo(db)
         settings = await user_repo.get_user_settings(telegram_id, word["language"], config)
         tz_name = settings.get("timezone", config.default_timezone)
@@ -97,7 +98,7 @@ def setup_routes_practice(app: web.Application, db: aiosqlite.Connection):
         word = await word_repo.get_word(word_id, user_id)
         if word:
             is_new = old_state.get("started_at") is None
-            config = request.app["config"]
+            config = request.app[CONFIG_KEY]
             user_repo = UserRepo(db)
             settings = await user_repo.get_user_settings(telegram_id, word["language"], config)
             tz_name = settings.get("timezone", config.default_timezone)

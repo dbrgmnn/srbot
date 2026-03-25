@@ -3,6 +3,7 @@ import logging
 import aiosqlite
 from aiohttp import web
 
+from api.app_keys import CONFIG_KEY, SCHEDULER_KEY
 from core.languages import LANGUAGES
 from core.scheduler import reschedule
 from db.repository import UserRepo, WordRepo
@@ -45,7 +46,7 @@ def setup_routes_settings(app: web.Application, db: aiosqlite.Connection):
         lang = request["language"]
         user_repo = UserRepo(db)
         word_repo = WordRepo(db)
-        config = request.app["config"]
+        config = request.app[CONFIG_KEY]
         settings = await user_repo.get_user_settings(telegram_id, lang, config)
         stats = await word_repo.get_full_stats(user_id, lang, tz_name=settings.get("timezone", "UTC"))
 
@@ -76,7 +77,7 @@ def setup_routes_settings(app: web.Application, db: aiosqlite.Connection):
         if "language" in body:
             new_lang = body["language"]
             if new_lang in LANGUAGES:
-                await user_repo.update_language(telegram_id, new_lang, request.app["config"])
+                await user_repo.update_language(telegram_id, new_lang, request.app[CONFIG_KEY])
                 lang = new_lang  # Use new lang for subsequent updates in this request
 
         if "timezone" in body:
@@ -91,7 +92,7 @@ def setup_routes_settings(app: web.Application, db: aiosqlite.Connection):
                     status=400,
                 )
 
-            config = request.app["config"]
+            config = request.app[CONFIG_KEY]
             if config.min_daily_limit <= limit <= config.max_daily_limit:
                 await user_repo.update_daily_limit(telegram_id, limit, lang)
             else:
@@ -106,10 +107,10 @@ def setup_routes_settings(app: web.Application, db: aiosqlite.Connection):
                     status=400,
                 )
 
-            config = request.app["config"]
+            config = request.app[CONFIG_KEY]
             if config.min_notify_interval <= interval <= config.max_notify_interval:
                 await user_repo.update_notification_interval(telegram_id, interval, lang)
-                scheduler = request.app["scheduler"]
+                scheduler = request.app[SCHEDULER_KEY]
                 if scheduler:
                     await reschedule(scheduler, db, config)
             else:
@@ -142,7 +143,7 @@ def setup_routes_settings(app: web.Application, db: aiosqlite.Connection):
 
             await user_repo.update_quiet_hours(telegram_id, quiet_start=quiet_start, quiet_end=quiet_end, language=lang)
 
-        config = request.app["config"]
+        config = request.app[CONFIG_KEY]
         settings = await user_repo.get_user_settings(telegram_id, lang, config)
         logger.info(f"User {telegram_id} updated settings for language '{lang}'")
         return web.json_response({"ok": True, "result": settings})

@@ -82,15 +82,14 @@ The following tools run automatically on every `git commit`:
 - **Pytest:** Local test suite for core logic.
 - **Sanity Checks:** Trailing whitespace, end-of-file consistency, and YAML validation.
 
-### Manual Usage
-You can run all checks manually on all files without committing:
-```bash
-# Run all hooks
-pre-commit run --all-files
+## 🚀 Deployment & CI/CD
+- **CI/CD:** Automated via GitHub Actions + Tailscale.
+- **Workflow:** Every push to `main` triggers an automated `pytest` suite. Upon success, the code is deployed to the Raspberry Pi via an encrypted SSH tunnel.
+- **Production:** Uses standard `systemd` with `SIGTERM` support for safe database shutdown during updates.
 
-# Run only Python ruff
-pre-commit run ruff --all-files
-```
+## 🏛 Architecture Standards
+- **App Keys:** Always use `AppKey` from `api/app_keys.py` for `aiohttp.web.Application` access (e.g., `app[CONFIG_KEY]`).
+- **Data Layer:** SQLite with `aiosqlite`. Use `db/models.py` for schema initialization.
 
 ## 🛠 User Guide
 

@@ -3,6 +3,7 @@ import logging
 import aiosqlite
 from aiohttp import web
 
+from api.app_keys import CONFIG_KEY
 from core.languages import LANGUAGES
 from db.repository import UserRepo, WordRepo
 
@@ -23,7 +24,7 @@ def setup_routes_init(app: web.Application, db: aiosqlite.Connection):
         user_repo = UserRepo(db)
         word_repo = WordRepo(db)
 
-        config = request.app["config"]
+        config = request.app[CONFIG_KEY]
         settings = await user_repo.get_user_settings(telegram_id, lang, config)
         tz = settings.get("timezone", "UTC")
         stats = await word_repo.get_full_stats(user_id, lang, tz_name=tz)
