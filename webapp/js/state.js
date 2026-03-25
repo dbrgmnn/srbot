@@ -67,11 +67,7 @@ class ObservableState {
     this._subscribers.get(key).push(callback);
 
     // Immediately call with current value if it exists
-    if (
-      key !== "*" &&
-      this._data[key] !== undefined &&
-      this._data[key] !== null
-    ) {
+    if (key !== "*" && this._data[key] !== undefined) {
       callback(this._data[key], null);
     }
 

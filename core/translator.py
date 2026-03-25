@@ -89,11 +89,9 @@ class Translator:
 
     async def translate_and_enrich(self, text: str, source_lang: str) -> dict | None:
         """Translate word and generate example + CEFR level via Gemini."""
-        lang_name = LANGUAGES.get(source_lang, {}).get("name", source_lang)
-
-        article_rule = (
-            "nouns: lowercase article + Capitalized noun (e.g. der Hund)." if source_lang == "de" else "lowercase."
-        )
+        lang_config = LANGUAGES.get(source_lang, {})
+        lang_name = lang_config.get("name", source_lang)
+        article_rule = lang_config.get("lex_rules", "lowercase.")
 
         system_prompt = f"""You are an expert lexicographer.
 Translate words from word:{lang_name} into translation:Russian or translation:Russian to word:{lang_name}.

@@ -532,7 +532,7 @@ class WordRepo:
         """Retrieve a word by its term (case-insensitive)."""
         cursor = await self.db.execute(
             """SELECT id, word, translation, example, level FROM words
-               WHERE user_id = ? AND language = ? AND LOWER(word) = LOWER(?)""",
+               WHERE user_id = ? AND language = ? AND word = ?""",
             (user_id, language, word),
         )
         row = await cursor.fetchone()

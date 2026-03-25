@@ -43,7 +43,7 @@ async def init_db(db_path: str = "srbot.db") -> aiosqlite.Connection:
         CREATE TABLE IF NOT EXISTS words (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER NOT NULL,
-            word TEXT NOT NULL,
+            word TEXT NOT NULL COLLATE NOCASE,
             translation TEXT NOT NULL,
             language TEXT NOT NULL,
             example TEXT,
@@ -77,6 +77,7 @@ async def init_db(db_path: str = "srbot.db") -> aiosqlite.Connection:
     await db.execute("CREATE INDEX IF NOT EXISTS idx_words_user_lang_rep ON words (user_id, language, repetitions)")
     await db.execute("CREATE INDEX IF NOT EXISTS idx_words_user_lang ON words (user_id, language)")
     await db.execute("CREATE INDEX IF NOT EXISTS idx_words_started_at ON words (user_id, started_at)")
+    await db.execute("CREATE INDEX IF NOT EXISTS idx_words_user_lang_word ON words (user_id, language, word)")
 
     await db.commit()
     return db
