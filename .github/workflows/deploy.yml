@@ -27,7 +27,7 @@ jobs:
       - name: Tailscale
         uses: tailscale/github-action@v2
         with:
-          auth-key: ${{ secrets.TS_AUTH_KEY }}
+          authkey: ${{ secrets.TS_AUTH_KEY }}
 
       - name: SSH to RPi
         uses: appleboy/ssh-action@master
