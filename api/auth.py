@@ -1,9 +1,12 @@
 import hashlib
 import hmac
+import logging
 import time
 from urllib.parse import parse_qsl
 
 from db.repository import UserRepo
+
+logger = logging.getLogger(__name__)
 
 
 def verify_init_data(init_data: str, bot_token: str, expires_in: int) -> dict | None:
@@ -11,6 +14,7 @@ def verify_init_data(init_data: str, bot_token: str, expires_in: int) -> dict | 
     params = dict(parse_qsl(init_data, keep_blank_values=True))
     received_hash = params.pop("hash", None)
     if not received_hash:
+        logger.warning("No hash in init_data")
         return None
 
     # auth_date is a Unix timestamp in seconds
@@ -18,8 +22,10 @@ def verify_init_data(init_data: str, bot_token: str, expires_in: int) -> dict | 
     try:
         auth_date = int(auth_date_raw)
     except (TypeError, ValueError):
+        logger.warning("Invalid auth_date format")
         return None
     if time.time() - auth_date > expires_in:
+        logger.warning(f"init_data expired: {time.time() - auth_date}s > {expires_in}s")
         return None
 
     # Build data-check-string per Telegram spec
@@ -29,6 +35,7 @@ def verify_init_data(init_data: str, bot_token: str, expires_in: int) -> dict | 
     expected_hash = hmac.new(secret_key, data_check.encode(), hashlib.sha256).hexdigest()
 
     if not hmac.compare_digest(expected_hash, received_hash):
+        logger.warning("HMAC signature mismatch")
         return None
 
     return params
