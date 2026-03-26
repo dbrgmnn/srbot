@@ -5,6 +5,7 @@ import logging
 import aiosqlite
 from aiohttp import web
 
+from api.app_keys import TRANSLATOR_KEY
 from api.auth import verify_bearer_token
 from core.languages import LANGUAGES
 from db.repository import WordRepo
@@ -81,7 +82,7 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
             )
 
         # Call Gemini for translation and enrichment
-        translator = request.app.get("translator")
+        translator = request.app.get(TRANSLATOR_KEY)
         if not translator:
             return web.json_response({"ok": False, "error": "no_gemini_api_key_or_translator"}, status=400)
 
