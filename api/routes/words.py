@@ -95,7 +95,7 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         if not ai_data:
             return web.json_response({"ok": False, "error": "ai_service_unavailable"}, status=503)
 
-        if ai_data.get("is_valid") is False:
+        if not ai_data.get("is_valid", True):
             return web.json_response({"ok": False, "error": "word_not_recognized"}, status=422)
 
         word = ai_data["word"]

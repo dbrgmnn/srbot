@@ -310,12 +310,9 @@ function _fillSettingsFromState() {
   const langDisplay = document.getElementById("language-display");
   if (langDisplay && s.language) {
     const meta = getLanguages()[s.language];
-    let label = s.language.toUpperCase();
-    if (meta) {
-      label = `${meta.flag} ${meta.name}`;
-      if (meta.word_count !== undefined) label += ` (${meta.word_count})`;
-    }
-    langDisplay.textContent = label;
+    langDisplay.textContent = meta
+      ? `${meta.flag} ${meta.name}`
+      : s.language.toUpperCase();
   }
 }
 
@@ -364,21 +361,14 @@ export async function loadSettings() {
   initSubscriptions();
   _fillSettingsFromState();
   try {
-    const [settingsResp, tokenResp] = await Promise.all([
-      GET("/api/settings"),
-      GET("/api/settings/token"),
-    ]);
-
-    const s = settingsResp.result;
+    const tokenResp = await GET("/api/settings/token");
     currentToken = tokenResp.result.token;
 
-    // Automatic sync timezone
+    // Auto-sync timezone from device
     const deviceTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    if (deviceTz && s.timezone !== deviceTz) {
+    if (deviceTz && state.currentSettings?.timezone !== deviceTz) {
       await saveSetting("timezone", deviceTz, false);
     }
-
-    state.currentSettings = s; // triggers _fillSettingsFromState through subscription
   } catch (e) {
     console.error(e);
   }
@@ -390,19 +380,8 @@ export async function saveSetting(key, val, showToast = true) {
     const res = await POST("/api/settings", body);
     if (showToast) toast(T.SAVED, "success");
 
-    // Optimization: Update state locally to trigger subscriptions immediately
-    const updatedSettings = { ...state.currentSettings, ...body };
-    state.currentSettings = updatedSettings;
-
-    // If these settings change, we need new stats
-    if (
-      key === "practice_mode" ||
-      key === "daily_limit" ||
-      key === "timezone"
-    ) {
-      // stats will be reloaded via loadHome if needed,
-      // but we can just wait for the next loadHome call from subscription
-    }
+    // Update state locally to trigger subscriptions immediately
+    state.currentSettings = { ...state.currentSettings, ...body };
   } catch (e) {
     if (showToast) toast(T.SAVE_FAIL, "error");
   }
@@ -413,10 +392,8 @@ export async function saveSetting(key, val, showToast = true) {
 export async function switchLanguage(lang) {
   if (state.currentLang === lang) return;
   try {
-    setLanguage(lang);
+    setLanguage(lang); // triggers currentLang subscription → loadHome()
     await POST("/api/settings", { language: lang });
-    // Update settings object to trigger subscriptions
-    state.currentSettings = { ...state.currentSettings, language: lang };
     toast(T.LANG_SWITCHED(lang.toUpperCase()), "success");
   } catch (e) {
     toast(T.LANG_FAIL, "error");
