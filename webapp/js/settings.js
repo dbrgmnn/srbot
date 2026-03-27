@@ -115,10 +115,12 @@ function _openLimitPicker() {
   for (let i = state.min_daily_limit; i <= state.max_daily_limit; i += 5) {
     options.push({ value: i.toString(), label: i.toString() });
   }
-  const currentVal = document.getElementById("set-limit-val").textContent;
+
+  const currentVal = String(state.currentSettings?.daily_limit || "");
+
   _showPickerSheet("New words limit", options, currentVal, (val) => {
     if (val === currentVal) return;
-    document.getElementById("set-limit-val").textContent = val;
+    document.getElementById("set-limit-val").textContent = `${val} words`;
     saveSetting("daily_limit", parseInt(val));
   });
 }
@@ -138,9 +140,11 @@ function _openIntervalPicker() {
   );
 
   const intervalEl = document.getElementById("set-notify-interval");
-  const currentVal =
-    intervalEl.dataset.value ||
-    String(Math.floor(state.max_notify_interval / 2));
+  const currentVal = String(
+    state.currentSettings?.notification_interval_minutes ||
+      intervalEl.dataset.value ||
+      "",
+  );
 
   _showPickerSheet("Notification frequency", options, currentVal, (val) => {
     if (val === currentVal) return;
