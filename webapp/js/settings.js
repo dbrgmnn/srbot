@@ -412,14 +412,34 @@ export function setPracticeMode(mode) {
 
 /** --- Delete All Words (Safe Confirmation) --- */
 
+let _deleteConfirmStr = "";
+
 export function openDeleteAllSheet() {
   const input = document.getElementById("delete-confirm-input");
   const btn = document.getElementById("btn-delete-all-confirm");
-  const lang = state.currentLang ? state.currentLang.toUpperCase() : "current";
-
-  // Dynamic label in the sheet
+  const info = document.getElementById("delete-all-info");
   const titleEl = document.querySelector("#delete-all-sheet .edit-sheet-title");
-  if (titleEl) titleEl.textContent = `Clear ${lang} Dictionary`;
+
+  const langCode = state.currentLang;
+  const langMeta = (state.languages || {})[langCode];
+  const count = langMeta ? langMeta.word_count || 0 : 0;
+  const flag = langMeta ? langMeta.flag : "";
+  const langName = langMeta ? langMeta.name : langCode.toUpperCase();
+
+  _deleteConfirmStr = `delete ${count}`;
+
+  if (titleEl) {
+    titleEl.textContent =
+      `Clear ${flag} ${langName} (${count}) Dictionary`.trim();
+  }
+
+  if (info) {
+    info.innerHTML = `
+      This will permanently delete ALL words in your <b>active dictionary</b>.
+      This action cannot be undone.<br /><br />
+      To confirm, type <b>${_deleteConfirmStr}</b> below:
+    `;
+  }
 
   input.value = "";
   btn.classList.add("is-disabled");
@@ -433,7 +453,6 @@ export function openDeleteAllSheet() {
 export function closeDeleteAllSheet() {
   document.getElementById("delete-all-overlay").classList.remove("open");
   document.getElementById("delete-all-sheet").classList.remove("open");
-  // Reset state immediately on close
   document.getElementById("delete-confirm-input").value = "";
   document
     .getElementById("btn-delete-all-confirm")
@@ -443,8 +462,7 @@ export function closeDeleteAllSheet() {
 
 window.onDeleteAllInput = (val) => {
   const btn = document.getElementById("btn-delete-all-confirm");
-  // Exact match required (no trim to react on extra spaces)
-  const isMatch = val.toLowerCase() === "delete all";
+  const isMatch = val.trim().toLowerCase() === _deleteConfirmStr.toLowerCase();
 
   if (isMatch && btn.classList.contains("is-disabled")) {
     tg.HapticFeedback.selectionChanged();
@@ -454,7 +472,8 @@ window.onDeleteAllInput = (val) => {
 
 window.executeDeleteAll = async () => {
   const input = document.getElementById("delete-confirm-input");
-  if (input.value.toLowerCase() !== "delete all") return;
+  if (input.value.trim().toLowerCase() !== _deleteConfirmStr.toLowerCase())
+    return;
 
   try {
     await DEL("/api/words/all");
@@ -463,9 +482,11 @@ window.executeDeleteAll = async () => {
     tg.HapticFeedback.notificationOccurred("success");
     toast(T.CLEARED, "success");
 
-    // Refresh UI
-    setTimeout(() => location.reload(), 1500);
+    // Refresh settings data from server (updates word counts in state)
+    const { loadHome } = await import("./ui.js");
+    await loadHome();
   } catch (e) {
+    console.error("Delete all error:", e);
     toast(T.CLEAR_FAIL, "error");
   }
 };

@@ -660,6 +660,7 @@
     <div id="delete-all-sheet" class="edit-sheet">
       <div class="edit-sheet-title">Clear Dictionary</div>
       <div
+        id="delete-all-info"
         style="
           text-align: center;
           color: var(--text-secondary);
@@ -669,14 +670,13 @@
         "
       >
         This will permanently delete ALL words in your <b>active dictionary</b>.
-        This action cannot be undone.<br /><br />
-        To confirm, type <b>delete all</b> below:
+        This action cannot be undone.
       </div>
       <input
         type="text"
         id="delete-confirm-input"
         class="form-input"
-        placeholder="type 'delete all' here"
+        placeholder="Type to delete..."
         oninput="onDeleteAllInput(this.value)"
         autocomplete="off"
       />
@@ -685,7 +685,7 @@
         class="btn btn-destructive is-disabled"
         onclick="executeDeleteAll()"
       >
-        Delete Everything
+        Delete
       </button>
       <button class="btn btn-secondary" onclick="closeDeleteAllSheet()">
         Cancel
