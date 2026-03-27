@@ -422,7 +422,7 @@ export function openDeleteAllSheet() {
 
   const langCode = state.currentLang;
   const langMeta = (state.languages || {})[langCode];
-  const count = langMeta ? langMeta.word_count || 0 : 0;
+  const count = state.currentStats ? state.currentStats.total || 0 : 0;
   const flag = langMeta ? langMeta.flag : "";
   const langName = langMeta ? langMeta.name : langCode.toUpperCase();
 
@@ -430,7 +430,7 @@ export function openDeleteAllSheet() {
 
   if (titleEl) {
     titleEl.textContent =
-      `Clear ${flag} ${langName} (${count}) Dictionary`.trim();
+      `Clear ${flag} ${langName} ${count} Dictionary`.trim();
   }
 
   if (info) {
