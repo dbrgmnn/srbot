@@ -415,14 +415,15 @@ class WordRepo:
         translation: str,
         example: str | None,
         level: str | None,
-    ):
-        """Update the text, translation, example, or level of a word."""
-        await self.db.execute(
+    ) -> bool:
+        """Update the text, translation, example, or level of a word. Returns True if successful."""
+        cursor = await self.db.execute(
             """UPDATE words SET word = ?, translation = ?, example = ?, level = ?
                WHERE id = ? AND user_id = ?""",
             (word, translation, example, level, word_id, user_id),
         )
         await self.db.commit()
+        return cursor.rowcount > 0
 
     async def delete_all_words(self, user_id: int, language: str = None):
         """Delete all words for a user, optionally filtered by language."""

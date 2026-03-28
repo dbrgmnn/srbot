@@ -208,6 +208,12 @@ export async function saveEdit() {
     closeEdit();
     toast(T.WORD_SAVED, "success");
     state.currentStats = null;
+
+    // Refresh search results to show the updated word
+    const searchInput = document.getElementById("search-input");
+    if (searchInput && searchInput.value) {
+      loadSearch(searchInput.value);
+    }
   } catch (e) {
     toast(e.message === "409" ? T.WORD_DUPLICATE : T.WORD_SAVE_FAIL, "error");
   } finally {

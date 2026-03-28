@@ -172,7 +172,9 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         level = (body.get("level") or "").strip() or None
         word_repo = WordRepo(db)
         try:
-            await word_repo.update_word_text(word_id, user_id, word, translation, example, level)
+            success = await word_repo.update_word_text(word_id, user_id, word, translation, example, level)
+            if not success:
+                return web.json_response({"ok": False, "error": "not_found"}, status=404)
             logger.info(f"User {telegram_id} updated word {word_id}: '{word}'")
         except aiosqlite.IntegrityError:
             return web.json_response({"ok": False, "error": "duplicate"}, status=409)
