@@ -32,7 +32,7 @@ from db.repository import UserRepo
 
 logger = logging.getLogger(__name__)
 
-WEBAPP_DIR = Path(__file__).parent.parent / "webapp"
+WEBAPP_DIR = Path(__file__).parent.parent / "static"
 
 
 async def create_app(config: Config, db: aiosqlite.Connection, scheduler=None) -> web.Application:

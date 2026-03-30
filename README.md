@@ -42,7 +42,7 @@ srbot/
 ├── db/
 │   ├── models.py        # SQLite schema (users, user_settings, words, daily_stats)
 │   └── repository.py    # All DB queries (UserRepo, WordRepo)
-├── webapp/
+├── static/
 │   ├── index.html       # Single-page app shell
 │   ├── css/style.css    # Unified design system, Glass-morphism, Skeletons
 │   └── js/
@@ -78,7 +78,7 @@ The project uses a modern automated linting and testing pipeline to ensure code 
 ### Automated Checks
 The following tools run automatically on every `git commit`:
 - **Ruff:** Ultra-fast Python linter and formatter (replaces flake8, isort, black).
-- **Prettier:** Standard formatter for `webapp/` (JS, CSS, HTML).
+- **Prettier:** Standard formatter for `static/` (JS, CSS, HTML).
 - **Pytest:** Local test suite for core logic.
 - **Sanity Checks:** Trailing whitespace, end-of-file consistency, and YAML validation.
 

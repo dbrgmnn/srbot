@@ -41,7 +41,7 @@ class IntegrityHTMLParser(HTMLParser):
 
 
 def get_webapp_path():
-    return os.path.join(os.path.dirname(__file__), "..", "webapp")
+    return os.path.join(os.path.dirname(__file__), "..", "static")
 
 
 def test_html_validity_and_ids():
