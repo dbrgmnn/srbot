@@ -50,7 +50,7 @@ def load_config() -> Config:
         db_path=os.getenv("DB_PATH"),
         api_port=int(os.getenv("API_PORT", "8080")),
         gemini_api_key=os.getenv("GEMINI_API_KEY"),
-        gemini_model=os.getenv("GEMINI_MODEL", "gemini-2.0-flash-lite-preview-02-05"),
+        gemini_model=os.getenv("GEMINI_MODEL", "gemini-2.5-flash-lite"),
         token_expiry=int(os.getenv("TOKEN_EXPIRY", "3600")),
         min_daily_limit=int(os.getenv("MIN_DAILY_LIMIT", "5")),
         max_daily_limit=int(os.getenv("MAX_DAILY_LIMIT", "50")),
