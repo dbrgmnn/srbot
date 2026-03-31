@@ -3,9 +3,8 @@
 A minimalist Telegram Mini App for learning foreign vocabulary using Spaced Repetition (SM-2 algorithm). Designed for personal use on a Raspberry Pi Zero 2W, accessed via Tailscale Funnel.
 
 ### Native Telegram Integration
-- **SettingsButton:** Native Telegram entry point for app configuration.
-- **Haptic Patterns:** Advanced tactical feedback (Success/Error/Warning/Selection) for a premium feel.
-- **Native UI:** Telegram-style SnackBars (Pill design) and native Popups for session results.
+- **Haptic Patterns:** Advanced haptic feedback (Success/Error/Warning/Selection) for a premium feel.
+- **Native UI:** Telegram-style Pill notifications and native Popups for session results.
 - **Visual Rewards:** Lightweight Canvas confetti effect upon session completion.
 - **Skeleton Screens:** Smooth loading experience using pulsing CSS placeholders.
 
@@ -33,7 +32,7 @@ srbot/
 │       └── words.py     # Word dictionary operations
 ├── core/
 │   ├── bot_handlers.py  # /start command and WebApp entry point
-│   ├── languages.py     # Supported languages (EN, DE) with flags and TTS codes
+│   ├── languages.py     # Supported languages (DE, EN) with flags and TTS codes
 │   ├── logger.py        # Custom ANSI color logger
 │   ├── scheduler.py     # APScheduler notification job
 │   ├── scheduler_utils.py# Quiet hours and notification text utilities
@@ -45,25 +44,26 @@ srbot/
 ├── static/
 │   ├── index.html       # Single-page app shell
 │   ├── css/style.css    # Unified design system, Glass-morphism, Skeletons
-│   └── js/
-│       ├── api.js       # HTTP client, auth headers, shared state access
-│       ├── app.js       # Entry point, theme detection, global haptics
-│       ├── dictionary.js# Word management (search, edit, delete)
-│       ├── practice.js  # SRS Session logic, Swipe engine, Confetti
-│       ├── settings.js  # Universal picker, CSV import/export, auto-save
-│       ├── state.js     # Observable state management (Proxy-based)
-│       ├── toast.js     # Native-style Pill notifications
-│       └── ui.js        # Reactive screen management and statistics rendering
+│       └── js/
+│           ├── api.js       # HTTP client, auth headers, shared state access
+│           ├── app.js       # Entry point, theme detection, global haptics
+│           ├── dictionary.js# Word management (search, edit, delete)
+│           ├── practice.js  # SRS Session logic, Swipe engine, Confetti
+│           ├── settings.js  # Universal picker, quiet hours, token management
+│           ├── state.js     # Observable state management (Proxy-based)
+│           ├── toast.js     # Native-style Pill notifications
+│           ├── ui.js        # Reactive screen management and statistics rendering
+│           └── utils.js     # Scroll lock utilities
 ├── tests/
 │   ├── test_scheduler.py   # Tests for scheduler utilities (quiet hours)
 │   ├── test_srs.py         # Automated tests for the SRS algorithm
 │   └── test_ui_integrity.py# Tests for HTML/JS references and structure
-└── update.sh            # Secure deploy script with pre-deployment testing
+└── update.sh            # Deploy script: git pull, pip install, systemd restart
 ```
 
 ## 🚀 Quick Start
 
-1. Create `.env` from `.env.example` and fill in `BOT_TOKEN`, `ALLOWED_USERS`, `GEMINI_API_KEY`, and `GEMINI_MODEL`.
+1. Create `.env` from `.env.example` and fill in `BOT_TOKEN`, `ALLOWED_USERS`, `WEBAPP_URL`, `GEMINI_API_KEY`, and `GEMINI_MODEL`.
 2. Install dependencies: `pip install -r requirements.txt`
 3. Run: `python main.py`
 
@@ -84,7 +84,8 @@ The following tools run automatically on every `git commit`:
 
 ## 🚀 Deployment & CI/CD
 - **CI/CD:** Automated via GitHub Actions + Tailscale.
-- **Workflow:** Every push to `main` triggers an automated `pytest` suite. Upon success, the code is deployed to the Raspberry Pi via an encrypted SSH tunnel.
+- **Workflow:** Every push to `main` runs `pre-commit run --all-files` (Ruff + Prettier + Pytest). Upon success, the code is deployed to the Raspberry Pi via an encrypted SSH tunnel (Tailscale IP).
+- **On-device update:** `update.sh` does `git reset --hard`, conditional `pip install`, then `systemctl restart srbot`.
 - **Production:** Uses standard `systemd` with `SIGTERM` support for safe database shutdown during updates.
 
 ## 🏛 Architecture Standards
@@ -105,13 +106,14 @@ The following tools run automatically on every `git commit`:
 - **Undo button** — reverts last grade
 - **Completion:** Statistics shown as colored numbers in a Pill toast + Confetti.
 
-### Settings (Accessible via Native Telegram Menu)
+### Settings (In-app screen)
 - **Active Dictionary** — switch between supported languages (DE/EN)
 - **Practice Mode** — Word→Translation or Translation→Word
 - **New words limit** — daily cap for new cards
 - **Frequency** — notification interval
+- **Quiet Hours** — suppress notifications during a configurable time range
 - **API Token** — generate or revoke a Bearer token for adding words via the `/api/external/words` external API.
-- **Import / Export** — CSV management and dictionary backup.
+- **Export** — share or copy dictionary as CSV.
 
 ## ⚙️ Tech Stack
 - **Backend:** Python 3.11+, aiohttp, aiosqlite, aiogram 3.x, pytest
