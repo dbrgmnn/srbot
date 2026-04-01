@@ -111,8 +111,25 @@
         </div>
         <div class="card-sep"></div>
 
-        <div class="skeleton skeleton-bar" style="margin-top: 10px"></div>
-        <div class="week-grid" id="week-grid"></div>
+        <div
+          class="today-stats"
+          style="
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            font-size: 14px;
+            color: var(--text-secondary);
+          "
+        >
+          <div>
+            Learned today:
+            <b id="stat-today-reviewed" style="color: var(--text-primary)">0</b>
+          </div>
+          <div>
+            Added today:
+            <b id="stat-today-added" style="color: var(--text-primary)">0</b>
+          </div>
+        </div>
       </div>
 
       <button id="btn-practice" class="btn" onclick="startPractice()">

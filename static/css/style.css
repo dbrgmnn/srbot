@@ -279,57 +279,6 @@ body.no-nav {
   background: var(--row-divider);
   margin: 16px 0;
 }
-.week-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 10px;
-}
-.week-day-column {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-}
-.week-cell {
-  width: 100%;
-  aspect-ratio: 1;
-  border-radius: var(--radius-sm);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--cell-bg);
-  border: 1px solid transparent;
-}
-.week-cell.wc-lvl-1 {
-  background: rgba(48, 209, 88, 0.08);
-  border-color: rgba(48, 209, 88, 0.1);
-}
-.week-cell.wc-lvl-2 {
-  background: rgba(48, 209, 88, 0.18);
-  border-color: rgba(48, 209, 88, 0.15);
-}
-.week-cell.wc-lvl-3 {
-  background: rgba(48, 209, 88, 0.3);
-  border-color: rgba(48, 209, 88, 0.2);
-}
-
-.week-cell.wc-today {
-  border-color: rgba(48, 209, 88, 0.55);
-}
-.week-cell-num {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--text);
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
-}
-.week-cell-day {
-  font-size: 8px;
-  color: var(--hint);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  opacity: 0.7;
-}
 
 .text-new {
   color: var(--color-new);
@@ -816,7 +765,7 @@ body.no-nav {
 .loading .progress-total,
 .loading .progress-bar,
 .loading .progress-legend,
-.loading .week-grid {
+.loading .today-stats {
   display: none;
 }
 .not-loading .skeleton {

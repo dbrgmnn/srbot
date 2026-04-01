@@ -62,14 +62,7 @@ def setup_routes_practice(app: web.Application, db: aiosqlite.Connection):
         except (ValueError, TypeError):
             return web.json_response({"ok": False, "error": "invalid_grade"}, status=400)
 
-        # Record activity in user's timezone
         is_new = word["started_at"] is None
-        config = request.app[CONFIG_KEY]
-        user_repo = UserRepo(db)
-        settings = await user_repo.get_user_settings(telegram_id, word["language"], config)
-        tz_name = settings.get("timezone", config.default_timezone)
-
-        await word_repo.increment_daily_stat(user_id, word["language"], is_new, tz_name)
 
         await word_repo.update_word_after_review(
             user_id=user_id,
@@ -99,13 +92,6 @@ def setup_routes_practice(app: web.Application, db: aiosqlite.Connection):
         word = await word_repo.get_word(word_id, user_id)
         if not word:
             return web.json_response({"ok": False, "error": "not_found"}, status=404)
-
-        is_new = old_state.get("started_at") is None
-        config = request.app[CONFIG_KEY]
-        user_repo = UserRepo(db)
-        settings = await user_repo.get_user_settings(telegram_id, word["language"], config)
-        tz_name = settings.get("timezone", config.default_timezone)
-        await word_repo.decrement_daily_stat(user_id, word["language"], is_new, tz_name)
 
         await word_repo.undo_word_review(
             user_id=user_id,

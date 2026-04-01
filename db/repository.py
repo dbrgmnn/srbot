@@ -372,6 +372,8 @@ class WordRepo:
                     SUM(CASE WHEN started_at IS NULL THEN 1 ELSE 0 END) as new,
                     SUM(CASE WHEN started_at IS NOT NULL AND next_review <= ? THEN 1 ELSE 0 END) as due,
                     COUNT(CASE WHEN started_at >= ? THEN 1 END) as today_new,
+                    COUNT(CASE WHEN created_at >= ? THEN 1 END) as today_added,
+                    COUNT(CASE WHEN last_reviewed_at >= ? THEN 1 END) as today_reviewed,
                     COUNT(CASE WHEN started_at IS NULL THEN 1 END) as st_new,
                     COUNT(CASE WHEN started_at IS NOT NULL AND interval < 5 THEN 1 END) as st_learning,
                     COUNT(CASE WHEN interval >= 5 AND interval < 30 THEN 1 END) as st_known,
@@ -380,6 +382,8 @@ class WordRepo:
                 FROM words WHERE user_id = ? AND language = ?""",
             (
                 now_utc.isoformat(),
+                today_start_utc.isoformat(),
+                today_start_utc.isoformat(),
                 today_start_utc.isoformat(),
                 now_utc.isoformat(),
                 user_id,
@@ -394,6 +398,8 @@ class WordRepo:
             "new": 0,
             "due": 0,
             "today_new": 0,
+            "today_added": 0,
+            "today_reviewed": 0,
             "st_new": 0,
             "st_learning": 0,
             "st_known": 0,
@@ -477,57 +483,6 @@ class WordRepo:
         )
         row = await cursor.fetchone()
         return dict(row) if row else None
-
-    async def decrement_daily_stat(self, user_id: int, language: str, is_new: bool, tz_name: str = "UTC"):
-        """Decrement the daily learning/review count for a user."""
-        tz = _safe_zoneinfo(tz_name, "UTC")
-        local_now = datetime.now(tz=UTC).astimezone(tz)
-        day_str = local_now.strftime("%Y-%m-%d")
-        col = "new_count" if is_new else "review_count"
-        await self.db.execute(
-            f"""UPDATE daily_stats SET {col} = MAX(0, {col} - 1)
-                WHERE user_id = ? AND language = ? AND day = ?""",
-            (user_id, language, day_str),
-        )
-        await self.db.commit()
-
-    async def increment_daily_stat(self, user_id: int, language: str, is_new: bool, tz_name: str = "UTC"):
-        """Increment the daily learning/review count for a user."""
-        tz = _safe_zoneinfo(tz_name, "UTC")
-        local_now = datetime.now(tz=UTC).astimezone(tz)
-        day_str = local_now.strftime("%Y-%m-%d")
-
-        col = "new_count" if is_new else "review_count"
-        await self.db.execute(
-            f"""INSERT INTO daily_stats (user_id, language, day, {col})
-                VALUES (?, ?, ?, 1)
-                ON CONFLICT(user_id, language, day)
-                DO UPDATE SET {col} = {col} + 1""",
-            (user_id, language, day_str),
-        )
-        await self.db.commit()
-
-    async def get_activity_heatmap(
-        self, user_id: int, language: str, days: int = 91, tz_name: str = "UTC"
-    ) -> list[dict]:
-        """Get activity data for a heatmap visualization."""
-        tz = _safe_zoneinfo(tz_name, "UTC")
-        local_now = datetime.now(tz=UTC).astimezone(tz)
-        cutoff_local = local_now - timedelta(days=days)
-        cutoff_day = cutoff_local.strftime("%Y-%m-%d")
-
-        cursor = await self.db.execute(
-            """
-            SELECT day, (new_count + review_count) as count
-            FROM daily_stats
-            WHERE user_id = ? AND language = ?
-              AND day >= ?
-            ORDER BY day ASC
-            """,
-            (user_id, language, cutoff_day),
-        )
-        rows = await cursor.fetchall()
-        return [{"date": row["day"], "count": row["count"]} for row in rows]
 
     async def get_word_by_text(self, user_id: int, language: str, word: str) -> dict | None:
         """Retrieve a word by its term (case-insensitive)."""

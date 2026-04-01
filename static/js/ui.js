@@ -82,67 +82,6 @@ function updateCountdowns() {
   }
 }
 
-/** --- Week Activity --- */
-
-function renderWeek(data) {
-  const DAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
-
-  // Build lookup: date string → count
-  const lookup = {};
-  data.forEach(({ date, count }) => {
-    lookup[date] = count;
-  });
-
-  const grid = document.getElementById("week-grid");
-  if (!grid) return;
-  grid.innerHTML = "";
-
-  const today = new Date();
-  // todayKey to identify the current day cell
-  const todayKey = `${today.getFullYear()}-${String(
-    today.getMonth() + 1,
-  ).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
-
-  // Last 7 days: i=0 → 6 days ago, i=6 → today
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(today);
-    d.setDate(d.getDate() - 6 + i);
-    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(
-      2,
-      "0",
-    )}-${String(d.getDate()).padStart(2, "0")}`;
-    const count = lookup[key] || 0;
-    const isToday = key === todayKey;
-
-    const col = document.createElement("div");
-    col.className = "week-day-column";
-
-    const dayEl = document.createElement("div");
-    dayEl.className = "week-cell-day";
-    dayEl.textContent = DAYS[d.getDay()];
-
-    const cell = document.createElement("div");
-    const classes = ["week-cell"];
-    if (count > 0) {
-      if (count <= 5) classes.push("wc-lvl-1");
-      else if (count <= 15) classes.push("wc-lvl-2");
-      else classes.push("wc-lvl-3");
-    }
-    if (isToday) classes.push("wc-today");
-    cell.className = classes.join(" ");
-
-    const num = document.createElement("div");
-    num.className = "week-cell-num";
-    num.textContent = count > 0 ? count : "0";
-
-    cell.appendChild(num);
-    col.appendChild(dayEl);
-    col.appendChild(cell);
-
-    grid.appendChild(col);
-  }
-}
-
 /** --- State Subscriptions --- */
 
 function initSubscriptions() {
@@ -211,6 +150,13 @@ function renderStats() {
   const elTotal = document.getElementById("count-total");
   if (elTotal) elTotal.textContent = total;
 
+  const statTodayReviewed = document.getElementById("stat-today-reviewed");
+  if (statTodayReviewed)
+    statTodayReviewed.textContent = stats.today_reviewed || 0;
+
+  const statTodayAdded = document.getElementById("stat-today-added");
+  if (statTodayAdded) statTodayAdded.textContent = stats.today_added || 0;
+
   // Bar widths
   const pct = (n) => (total > 0 ? `${((n / total) * 100).toFixed(1)}%` : "0%");
   const barNew = document.getElementById("bar-new");
@@ -270,8 +216,6 @@ export async function loadHome() {
     if (!countdownInterval) {
       countdownInterval = setInterval(updateCountdowns, 30000);
     }
-
-    renderWeek(init.heatmap || []);
   } catch (e) {
     console.error("LoadHome failed", e);
   }
