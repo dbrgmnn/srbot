@@ -72,12 +72,7 @@ async function _openLanguagePicker() {
         ? `${meta.flag} ${meta.name} ${meta.word_count}`
         : `${meta.flag} ${meta.name}`,
   }));
-  _showPickerSheet(
-    "Active Dictionary",
-    options,
-    state.currentLang,
-    switchLanguage,
-  );
+  _showPickerSheet("", options, state.currentLang, switchLanguage);
 }
 
 function _openPracticeModePicker() {
@@ -85,12 +80,7 @@ function _openPracticeModePicker() {
     value,
     label,
   }));
-  _showPickerSheet(
-    "Practice Mode",
-    options,
-    state.practiceMode,
-    setPracticeMode,
-  );
+  _showPickerSheet("", options, state.practiceMode, setPracticeMode);
 }
 
 function _openLevelPicker(context) {
@@ -102,7 +92,7 @@ function _openLevelPicker(context) {
     })),
   ];
   const currentVal = document.getElementById(`${context}-level`).value;
-  _showPickerSheet("Select Level", options, currentVal, (val) => {
+  _showPickerSheet("", options, currentVal, (val) => {
     document.getElementById(`${context}-level`).value = val;
     const displaySpan = document.getElementById(`${context}-level-display`);
     displaySpan.textContent = val || "Level";
@@ -118,7 +108,7 @@ function _openLimitPicker() {
 
   const currentVal = String(state.currentSettings?.daily_limit || "");
 
-  _showPickerSheet("New words limit", options, currentVal, (val) => {
+  _showPickerSheet("", options, currentVal, (val) => {
     if (val === currentVal) return;
     document.getElementById("set-limit-val").textContent = `${val} words`;
     saveSetting("daily_limit", parseInt(val));
@@ -146,7 +136,7 @@ function _openIntervalPicker() {
       "",
   );
 
-  _showPickerSheet("Notification frequency", options, currentVal, (val) => {
+  _showPickerSheet("", options, currentVal, (val) => {
     if (val === currentVal) return;
     _renderIntervalEl(intervalEl, parseInt(val));
     saveSetting("notification_interval_minutes", parseInt(val));
@@ -428,16 +418,12 @@ export function openDeleteAllSheet() {
 
   _deleteConfirmStr = `delete ${count}`;
 
-  if (titleEl) {
-    titleEl.textContent =
-      `Clear ${flag} ${langName} ${count} Dictionary`.trim();
-  }
+  if (titleEl) titleEl.textContent = "Erase Data";
 
   if (info) {
     info.innerHTML = `
-      This will permanently delete ALL words in your <b>active dictionary</b>.
-      This action cannot be undone.<br /><br />
-      To confirm, type <b>${_deleteConfirmStr}</b> below:
+      All words and progress will be lost.<br /><br />
+      Type <b>${_deleteConfirmStr}</b> to confirm:
     `;
   }
 

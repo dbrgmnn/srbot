@@ -470,32 +470,34 @@
           <div class="picker-trigger-arrow">›</div>
         </div>
 
-        <div
-          class="settings-row"
-          onclick="document.getElementById('csv-input').click()"
-        >
-          <div class="settings-row-left">
-            <div class="settings-icon settings-icon-api">
-              <svg class="u-svg-md"><use href="#icon-upload"></use></svg>
+        <div class="settings-row-split">
+          <div
+            class="settings-row"
+            onclick="document.getElementById('csv-input').click()"
+          >
+            <div class="settings-row-left">
+              <div class="settings-icon settings-icon-api">
+                <svg class="u-svg-md"><use href="#icon-upload"></use></svg>
+              </div>
+              <div class="settings-label">Import</div>
             </div>
-            <div class="settings-label">Import</div>
           </div>
-          <div class="picker-trigger-arrow">›</div>
-        </div>
-
-        <div class="settings-row" onclick="shareWords()">
-          <div class="settings-row-left">
-            <div class="settings-icon settings-icon-export">
-              <svg class="u-svg-md"><use href="#icon-export"></use></svg>
+          <div class="settings-row" onclick="shareWords()">
+            <div class="settings-row-left">
+              <div class="settings-icon settings-icon-export">
+                <svg class="u-svg-md"><use href="#icon-export"></use></svg>
+              </div>
+              <div class="settings-label">Export</div>
             </div>
-            <div class="settings-label">Export</div>
           </div>
-          <div class="picker-trigger-arrow">›</div>
         </div>
       </div>
 
-      <div class="u-p16">
-        <button class="btn btn-destructive" onclick="openDeleteAllSheet()">
+      <div class="u-mt24" style="display: flex; justify-content: center">
+        <button
+          class="btn btn-quiet-danger btn-sm"
+          onclick="openDeleteAllSheet()"
+        >
           Clear Dictionary
         </button>
       </div>
@@ -517,9 +519,7 @@
     ></div>
     <div id="api-sheet" class="edit-sheet">
       <div class="edit-sheet-title">API Access</div>
-      <div class="sheet-text">
-        Use this token to access the API from external apps. Keep it secret!
-      </div>
+      <div class="sheet-text">Use this token to connect external apps.</div>
       <div class="card settings-group card-sm u-mb24">
         <div id="api-token-display" class="token-box">—</div>
       </div>
@@ -628,10 +628,9 @@
       onclick="closeDeleteAllSheet()"
     ></div>
     <div id="delete-all-sheet" class="edit-sheet">
-      <div class="edit-sheet-title">Clear Dictionary</div>
+      <div class="edit-sheet-title">Erase Data</div>
       <div id="delete-all-info" class="sheet-text u-mb20">
-        This will permanently delete ALL words in your <b>active dictionary</b>.
-        This action cannot be undone.
+        All words and progress will be lost.
       </div>
       <input
         type="text"
