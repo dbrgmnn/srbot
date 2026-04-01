@@ -372,39 +372,39 @@
       <div class="header">
         <div class="header-title">Add Word</div>
       </div>
-      <div class="card settings-group">
-        <div class="add-form">
-          <input
-            type="text"
-            id="add-word"
-            class="form-input"
-            placeholder="Word"
-          />
-          <input
-            type="text"
-            id="add-translation"
-            class="form-input"
-            placeholder="Translate"
-          />
-          <input
-            type="text"
-            id="add-example"
-            class="form-input"
-            placeholder="Example"
-          />
-          <div
-            id="add-level-trigger"
-            class="form-input picker-trigger"
-            onclick="openPicker('level', 'add')"
+
+      <div class="add-form">
+        <input
+          type="text"
+          id="add-word"
+          class="form-input"
+          placeholder="Word"
+        />
+        <input
+          type="text"
+          id="add-translation"
+          class="form-input"
+          placeholder="Translate"
+        />
+        <input
+          type="text"
+          id="add-example"
+          class="form-input"
+          placeholder="Example"
+        />
+        <div
+          id="add-level-trigger"
+          class="form-input picker-trigger"
+          onclick="openPicker('level', 'add')"
+        >
+          <span id="add-level-display" class="picker-trigger-placeholder"
+            >Level</span
           >
-            <span id="add-level-display" class="picker-trigger-placeholder"
-              >Level</span
-            >
-            <span class="picker-trigger-arrow">›</span>
-          </div>
-          <input type="hidden" id="add-level" value="" />
+          <span class="picker-trigger-arrow">›</span>
         </div>
+        <input type="hidden" id="add-level" value="" />
       </div>
+
       <button class="btn" onclick="submitWords()">Add</button>
 
       <div class="capsule-wrapper">
