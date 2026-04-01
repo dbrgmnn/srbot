@@ -137,8 +137,6 @@ function renderStats() {
   const st_learning = stats.st_learning || 0;
   const st_known = stats.st_known || 0;
   const st_mastered = stats.st_mastered || 0;
-  const total = st_new + st_learning + st_known + st_mastered;
-
   const elNew = document.getElementById("count-new");
   if (elNew) elNew.textContent = st_new;
   const elLearning = document.getElementById("count-learning");
@@ -180,7 +178,7 @@ export async function loadHome() {
 
     const stats = init.stats;
     const due = stats.due || 0;
-    const newWords = stats.new || 0;
+    const newWords = stats.st_new || 0;
     const todayDone = stats.today_new || 0;
     const limit = init.settings.daily_limit;
     const availableNew = Math.max(0, limit - todayDone);
