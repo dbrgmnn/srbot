@@ -234,7 +234,7 @@ body.no-nav {
 /* ── Screens ── */
 .screen {
   display: none;
-  padding: 0 var(--gap) var(--gap);
+  padding: 0 16px 16px;
 }
 .screen.active {
   display: block;
@@ -249,7 +249,7 @@ body.no-nav {
 
 /* ── Header ── */
 .header {
-  padding: calc(env(safe-area-inset-top) + 8px) var(--gap) 8px;
+  padding: calc(env(safe-area-inset-top) + 8px) 16px 8px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -278,8 +278,8 @@ body.no-nav {
 .stats-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--gap);
-  margin-bottom: var(--gap);
+  gap: 12px;
+  margin-bottom: 16px;
 }
 
 .stat-pill {
@@ -341,8 +341,8 @@ body.no-nav {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 12px;
-  margin-top: 24px;
-  margin-bottom: 24px;
+  margin-top: 16px;
+  margin-bottom: 32px;
 }
 .progress-legend-item {
   flex-direction: column;
@@ -441,7 +441,6 @@ body.no-nav {
 }
 .capsule {
   flex: 1;
-  max-width: 200px;
   display: flex;
   align-items: center;
   justify-content: center;
