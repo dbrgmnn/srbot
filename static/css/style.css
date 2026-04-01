@@ -18,6 +18,9 @@
   --color-known: #30d158;
   --color-mastered: #bf5af2;
   --color-review: #ff9f0a;
+  --color-danger: #ff453a;
+  --color-info: #0a84ff;
+  --color-warning: #ffd60a;
 
   /* Design System */
   --glass: rgba(255, 255, 255, 0.07);
@@ -192,8 +195,10 @@ body.no-nav {
   font-variant-numeric: tabular-nums;
 }
 .stat-val.is-timer {
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 700;
   color: var(--text-secondary);
+  opacity: 0.5;
 }
 .stat-pill-icon {
   width: 44px;
@@ -255,10 +260,12 @@ body.no-nav {
   gap: 4px;
 }
 .progress-legend-lbl {
-  font-size: 8px;
+  font-size: 10px;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
   color: var(--hint);
+  font-weight: 700;
+  opacity: 0.5;
 }
 .progress-legend-num {
   font-size: 14px;
@@ -329,8 +336,8 @@ body.no-nav {
   box-shadow: none;
 }
 .btn-destructive {
-  background: #ff453a;
-  border-color: #ff453a;
+  background: var(--color-danger);
+  border-color: var(--color-danger);
   color: #ffffff;
 }
 .btn-destructive.is-disabled {
@@ -374,7 +381,7 @@ body.no-nav {
 }
 
 .capsule-danger {
-  color: #ff453a;
+  color: var(--color-danger);
   border-color: rgba(255, 69, 58, 0.2);
 }
 
@@ -408,11 +415,11 @@ body.no-nav {
 }
 .practice-badge-new {
   background: rgba(48, 209, 88, 0.12);
-  color: #30d158;
+  color: var(--color-known);
 }
 .practice-badge-review {
   background: rgba(10, 132, 255, 0.12);
-  color: #64b5f6;
+  color: var(--color-info);
 }
 .practice-badge-info {
   background: var(--glass);
@@ -445,7 +452,7 @@ body.no-nav {
   width: 100%;
   height: 100%;
   background: transparent;
-  border-radius: 32px;
+  border-radius: var(--radius-lg);
   position: relative;
   transform-style: preserve-3d;
   transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
@@ -457,13 +464,13 @@ body.no-nav {
   content: "";
   position: absolute;
   inset: 0;
-  border-radius: 32px;
+  border-radius: var(--radius-lg);
   background: var(--glass);
   backdrop-filter: var(--blur);
   -webkit-backdrop-filter: var(--blur);
   border: 1px solid var(--glass-border);
   box-shadow:
-    0 24px 48px rgba(0, 0, 0, 0.35),
+    var(--shadow-high),
     inset 0 1px 0 var(--glass-shine);
   pointer-events: none;
   z-index: 0;
@@ -511,15 +518,15 @@ body.no-nav {
 
 .word-card.swipe-left::before {
   background: rgba(255, 69, 58, 0.12) !important;
-  border-color: rgba(255, 69, 58, 0.5) !important;
+  border-color: var(--color-danger) !important;
 }
 .word-card.swipe-right::before {
   background: rgba(48, 209, 88, 0.12) !important;
-  border-color: rgba(48, 209, 88, 0.5) !important;
+  border-color: var(--color-known) !important;
 }
 .word-card.swipe-up::before {
   background: rgba(255, 214, 10, 0.12) !important;
-  border-color: rgba(255, 214, 10, 0.5) !important;
+  border-color: var(--color-warning) !important;
 }
 
 .practice-footer {
@@ -635,7 +642,7 @@ body.no-nav {
 
 /* Danger icon (Accent) */
 .settings-icon-delete {
-  color: #ff453a;
+  color: var(--color-danger);
   filter: drop-shadow(0 0 5px rgba(255, 69, 58, 0.35));
 }
 
@@ -653,7 +660,7 @@ body.no-nav {
 }
 .settings-label-danger {
   font-size: 16px;
-  color: #ff453a;
+  color: var(--color-danger);
   font-weight: 500;
 }
 
@@ -698,7 +705,7 @@ body.no-nav {
 .del-btn {
   background: none;
   border: none;
-  color: #ff453a;
+  color: var(--color-danger);
   padding-left: 12px;
   cursor: pointer;
   flex-shrink: 0;
@@ -708,7 +715,7 @@ body.no-nav {
 .del-btn svg {
   width: 18px;
   height: 18px;
-  stroke: #ff453a;
+  stroke: var(--color-danger);
 }
 
 /* ── Skeletons ── */
@@ -806,13 +813,13 @@ body.no-nav {
 }
 
 .toast-success .toast-icon {
-  color: #30d158;
+  color: var(--color-known);
 }
 .toast-error .toast-icon {
-  color: #ff453a;
+  color: var(--color-danger);
 }
 .toast-info .toast-icon {
-  color: #0a84ff;
+  color: var(--color-info);
 }
 .toast-stats .toast-icon {
   color: rgba(255, 255, 255, 0.5);
@@ -824,15 +831,15 @@ body.no-nav {
   align-items: center;
 }
 .stat-good {
-  color: #30d158;
+  color: var(--color-known);
   font-weight: 800;
 }
 .stat-hard {
-  color: #ff9f0a;
+  color: var(--color-warning);
   font-weight: 800;
 }
 .stat-again {
-  color: #ff453a;
+  color: var(--color-danger);
   font-weight: 800;
 }
 
@@ -1098,9 +1105,9 @@ body.theme-light {
   --shadow-high: 0 8px 25px rgba(0, 0, 0, 0.12);
 
   /* Contrast status colors for light background */
-  --stat-good-clr: #248a3d;
-  --stat-hard-clr: #c97b06;
-  --stat-again-clr: #d32f2f;
+  --color-known: #248a3d;
+  --color-warning: #c97b06;
+  --color-danger: #d32f2f;
 }
 
 /* Light theme toast adjustments */
@@ -1108,13 +1115,13 @@ body.theme-light .toast-stats .toast-icon {
   color: rgba(0, 0, 0, 0.4);
 }
 body.theme-light .stat-good {
-  color: var(--stat-good-clr);
+  color: var(--color-known);
 }
 body.theme-light .stat-hard {
-  color: var(--stat-hard-clr);
+  color: var(--color-warning);
 }
 body.theme-light .stat-again {
-  color: var(--stat-again-clr);
+  color: var(--color-danger);
 }
 
 /* Light theme skeleton animation tweak */
@@ -1178,7 +1185,7 @@ body.theme-light .skeleton {
   stroke-width: 2.2;
 }
 .row-btn-danger {
-  color: #ff453a;
+  color: var(--color-danger);
 }
 .settings-row.no-click {
   cursor: default;
