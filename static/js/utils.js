@@ -1,6 +1,4 @@
-/**
- * Centralized utility functions for the SRbot WebApp.
- */
+/** --- Scroll Management --- */
 
 /**
  * Locks the body scroll by setting overflow to hidden and touch-action to none.

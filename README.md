@@ -118,6 +118,6 @@ The following tools run automatically on every `git commit`:
 ## ⚙️ Tech Stack
 - **Backend:** Python 3.11+, aiohttp, aiosqlite, aiogram 3.x, pytest
 - **Frontend:** Vanilla JS (Reactive State), CSS Variables, Telegram WebApp SDK
-- **AI / NLP:** Google Gemini API (translation, CEFR level, example generation)
+- **AI / NLP:** Google Gemini API (translation, CEFR level, example generation) via secure `x-goog-api-key` headers.
 - **Auth:** HMAC-SHA256 Telegram initData verification
 - **Deployment:** Raspberry Pi Zero 2W, Tailscale Funnel, automated test validation

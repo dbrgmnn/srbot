@@ -37,36 +37,24 @@ async def main():
 
     try:
         logger.info("Starting bot polling...")
-        # Aiogram handles SIGTERM and SIGINT by default
         await dp.start_polling(bot)
     except Exception as e:
         logger.error(f"Error during execution: {e}")
+    finally:
+        logger.info("Shutting down...")
         if api_runner:
-            logger.info("Stopping API server...")
             await api_runner.cleanup()
-
         if scheduler:
-            logger.info("Shutting down scheduler...")
             scheduler.shutdown(wait=False)
 
-        logger.info("Closing database and bot sessions...")
+        await db.close()
+        await bot.session.close()
 
-        # Cancel all other pending tasks
         pending = [t for t in asyncio.all_tasks() if t is not asyncio.current_task()]
         for task in pending:
             task.cancel()
-
-        cleanup_tasks = [
-            db.close(),
-            bot.session.close(),
-            asyncio.gather(*pending, return_exceptions=True),
-        ]
-
-        # Wait for all cleanup tasks with a reasonable timeout
-        try:
-            await asyncio.wait_for(asyncio.gather(*cleanup_tasks, return_exceptions=True), timeout=10.0)
-        except TimeoutError:
-            logger.warning("Cleanup timed out, some resources might not have closed properly")
+        if pending:
+            await asyncio.gather(*pending, return_exceptions=True)
 
         logger.info("Stopped.")
 
