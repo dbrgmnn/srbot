@@ -1,6 +1,6 @@
-import { DEL, GET, PATCH, POST, state } from "./api.js";
-import { T, toast } from "./toast.js";
-import { lockScroll, unlockScroll } from "./utils.js";
+import { API, UI, lockScroll, unlockScroll } from "./utils.js";
+import { state } from "./state.js";
+import { T } from "./toast.js";
 
 const tg = window.Telegram.WebApp;
 let searchTimer = null;
@@ -94,11 +94,11 @@ export async function submitWords() {
 
   isSubmitting = true;
   try {
-    const res = await POST("/api/words", {
+    const res = await API.post("/api/words", {
       words: [{ word, translation, example, level }],
     });
     if (res.result && res.result.added) {
-      toast(T.WORD_ADDED(word), "success");
+      UI.toast(T.WORD_ADDED(word), "success");
       wordEl.value = "";
       transEl.value = "";
       exEl.value = "";
@@ -111,10 +111,10 @@ export async function submitWords() {
 
       state.currentStats = null;
     } else {
-      toast(T.WORD_DUPLICATE, "error");
+      UI.toast(T.WORD_DUPLICATE, "error");
     }
   } catch (e) {
-    toast(T.WORD_ADD_FAIL, "error");
+    UI.toast(T.WORD_ADD_FAIL, "error");
   } finally {
     isSubmitting = false;
   }
@@ -132,15 +132,15 @@ export async function handleFileUpload(input) {
       return;
     }
     try {
-      const res = await POST("/api/words", { words });
+      const res = await API.post("/api/words", { words });
       if (res.result && res.result.added) {
-        toast(T.CSV_ADDED(res.result.added), "success");
+        UI.toast(T.CSV_ADDED(res.result.added), "success");
         state.currentStats = null;
       } else {
-        toast(T.WORD_DUPLICATE, "error");
+        UI.toast(T.WORD_DUPLICATE, "error");
       }
     } catch (e) {
-      toast(T.CSV_FAIL, "error");
+      UI.toast(T.CSV_FAIL, "error");
     }
   };
   reader.readAsText(file);
@@ -198,14 +198,14 @@ export async function saveEdit() {
 
   isSubmitting = true;
   try {
-    await PATCH(`/api/words/${editWordId}`, {
+    await API.patch(`/api/words/${editWordId}`, {
       word,
       translation: trans,
       example: ex,
       level,
     });
     closeEdit();
-    toast(T.WORD_SAVED, "success");
+    UI.toast(T.WORD_SAVED, "success");
     state.currentStats = null;
 
     // Refresh search results to show the updated word
@@ -214,7 +214,10 @@ export async function saveEdit() {
       loadSearch(searchInput.value);
     }
   } catch (e) {
-    toast(e.message === "409" ? T.WORD_DUPLICATE : T.WORD_SAVE_FAIL, "error");
+    UI.toast(
+      e.message === "409" ? T.WORD_DUPLICATE : T.WORD_SAVE_FAIL,
+      "error",
+    );
   } finally {
     isSubmitting = false;
   }
@@ -222,15 +225,7 @@ export async function saveEdit() {
 
 export async function shareWords() {
   try {
-    const res = await fetch("/api/words/export", {
-      headers: {
-        "X-Init-Data": tg.initData,
-        "X-Language": state.currentLang,
-        "X-Timezone": Intl.DateTimeFormat().resolvedOptions().timeZone,
-      },
-    });
-    if (!res.ok) throw new Error(`Error ${res.status}`);
-    const text = await res.text();
+    const text = await API.get("/api/words/export");
     if (navigator.share) {
       try {
         await navigator.share({ title: "SRbot dictionary", text });
@@ -240,10 +235,10 @@ export async function shareWords() {
       }
     } else {
       await navigator.clipboard.writeText(text);
-      toast(T.COPIED, "success");
+      UI.toast(T.COPIED, "success");
     }
   } catch (e) {
-    toast(T.EXPORT_FAIL, "error");
+    UI.toast(T.EXPORT_FAIL, "error");
   }
 }
 
@@ -256,7 +251,7 @@ async function loadSearch(q) {
     return;
   }
   try {
-    const data = await GET(`/api/words/search?q=${encodeURIComponent(q)}`);
+    const data = await API.get(`/api/words/search?q=${encodeURIComponent(q)}`);
     el.innerHTML = data.result.words
       .map(
         (w) => `
@@ -272,7 +267,7 @@ async function loadSearch(q) {
           <div class="word-row-trans">${highlight(w.translation, q)}</div>
         </div>
         <button class="del-btn" data-id="${w.id}">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14H6L5 6"></path><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M9 6V4h6v2"></path></svg>
+          <svg><use href="#icon-trash"></use></svg>
         </button>
       </div>
     `,
@@ -292,10 +287,10 @@ async function loadSearch(q) {
 
 async function deleteWord(id) {
   try {
-    await DEL(`/api/words/${id}`);
+    await API.delete(`/api/words/${id}`);
     document.getElementById(`wr-${id}`)?.remove();
     state.currentStats = null;
   } catch (e) {
-    toast(T.DELETE_FAIL, "error");
+    UI.toast(T.DELETE_FAIL, "error");
   }
 }

@@ -20,7 +20,8 @@ import {
   openQuietHoursSheet,
   saveQuietHours,
 } from "./settings.js";
-import { T, toast } from "./toast.js";
+import { T } from "./toast.js";
+import { UI } from "./utils.js";
 import { loadHome, showScreen } from "./ui.js";
 
 const tg = window.Telegram.WebApp;
@@ -98,7 +99,7 @@ async function init() {
     initGlobalHaptics();
     await loadHome();
   } catch (e) {
-    toast(T.INIT_FAIL, "error");
+    UI.toast(T.INIT_FAIL, "error");
     console.error(e);
   }
 }

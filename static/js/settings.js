@@ -1,6 +1,6 @@
-import { DEL, GET, POST, setLanguage, state } from "./api.js";
-import { T, toast } from "./toast.js";
-import { lockScroll, unlockScroll } from "./utils.js";
+import { API, UI, lockScroll, unlockScroll } from "./utils.js";
+import { state, setLanguage } from "./state.js";
+import { T } from "./toast.js";
 
 const tg = window.Telegram.WebApp;
 
@@ -63,7 +63,7 @@ export function openPicker(type, context = null) {
 }
 
 async function _openLanguagePicker() {
-  const resp = await GET("/api/settings/languages");
+  const resp = await API.get("/api/settings/languages");
   const languages = resp.result.languages;
   const options = Object.entries(languages).map(([code, meta]) => ({
     value: code,
@@ -330,10 +330,10 @@ window.copyToken = async () => {
   try {
     await navigator.clipboard.writeText(currentToken);
     tg.HapticFeedback.notificationOccurred("success");
-    toast(T.COPIED, "success");
+    UI.toast(T.COPIED, "success");
   } catch (err) {
     console.error("Copy failed:", err);
-    toast(T.COPY_FAIL, "error");
+    UI.toast(T.COPY_FAIL, "error");
   }
 };
 
@@ -343,7 +343,7 @@ window.revokeToken = () => {
     async (ok) => {
       if (ok) {
         try {
-          const resp = await POST("/api/settings/token/revoke");
+          const resp = await API.post("/api/settings/token/revoke");
           const newToken = resp.result.token;
           currentToken = newToken;
 
@@ -351,10 +351,10 @@ window.revokeToken = () => {
           if (display) display.textContent = newToken;
 
           tg.HapticFeedback.notificationOccurred("success");
-          toast(T.TOKEN_REVOKED, "success");
+          UI.toast(T.TOKEN_REVOKED, "success");
         } catch (e) {
           console.error("Revoke error:", e);
-          toast(T.REVOKE_FAIL, "error");
+          UI.toast(T.REVOKE_FAIL, "error");
         }
       }
     },
@@ -365,7 +365,7 @@ export async function loadSettings() {
   initSubscriptions();
   _fillSettingsFromState();
   try {
-    const tokenResp = await GET("/api/settings/token");
+    const tokenResp = await API.get("/api/settings/token");
     currentToken = tokenResp.result.token;
 
     // Auto-sync timezone from device
@@ -381,13 +381,13 @@ export async function loadSettings() {
 export async function saveSetting(key, val, showToast = true) {
   const body = typeof val === "object" && val !== null ? val : { [key]: val };
   try {
-    const res = await POST("/api/settings", body);
-    if (showToast) toast(T.SAVED, "success");
+    await API.post("/api/settings", body);
+    if (showToast) UI.toast(T.SAVED, "success");
 
     // Update state locally to trigger subscriptions immediately
     state.currentSettings = { ...state.currentSettings, ...body };
   } catch (e) {
-    if (showToast) toast(T.SAVE_FAIL, "error");
+    if (showToast) UI.toast(T.SAVE_FAIL, "error");
   }
 }
 
@@ -397,10 +397,10 @@ export async function switchLanguage(lang) {
   if (state.currentLang === lang) return;
   try {
     setLanguage(lang); // triggers currentLang subscription → loadHome()
-    await POST("/api/settings", { language: lang });
-    toast(T.LANG_SWITCHED(lang.toUpperCase()), "success");
+    await API.post("/api/settings", { language: lang });
+    UI.toast(T.LANG_SWITCHED(lang.toUpperCase()), "success");
   } catch (e) {
-    toast(T.LANG_FAIL, "error");
+    UI.toast(T.LANG_FAIL, "error");
   }
 }
 
@@ -476,17 +476,17 @@ window.executeDeleteAll = async () => {
     return;
 
   try {
-    await DEL("/api/words/all");
+    await API.delete("/api/words/all");
 
     closeDeleteAllSheet();
     tg.HapticFeedback.notificationOccurred("success");
-    toast(T.CLEARED, "success");
+    UI.toast(T.CLEARED, "success");
 
     // Refresh settings data from server (updates word counts in state)
     const { loadHome } = await import("./ui.js");
     await loadHome();
   } catch (e) {
     console.error("Delete all error:", e);
-    toast(T.CLEAR_FAIL, "error");
+    UI.toast(T.CLEAR_FAIL, "error");
   }
 };

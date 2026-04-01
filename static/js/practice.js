@@ -1,5 +1,6 @@
-import { GET, POST, state } from "./api.js";
-import { T, toast } from "./toast.js";
+import { API, UI } from "./utils.js";
+import { state } from "./state.js";
+import { T } from "./toast.js";
 import { showScreen } from "./ui.js";
 
 const tg = window.Telegram.WebApp;
@@ -21,7 +22,7 @@ let rafId = null;
 
 export async function startPractice() {
   try {
-    const data = await GET("/api/session");
+    const data = await API.get("/api/session");
     const words = data.result.words;
     if (!words || words.length === 0) return;
     sessionWords = words;
@@ -33,7 +34,7 @@ export async function startPractice() {
     renderWord();
   } catch (e) {
     console.error(e);
-    toast(T.SESSION_FAIL, "error");
+    UI.toast(T.SESSION_FAIL, "error");
   }
 }
 
@@ -237,9 +238,9 @@ async function grade(quality) {
     card.style.opacity = "0";
 
     sessionIdx++;
-    POST("/api/grade", { word_id: word.id, quality }).catch((e) => {
+    API.post("/api/grade", { word_id: word.id, quality }).catch((e) => {
       console.error("Grade failed, word progress may not be saved:", e);
-      toast(T.GRADE_FAIL, "error");
+      UI.toast(T.GRADE_FAIL, "error");
     });
     setTimeout(() => {
       isGrading = false;
@@ -259,7 +260,7 @@ export async function undo() {
   const last = practiceHistory.pop();
 
   try {
-    await POST("/api/undo", {
+    await API.post("/api/undo", {
       word_id: last.word.id,
       old_state: {
         repetitions: last.word.repetitions ?? 0,
@@ -272,7 +273,7 @@ export async function undo() {
     });
   } catch (e) {
     console.error("Undo failed", e);
-    toast(T.UNDO_FAIL, "error");
+    UI.toast(T.UNDO_FAIL, "error");
   }
 
   sessionIdx = last.sessionIdx;
@@ -376,7 +377,7 @@ export function exitPractice() {
       <span class="stat-hard">${sessionStats.hard}</span>
       <span class="stat-good">${sessionStats.good}</span>
     `;
-    toast(statsHtml, "stats");
+    UI.toast(statsHtml, "stats");
 
     if (isComplete) launchConfetti();
     state.currentStats = null; // Trigger stats refresh

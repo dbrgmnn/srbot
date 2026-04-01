@@ -1,54 +1,9 @@
-const tg = window.Telegram.WebApp;
-
-let toastTimeout = null;
-
-const ICONS = {
-  success:
-    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>',
-  error:
-    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>',
-  info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>',
-  stats:
-    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>',
-};
-
-/**
- * Modern Pill Notification
- * @param {string} msg - Message text (supports HTML)
- * @param {'info'|'success'|'error'|'stats'} type - Notification style
+/** ── Translation Logic ──
+ * This file contains all UI-facing strings for the application.
  */
-export function toast(msg, type = "info") {
-  const el = document.getElementById("toast");
-  if (!el) return;
 
-  if (toastTimeout) clearTimeout(toastTimeout);
-
-  // Update content with icon
-  const iconHtml = `<div class="toast-icon">${ICONS[type] || ICONS.info}</div>`;
-  el.innerHTML = `${iconHtml}<div class="toast-text">${msg}</div>`;
-  el.className = `toast toast-${type} show`;
-
-  // Haptics
-  if (type === "success" || (type === "stats" && msg.includes("stat-good")))
-    tg.HapticFeedback.notificationOccurred("success");
-  else if (type === "error") tg.HapticFeedback.notificationOccurred("error");
-  else tg.HapticFeedback.impactOccurred("light");
-
-  const duration = type === "stats" ? 4500 : 2200;
-
-  toastTimeout = setTimeout(() => {
-    el.classList.remove("show");
-    toastTimeout = null;
-  }, duration);
-}
-
-/** --- Shared Base Messages --- */
-
-const _saved = "Saved";
 const _fail = (what) => `Failed to ${what}`;
 const _added = (n) => `Added ${n} words`;
-
-/** --- Message Constants --- */
 
 export const T = {
   // Dictionary — Add
@@ -62,7 +17,7 @@ export const T = {
   CSV_FAIL: _fail("upload file"),
 
   // Dictionary — Edit / Delete
-  WORD_SAVED: _saved,
+  WORD_SAVED: "Saved",
   WORD_SAVE_FAIL: _fail("save"),
   WORD_DUPLICATE: "Word already exists",
   DELETE_FAIL: _fail("delete"),
@@ -76,7 +31,7 @@ export const T = {
   SEARCH_FAIL: "Search error",
 
   // Settings
-  SAVED: _saved,
+  SAVED: "Saved",
   SAVE_FAIL: _fail("save"),
   LANG_SWITCHED: (l) => `Switched to ${l}`,
   LANG_FAIL: _fail("switch language"),

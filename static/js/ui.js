@@ -1,4 +1,5 @@
-import { GET, state } from "./api.js";
+import { API, UI } from "./utils.js";
+import { state } from "./state.js";
 
 const tg = window.Telegram.WebApp;
 
@@ -157,7 +158,7 @@ function renderStats() {
 export async function loadHome() {
   initSubscriptions();
   try {
-    const resp = await GET("/api/init");
+    const resp = await API.get("/api/init");
     const init = resp.result;
 
     // This will trigger all subscriptions automatically
