@@ -95,8 +95,10 @@ The following tools run automatically on every `git commit`:
 ## 🛠 User Guide
 
 ### Word Management
-- **Search tab:** Instant search with highlighting. Tap to edit, tap ✕ to delete.
-- **Import:** Move to Settings → Import CSV. Supports `word,translation,example,level`.
+- **Smart Search:** Instant search with highlighting. If a word is not found, tap **Add** to automatically translate, generate examples, and save via Gemini AI.
+- **Today's Feed:** Tap the **ADDED** stat pill on the home screen to instantly view all words added today.
+- **Edit & Delete:** Tap any word in search results to edit details, or tap the **Trash** icon for instant removal.
+- **Import/Export:** Move to Settings → bottom actions. Supports CSV `word,translation,example,level`.
 
 ### Practice Session
 - **Swipe right** — Good ✅ (remembered well)

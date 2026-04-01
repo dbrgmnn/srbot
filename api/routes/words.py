@@ -52,7 +52,8 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
             logger.info(f"AI Add: Word '{raw_word}' for user {telegram_id} is a direct duplicate.")
             return web.json_response(
                 {
-                    "ok": True,
+                    "ok": False,
+                    "error": "duplicate",
                     "result": {
                         "added": 0,
                         "status": "duplicate",
@@ -90,7 +91,8 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
             logger.info(f"AI Add: AI-normalized word '{word}' for user {telegram_id} is a duplicate.")
             return web.json_response(
                 {
-                    "ok": True,
+                    "ok": False,
+                    "error": "duplicate",
                     "result": {
                         "added": 0,
                         "status": "duplicate",

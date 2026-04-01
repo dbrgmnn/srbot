@@ -86,7 +86,9 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
-  padding: 0 4px;
+}
+.settings-actions .btn {
+  margin-bottom: 0;
 }
 
 /* ── Design System: Foundation ── */
@@ -425,6 +427,10 @@ body.no-nav {
 .btn {
   width: 100%;
   padding: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
   border: 1px solid var(--accent);
   background: var(--accent);
   color: var(--btn-text);
@@ -434,6 +440,7 @@ body.no-nav {
   margin-bottom: 24px;
   letter-spacing: 0.01em;
   box-shadow: var(--shadow-low);
+  -webkit-tap-highlight-color: transparent;
 }
 .btn:active {
   transform: scale(0.98);

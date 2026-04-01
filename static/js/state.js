@@ -12,6 +12,7 @@ const initialData = {
   currentStats: null,
   currentSettings: null,
   sessionTotal: 0,
+  currentScreen: "home",
 };
 
 /**

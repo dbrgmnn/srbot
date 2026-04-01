@@ -6,6 +6,20 @@ const tg = window.Telegram.WebApp;
 /** --- Screen Switching --- */
 
 export function showScreen(name) {
+  // If already on this screen, handle refresh/reset
+  if (state.currentScreen === name) {
+    if (name === "home") {
+      state.currentStats = null; // Forces re-fetch through Proxy
+    } else if (name === "search") {
+      const input = document.getElementById("search-input");
+      if (input) input.value = "";
+      if (window.clearSearch) window.clearSearch();
+    }
+    return;
+  }
+
+  state.currentScreen = name;
+
   document
     .querySelectorAll(".screen")
     .forEach((s) => s.classList.remove("active"));
