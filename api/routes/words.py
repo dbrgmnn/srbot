@@ -125,7 +125,9 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         words_to_add = [{"word": word, "translation": trans, "example": example, "level": level}]
         added_count = await word_repo.add_words_batch(user_id, lang, words_to_add)
 
-        logger.info(f"External API: User {user_id} added enriched word '{word}' (lang: {lang})")
+        logger.info(
+            f"External API: User {user_id} added enriched word '{word}' (original: '{raw_word}') for lang '{lang}'"
+        )
 
         return web.json_response(
             {

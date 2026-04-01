@@ -32,7 +32,10 @@ class Translator:
             },
         }
 
-        url_with_key = f"{self.url}?key={self.api_key}"
+        headers = {
+            "Content-Type": "application/json",
+            "x-goog-api-key": self.api_key,
+        }
         content_text = ""
         max_retries = 3
         base_delay = 1.0
@@ -40,7 +43,7 @@ class Translator:
         for attempt in range(max_retries):
             try:
                 async with asyncio.timeout(10.0):
-                    async with self.session.post(url_with_key, json=payload) as resp:
+                    async with self.session.post(self.url, json=payload, headers=headers) as resp:
                         if resp.status == 429 or resp.status >= 500:
                             err_text = await resp.text()
                             logger.warning(
