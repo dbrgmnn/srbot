@@ -50,6 +50,68 @@
   --cell-bg: rgba(255, 255, 255, 0.05);
   --mark-bg: rgba(255, 255, 255, 0.15);
   --sheet-bg: rgba(20, 20, 24, 0.96);
+
+  /* ── Shared Definitions ── */
+  --glass-base: var(--glass) var(--blur);
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-expo: cubic-bezier(0.19, 1, 0.22, 1);
+  --transition-base: 0.2s var(--ease-standard);
+  --transition-slow: 0.4s var(--ease-expo);
+}
+
+/* ── Design System: Glassmorphism ── */
+.nav,
+.u-glass-mid {
+  background: var(--glass-mid);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+  border: 1px solid var(--glass-border);
+  box-shadow:
+    var(--shadow-mid),
+    inset 0 1px 0 var(--glass-shine);
+}
+
+.card,
+.settings-group,
+.stat-pill,
+.practice-badge,
+.word-level-badge,
+.word-row-level,
+.btn-round,
+.form-input,
+.picker-item,
+.picker-list-mini,
+.csv-preview,
+.row-btn,
+.u-glass {
+  background: var(--glass);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+  border: 1px solid var(--glass-border);
+  box-shadow:
+    var(--shadow-low),
+    inset 0 1px 0 var(--glass-shine);
+}
+
+.toast {
+  background: rgba(18, 18, 18, 0.85);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+  border: 0.5px solid var(--glass-border);
+  box-shadow: var(--shadow-high);
+}
+
+/* ── Custom Scrollbars ── */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--glass-shine);
+  border-radius: var(--radius-pill);
 }
 
 body {
@@ -73,16 +135,9 @@ body.no-nav {
   left: 16px;
   right: 16px;
   display: flex;
-  background: var(--glass-mid);
-  backdrop-filter: var(--blur);
-  -webkit-backdrop-filter: var(--blur);
-  border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
   z-index: 100;
   padding: 6px;
-  box-shadow:
-    var(--shadow-mid),
-    inset 0 1px 0 var(--glass-shine);
 }
 .nav-btn {
   flex: 1;
@@ -145,13 +200,11 @@ body.no-nav {
 /* ── Cards ── */
 .card,
 .settings-group {
-  background: var(--glass);
-  backdrop-filter: var(--blur);
-  -webkit-backdrop-filter: var(--blur);
-  border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
   padding: 20px;
   margin-bottom: var(--gap);
+}
+.card {
   box-shadow:
     var(--shadow-low),
     inset 0 1px 0 var(--glass-shine);
@@ -169,19 +222,12 @@ body.no-nav {
 }
 
 .stat-pill {
-  background: var(--glass);
-  backdrop-filter: var(--blur);
-  -webkit-backdrop-filter: var(--blur);
-  border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
   padding: 18px 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 0;
-  box-shadow:
-    var(--shadow-low),
-    inset 0 1px 0 var(--glass-shine);
 }
 .stat-pill-left {
   display: flex;
@@ -227,22 +273,30 @@ body.no-nav {
 .stat-pill-icon-review {
   background: none;
   color: var(--color-review);
-  filter: drop-shadow(0 0 5px rgba(255, 159, 10, 0.4));
+  filter: drop-shadow(
+    0 0 5px color-mix(in srgb, var(--color-review), transparent 60%)
+  );
 }
 .stat-pill-icon-new {
   background: none;
   color: var(--color-known);
-  filter: drop-shadow(0 0 5px rgba(48, 209, 88, 0.4));
+  filter: drop-shadow(
+    0 0 5px color-mix(in srgb, var(--color-known), transparent 60%)
+  );
 }
 .stat-pill-icon-learned {
   background: none;
   color: var(--color-mastered);
-  filter: drop-shadow(0 0 5px rgba(191, 90, 242, 0.4));
+  filter: drop-shadow(
+    0 0 5px color-mix(in srgb, var(--color-mastered), transparent 60%)
+  );
 }
 .stat-pill-icon-added {
   background: none;
   color: var(--color-known);
-  filter: drop-shadow(0 0 5px rgba(48, 209, 88, 0.4));
+  filter: drop-shadow(
+    0 0 5px color-mix(in srgb, var(--color-known), transparent 60%)
+  );
 }
 
 /* ── Progress block ── */
@@ -360,8 +414,6 @@ body.no-nav {
   justify-content: center;
   gap: 8px;
   padding: 12px 16px;
-  background: var(--glass);
-  border: 1px solid var(--glass-border);
   border-radius: var(--radius-pill);
   color: var(--text-faint);
   font-size: 14px;
@@ -404,21 +456,17 @@ body.no-nav {
   font-weight: 700;
   font-size: 10px;
   letter-spacing: 0.05em;
-  border: 1px solid var(--glass-border);
-  backdrop-filter: var(--blur);
-  -webkit-backdrop-filter: var(--blur);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   line-height: 1;
-  box-shadow: var(--shadow-low);
 }
 .practice-badge-new {
-  background: rgba(48, 209, 88, 0.12);
+  background: color-mix(in srgb, var(--color-known), transparent 88%);
   color: var(--color-known);
 }
 .practice-badge-review {
-  background: rgba(10, 132, 255, 0.12);
+  background: color-mix(in srgb, var(--color-info), transparent 88%);
   color: var(--color-info);
 }
 .practice-badge-info {
@@ -517,15 +565,27 @@ body.no-nav {
 }
 
 .word-card.swipe-left::before {
-  background: rgba(255, 69, 58, 0.12) !important;
+  background: color-mix(
+    in srgb,
+    var(--color-danger),
+    transparent 88%
+  ) !important;
   border-color: var(--color-danger) !important;
 }
 .word-card.swipe-right::before {
-  background: rgba(48, 209, 88, 0.12) !important;
+  background: color-mix(
+    in srgb,
+    var(--color-known),
+    transparent 88%
+  ) !important;
   border-color: var(--color-known) !important;
 }
 .word-card.swipe-up::before {
-  background: rgba(255, 214, 10, 0.12) !important;
+  background: color-mix(
+    in srgb,
+    var(--color-warning),
+    transparent 88%
+  ) !important;
   border-color: var(--color-warning) !important;
 }
 
@@ -556,23 +616,13 @@ body.no-nav {
   flex: 1;
   height: 50px;
   border-radius: var(--radius-md);
-  border: 1px solid var(--glass-border);
-  background: var(--glass);
-  backdrop-filter: var(--blur);
-  -webkit-backdrop-filter: var(--blur);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: opacity 0.15s;
-  box-shadow:
-    var(--shadow-low),
-    inset 0 1px 0 var(--glass-shine);
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
-}
-.btn-round:active {
-  opacity: 0.7;
 }
 .btn-round svg {
   width: 20px;
@@ -643,7 +693,9 @@ body.no-nav {
 /* Danger icon (Accent) */
 .settings-icon-delete {
   color: var(--color-danger);
-  filter: drop-shadow(0 0 5px rgba(255, 69, 58, 0.35));
+  filter: drop-shadow(
+    0 0 5px color-mix(in srgb, var(--color-danger), transparent 65%)
+  );
 }
 
 .settings-row:active,
@@ -772,10 +824,6 @@ body.no-nav {
   bottom: calc(105px + env(safe-area-inset-bottom));
   left: 50%;
   transform: translateX(-50%) translateY(30px);
-  background: rgba(18, 18, 18, 0.85);
-  backdrop-filter: var(--blur);
-  -webkit-backdrop-filter: var(--blur);
-  border: 0.5px solid var(--glass-border);
   border-radius: var(--radius-pill);
   padding: 8px 18px 8px 12px;
   color: #ffffff;
@@ -790,7 +838,6 @@ body.no-nav {
   pointer-events: none;
   z-index: 9999;
   max-width: 90vw;
-  box-shadow: var(--shadow-high);
   white-space: nowrap;
 }
 .toast.show {
@@ -910,8 +957,6 @@ body.theme-light .toast {
   display: flex;
   flex-direction: column;
   background: var(--sheet-bg);
-  backdrop-filter: var(--blur);
-  -webkit-backdrop-filter: var(--blur);
   border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   border-top: 1px solid var(--glass-border);
   padding: 24px 20px calc(env(safe-area-inset-bottom) + 32px);
@@ -929,19 +974,12 @@ body.theme-light .toast {
 .form-input {
   display: block;
   width: 100%;
-  background: var(--glass);
-  backdrop-filter: var(--blur);
-  -webkit-backdrop-filter: var(--blur);
-  border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
   padding: 16px 20px;
   color: var(--text);
   font-size: 17px;
   outline: none;
   margin-bottom: 16px;
-  box-shadow:
-    var(--shadow-low),
-    inset 0 1px 0 var(--glass-shine);
   touch-action: manipulation;
 }
 .form-input::placeholder {
@@ -1008,7 +1046,6 @@ mark {
   justify-content: space-between;
   padding: 14px 14px;
   border-radius: var(--radius-md);
-  background: var(--glass);
   border: 1px solid transparent;
   font-size: 15px;
   cursor: pointer;
@@ -1056,9 +1093,7 @@ mark {
 .picker-list-mini {
   height: 220px;
   overflow-y: auto;
-  background: var(--glass);
   border-radius: var(--radius-md);
-  border: 1px solid var(--glass-border);
   -webkit-overflow-scrolling: touch;
 }
 .picker-list-mini .picker-item {
@@ -1087,22 +1122,22 @@ mark {
 
 /* ── Light theme overrides ── */
 body.theme-light {
-  --glass: rgba(0, 0, 0, 0.04);
-  --glass-mid: rgba(0, 0, 0, 0.07);
-  --glass-border: rgba(0, 0, 0, 0.08);
-  --glass-shine: rgba(0, 0, 0, 0.04);
-  --row-divider: rgba(0, 0, 0, 0.06);
+  --glass: color-mix(in srgb, #000000, transparent 96%);
+  --glass-mid: color-mix(in srgb, #000000, transparent 93%);
+  --glass-border: color-mix(in srgb, #000000, transparent 92%);
+  --glass-shine: color-mix(in srgb, #000000, transparent 96%);
+  --row-divider: color-mix(in srgb, #000000, transparent 94%);
   --text-muted: var(--hint);
   --text-secondary: var(--hint);
   --text-faint: var(--hint);
   --text-subtle: var(--hint);
   --icon-stroke: var(--text);
-  --cell-bg: rgba(0, 0, 0, 0.04);
-  --mark-bg: rgba(0, 0, 0, 0.08);
+  --cell-bg: color-mix(in srgb, #000000, transparent 96%);
+  --mark-bg: color-mix(in srgb, #000000, transparent 92%);
   --sheet-bg: #ffffff;
-  --shadow-low: 0 2px 10px rgba(0, 0, 0, 0.06);
-  --shadow-mid: 0 4px 15px rgba(0, 0, 0, 0.1);
-  --shadow-high: 0 8px 25px rgba(0, 0, 0, 0.12);
+  --shadow-low: 0 2px 10px color-mix(in srgb, #000000, transparent 94%);
+  --shadow-mid: 0 4px 15px color-mix(in srgb, #000000, transparent 90%);
+  --shadow-high: 0 8px 25px color-mix(in srgb, #000000, transparent 88%);
 
   /* Contrast status colors for light background */
   --color-known: #248a3d;
@@ -1189,7 +1224,11 @@ body.theme-light .skeleton {
 }
 .btn-revoke {
   color: var(--color-danger) !important;
-  border-color: rgba(255, 69, 58, 0.2) !important;
+  border-color: color-mix(
+    in srgb,
+    var(--color-danger),
+    transparent 80%
+  ) !important;
 }
 .settings-row.no-click {
   cursor: default;
@@ -1243,8 +1282,6 @@ body.theme-light .word-card.swipe-up::before {
 .confetti-canvas {
   position: fixed;
   inset: 0;
-  width: 100%;
-  height: 100%;
   pointer-events: none;
   z-index: 2000;
 }
