@@ -141,7 +141,7 @@ def setup_routes_settings(app: web.Application, db: aiosqlite.Connection):
                     status=400,
                 )
 
-            await user_repo.update_quiet_hours(telegram_id, quiet_start=quiet_start, quiet_end=quiet_end, language=lang)
+            await user_repo.update_quiet_hours(telegram_id, lang, quiet_start=quiet_start, quiet_end=quiet_end)
 
         config = request.app[CONFIG_KEY]
         settings = await user_repo.get_user_settings(telegram_id, lang, config)

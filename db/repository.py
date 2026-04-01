@@ -115,9 +115,7 @@ class UserRepo:
         """Update the notification interval for a specific language."""
         await self._update_setting("notification_interval_minutes", minutes, telegram_id, language)
 
-    async def update_quiet_hours(
-        self, telegram_id: int, quiet_start: str = None, quiet_end: str = None, language: str = None
-    ):
+    async def update_quiet_hours(self, telegram_id: int, language: str, quiet_start: str = None, quiet_end: str = None):
         """Update the quiet hours during which notifications are suppressed."""
         fields = {}
         if quiet_start is not None:
@@ -318,6 +316,7 @@ class WordRepo:
 
     async def update_word_after_review(
         self,
+        user_id: int,
         word_id: int,
         repetitions: int,
         easiness: float,
@@ -331,13 +330,14 @@ class WordRepo:
                 SET repetitions = ?, easiness = ?, interval = ?, next_review = ?,
                     last_reviewed_at = ?,
                     started_at = COALESCE(started_at, ?)
-                WHERE id = ?""",
-            (repetitions, easiness, interval, next_review.isoformat(), now, now, word_id),
+                WHERE id = ? AND user_id = ?""",
+            (repetitions, easiness, interval, next_review.isoformat(), now, now, word_id, user_id),
         )
         await self.db.commit()
 
     async def undo_word_review(
         self,
+        user_id: int,
         word_id: int,
         repetitions: int,
         easiness: float,
@@ -351,8 +351,8 @@ class WordRepo:
             """UPDATE words
                 SET repetitions = ?, easiness = ?, interval = ?, next_review = ?,
                     last_reviewed_at = ?, started_at = ?
-                WHERE id = ?""",
-            (repetitions, easiness, interval, next_review, last_reviewed_at, started_at, word_id),
+                WHERE id = ? AND user_id = ?""",
+            (repetitions, easiness, interval, next_review, last_reviewed_at, started_at, word_id, user_id),
         )
         await self.db.commit()
 
