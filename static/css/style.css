@@ -278,8 +278,8 @@ body.no-nav {
 .stats-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-bottom: 16px;
+  gap: 8px;
+  margin-bottom: 24px;
 }
 
 .stat-pill {
@@ -340,9 +340,9 @@ body.no-nav {
 .progress-legend {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-  margin-top: 16px;
-  margin-bottom: 32px;
+  gap: 8px;
+  margin-top: 24px;
+  margin-bottom: 24px;
 }
 .progress-legend-item {
   flex-direction: column;
@@ -397,7 +397,7 @@ body.no-nav {
   font-size: var(--font-base);
   font-weight: var(--weight-bold);
   cursor: pointer;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
   letter-spacing: 0.01em;
   box-shadow: var(--shadow-low);
 }
@@ -436,7 +436,7 @@ body.no-nav {
 .capsule-wrapper {
   display: flex;
   justify-content: center;
-  gap: 12px;
+  gap: 8px;
   margin: 24px 0 24px;
 }
 .capsule {
@@ -642,7 +642,7 @@ body.no-nav {
   font-size: var(--font-sm);
   text-transform: uppercase;
   color: var(--hint);
-  margin: 16px 0 8px var(--gap);
+  margin: 24px 0 8px 0;
   letter-spacing: 0.07em;
   font-weight: var(--weight-semibold);
 }
@@ -830,6 +830,12 @@ body.no-nav {
 .not-loading .skeleton {
   display: none;
 }
+.today-stats {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin: 0 0 24px 0;
+}
 
 /* ── Toast (Modern Pill) ── */
 .toast {
@@ -922,7 +928,7 @@ body.theme-light .toast {
 .add-form {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
   margin-bottom: 0;
 }
 
@@ -990,7 +996,7 @@ body.theme-light .toast {
   color: var(--text);
   font-size: 17px;
   outline: none;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
   touch-action: manipulation;
   transition: var(--transition);
 }
@@ -1105,7 +1111,7 @@ mark {
 /* ── Double Picker ── */
 .picker-double {
   display: flex;
-  gap: 12px;
+  gap: 8px;
   margin-bottom: 24px;
 }
 .picker-column {
