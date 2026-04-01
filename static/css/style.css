@@ -264,15 +264,13 @@ body.no-nav {
 }
 
 /* ── Cards ── */
-.card,
-.settings-group {
+.card {
   padding: 20px;
   margin-bottom: var(--gap);
   box-shadow: var(--shadow-low);
 }
 .settings-group {
-  padding: 0 20px;
-  margin-bottom: 12px;
+  margin-bottom: 24px;
 }
 /* ── Stats grid ── */
 .stats-grid {
@@ -668,13 +666,17 @@ body.no-nav {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--space-md) 0;
-  border-bottom: 1px solid var(--row-divider);
+  padding: 16px 20px;
+  background: var(--glass-mid);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  margin-bottom: 8px;
   cursor: pointer;
+  transition: var(--transition);
 }
 .settings-row:last-child,
 .word-row:last-child {
-  border-bottom: none;
+  margin-bottom: 0;
 }
 .settings-row-left {
   display: flex;
@@ -915,22 +917,8 @@ body.theme-light .toast {
 .add-form {
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: 12px;
   margin-bottom: 0;
-}
-.add-form .form-input {
-  margin-bottom: 0;
-  padding: 18px 0;
-  background: none;
-  border: none;
-  border-radius: 0;
-  border-bottom: 1px solid var(--row-divider);
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  box-shadow: none;
-}
-.add-form .form-input:last-child {
-  border-bottom: none;
 }
 
 /* ── Edit / Picker sheets ── */
@@ -997,8 +985,15 @@ body.theme-light .toast {
   color: var(--text);
   font-size: 17px;
   outline: none;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
   touch-action: manipulation;
+  transition: var(--transition);
+}
+.form-input:focus {
+  border-color: var(--accent);
+}
+.form-input:last-child {
+  margin-bottom: 0;
 }
 .form-input::placeholder {
   color: var(--hint);
@@ -1021,7 +1016,21 @@ mark {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 16px 20px;
+  background: var(--glass-mid);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
   cursor: pointer;
+  transition: var(--transition);
+}
+.picker-trigger:active {
+  transform: scale(0.98);
+}
+.settings-row .picker-trigger {
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
 }
 .picker-trigger-placeholder {
   color: var(--hint);
