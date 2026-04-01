@@ -172,27 +172,29 @@ export async function addWordWithAI(word, btn) {
           <div class="word-row-content" data-word='${JSON.stringify(
             added,
           ).replace(/'/g, "&apos;")}'>
-            <div class="word-row-left">
-              <div class="word-row-main">${added.word}</div>
-              <div class="word-row-sub">${added.translation}</div>
+            <div class="word-row-text">
+              ${esc(added.word)}
+              ${
+                added.level
+                  ? `<span class="word-row-level">${esc(added.level)}</span>`
+                  : ""
+              }
             </div>
-            <div class="word-row-right">
-              <div class="word-row-level">${added.level || "—"}</div>
-            </div>
+            <div class="word-row-trans">${esc(added.translation)}</div>
           </div>
-          <button class="del-btn" data-id="${added.id}" onclick="deleteWord(${
-            added.id
-          })">
-            <svg class="u-svg-xs"><use href="#icon-close"></use></svg>
+          <button class="del-btn" data-id="${added.id}">
+            <svg class="u-svg-md"><use href="#icon-trash"></use></svg>
           </button>
         </div>
       `;
 
-      // Bind the click listener for editing
-      results.querySelector(".word-row-content").onclick = (e) => {
+      // Bind the click listeners
+      const row = results.querySelector(".word-row");
+      row.querySelector(".word-row-content").onclick = (e) => {
         const item = e.currentTarget;
         if (item.dataset.word) openEdit(JSON.parse(item.dataset.word));
       };
+      row.querySelector(".del-btn").onclick = () => deleteWord(added.id);
 
       state.currentStats = null; // Trigger home stats refresh
     } else {
@@ -271,16 +273,18 @@ export async function showTodayAdded() {
           /'/g,
           "&apos;",
         )}'>
-          <div class="word-row-left">
-            <div class="word-row-main">${esc(w.word)}</div>
-            <div class="word-row-sub">${esc(w.translation)}</div>
+          <div class="word-row-text">
+            ${esc(w.word)}
+            ${
+              w.level
+                ? `<span class="word-row-level">${esc(w.level)}</span>`
+                : ""
+            }
           </div>
-          <div class="word-row-right">
-            <div class="word-row-level">${w.level || "—"}</div>
-          </div>
+          <div class="word-row-trans">${esc(w.translation)}</div>
         </div>
         <button class="del-btn" data-id="${w.id}">
-          <svg class="u-svg-xs"><use href="#icon-close"></use></svg>
+          <svg class="u-svg-md"><use href="#icon-trash"></use></svg>
         </button>
       </div>
     `,
@@ -354,7 +358,11 @@ async function loadSearch(q) {
         )}'>
           <div class="word-row-text">
             ${highlight(w.word, q)}
-            ${w.level ? `<span class="word-row-level">${w.level}</span>` : ""}
+            ${
+              w.level
+                ? `<span class="word-row-level">${esc(w.level)}</span>`
+                : ""
+            }
           </div>
           <div class="word-row-trans">${highlight(w.translation, q)}</div>
         </div>
@@ -377,7 +385,7 @@ async function loadSearch(q) {
   }
 }
 
-async function deleteWord(id) {
+export async function deleteWord(id) {
   try {
     await API.delete(`/api/words/${id}`);
     document.getElementById(`wr-${id}`)?.remove();
