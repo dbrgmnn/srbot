@@ -40,9 +40,10 @@ export const UI = {
 
     if (this._toastTimeout) clearTimeout(this._toastTimeout);
 
-    const iconHtml = `<div class="toast-icon">${
-      ICONS[type] || ICONS.info
-    }</div>`;
+    const iconHtml =
+      type === "stats"
+        ? ""
+        : `<div class="toast-icon">${ICONS[type] || ICONS.info}</div>`;
     el.innerHTML = `${iconHtml}<div class="toast-text">${msg}</div>`;
     el.className = `toast toast-${type} show`;
 
