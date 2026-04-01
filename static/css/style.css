@@ -219,34 +219,18 @@ body.no-nav {
   color: var(--color-known);
   filter: drop-shadow(0 0 5px rgba(48, 209, 88, 0.4));
 }
+.stat-pill-icon-learned {
+  background: none;
+  color: var(--color-mastered);
+  filter: drop-shadow(0 0 5px rgba(191, 90, 242, 0.4));
+}
+.stat-pill-icon-added {
+  background: none;
+  color: var(--color-new);
+  filter: drop-shadow(0 0 5px rgba(142, 142, 147, 0.4));
+}
 
 /* ── Progress block ── */
-.progress-total {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--text-faint);
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-  margin-bottom: 14px;
-  text-align: center;
-  font-variant-numeric: tabular-nums;
-}
-.progress-total span {
-  color: var(--text-faint);
-  opacity: 0.8;
-}
-.progress-bar {
-  height: 6px;
-  border-radius: var(--radius-sm);
-  display: flex;
-  overflow: hidden;
-  margin-bottom: 14px;
-  background: var(--cell-bg);
-}
-.progress-bar-seg {
-  height: 100%;
-  transition: width 0.4s ease;
-}
 .progress-legend {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -741,12 +725,7 @@ body.no-nav {
   height: 28px;
   border-radius: var(--radius-sm);
 }
-.skeleton-total {
-  width: 80px;
-  height: 12px;
-  margin: 0 auto 14px;
-  display: block;
-}
+
 .skeleton-bar {
   width: 100%;
   height: 6px;
@@ -762,8 +741,6 @@ body.no-nav {
 /* Hide real content when loading */
 .loading .stat-val,
 .loading .stat-pill-icon,
-.loading .progress-total,
-.loading .progress-bar,
 .loading .progress-legend,
 .loading .today-stats {
   display: none;

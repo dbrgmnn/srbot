@@ -147,8 +147,6 @@ function renderStats() {
   if (elKnown) elKnown.textContent = st_known;
   const elMastered = document.getElementById("count-mastered");
   if (elMastered) elMastered.textContent = st_mastered;
-  const elTotal = document.getElementById("count-total");
-  if (elTotal) elTotal.textContent = total;
 
   const statTodayReviewed = document.getElementById("stat-today-reviewed");
   if (statTodayReviewed)
@@ -156,29 +154,6 @@ function renderStats() {
 
   const statTodayAdded = document.getElementById("stat-today-added");
   if (statTodayAdded) statTodayAdded.textContent = stats.today_added || 0;
-
-  // Bar widths
-  const pct = (n) => (total > 0 ? `${((n / total) * 100).toFixed(1)}%` : "0%");
-  const barNew = document.getElementById("bar-new");
-  if (barNew) {
-    barNew.style.width = pct(st_new);
-    barNew.style.background = "#8e8e93";
-  }
-  const barLearning = document.getElementById("bar-learning");
-  if (barLearning) {
-    barLearning.style.width = pct(st_learning);
-    barLearning.style.background = "#ff9f0a";
-  }
-  const barKnown = document.getElementById("bar-known");
-  if (barKnown) {
-    barKnown.style.width = pct(st_known);
-    barKnown.style.background = "#30d158";
-  }
-  const barMastered = document.getElementById("bar-mastered");
-  if (barMastered) {
-    barMastered.style.width = pct(st_mastered);
-    barMastered.style.background = "#bf5af2";
-  }
 }
 
 /** --- Home Screen --- */
