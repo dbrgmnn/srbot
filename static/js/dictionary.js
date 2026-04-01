@@ -75,58 +75,6 @@ function parseText(text) {
 
 let isSubmitting = false;
 
-export async function submitWords() {
-  if (isSubmitting) return;
-  const wordEl = document.getElementById("add-word");
-  const transEl = document.getElementById("add-translation");
-  const exEl = document.getElementById("add-example");
-  const levelEl = document.getElementById("add-level");
-
-  const word = wordEl.value.trim();
-  const translation = transEl.value.trim();
-  const example = exEl.value.trim() || null;
-  const level = levelEl.value.trim() || null;
-
-  if (!word || !translation) {
-    toast(T.WORD_REQUIRED, "error");
-    return;
-  }
-
-  isSubmitting = true;
-  try {
-    const res = await API.post("/api/words", {
-      words: [{ word, translation, example, level }],
-    });
-    if (res.result && res.result.added) {
-      UI.toast(T.WORD_ADDED(word), "success");
-      wordEl.value = "";
-      transEl.value = "";
-      exEl.value = "";
-      levelEl.value = "";
-      const levelDisp = document.getElementById("add-level-display");
-      if (levelDisp) {
-        levelDisp.textContent = "Level";
-        levelDisp.classList.add("picker-trigger-placeholder");
-      }
-
-      state.currentStats = null;
-      closeAddSheet();
-
-      // If user is on search screen, refresh results
-      const searchInput = document.getElementById("search-input");
-      if (searchInput && searchInput.value) {
-        loadSearch(searchInput.value);
-      }
-    } else {
-      UI.toast(T.WORD_DUPLICATE, "error");
-    }
-  } catch (e) {
-    UI.toast(T.WORD_ADD_FAIL, "error");
-  } finally {
-    isSubmitting = false;
-  }
-}
-
 export async function handleFileUpload(input) {
   const file = input.files[0];
   if (!file) return;
@@ -143,7 +91,6 @@ export async function handleFileUpload(input) {
       if (res.result && res.result.added) {
         UI.toast(T.CSV_ADDED(res.result.added), "success");
         state.currentStats = null;
-        closeAddSheet();
       } else {
         UI.toast(T.WORD_DUPLICATE, "error");
       }
@@ -197,28 +144,6 @@ export function closeEdit() {
   unlockScroll();
 }
 
-export function openAddSheet() {
-  document.getElementById("add-overlay").classList.add("open");
-  document.getElementById("add-sheet").classList.add("open");
-  document.getElementById("add-word").focus();
-  lockScroll();
-}
-
-export function openAddWithValue(val) {
-  openAddSheet();
-  const input = document.getElementById("add-word");
-  if (input) {
-    input.value = val;
-    input.dispatchEvent(new Event("input"));
-  }
-}
-
-export function closeAddSheet() {
-  document.getElementById("add-overlay").classList.remove("open");
-  document.getElementById("add-sheet").classList.remove("open");
-  unlockScroll();
-}
-
 export async function addWordWithAI(word, btn) {
   if (isSubmitting || !word) return;
   isSubmitting = true;
@@ -232,11 +157,37 @@ export async function addWordWithAI(word, btn) {
     const res = await API.post("/api/words/ai", { word });
     if (res.ok && res.result) {
       const added = res.result;
-      UI.toast(`Added: ${added.word} — ${added.translation}`, "success");
+      UI.toast(`Added: ${added.word}`, "success");
 
-      // Refresh search immediately to show the new word
+      // Clear input and hide the clear button
       const input = document.getElementById("search-input");
-      if (input) loadSearch(input.value);
+      const clearBtn = document.getElementById("search-clear");
+      if (input) input.value = "";
+      if (clearBtn) clearBtn.classList.add("u-hidden");
+
+      // Show the newly added word as the sole result
+      const results = document.getElementById("search-results");
+      results.innerHTML = `
+        <div class="word-row">
+          <div class="word-row-content" data-word='${JSON.stringify(
+            added,
+          ).replace(/'/g, "&apos;")}'>
+            <div class="word-row-left">
+              <div class="word-row-main">${added.word}</div>
+              <div class="word-row-sub">${added.translation}</div>
+            </div>
+            <div class="word-row-right">
+              <div class="word-row-level">${added.level || "—"}</div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Bind the click listener
+      results.querySelector(".word-row-content").onclick = (e) => {
+        const item = e.currentTarget;
+        if (item.dataset.word) openEdit(JSON.parse(item.dataset.word));
+      };
 
       state.currentStats = null; // Trigger home stats refresh
     } else {
@@ -320,13 +271,13 @@ async function loadSearch(q) {
     const data = await API.get(`/api/words/search?q=${encodeURIComponent(q)}`);
     if (data.result.words.length === 0) {
       el.innerHTML = `
-        <div class="settings-row" style="padding: 16px;">
-          <div class="settings-row-left">
-            <div class="settings-label" style="font-weight: 600; color: var(--text);">No matches for "${esc(
-              q,
-            )}"</div>
+        <div class="settings-row" style="padding: 12px 16px; gap: 12px;">
+          <div class="settings-row-left" style="min-width: 0; flex: 1;">
+            <div class="settings-label" style="font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+              "${esc(q)}"
+            </div>
           </div>
-          <button class="btn btn-sm" style="width: auto; margin: 0; padding: 8px 20px;" onclick="addWordWithAI('${esc(
+          <button class="btn btn-sm" style="width: auto; margin: 0; padding: 10px 24px; flex-shrink: 0;" onclick="addWordWithAI('${esc(
             q,
           )}', this)">
             Add

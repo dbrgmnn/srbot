@@ -82,6 +82,13 @@
   --glass-base: var(--glass) var(--blur);
 }
 
+.settings-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 0 4px;
+}
+
 /* ── Design System: Foundation ── */
 .nav,
 .u-glass,

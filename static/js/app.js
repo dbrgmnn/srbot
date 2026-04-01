@@ -1,15 +1,12 @@
 import {
   addWordWithAI,
   clearSearch,
-  closeAddSheet,
   closeEdit,
   handleFileUpload,
   onSearchInput,
-  openAddSheet,
-  openAddWithValue,
+  openEdit,
   saveEdit,
   shareWords,
-  submitWords,
 } from "./dictionary.js";
 import { exitPractice, playAudio, startPractice, undo } from "./practice.js";
 import {
@@ -63,17 +60,14 @@ window.undo = undo;
 window.playAudio = playAudio;
 
 // Dictionary
-window.submitWords = submitWords;
 window.handleFileUpload = handleFileUpload;
 window.onSearchInput = onSearchInput;
 window.clearSearch = clearSearch;
 window.saveEdit = saveEdit;
 window.closeEdit = closeEdit;
-window.openAddSheet = openAddSheet;
-window.openAddWithValue = openAddWithValue;
 window.addWordWithAI = addWordWithAI;
-window.closeAddSheet = closeAddSheet;
 window.shareWords = shareWords;
+window.openEdit = openEdit;
 
 // Settings
 window.openPicker = openPicker;

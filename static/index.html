@@ -489,6 +489,26 @@
           </div>
         </div>
       </div>
+      <div class="settings-actions u-mt24">
+        <button
+          class="btn btn-secondary"
+          onclick="document.getElementById('csv-input').click()"
+        >
+          <svg class="u-svg-xs u-mr8"><use href="#icon-upload"></use></svg>
+          Import
+        </button>
+        <button class="btn btn-secondary" onclick="shareWords()">
+          <svg class="u-svg-xs u-mr8"><use href="#icon-export"></use></svg>
+          Export
+        </button>
+      </div>
+      <input
+        type="file"
+        id="csv-input"
+        accept=".csv"
+        style="display: none"
+        onchange="handleFileUpload(this)"
+      />
     </div>
 
     <!-- API Access Sheet -->
@@ -552,61 +572,6 @@
         onclick="showScreen('settings')"
       >
         <svg class="u-svg-lg"><use href="#icon-settings"></use></svg>
-      </button>
-    </div>
-
-    <!-- Add Sheet -->
-    <div id="add-overlay" class="edit-overlay" onclick="closeAddSheet()"></div>
-    <div id="add-sheet" class="edit-sheet">
-      <div class="edit-sheet-title">Add Word</div>
-      <div class="add-form">
-        <input
-          type="text"
-          id="add-word"
-          class="form-input"
-          placeholder="Word"
-        />
-        <input
-          type="text"
-          id="add-translation"
-          class="form-input"
-          placeholder="Translate"
-        />
-        <input
-          type="text"
-          id="add-example"
-          class="form-input"
-          placeholder="Example"
-        />
-        <div
-          id="add-level-trigger"
-          class="form-input picker-trigger"
-          onclick="openPicker('level', 'add')"
-        >
-          <span id="add-level-display" class="picker-trigger-placeholder"
-            >Level</span
-          >
-          <span class="picker-trigger-arrow">›</span>
-        </div>
-        <input type="hidden" id="add-level" value="" />
-      </div>
-
-      <button class="btn" onclick="submitWords()">Add Item</button>
-
-      <div class="capsule-wrapper u-m0">
-        <label class="capsule" for="file-input">
-          <svg class="u-svg-xs"><use href="#icon-upload"></use></svg>
-          Upload CSV
-        </label>
-      </div>
-      <input
-        type="file"
-        id="file-input"
-        accept=".csv,.txt"
-        onchange="handleFileUpload(this)"
-      />
-      <button class="btn btn-secondary u-mt8" onclick="closeAddSheet()">
-        Cancel
       </button>
     </div>
 
