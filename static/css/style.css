@@ -84,7 +84,14 @@
 
 /* ── Design System: Foundation ── */
 .nav,
+.u-glass,
 .u-glass-mid,
+.card,
+.settings-group,
+.stat-pill,
+.form-input,
+.word-card::before,
+.word-row-level,
 .picker-list-mini,
 .csv-preview,
 .capsule,
@@ -94,30 +101,13 @@
   backdrop-filter: var(--blur);
   -webkit-backdrop-filter: var(--blur);
   border: 1px solid var(--glass-border);
-}
-
-.u-glass,
-.card,
-.settings-group,
-.stat-pill,
-.form-input,
-.word-card::before,
-.word-row-level {
-  background: var(--glass);
-  backdrop-filter: var(--blur);
-  -webkit-backdrop-filter: var(--blur);
-  border: 1px solid var(--glass-border);
+  box-shadow:
+    var(--shadow-mid),
+    inset 0 1px 0 var(--glass-shine);
 }
 
 .form-input {
   background: var(--bg2) !important;
-}
-
-.nav,
-.u-glass-mid {
-  box-shadow:
-    var(--shadow-mid),
-    inset 0 1px 0 var(--glass-shine);
 }
 
 .card,
@@ -786,7 +776,7 @@ body.no-nav {
 }
 .skeleton {
   background: var(--glass-mid);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   animation: skeleton-pulse 1.5s var(--ease-standard) infinite;
   display: inline-block;
   pointer-events: none;
@@ -1008,8 +998,8 @@ body.theme-light .toast {
 mark {
   background: var(--mark-bg);
   color: var(--text);
-  border-radius: 3px;
-  padding: 0 2px;
+  border-radius: var(--radius-sm);
+  padding: 0 4px;
 }
 
 /* ── Picker ── */
@@ -1141,7 +1131,7 @@ body.theme-light {
   --hint: var(--tg-theme-hint-color, #8e8e93);
   --accent: var(--tg-theme-button-color, #007aff);
   --btn-text: #ffffff;
-  --glass: rgba(0, 0, 0, 0.04);
+  --glass: rgba(0, 0, 0, 0.07);
   --glass-mid: rgba(0, 0, 0, 0.07);
   --glass-border: rgba(0, 0, 0, 0.08);
   --glass-shine: rgba(255, 255, 255, 0.5);
@@ -1165,6 +1155,12 @@ body.theme-light {
 }
 
 /* Light theme toast adjustments */
+body.theme-light .toast {
+  background: rgba(255, 255, 255, 0.9);
+  color: #000000;
+  border-color: rgba(0, 0, 0, 0.12);
+  box-shadow: var(--shadow-high);
+}
 body.theme-light .toast-stats .toast-icon {
   color: rgba(0, 0, 0, 0.4);
 }
