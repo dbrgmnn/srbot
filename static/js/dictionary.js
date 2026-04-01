@@ -168,7 +168,7 @@ export async function addWordWithAI(word, btn) {
       // Show the newly added word as the sole result
       const results = document.getElementById("search-results");
       results.innerHTML = `
-        <div class="word-row">
+        <div class="word-row" id="wr-${added.id}">
           <div class="word-row-content" data-word='${JSON.stringify(
             added,
           ).replace(/'/g, "&apos;")}'>
@@ -180,10 +180,15 @@ export async function addWordWithAI(word, btn) {
               <div class="word-row-level">${added.level || "—"}</div>
             </div>
           </div>
+          <button class="del-btn" data-id="${added.id}" onclick="deleteWord(${
+            added.id
+          })">
+            <svg class="u-svg-xs"><use href="#icon-close"></use></svg>
+          </button>
         </div>
       `;
 
-      // Bind the click listener
+      // Bind the click listener for editing
       results.querySelector(".word-row-content").onclick = (e) => {
         const item = e.currentTarget;
         if (item.dataset.word) openEdit(JSON.parse(item.dataset.word));
@@ -237,6 +242,59 @@ export async function saveEdit() {
     );
   } finally {
     isSubmitting = false;
+  }
+}
+
+export async function showTodayAdded() {
+  window.showScreen("search");
+  const results = document.getElementById("search-results");
+  const input = document.getElementById("search-input");
+  const clearBtn = document.getElementById("search-clear");
+
+  if (input) input.value = "";
+  if (clearBtn) clearBtn.classList.add("u-hidden");
+  if (results)
+    results.innerHTML = `<div class="u-flex-center u-p24"><span class="spinner"></span></div>`;
+
+  try {
+    const data = await API.get("/api/words/search?filter=today");
+    if (!data.result.words.length) {
+      results.innerHTML = `<div class="u-p32 u-text-center u-hint">No words added today yet</div>`;
+      return;
+    }
+
+    results.innerHTML = data.result.words
+      .map(
+        (w) => `
+      <div class="word-row" id="wr-${w.id}">
+        <div class="word-row-content" data-word='${JSON.stringify(w).replace(
+          /'/g,
+          "&apos;",
+        )}'>
+          <div class="word-row-left">
+            <div class="word-row-main">${esc(w.word)}</div>
+            <div class="word-row-sub">${esc(w.translation)}</div>
+          </div>
+          <div class="word-row-right">
+            <div class="word-row-level">${w.level || "—"}</div>
+          </div>
+        </div>
+        <button class="del-btn" data-id="${w.id}">
+          <svg class="u-svg-xs"><use href="#icon-close"></use></svg>
+        </button>
+      </div>
+    `,
+      )
+      .join("");
+
+    results.querySelectorAll(".word-row-content").forEach((item) => {
+      item.onclick = () => openEdit(JSON.parse(item.dataset.word));
+    });
+    results.querySelectorAll(".del-btn").forEach((btn) => {
+      btn.onclick = () => deleteWord(btn.dataset.id);
+    });
+  } catch (e) {
+    UI.toast(T.SEARCH_FAIL, "error");
   }
 }
 

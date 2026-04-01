@@ -8,7 +8,7 @@ from aiohttp import web
 from api.app_keys import TRANSLATOR_KEY
 from api.auth import verify_bearer_token
 from core.languages import LANGUAGES
-from db.repository import WordRepo
+from db.repository import UserRepo, WordRepo
 
 logger = logging.getLogger(__name__)
 
@@ -228,8 +228,19 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         user_id = request["user_id"]
         lang = request["language"]
         query = request.query.get("q", "")
+        filter_type = request.query.get("filter", "")
+
         word_repo = WordRepo(db)
-        words = await word_repo.search_words(user_id, lang, query)
+
+        if filter_type == "today":
+            # Need timezone from user_settings for correctness
+            user_repo = UserRepo(db)
+            settings = await user_repo.get_user_settings(request["telegram_id"], lang)
+            tz_name = settings.get("timezone", "UTC")
+            words = await word_repo.get_today_added_words(user_id, lang, tz_name)
+        else:
+            words = await word_repo.search_words(user_id, lang, query)
+
         return web.json_response({"ok": True, "result": {"words": words}})
 
     async def export_words(request: web.Request) -> web.Response:
