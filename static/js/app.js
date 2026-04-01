@@ -1,8 +1,11 @@
 import {
   clearSearch,
+  closeAddSheet,
   closeEdit,
   handleFileUpload,
   onSearchInput,
+  openAddSheet,
+  openAddWithValue,
   saveEdit,
   shareWords,
   submitWords,
@@ -65,6 +68,9 @@ window.onSearchInput = onSearchInput;
 window.clearSearch = clearSearch;
 window.saveEdit = saveEdit;
 window.closeEdit = closeEdit;
+window.openAddSheet = openAddSheet;
+window.openAddWithValue = openAddWithValue;
+window.closeAddSheet = closeAddSheet;
 window.shareWords = shareWords;
 
 // Settings

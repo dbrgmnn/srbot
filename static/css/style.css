@@ -132,7 +132,14 @@
 .btn-round,
 .picker-list-mini,
 .csv-preview,
-.form-input {
+.form-input,
+.word-card,
+.word-card::before,
+.settings-row,
+.word-row,
+.progress-legend-item,
+.u-glass,
+.row-btn {
   border-radius: var(--radius-md);
 }
 
@@ -254,12 +261,32 @@ body.no-nav {
   align-items: center;
   justify-content: center;
   min-height: calc(env(safe-area-inset-top) + 44px);
+  position: relative;
 }
 .header-title {
   font-size: var(--font-md);
   font-weight: var(--weight-semibold);
   color: var(--text-muted);
   letter-spacing: 0.02em;
+}
+.header-action {
+  position: absolute;
+  right: 16px;
+  bottom: 8px;
+  background: none;
+  border: none;
+  color: var(--accent);
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity 0.2s;
+}
+.header-action:active {
+  opacity: 0.5;
+  transform: scale(0.9);
 }
 .header-centered {
   justify-content: center;

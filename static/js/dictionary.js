@@ -110,6 +110,13 @@ export async function submitWords() {
       }
 
       state.currentStats = null;
+      closeAddSheet();
+
+      // If user is on search screen, refresh results
+      const searchInput = document.getElementById("search-input");
+      if (searchInput && searchInput.value) {
+        loadSearch(searchInput.value);
+      }
     } else {
       UI.toast(T.WORD_DUPLICATE, "error");
     }
@@ -136,6 +143,7 @@ export async function handleFileUpload(input) {
       if (res.result && res.result.added) {
         UI.toast(T.CSV_ADDED(res.result.added), "success");
         state.currentStats = null;
+        closeAddSheet();
       } else {
         UI.toast(T.WORD_DUPLICATE, "error");
       }
@@ -186,6 +194,28 @@ export function openEdit(w) {
 export function closeEdit() {
   document.getElementById("edit-overlay").classList.remove("open");
   document.getElementById("edit-sheet").classList.remove("open");
+  unlockScroll();
+}
+
+export function openAddSheet() {
+  document.getElementById("add-overlay").classList.add("open");
+  document.getElementById("add-sheet").classList.add("open");
+  document.getElementById("add-word").focus();
+  lockScroll();
+}
+
+export function openAddWithValue(val) {
+  openAddSheet();
+  const input = document.getElementById("add-word");
+  if (input) {
+    input.value = val;
+    input.dispatchEvent(new Event("input"));
+  }
+}
+
+export function closeAddSheet() {
+  document.getElementById("add-overlay").classList.remove("open");
+  document.getElementById("add-sheet").classList.remove("open");
   unlockScroll();
 }
 
@@ -252,6 +282,18 @@ async function loadSearch(q) {
   }
   try {
     const data = await API.get(`/api/words/search?q=${encodeURIComponent(q)}`);
+    if (data.result.words.length === 0) {
+      el.innerHTML = `
+        <div class="settings-row" onclick="openAddWithValue('${esc(q)}')">
+          <div class="settings-row-left">
+            <div class="settings-icon"><svg class="u-svg-md"><use href="#icon-add"></use></svg></div>
+            <div class="settings-label">Add "${esc(q)}"?</div>
+          </div>
+          <div class="picker-trigger-arrow">›</div>
+        </div>
+      `;
+      return;
+    }
     el.innerHTML = data.result.words
       .map(
         (w) => `
