@@ -421,27 +421,29 @@ export async function showTodayLearned() {
           /'/g,
           "&apos;",
         )}'>
-          <div class="word-info">
-            <div class="word-term">${w.word}</div>
-            <div class="word-trans">${w.translation}</div>
+          <div class="word-row-text">
+            ${esc(w.word)}
+            ${
+              w.level
+                ? `<span class="word-row-level">${esc(w.level)}</span>`
+                : ""
+            }
           </div>
-          <div class="word-meta">
-            ${w.level ? `<span class="word-badge">${w.level}</span>` : ""}
-            <svg class="u-svg-xs u-hint"><use href="#icon-chevron-right"></use></svg>
-          </div>
+          <div class="word-row-trans">${esc(w.translation)}</div>
         </div>
+        <button class="del-btn" data-id="${w.id}">
+          <svg class="u-svg-md"><use href="#icon-trash"></use></svg>
+        </button>
       </div>
     `,
       )
       .join("");
 
-    // Add click listeners
-    const rows = results.querySelectorAll(".word-row-content");
-    rows.forEach((row) => {
-      row.onclick = () => {
-        const w = JSON.parse(row.dataset.word);
-        openEdit(w);
-      };
+    results.querySelectorAll(".word-row-content").forEach((item) => {
+      item.onclick = () => openEdit(JSON.parse(item.dataset.word));
+    });
+    results.querySelectorAll(".del-btn").forEach((btn) => {
+      btn.onclick = () => deleteWord(btn.dataset.id);
     });
   } catch (e) {
     console.error("Show today learned error:", e);
