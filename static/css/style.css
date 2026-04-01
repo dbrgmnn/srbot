@@ -340,9 +340,9 @@ body.no-nav {
 .progress-legend {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 0;
-  margin-top: 4px;
-  margin-bottom: 4px;
+  gap: 12px;
+  margin-top: 24px;
+  margin-bottom: 24px;
 }
 .progress-legend-item {
   flex-direction: column;
@@ -363,6 +363,8 @@ body.no-nav {
   font-weight: 700;
   letter-spacing: -0.3px;
   font-variant-numeric: tabular-nums;
+  line-height: 1;
+  margin-bottom: 2px;
 }
 
 /* ── Week activity grid ── */
