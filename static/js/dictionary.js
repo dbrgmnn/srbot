@@ -267,7 +267,7 @@ async function loadSearch(q) {
           <div class="word-row-trans">${highlight(w.translation, q)}</div>
         </div>
         <button class="del-btn" data-id="${w.id}">
-          <svg><use href="#icon-trash"></use></svg>
+          <svg class="u-svg-md"><use href="#icon-trash"></use></svg>
         </button>
       </div>
     `,

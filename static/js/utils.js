@@ -23,10 +23,10 @@ export function unlockScroll() {
 }
 
 const ICONS = {
-  success: '<svg><use href="#icon-learned"></use></svg>',
-  error: '<svg><use href="#icon-close"></use></svg>',
-  info: '<svg><use href="#icon-review"></use></svg>',
-  stats: '<svg><use href="#icon-settings"></use></svg>',
+  success: '<svg class="u-svg-md"><use href="#icon-learned"></use></svg>',
+  error: '<svg class="u-svg-md"><use href="#icon-close"></use></svg>',
+  info: '<svg class="u-svg-md"><use href="#icon-review"></use></svg>',
+  stats: '<svg class="u-svg-md"><use href="#icon-settings"></use></svg>',
 };
 
 /** ── UI Management ── */
