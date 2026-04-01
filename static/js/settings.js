@@ -418,7 +418,7 @@ export function openDeleteAllSheet() {
 
   _deleteConfirmStr = `delete ${count}`;
 
-  if (titleEl) titleEl.textContent = "Erase Data";
+  if (titleEl) titleEl.textContent = `${flag} ${langName} ${count}`;
 
   if (info) {
     info.innerHTML = `
