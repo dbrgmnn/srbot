@@ -93,6 +93,7 @@
 .word-row,
 .word-row-level,
 .picker-trigger,
+.progress-legend-item,
 .capsule,
 .btn-round,
 .row-btn {
@@ -345,6 +346,8 @@ body.no-nav {
 }
 .progress-legend-item {
   flex-direction: column;
+  padding: 12px 8px;
+  border-radius: var(--radius-md);
   gap: 4px;
 }
 .progress-legend-lbl {
@@ -356,7 +359,7 @@ body.no-nav {
   opacity: 0.5;
 }
 .progress-legend-num {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 700;
   letter-spacing: -0.3px;
   font-variant-numeric: tabular-nums;
