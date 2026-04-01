@@ -175,14 +175,8 @@ export async function loadHome() {
     state.practiceMode = init.settings.practice_mode;
 
     const stats = init.stats;
-    const due = stats.due || 0;
-    const newWords = stats.st_new || 0;
-    const todayDone = stats.today_new || 0;
-    const limit = init.settings.daily_limit;
-    const availableNew = Math.max(0, limit - todayDone);
-
-    state.sessionTotal = due + Math.min(newWords, availableNew);
-    state.currentStats = stats; // Triggers renderStats and updateCountdowns
+    state.sessionTotal = stats.session_total || 0;
+    state.currentStats = stats;
 
     if (!countdownInterval) {
       countdownInterval = setInterval(updateCountdowns, 30000);

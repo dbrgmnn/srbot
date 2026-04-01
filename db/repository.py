@@ -376,7 +376,8 @@ class WordRepo:
                     COUNT(CASE WHEN started_at IS NOT NULL AND interval < 5 THEN 1 END) as st_learning,
                     COUNT(CASE WHEN interval >= 5 AND interval < 30 THEN 1 END) as st_known,
                     COUNT(CASE WHEN interval >= 30 THEN 1 END) as st_mastered,
-                    MIN(CASE WHEN started_at IS NOT NULL AND next_review > ? THEN next_review END) as next_due_at
+                    MIN(CASE WHEN started_at IS NOT NULL AND next_review > ? THEN next_review END) as next_due_at,
+                    (SELECT daily_limit FROM user_settings WHERE user_id = ? AND language = ?) as daily_limit
                 FROM words WHERE user_id = ? AND language = ?""",
             (
                 now_utc.isoformat(),
@@ -384,6 +385,8 @@ class WordRepo:
                 today_start_utc.isoformat(),
                 today_start_utc.isoformat(),
                 now_utc.isoformat(),
+                user_id,
+                language,
                 user_id,
                 language,
             ),
@@ -403,10 +406,21 @@ class WordRepo:
             "st_known": 0,
             "st_mastered": 0,
             "next_due_at": None,
+            "session_total": 0,
             "next_day_start_utc": next_day_start_utc.isoformat(),
         }
         if row:
-            res = {**defaults, **{k: v for k, v in dict(row).items() if v is not None}}
+            data = dict(row)
+            # Calculate session_total in Python for consistency with practice logic
+            due_count = data.get("due") or 0
+            new_count = data.get("st_new") or 0
+            today_done = data.get("today_new") or 0
+            limit = data.get("daily_limit") or 20
+
+            available_new = max(0, min(new_count, limit - today_done))
+            data["session_total"] = due_count + available_new
+
+            res = {**defaults, **{k: v for k, v in data.items() if v is not None}}
             res["next_day_start_utc"] = next_day_start_utc.isoformat()
             return res
         return defaults
