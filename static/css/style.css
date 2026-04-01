@@ -92,8 +92,6 @@
 .form-input,
 .word-card::before,
 .word-row-level,
-.picker-list-mini,
-.csv-preview,
 .capsule,
 .btn-round,
 .row-btn {
@@ -104,6 +102,21 @@
   box-shadow:
     var(--shadow-mid),
     inset 0 1px 0 var(--glass-shine);
+}
+
+.csv-preview,
+.picker-list-mini {
+  background: var(--cell-bg);
+  border-radius: var(--radius-md);
+}
+
+.csv-preview {
+  padding: var(--space-md);
+  margin-top: var(--space-md);
+  font-size: var(--font-xs);
+  color: var(--text-secondary);
+  overflow-x: auto;
+  white-space: pre;
 }
 
 .form-input {
@@ -213,8 +226,6 @@ body.no-nav {
   opacity: 0.95;
 }
 .nav-btn svg {
-  width: 22px;
-  height: 22px;
   stroke-width: var(--icon-weight);
 }
 
@@ -671,8 +682,6 @@ body.no-nav {
   gap: 12px;
 }
 .settings-icon {
-  width: 24px;
-  height: 24px;
   flex-shrink: 0;
   color: var(--hint);
 }
@@ -856,8 +865,6 @@ body.no-nav {
   flex-shrink: 0;
 }
 .toast-icon svg {
-  width: 16px;
-  height: 16px;
   stroke-width: var(--icon-weight);
 }
 
@@ -936,7 +943,14 @@ body.theme-light .toast {
   letter-spacing: 0.02em;
 }
 .edit-sheet .settings-group {
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
   margin-bottom: 24px;
+  padding: 0;
+}
+.edit-sheet .settings-group .settings-row:last-child {
+  border-bottom: 1px solid var(--row-divider);
 }
 .edit-overlay {
   display: none;
@@ -1095,6 +1109,7 @@ mark {
   font-weight: 600;
 }
 .picker-list-mini {
+  background: var(--cell-bg);
   height: 220px;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
