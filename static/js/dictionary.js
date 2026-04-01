@@ -219,6 +219,42 @@ export function closeAddSheet() {
   unlockScroll();
 }
 
+export async function addWordWithAI(word, btn) {
+  if (isSubmitting || !word) return;
+  isSubmitting = true;
+
+  const originalContent = btn.innerHTML;
+  btn.classList.add("is-loading");
+  btn.disabled = true;
+  btn.innerHTML = `<span class="spinner"></span> Generating...`;
+
+  try {
+    const res = await API.post("/api/words/ai", { word });
+    if (res.ok && res.result) {
+      const added = res.result;
+      UI.toast(`Added: ${added.word} — ${added.translation}`, "success");
+
+      // Refresh search immediately to show the new word
+      const input = document.getElementById("search-input");
+      if (input) loadSearch(input.value);
+
+      state.currentStats = null; // Trigger home stats refresh
+    } else {
+      UI.toast(
+        res.error === "duplicate" ? T.WORD_DUPLICATE : T.WORD_ADD_FAIL,
+        "error",
+      );
+    }
+  } catch (e) {
+    UI.toast(T.WORD_ADD_FAIL, "error");
+  } finally {
+    isSubmitting = false;
+    btn.classList.remove("is-loading");
+    btn.disabled = false;
+    btn.innerHTML = originalContent;
+  }
+}
+
 export async function saveEdit() {
   if (isSubmitting) return;
   const word = document.getElementById("edit-word").value.trim();
@@ -284,12 +320,17 @@ async function loadSearch(q) {
     const data = await API.get(`/api/words/search?q=${encodeURIComponent(q)}`);
     if (data.result.words.length === 0) {
       el.innerHTML = `
-        <div class="settings-row" onclick="openAddWithValue('${esc(q)}')">
+        <div class="settings-row" style="padding: 16px;">
           <div class="settings-row-left">
-            <div class="settings-icon"><svg class="u-svg-md"><use href="#icon-add"></use></svg></div>
-            <div class="settings-label">Add "${esc(q)}"?</div>
+            <div class="settings-label" style="font-weight: 600; color: var(--text);">No matches for "${esc(
+              q,
+            )}"</div>
           </div>
-          <div class="picker-trigger-arrow">›</div>
+          <button class="btn btn-sm" style="width: auto; margin: 0; padding: 8px 20px;" onclick="addWordWithAI('${esc(
+            q,
+          )}', this)">
+            Add
+          </button>
         </div>
       `;
       return;

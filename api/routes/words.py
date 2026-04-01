@@ -40,32 +40,16 @@ def _clean_words(raw: list) -> list:
 def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
     """Register word management routes."""
 
-    async def add_external_words(request: web.Request) -> web.Response:
-        """Process a single word from external source: translate, enrich via AI, and save."""
-        user_id = await verify_bearer_token(request, db)
-        if not user_id:
-            return web.json_response({"ok": False, "error": "unauthorized"}, status=401)
-
-        try:
-            body = await request.json()
-        except Exception:
-            return web.json_response({"ok": False, "error": "invalid_json"}, status=400)
-
-        # Get and validate raw input
-        raw_word = (body.get("word") or "").strip()
-        lang = (body.get("language") or "").lower()
-
-        if not lang or lang not in LANGUAGES:
-            return web.json_response({"ok": False, "error": "language_required_and_must_be_supported"}, status=400)
-
-        if not raw_word:
-            return web.json_response({"ok": False, "error": "word_is_missing"}, status=400)
-
+    async def _process_add_ai_word(
+        request: web.Request, user_id: int, lang: str, raw_word: str, telegram_id: int | str
+    ) -> web.Response:
+        """Shared logic for AI-powered word translation, enrichment, and storage."""
         word_repo = WordRepo(db)
 
-        # Check for duplicate before calling AI
+        # 1. Quick duplicate check (raw input)
         match = await word_repo.get_word_by_text(user_id, lang, raw_word)
         if match:
+            logger.info(f"AI Add: Word '{raw_word}' for user {telegram_id} is a direct duplicate.")
             return web.json_response(
                 {
                     "ok": True,
@@ -81,10 +65,10 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
                 }
             )
 
-        # Call Gemini for translation and enrichment
+        # 2. Call Gemini
         translator = request.app.get(TRANSLATOR_KEY)
         if not translator:
-            return web.json_response({"ok": False, "error": "no_gemini_api_key_or_translator"}, status=400)
+            return web.json_response({"ok": False, "error": "ai_service_unavailable"}, status=503)
 
         try:
             ai_data = await translator.translate_and_enrich(raw_word, lang)
@@ -92,10 +76,7 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
             logger.error(f"AI translation failed: {e}")
             return web.json_response({"ok": False, "error": "ai_service_unavailable"}, status=503)
 
-        if not ai_data:
-            return web.json_response({"ok": False, "error": "ai_service_unavailable"}, status=503)
-
-        if not ai_data.get("is_valid", True):
+        if not ai_data or not ai_data.get("is_valid", True):
             return web.json_response({"ok": False, "error": "word_not_recognized"}, status=422)
 
         word = ai_data["word"]
@@ -103,9 +84,10 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         example = ai_data["example"]
         level = ai_data["level"]
 
-        # Check again using AI-normalized lemma
+        # 3. Final duplicate check (after AI normalization)
         match = await word_repo.get_word_by_text(user_id, lang, word)
         if match:
+            logger.info(f"AI Add: AI-normalized word '{word}' for user {telegram_id} is a duplicate.")
             return web.json_response(
                 {
                     "ok": True,
@@ -121,13 +103,11 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
                 }
             )
 
-        # Save enriched word
+        # 4. Save
         words_to_add = [{"word": word, "translation": trans, "example": example, "level": level}]
         added_count = await word_repo.add_words_batch(user_id, lang, words_to_add)
 
-        logger.info(
-            f"External API: User {user_id} added enriched word '{word}' (original: '{raw_word}') for lang '{lang}'"
-        )
+        logger.info(f"AI Add: User {telegram_id} added '{word}' (lang: {lang})")
 
         return web.json_response(
             {
@@ -142,6 +122,44 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
                 },
             }
         )
+
+    async def add_external_words(request: web.Request) -> web.Response:
+        """External API: AI-powered word addition via Bearer token."""
+        user_id = await verify_bearer_token(request, db)
+        if not user_id:
+            return web.json_response({"ok": False, "error": "unauthorized"}, status=401)
+
+        try:
+            body = await request.json()
+        except Exception:
+            return web.json_response({"ok": False, "error": "invalid_json"}, status=400)
+
+        raw_word = (body.get("word") or "").strip()
+        lang = (body.get("language") or "").lower()
+
+        if not lang or lang not in LANGUAGES:
+            return web.json_response({"ok": False, "error": "invalid_language"}, status=400)
+        if not raw_word:
+            return web.json_response({"ok": False, "error": "word_missing"}, status=400)
+
+        return await _process_add_ai_word(request, user_id, lang, raw_word, f"ext_{user_id}")
+
+    async def add_word_ai(request: web.Request) -> web.Response:
+        """Internal App: Instant AI-powered word addition via session."""
+        user_id = request["user_id"]
+        lang = request["language"]
+        telegram_id = request["telegram_id"]
+
+        try:
+            body = await request.json()
+        except Exception:
+            return web.json_response({"ok": False, "error": "invalid_json"}, status=400)
+
+        raw_word = (body.get("word") or "").strip()
+        if not raw_word:
+            return web.json_response({"ok": False, "error": "word_missing"}, status=400)
+
+        return await _process_add_ai_word(request, user_id, lang, raw_word, telegram_id)
 
     async def add_words(request: web.Request) -> web.Response:
         """Batch add words for the current user and language."""
@@ -236,6 +254,7 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
 
     # specific routes must be registered before parameterized ones
     app.router.add_post("/api/words", add_words)
+    app.router.add_post("/api/words/ai", add_word_ai)
     app.router.add_post("/api/external/words", add_external_words)
     app.router.add_get("/api/words/export", export_words)
     app.router.add_get("/api/words/search", search_words)

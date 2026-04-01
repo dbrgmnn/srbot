@@ -1,4 +1,5 @@
 import {
+  addWordWithAI,
   clearSearch,
   closeAddSheet,
   closeEdit,
@@ -70,6 +71,7 @@ window.saveEdit = saveEdit;
 window.closeEdit = closeEdit;
 window.openAddSheet = openAddSheet;
 window.openAddWithValue = openAddWithValue;
+window.addWordWithAI = addWordWithAI;
 window.closeAddSheet = closeAddSheet;
 window.shareWords = shareWords;
 
