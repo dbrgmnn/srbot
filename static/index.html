@@ -25,10 +25,7 @@
             <div class="stat-val" id="stat-due">0</div>
             <div class="stat-pill-label">REVIEW</div>
           </div>
-          <div
-            class="skeleton skeleton-val"
-            style="width: 44px; height: 44px; border-radius: var(--radius-pill)"
-          ></div>
+          <div class="skeleton skeleton-val skeleton-icon"></div>
           <div class="stat-pill-icon stat-pill-icon-review">
             <svg
               viewBox="0 0 24 24"
@@ -49,10 +46,7 @@
             <div class="stat-val" id="stat-new">0</div>
             <div class="stat-pill-label">NEW</div>
           </div>
-          <div
-            class="skeleton skeleton-val"
-            style="width: 44px; height: 44px; border-radius: var(--radius-pill)"
-          ></div>
+          <div class="skeleton skeleton-val skeleton-icon"></div>
           <div class="stat-pill-icon stat-pill-icon-new">
             <svg
               viewBox="0 0 24 24"
@@ -68,12 +62,9 @@
         </div>
       </div>
 
-      <div class="card" style="padding: 16px">
-        <div
-          class="skeleton skeleton-bar"
-          style="width: 100%; height: 30px; border-radius: var(--radius-sm)"
-        ></div>
-        <div class="progress-legend" style="margin: 0">
+      <div class="card card-sm">
+        <div class="skeleton skeleton-bar-h30"></div>
+        <div class="progress-legend u-m0">
           <div class="progress-legend-item">
             <b class="progress-legend-num text-new" id="count-new">0</b>
             <span class="progress-legend-lbl">QUEUE</span>
@@ -104,10 +95,7 @@
             <div class="stat-val" id="stat-today-reviewed">0</div>
             <div class="stat-pill-label">LEARNED</div>
           </div>
-          <div
-            class="skeleton skeleton-val"
-            style="width: 44px; height: 44px; border-radius: var(--radius-pill)"
-          ></div>
+          <div class="skeleton skeleton-val skeleton-icon"></div>
           <div class="stat-pill-icon stat-pill-icon-learned">
             <svg
               viewBox="0 0 24 24"
@@ -127,10 +115,7 @@
             <div class="stat-val" id="stat-today-added">0</div>
             <div class="stat-pill-label">ADDED</div>
           </div>
-          <div
-            class="skeleton skeleton-val"
-            style="width: 44px; height: 44px; border-radius: var(--radius-pill)"
-          ></div>
+          <div class="skeleton skeleton-val skeleton-icon"></div>
           <div class="stat-pill-icon stat-pill-icon-added">
             <svg
               viewBox="0 0 24 24"
@@ -304,10 +289,9 @@
           oninput="onSearchInput(this.value)"
         />
         <button
-          class="search-clear"
+          class="search-clear u-hidden"
           id="search-clear"
           onclick="clearSearch()"
-          style="display: none"
         >
           ✕
         </button>
@@ -502,48 +486,17 @@
     ></div>
     <div id="api-sheet" class="edit-sheet">
       <div class="edit-sheet-title">API Access</div>
-      <div
-        style="
-          text-align: center;
-          color: var(--text-secondary);
-          margin-bottom: 24px;
-          font-size: 14px;
-          line-height: 1.5;
-        "
-      >
+      <div class="sheet-text">
         Use this token to access the API from external apps. Keep it secret!
       </div>
-      <div
-        class="card settings-group"
-        style="padding: 16px; margin-bottom: 24px; background: var(--glass-mid)"
-      >
-        <div
-          id="api-token-display"
-          style="
-            word-break: break-all;
-            font-family: monospace;
-            font-size: 14px;
-            text-align: center;
-            color: var(--text);
-            letter-spacing: 0.05em;
-          "
-        >
-          —
-        </div>
+      <div class="card settings-group card-sm u-mb24">
+        <div id="api-token-display" class="token-box">—</div>
       </div>
       <button class="btn" onclick="copyToken()">Copy Token</button>
-      <button
-        class="btn btn-secondary"
-        onclick="revokeToken()"
-        style="color: #ff453a; border-color: rgba(255, 69, 58, 0.2)"
-      >
+      <button class="btn btn-secondary btn-revoke" onclick="revokeToken()">
         Revoke
       </button>
-      <button
-        class="btn btn-secondary"
-        onclick="closeApiAccessSheet()"
-        style="margin-top: 8px"
-      >
+      <button class="btn btn-secondary u-mt8" onclick="closeApiAccessSheet()">
         Close
       </button>
     </div>
@@ -691,16 +644,7 @@
     ></div>
     <div id="delete-all-sheet" class="edit-sheet">
       <div class="edit-sheet-title">Clear Dictionary</div>
-      <div
-        id="delete-all-info"
-        style="
-          text-align: center;
-          color: var(--text-secondary);
-          margin-bottom: 20px;
-          font-size: 14px;
-          line-height: 1.5;
-        "
-      >
+      <div id="delete-all-info" class="sheet-text u-mb20">
         This will permanently delete ALL words in your <b>active dictionary</b>.
         This action cannot be undone.
       </div>
@@ -724,17 +668,7 @@
       </button>
     </div>
 
-    <canvas
-      id="confetti-canvas"
-      style="
-        position: fixed;
-        inset: 0;
-        width: 100%;
-        height: 100%;
-        pointer-events: none;
-        z-index: 2000;
-      "
-    ></canvas>
+    <canvas id="confetti-canvas" class="confetti-canvas"></canvas>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script type="module" src="/static/js/app.js"></script>
   </body>

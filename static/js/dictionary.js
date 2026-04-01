@@ -150,7 +150,7 @@ export async function handleFileUpload(input) {
 export function onSearchInput(val) {
   clearTimeout(searchTimer);
   const clearBtn = document.getElementById("search-clear");
-  if (clearBtn) clearBtn.style.display = val ? "block" : "none";
+  if (clearBtn) clearBtn.classList.toggle("u-hidden", !val);
   searchTimer = setTimeout(() => loadSearch(val), 300);
 }
 
@@ -159,7 +159,7 @@ export function clearSearch() {
   const clearBtn = document.getElementById("search-clear");
   const results = document.getElementById("search-results");
   if (input) input.value = "";
-  if (clearBtn) clearBtn.style.display = "none";
+  if (clearBtn) clearBtn.classList.add("u-hidden");
   if (results) results.innerHTML = "";
   if (input) input.focus();
 }
