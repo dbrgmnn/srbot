@@ -679,9 +679,10 @@ body.no-nav {
 .btn-round {
   flex: 1;
   height: 50px;
+  color: var(--text-secondary);
 }
 .btn-round svg {
-  stroke: var(--icon-stroke);
+  stroke: var(--text-secondary);
 }
 
 /* ── Section Titles ── */
