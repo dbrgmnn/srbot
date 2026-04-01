@@ -86,12 +86,13 @@
 .nav,
 .u-glass,
 .u-glass-mid,
-.card,
-.settings-group,
 .stat-pill,
 .form-input,
 .word-card::before,
+.settings-row,
+.word-row,
 .word-row-level,
+.picker-trigger,
 .capsule,
 .btn-round,
 .row-btn {
@@ -264,12 +265,12 @@ body.no-nav {
 }
 
 /* ── Cards ── */
-.card {
-  padding: 20px;
-  margin-bottom: var(--gap);
-  box-shadow: var(--shadow-low);
-}
+.card,
 .settings-group {
+  background: none;
+  border: none;
+  box-shadow: none;
+  padding: 0;
   margin-bottom: 24px;
 }
 /* ── Stats grid ── */
