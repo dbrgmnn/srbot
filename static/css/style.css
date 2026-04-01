@@ -12,7 +12,7 @@
   --accent: var(--tg-theme-button-color, #0a84ff);
   --btn-text: var(--tg-theme-button-text-color, #ffffff);
 
-  /* Status Colors */
+  /* ── Status Colors ── */
   --color-new: #8e8e93;
   --color-learning: #ff9f0a;
   --color-known: #30d158;
@@ -22,7 +22,7 @@
   --color-info: #0a84ff;
   --color-warning: #ffd60a;
 
-  /* Design System */
+  /* ── Design System ── */
   --glass: rgba(255, 255, 255, 0.07);
   --glass-mid: rgba(255, 255, 255, 0.11);
   --glass-border: rgba(255, 255, 255, 0.11);

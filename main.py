@@ -1,7 +1,4 @@
-"""
-Main entry point for the SRBot application.
-Initializes the database, Telegram bot, scheduler, and API server.
-"""
+"""Main entry point for the SRBot application."""
 
 import asyncio
 import logging
@@ -44,20 +41,14 @@ async def main():
         await dp.start_polling(bot)
     except Exception as e:
         logger.error(f"Error during execution: {e}")
-    finally:
-        logger.info("Shutting down gracefully...")
-
-        # 1. Stop API server (no longer accepting new requests)
         if api_runner:
             logger.info("Stopping API server...")
             await api_runner.cleanup()
 
-        # 2. Shutdown scheduler
         if scheduler:
             logger.info("Shutting down scheduler...")
             scheduler.shutdown(wait=False)
 
-        # 3. Close resources
         logger.info("Closing database and bot sessions...")
 
         # Cancel all other pending tasks

@@ -21,7 +21,7 @@ class Translator:
     async def _call_gemini(
         self, system_prompt: str, user_prompt: str, temperature: float = 0.1, max_tokens: int = 256
     ) -> dict | None:
-        """Call Gemini API with system instructions and return parsed JSON response."""
+        """Call Gemini API and return literal JSON response."""
         payload = {
             "system_instruction": {"parts": [{"text": system_prompt}]},
             "contents": [{"parts": [{"text": user_prompt}]}],
@@ -34,7 +34,6 @@ class Translator:
 
         url_with_key = f"{self.url}?key={self.api_key}"
         content_text = ""
-
         max_retries = 3
         base_delay = 1.0
 
@@ -65,7 +64,7 @@ class Translator:
 
                         content_text = result["candidates"][0]["content"]["parts"][0]["text"].strip()
 
-                        # Robust JSON extraction
+                        # Extract JSON from code blocks if present
                         if content_text.startswith("```"):
                             lines = content_text.splitlines()
                             if lines[0].startswith("```"):

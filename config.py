@@ -1,7 +1,4 @@
-"""
-Configuration management for the SRBot application.
-Handles environment variables and application-wide settings.
-"""
+"""Configuration management for the SRBot application."""
 
 import os
 from dataclasses import dataclass

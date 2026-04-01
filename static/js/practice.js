@@ -362,7 +362,7 @@ function launchConfetti() {
   requestAnimationFrame(draw);
 }
 
-// --- Exit ---
+/** --- Exit --- */
 
 export function exitPractice() {
   isGrading = false;

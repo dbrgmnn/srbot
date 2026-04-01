@@ -18,7 +18,6 @@ export function showScreen(name) {
 
   if (name === "home") {
     if (tg.enableVerticalSwipe) tg.enableVerticalSwipe();
-    // loadHome is now handled by subscriptions and initial init
   } else {
     if (name !== "practice" && tg.enableVerticalSwipe) tg.enableVerticalSwipe();
   }
@@ -122,7 +121,6 @@ function initSubscriptions() {
   });
 
   state.subscribe("currentSettings", (newS, oldS) => {
-    // If settings changed (not the initial load), refresh stats
     if (oldS && JSON.stringify(newS) !== JSON.stringify(oldS)) {
       state.currentStats = null;
     }

@@ -2,7 +2,7 @@ import { state } from "./state.js";
 
 const tg = window.Telegram.WebApp;
 
-// --- HTTP Client ---
+/** --- HTTP Client --- */
 
 async function api(method, path, body) {
   const opts = {
@@ -42,7 +42,7 @@ async function api(method, path, body) {
   }
 }
 
-// --- Exports ---
+/** --- Exports --- */
 
 export const GET = (path) => api("GET", path);
 export const POST = (path, body) => api("POST", path, body);

@@ -38,7 +38,6 @@ class ColorFormatter(logging.Formatter):
 def setup_logging():
     """Configures global logging for the entire application."""
 
-    # Determine if the application is running under systemd
     in_systemd = os.environ.get("INVOCATION_ID") is not None
 
     if in_systemd:
@@ -55,7 +54,6 @@ def setup_logging():
     handler = logging.StreamHandler(sys.stdout)
     handler.setFormatter(ColorFormatter(use_color=use_color, fmt=base_fmt))
 
-    # Setup the root logger
     root_logger = logging.getLogger()
     root_logger.setLevel(logging.INFO)
 

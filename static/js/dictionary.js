@@ -6,7 +6,7 @@ const tg = window.Telegram.WebApp;
 let searchTimer = null;
 let editWordId = null;
 
-// --- Internal Helpers ---
+/** --- Internal Helpers --- */
 
 function esc(str) {
   return String(str)
@@ -71,7 +71,7 @@ function parseText(text) {
     .filter((x) => x);
 }
 
-// --- Public Functions ---
+/** --- Public Functions --- */
 
 let isSubmitting = false;
 
@@ -109,7 +109,6 @@ export async function submitWords() {
         levelDisp.classList.add("picker-trigger-placeholder");
       }
 
-      // Invalidate stats to trigger reload via ui.js subscription
       state.currentStats = null;
     } else {
       toast(T.WORD_DUPLICATE, "error");
@@ -248,7 +247,7 @@ export async function shareWords() {
   }
 }
 
-// --- Internal Async ---
+/** --- Internal Async --- */
 
 async function loadSearch(q) {
   const el = document.getElementById("search-results");

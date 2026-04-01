@@ -25,7 +25,6 @@ class UserRepo:
 
     async def get_or_create(self, telegram_id: int, language: str, tz_name: str, config=None) -> int:
         """Get an existing user's ID or create a new user record with default settings."""
-        # Use ON CONFLICT to ensure atomic creation or ignore if exists
         await self.db.execute(
             "INSERT INTO users (telegram_id) VALUES (?) ON CONFLICT(telegram_id) DO NOTHING",
             (telegram_id,),
@@ -37,7 +36,7 @@ class UserRepo:
             return None
         user_id = row["id"]
 
-        # Initialize settings for this language if not already present
+        # Initialize settings
         await self._create_settings(user_id, language, tz_name, config)
         await self.db.commit()
         return user_id
@@ -143,7 +142,6 @@ class UserRepo:
         row = await user_id_cur.fetchone()
         if not row:
             return
-        # Create settings row for the new language if it doesn't exist yet
         await self._create_settings(row["id"], new_language, "UTC", config)
         await self.db.commit()
 
