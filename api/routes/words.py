@@ -106,8 +106,10 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
             )
 
         # 4. Save
-        words_to_add = [{"word": word, "translation": trans, "example": example, "level": level}]
-        added_count = await word_repo.add_words_batch(user_id, lang, words_to_add)
+        new_id = await word_repo.add_single_word(user_id, lang, word, trans, example, level)
+        if not new_id:
+            # Already checked duplicate, but guard nonetheless
+            return web.json_response({"ok": False, "error": "duplicate"}, status=409)
 
         logger.info(f"AI Add: User {telegram_id} added '{word}' (lang: {lang})")
 
@@ -115,7 +117,8 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
             {
                 "ok": True,
                 "result": {
-                    "added": added_count,
+                    "id": new_id,
+                    "added": 1,
                     "word": word,
                     "language": lang,
                     "translation": trans,

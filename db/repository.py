@@ -284,6 +284,20 @@ class WordRepo:
         await self.db.commit()
         return cursor.rowcount
 
+    async def add_single_word(
+        self, user_id: int, language: str, word: str, translation: str, example: str = None, level: str = None
+    ) -> int | None:
+        """Add a single word and return its database ID."""
+        now = datetime.now(tz=UTC).isoformat()
+        cursor = await self.db.execute(
+            """INSERT OR IGNORE INTO words
+                (user_id, word, translation, language, example, level, next_review, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+            (user_id, word, translation, language, example, level, now, now),
+        )
+        await self.db.commit()
+        return cursor.lastrowid if cursor.rowcount > 0 else None
+
     async def get_session_words(self, user_id: int, language: str, new_limit: int) -> list[dict]:
         """Get words for a practice session, including due reviews and new words."""
         now = datetime.now(tz=UTC).isoformat()
