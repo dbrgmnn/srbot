@@ -394,3 +394,57 @@ export async function deleteWord(id) {
     UI.toast(T.DELETE_FAIL, "error");
   }
 }
+
+export async function showTodayLearned() {
+  window.showScreen("search");
+  const results = document.getElementById("search-results");
+  const input = document.getElementById("search-input");
+  const clearBtn = document.getElementById("search-clear");
+
+  if (input) input.value = "";
+  if (clearBtn) clearBtn.classList.add("u-hidden");
+  if (results)
+    results.innerHTML = `<div class="u-flex-center u-p24"><span class="spinner"></span></div>`;
+
+  try {
+    const data = await API.get("/api/words/search?filter=reviewed");
+    if (!data.result.words.length) {
+      results.innerHTML = `<div class="u-p32 u-text-center u-hint">No words learned today yet</div>`;
+      return;
+    }
+
+    results.innerHTML = data.result.words
+      .map(
+        (w) => `
+      <div class="word-row" id="wr-${w.id}">
+        <div class="word-row-content" data-word='${JSON.stringify(w).replace(
+          /'/g,
+          "&apos;",
+        )}'>
+          <div class="word-info">
+            <div class="word-term">${w.word}</div>
+            <div class="word-trans">${w.translation}</div>
+          </div>
+          <div class="word-meta">
+            ${w.level ? `<span class="word-badge">${w.level}</span>` : ""}
+            <svg class="u-svg-xs u-hint"><use href="#icon-chevron-right"></use></svg>
+          </div>
+        </div>
+      </div>
+    `,
+      )
+      .join("");
+
+    // Add click listeners
+    const rows = results.querySelectorAll(".word-row-content");
+    rows.forEach((row) => {
+      row.onclick = () => {
+        const w = JSON.parse(row.dataset.word);
+        openEdit(w);
+      };
+    });
+  } catch (e) {
+    console.error("Show today learned error:", e);
+    results.innerHTML = `<div class="u-p32 u-text-center u-danger">Could not load words</div>`;
+  }
+}

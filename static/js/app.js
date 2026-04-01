@@ -8,6 +8,7 @@ import {
   saveEdit,
   shareWords,
   showTodayAdded,
+  showTodayLearned,
   deleteWord,
 } from "./dictionary.js";
 import { exitPractice, playAudio, startPractice, undo } from "./practice.js";
@@ -71,6 +72,7 @@ window.addWordWithAI = addWordWithAI;
 window.shareWords = shareWords;
 window.openEdit = openEdit;
 window.showTodayAdded = showTodayAdded;
+window.showTodayLearned = showTodayLearned;
 window.deleteWord = deleteWord;
 
 // Settings

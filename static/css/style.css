@@ -1001,6 +1001,9 @@ body.theme-light .toast {
   text-align: center;
   letter-spacing: 0.02em;
 }
+.edit-sheet-title:empty {
+  display: none;
+}
 .edit-sheet .settings-group {
   background: none !important;
   border: none !important;
@@ -1367,6 +1370,9 @@ body.theme-light .word-card.swipe-up::before {
 
 .u-mt8 {
   margin-top: 8px;
+}
+.u-mt80 {
+  margin-top: 80px;
 }
 .u-m0 {
   margin: 0;

@@ -493,6 +493,24 @@ class WordRepo:
         rows = await cursor.fetchall()
         return [dict(row) for row in rows]
 
+    async def get_today_reviewed_words(
+        self, user_id: int, language: str, tz_name: str = "UTC", fallback_tz: str = "UTC"
+    ) -> list[dict]:
+        """Get all words practiced by the user today in their local timezone."""
+        now_utc = datetime.now(tz=UTC)
+        tz = _safe_zoneinfo(tz_name, fallback_tz)
+        local_now = now_utc.astimezone(tz)
+        today_start_utc = local_now.replace(hour=0, minute=0, second=0, microsecond=0).astimezone(UTC)
+
+        cursor = await self.db.execute(
+            """SELECT id, word, translation, example, level FROM words
+               WHERE user_id = ? AND language = ? AND last_reviewed_at >= ?
+               ORDER BY last_reviewed_at DESC""",
+            (user_id, language, today_start_utc.isoformat()),
+        )
+        rows = await cursor.fetchall()
+        return [dict(row) for row in rows]
+
     async def get_all_words(self, user_id: int, language: str) -> list[dict]:
         """Get all words for a user in a specific language."""
         cursor = await self.db.execute(

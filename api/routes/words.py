@@ -240,6 +240,11 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
             settings = await user_repo.get_user_settings(request["telegram_id"], lang)
             tz_name = settings.get("timezone", "UTC")
             words = await word_repo.get_today_added_words(user_id, lang, tz_name)
+        elif filter_type == "reviewed":
+            user_repo = UserRepo(db)
+            settings = await user_repo.get_user_settings(request["telegram_id"], lang)
+            tz_name = settings.get("timezone", "UTC")
+            words = await word_repo.get_today_reviewed_words(user_id, lang, tz_name)
         else:
             words = await word_repo.search_words(user_id, lang, query)
 
