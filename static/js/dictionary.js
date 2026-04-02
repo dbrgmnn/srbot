@@ -189,7 +189,12 @@ function createWordRow(w) {
   };
 
   row.ontouchstart = startPress;
-  row.ontouchend = cancelPress;
+  row.ontouchend = (e) => {
+    cancelPress();
+    if (blockClick) {
+      e.preventDefault();
+    }
+  };
   row.onmousedown = startPress;
   row.onmouseup = cancelPress;
   row.onmouseleave = cancelPress;
