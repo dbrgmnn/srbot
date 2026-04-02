@@ -144,6 +144,81 @@ export function closeEdit() {
   unlockScroll();
 }
 
+/** --- Word Row Builder --- */
+
+function createWordRow(w) {
+  const row = document.createElement("div");
+  row.className = "word-row";
+  row.id = `wr-${w.id}`;
+  row.innerHTML = `
+    <div class="swipe-action-delete" onclick="deleteWord('${
+      w.id
+    }')">Delete</div>
+    <div class="swipe-content" data-word='${JSON.stringify(w).replace(
+      /'/g,
+      "&apos;",
+    )}'>
+      <div class="word-row-info">
+        <div class="word-row-text">${esc(w.word)}</div>
+        <div class="word-row-trans">${esc(w.translation)}</div>
+      </div>
+      ${w.level ? `<span class="word-row-level">${esc(w.level)}</span>` : ""}
+    </div>
+  `;
+
+  const content = row.querySelector(".swipe-content");
+  content.onclick = (e) => {
+    if (Math.abs(row._swipeDist || 0) < 5) {
+      openEdit(JSON.parse(content.dataset.word));
+    }
+  };
+
+  initSwipe(row, content);
+  return row;
+}
+
+function initSwipe(row, content) {
+  let startX = 0;
+  let currentX = 0;
+  const threshold = 80;
+
+  content.addEventListener(
+    "touchstart",
+    (e) => {
+      startX = e.touches[0].clientX;
+      content.style.transition = "none";
+    },
+    { passive: true },
+  );
+
+  content.addEventListener(
+    "touchmove",
+    (e) => {
+      currentX = e.touches[0].clientX - startX;
+      if (currentX > 0) currentX = 0;
+      if (currentX < -threshold - 20) currentX = -threshold - 20;
+      content.style.transform = `translateX(${currentX}px)`;
+      row._swipeDist = currentX;
+    },
+    { passive: true },
+  );
+
+  content.addEventListener(
+    "touchend",
+    () => {
+      content.style.transition = "";
+      if (currentX < -threshold / 2) {
+        currentX = -threshold;
+      } else {
+        currentX = 0;
+      }
+      content.style.transform = `translateX(${currentX}px)`;
+      row._swipeDist = currentX;
+    },
+    { passive: true },
+  );
+}
+
 export async function addWordWithAI(word, btn) {
   if (isSubmitting || !word) return;
   isSubmitting = true;
@@ -171,34 +246,8 @@ export async function addWordWithAI(word, btn) {
 
       // Show the newly added word as the sole result
       const results = document.getElementById("search-results");
-      results.innerHTML = `
-        <div class="word-row" id="wr-${added.id}">
-          <div class="word-row-content" data-word='${JSON.stringify(
-            added,
-          ).replace(/'/g, "&apos;")}'>
-            <div class="word-row-text">
-              ${esc(added.word)}
-              ${
-                added.level
-                  ? `<span class="word-row-level">${esc(added.level)}</span>`
-                  : ""
-              }
-            </div>
-            <div class="word-row-trans">${esc(added.translation)}</div>
-          </div>
-          <button class="del-btn" data-id="${added.id}">
-            <svg class="u-svg-md"><use href="#icon-trash"></use></svg>
-          </button>
-        </div>
-      `;
-
-      // Bind the click listeners
-      const row = results.querySelector(".word-row");
-      row.querySelector(".word-row-content").onclick = (e) => {
-        const item = e.currentTarget;
-        if (item.dataset.word) openEdit(JSON.parse(item.dataset.word));
-      };
-      row.querySelector(".del-btn").onclick = () => deleteWord(added.id);
+      results.innerHTML = "";
+      results.appendChild(createWordRow(added));
 
       state.currentStats = null; // Trigger home stats refresh
     } else {
@@ -266,37 +315,9 @@ export async function showTodayAdded() {
       return;
     }
 
-    results.innerHTML = data.result.words
-      .map(
-        (w) => `
-      <div class="word-row" id="wr-${w.id}">
-        <div class="word-row-content" data-word='${JSON.stringify(w).replace(
-          /'/g,
-          "&apos;",
-        )}'>
-          <div class="word-row-text">
-            ${esc(w.word)}
-            ${
-              w.level
-                ? `<span class="word-row-level">${esc(w.level)}</span>`
-                : ""
-            }
-          </div>
-          <div class="word-row-trans">${esc(w.translation)}</div>
-        </div>
-        <button class="del-btn" data-id="${w.id}">
-          <svg class="u-svg-md"><use href="#icon-trash"></use></svg>
-        </button>
-      </div>
-    `,
-      )
-      .join("");
-
-    results.querySelectorAll(".word-row-content").forEach((item) => {
-      item.onclick = () => openEdit(JSON.parse(item.dataset.word));
-    });
-    results.querySelectorAll(".del-btn").forEach((btn) => {
-      btn.onclick = () => deleteWord(btn.dataset.id);
+    results.innerHTML = "";
+    data.result.words.forEach((w) => {
+      results.appendChild(createWordRow(w));
     });
   } catch (e) {
     UI.toast(T.SEARCH_FAIL, "error");
@@ -349,37 +370,9 @@ async function loadSearch(q) {
       `;
       return;
     }
-    el.innerHTML = data.result.words
-      .map(
-        (w) => `
-      <div class="word-row" id="wr-${w.id}">
-        <div class="word-row-content" data-word='${JSON.stringify(w).replace(
-          /'/g,
-          "&apos;",
-        )}'>
-          <div class="word-row-text">
-            ${highlight(w.word, q)}
-            ${
-              w.level
-                ? `<span class="word-row-level">${esc(w.level)}</span>`
-                : ""
-            }
-          </div>
-          <div class="word-row-trans">${highlight(w.translation, q)}</div>
-        </div>
-        <button class="del-btn" data-id="${w.id}">
-          <svg class="u-svg-md"><use href="#icon-trash"></use></svg>
-        </button>
-      </div>
-    `,
-      )
-      .join("");
-
-    el.querySelectorAll(".word-row-content").forEach((item) => {
-      item.onclick = () => openEdit(JSON.parse(item.dataset.word));
-    });
-    el.querySelectorAll(".del-btn").forEach((btn) => {
-      btn.onclick = () => deleteWord(btn.dataset.id);
+    el.innerHTML = "";
+    data.result.words.forEach((w) => {
+      el.appendChild(createWordRow(w));
     });
   } catch (e) {
     toast(T.SEARCH_FAIL, "error");
@@ -414,37 +407,9 @@ export async function showTodayLearned() {
       return;
     }
 
-    results.innerHTML = data.result.words
-      .map(
-        (w) => `
-      <div class="word-row" id="wr-${w.id}">
-        <div class="word-row-content" data-word='${JSON.stringify(w).replace(
-          /'/g,
-          "&apos;",
-        )}'>
-          <div class="word-row-text">
-            ${esc(w.word)}
-            ${
-              w.level
-                ? `<span class="word-row-level">${esc(w.level)}</span>`
-                : ""
-            }
-          </div>
-          <div class="word-row-trans">${esc(w.translation)}</div>
-        </div>
-        <button class="del-btn" data-id="${w.id}">
-          <svg class="u-svg-md"><use href="#icon-trash"></use></svg>
-        </button>
-      </div>
-    `,
-      )
-      .join("");
-
-    results.querySelectorAll(".word-row-content").forEach((item) => {
-      item.onclick = () => openEdit(JSON.parse(item.dataset.word));
-    });
-    results.querySelectorAll(".del-btn").forEach((btn) => {
-      btn.onclick = () => deleteWord(btn.dataset.id);
+    results.innerHTML = "";
+    data.result.words.forEach((w) => {
+      results.appendChild(createWordRow(w));
     });
   } catch (e) {
     console.error("Show today learned error:", e);
