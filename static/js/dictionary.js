@@ -151,72 +151,52 @@ function createWordRow(w) {
   row.className = "word-row";
   row.id = `wr-${w.id}`;
   row.innerHTML = `
-    <div class="swipe-action-delete" onclick="deleteWord('${
-      w.id
-    }')">Delete</div>
-    <div class="swipe-content" data-word='${JSON.stringify(w).replace(
-      /'/g,
-      "&apos;",
-    )}'>
-      <div class="word-row-info">
-        <div class="word-row-text">${esc(w.word)}</div>
-        <div class="word-row-trans">${esc(w.translation)}</div>
-      </div>
-      ${w.level ? `<span class="word-row-level">${esc(w.level)}</span>` : ""}
+    <div class="word-row-info">
+      <div class="word-row-text">${esc(w.word)}</div>
+      <div class="word-row-trans">${esc(w.translation)}</div>
     </div>
+    ${w.level ? `<span class="word-row-level">${esc(w.level)}</span>` : ""}
   `;
 
-  const content = row.querySelector(".swipe-content");
-  content.onclick = (e) => {
-    if (Math.abs(row._swipeDist || 0) < 5) {
-      openEdit(JSON.parse(content.dataset.word));
-    }
+  let pressTimer;
+  let isLongPress = false;
+
+  const startPress = () => {
+    isLongPress = false;
+    // Light vibration on touch start
+    window.Telegram?.WebApp?.HapticFeedback?.selectionChanged();
+
+    pressTimer = setTimeout(() => {
+      isLongPress = true;
+      // Medium vibration on long press trigger
+      window.Telegram?.WebApp?.HapticFeedback?.impactOccurred("medium");
+
+      if (window.Telegram?.WebApp?.showConfirm) {
+        window.Telegram.WebApp.showConfirm(`Delete "${w.word}"?`, (ok) => {
+          if (ok) deleteWord(w.id);
+        });
+      } else if (confirm(`Delete "${w.word}"?`)) {
+        deleteWord(w.id);
+      }
+    }, 600);
   };
 
-  initSwipe(row, content);
+  const cancelPress = () => {
+    clearTimeout(pressTimer);
+  };
+
+  row.ontouchstart = startPress;
+  row.ontouchend = cancelPress;
+  row.onmousedown = startPress;
+  row.onmouseup = cancelPress;
+  row.onmouseleave = cancelPress;
+
+  row.onclick = () => {
+    if (isLongPress) return;
+    openEdit(w);
+  };
+
   return row;
-}
-
-function initSwipe(row, content) {
-  let startX = 0;
-  let currentX = 0;
-  const threshold = 80;
-
-  content.addEventListener(
-    "touchstart",
-    (e) => {
-      startX = e.touches[0].clientX;
-      content.style.transition = "none";
-    },
-    { passive: true },
-  );
-
-  content.addEventListener(
-    "touchmove",
-    (e) => {
-      currentX = e.touches[0].clientX - startX;
-      if (currentX > 0) currentX = 0;
-      if (currentX < -threshold - 20) currentX = -threshold - 20;
-      content.style.transform = `translateX(${currentX}px)`;
-      row._swipeDist = currentX;
-    },
-    { passive: true },
-  );
-
-  content.addEventListener(
-    "touchend",
-    () => {
-      content.style.transition = "";
-      if (currentX < -threshold / 2) {
-        currentX = -threshold;
-      } else {
-        currentX = 0;
-      }
-      content.style.transform = `translateX(${currentX}px)`;
-      row._swipeDist = currentX;
-    },
-    { passive: true },
-  );
 }
 
 export async function addWordWithAI(word, btn) {
