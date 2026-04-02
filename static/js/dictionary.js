@@ -83,7 +83,7 @@ export async function handleFileUpload(input) {
     const words = parseText(e.target.result);
     input.value = "";
     if (!words.length) {
-      toast(T.NO_WORDS_CSV, "error");
+      UI.toast(T.NO_WORDS_CSV, "error");
       return;
     }
     try {
@@ -159,20 +159,27 @@ function createWordRow(w) {
   `;
 
   let pressTimer;
-  let isLongPress = false;
+  let blockClick = false;
 
   const startPress = (e) => {
-    isLongPress = false;
+    blockClick = false;
     window.Telegram?.WebApp?.HapticFeedback?.selectionChanged();
     pressTimer = setTimeout(() => {
-      isLongPress = true;
+      blockClick = true;
       window.Telegram?.WebApp?.HapticFeedback?.impactOccurred("medium");
       if (window.Telegram?.WebApp?.showConfirm) {
         window.Telegram.WebApp.showConfirm(`Delete "${w.word}"?`, (ok) => {
           if (ok) deleteWord(w.id);
+          // Keep blockClick true for a bit to avoid accidental tap after confirm
+          setTimeout(() => {
+            blockClick = false;
+          }, 300);
         });
       } else if (confirm(`Delete "${w.word}"?`)) {
         deleteWord(w.id);
+        setTimeout(() => {
+          blockClick = false;
+        }, 300);
       }
     }, 500);
   };
@@ -182,19 +189,16 @@ function createWordRow(w) {
   };
 
   row.ontouchstart = startPress;
-  row.ontouchend = (e) => {
-    cancelPress();
-    if (isLongPress) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-  };
+  row.ontouchend = cancelPress;
   row.onmousedown = startPress;
   row.onmouseup = cancelPress;
   row.onmouseleave = cancelPress;
 
   row.onclick = (e) => {
-    if (isLongPress) return;
+    if (blockClick) {
+      blockClick = false;
+      return;
+    }
     openEdit(w);
   };
 
@@ -357,7 +361,7 @@ async function loadSearch(q) {
       el.appendChild(createWordRow(w));
     });
   } catch (e) {
-    toast(T.SEARCH_FAIL, "error");
+    UI.toast(T.SEARCH_FAIL, "error");
   }
 }
 
@@ -398,3 +402,13 @@ export async function showTodayLearned() {
     results.innerHTML = `<div class="u-p32 u-text-center u-danger">Could not load words</div>`;
   }
 }
+
+/** --- Keyboard Support --- */
+document.addEventListener("focusin", (e) => {
+  if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") {
+    document.body.classList.add("keyboard-visible");
+  }
+});
+document.addEventListener("focusout", (e) => {
+  document.body.classList.remove("keyboard-visible");
+});
