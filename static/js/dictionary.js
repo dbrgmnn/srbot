@@ -87,7 +87,7 @@ export async function handleFileUpload(input) {
       return;
     }
     try {
-      const res = await API.post("/api/words", { words });
+      const res = await API.post("/api/words/batch", { words });
       if (res.result && res.result.added) {
         UI.toast(T.CSV_ADDED(res.result.added), "success");
         state.currentStats = null;
@@ -154,10 +154,14 @@ export async function addWordWithAI(word, btn) {
   btn.innerHTML = `<span class="spinner"></span> Generating...`;
 
   try {
-    const res = await API.post("/api/words/ai", { word });
+    const res = await API.post("/api/words", { word });
     if (res.ok && res.result) {
       const added = res.result;
-      UI.toast(`Added: ${added.word}`, "success");
+      if (added.added === 0) {
+        UI.toast(T.WORD_DUPLICATE, "info");
+      } else {
+        UI.toast(`Added: ${added.word}`, "success");
+      }
 
       // Clear input and hide the clear button
       const input = document.getElementById("search-input");
@@ -198,10 +202,7 @@ export async function addWordWithAI(word, btn) {
 
       state.currentStats = null; // Trigger home stats refresh
     } else {
-      UI.toast(
-        res.error === "duplicate" ? T.WORD_DUPLICATE : T.WORD_ADD_FAIL,
-        "error",
-      );
+      UI.toast(T.WORD_ADD_FAIL, "error");
     }
   } catch (e) {
     UI.toast(T.WORD_ADD_FAIL, "error");

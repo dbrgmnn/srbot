@@ -52,8 +52,7 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
             logger.info(f"AI Add: Word '{raw_word}' for user {telegram_id} is a direct duplicate.")
             return web.json_response(
                 {
-                    "ok": False,
-                    "error": "duplicate",
+                    "ok": True,
                     "result": {
                         "added": 0,
                         "status": "duplicate",
@@ -91,8 +90,7 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
             logger.info(f"AI Add: AI-normalized word '{word}' for user {telegram_id} is a duplicate.")
             return web.json_response(
                 {
-                    "ok": False,
-                    "error": "duplicate",
+                    "ok": True,
                     "result": {
                         "added": 0,
                         "status": "duplicate",
@@ -128,7 +126,7 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
             }
         )
 
-    async def add_external_words(request: web.Request) -> web.Response:
+    async def add_word_external(request: web.Request) -> web.Response:
         """External API: AI-powered word addition via Bearer token."""
         user_id = await verify_bearer_token(request, db)
         if not user_id:
@@ -149,7 +147,7 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
 
         return await _process_add_ai_word(request, user_id, lang, raw_word, f"ext_{user_id}")
 
-    async def add_word_ai(request: web.Request) -> web.Response:
+    async def add_word(request: web.Request) -> web.Response:
         """Internal App: Instant AI-powered word addition via session."""
         user_id = request["user_id"]
         lang = request["language"]
@@ -166,7 +164,7 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
 
         return await _process_add_ai_word(request, user_id, lang, raw_word, telegram_id)
 
-    async def add_words(request: web.Request) -> web.Response:
+    async def add_words_batch(request: web.Request) -> web.Response:
         """Batch add words for the current user and language."""
         user_id = request["user_id"]
         lang = request["language"]
@@ -274,9 +272,9 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         return response
 
     # specific routes must be registered before parameterized ones
-    app.router.add_post("/api/words", add_words)
-    app.router.add_post("/api/words/ai", add_word_ai)
-    app.router.add_post("/api/external/words", add_external_words)
+    app.router.add_post("/api/words/batch", add_words_batch)
+    app.router.add_post("/api/words", add_word)
+    app.router.add_post("/api/external/words", add_word_external)
     app.router.add_get("/api/words/export", export_words)
     app.router.add_get("/api/words/search", search_words)
     app.router.add_delete("/api/words/all", delete_all_words)
