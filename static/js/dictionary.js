@@ -158,46 +158,29 @@ function createWordRow(w) {
     ${w.level ? `<span class="word-row-level">${esc(w.level)}</span>` : ""}
   `;
 
-  let pressTimer;
   let blockClick = false;
 
-  const startPress = (e) => {
-    blockClick = false;
-    window.Telegram?.WebApp?.HapticFeedback?.selectionChanged();
-    pressTimer = setTimeout(() => {
-      blockClick = true;
-      window.Telegram?.WebApp?.HapticFeedback?.impactOccurred("medium");
-      if (window.Telegram?.WebApp?.showConfirm) {
-        window.Telegram.WebApp.showConfirm(`Delete "${w.word}"?`, (ok) => {
-          if (ok) deleteWord(w.id);
-          // Keep blockClick true for a bit to avoid accidental tap after confirm
-          setTimeout(() => {
-            blockClick = false;
-          }, 300);
-        });
-      } else if (confirm(`Delete "${w.word}"?`)) {
-        deleteWord(w.id);
+  row.oncontextmenu = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    blockClick = true;
+
+    window.Telegram?.WebApp?.HapticFeedback?.impactOccurred("medium");
+    if (window.Telegram?.WebApp?.showConfirm) {
+      window.Telegram.WebApp.showConfirm(`Delete "${w.word}"?`, (ok) => {
+        if (ok) deleteWord(w.id);
         setTimeout(() => {
           blockClick = false;
         }, 300);
-      }
-    }, 500);
-  };
-
-  const cancelPress = (e) => {
-    clearTimeout(pressTimer);
-  };
-
-  row.ontouchstart = startPress;
-  row.ontouchend = (e) => {
-    cancelPress();
-    if (blockClick) {
-      e.preventDefault();
+      });
+    } else if (confirm(`Delete "${w.word}"?`)) {
+      deleteWord(w.id);
+      setTimeout(() => {
+        blockClick = false;
+      }, 300);
     }
+    return false;
   };
-  row.onmousedown = startPress;
-  row.onmouseup = cancelPress;
-  row.onmouseleave = cancelPress;
 
   row.onclick = (e) => {
     if (blockClick) {
