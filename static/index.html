@@ -575,7 +575,7 @@
 
     <!-- Edit Sheet -->
     <div id="edit-overlay" class="edit-overlay" onclick="closeEdit()"></div>
-    <div id="edit-sheet" class="edit-sheet">
+    <div id="edit-sheet" class="edit-sheet" style="padding-bottom: 80px">
       <div class="edit-sheet-title">Edit Word</div>
       <div class="card settings-group">
         <div class="add-form">
@@ -610,8 +610,13 @@
           <input type="hidden" id="edit-level" value="" />
         </div>
       </div>
-      <button id="edit-save-btn" class="btn" onclick="saveEdit()">Save</button>
-      <button class="btn btn-secondary" onclick="closeEdit()">Cancel</button>
+      <div class="settings-row-split u-mt24">
+        <button class="btn btn-secondary" onclick="closeEdit()">Cancel</button>
+        <button id="edit-save-btn" class="btn" onclick="saveEdit()">
+          Save
+        </button>
+      </div>
+      <div class="u-mt40"></div>
     </div>
 
     <!-- Universal Picker Sheet -->

@@ -161,16 +161,12 @@ function createWordRow(w) {
   let pressTimer;
   let isLongPress = false;
 
-  const startPress = () => {
+  const startPress = (e) => {
     isLongPress = false;
-    // Light vibration on touch start
     window.Telegram?.WebApp?.HapticFeedback?.selectionChanged();
-
     pressTimer = setTimeout(() => {
       isLongPress = true;
-      // Medium vibration on long press trigger
       window.Telegram?.WebApp?.HapticFeedback?.impactOccurred("medium");
-
       if (window.Telegram?.WebApp?.showConfirm) {
         window.Telegram.WebApp.showConfirm(`Delete "${w.word}"?`, (ok) => {
           if (ok) deleteWord(w.id);
@@ -178,20 +174,26 @@ function createWordRow(w) {
       } else if (confirm(`Delete "${w.word}"?`)) {
         deleteWord(w.id);
       }
-    }, 600);
+    }, 500);
   };
 
-  const cancelPress = () => {
+  const cancelPress = (e) => {
     clearTimeout(pressTimer);
   };
 
   row.ontouchstart = startPress;
-  row.ontouchend = cancelPress;
+  row.ontouchend = (e) => {
+    cancelPress();
+    if (isLongPress) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  };
   row.onmousedown = startPress;
   row.onmouseup = cancelPress;
   row.onmouseleave = cancelPress;
 
-  row.onclick = () => {
+  row.onclick = (e) => {
     if (isLongPress) return;
     openEdit(w);
   };
