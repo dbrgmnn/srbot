@@ -616,13 +616,17 @@
           Save
         </button>
       </div>
-      <button
-        class="btn btn-quiet-danger u-mt12"
-        style="width: 100%; border: none; background: none"
-        onclick="deleteCurrentWord()"
-      >
-        Delete Word
-      </button>
+
+      <div class="card settings-group u-mt24">
+        <div class="settings-row" onclick="deleteCurrentWord()">
+          <div
+            class="settings-row-left"
+            style="justify-content: center; width: 100%"
+          >
+            <div class="settings-label-danger">Delete Word</div>
+          </div>
+        </div>
+      </div>
       <div class="u-mt40"></div>
     </div>
 

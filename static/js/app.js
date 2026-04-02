@@ -92,7 +92,7 @@ window.saveQuietHours = saveQuietHours;
 
 function initGlobalHaptics() {
   const selector =
-    "button, .nav-btn, .picker-item, .settings-row, .word-row-content, .del-btn, .capsule, .picker-trigger";
+    "button, .nav-btn, .picker-item, .settings-row, .word-row-info, .capsule, .picker-trigger";
   document.addEventListener(
     "pointerdown",
     (e) => {

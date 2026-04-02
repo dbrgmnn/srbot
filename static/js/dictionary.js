@@ -379,7 +379,6 @@ export async function showTodayLearned() {
       results.appendChild(createWordRow(w));
     });
   } catch (e) {
-    console.error("Show today learned error:", e);
     results.innerHTML = `<div class="u-p32 u-text-center u-danger">Could not load words</div>`;
   }
 }

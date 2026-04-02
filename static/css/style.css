@@ -839,7 +839,7 @@ body.no-nav {
 
 .settings-row:active,
 .word-card-face:active,
-.word-row-content:active {
+.word-row:active {
   opacity: 0.6;
   transform: scale(0.985);
 }
