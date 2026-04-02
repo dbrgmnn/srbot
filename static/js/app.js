@@ -10,6 +10,7 @@ import {
   showTodayAdded,
   showTodayLearned,
   deleteWord,
+  deleteCurrentWord,
 } from "./dictionary.js";
 import { exitPractice, playAudio, startPractice, undo } from "./practice.js";
 import {
@@ -74,6 +75,7 @@ window.openEdit = openEdit;
 window.showTodayAdded = showTodayAdded;
 window.showTodayLearned = showTodayLearned;
 window.deleteWord = deleteWord;
+window.deleteCurrentWord = deleteCurrentWord;
 
 // Settings
 window.openPicker = openPicker;
