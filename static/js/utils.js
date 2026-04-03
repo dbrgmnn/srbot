@@ -132,7 +132,7 @@ export const API = {
   patch(path, body) {
     return this.request("PATCH", path, body);
   },
-  delete(path) {
-    return this.request("DELETE", path);
+  delete(path, body) {
+    return this.request("DELETE", path, body);
   },
 };

@@ -31,6 +31,10 @@ export function showScreen(name) {
   const nav = document.getElementById(`nav-${name}`);
   if (nav) nav.classList.add("active");
 
+  if (name === "search" && window.clearSearch) {
+    window.clearSearch(false);
+  }
+
   if (name === "home") {
     if (tg.enableVerticalSwipe) tg.enableVerticalSwipe();
   } else {

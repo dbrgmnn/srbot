@@ -110,14 +110,17 @@ export function onSearchInput(val) {
   searchTimer = setTimeout(() => loadSearch(val), 300);
 }
 
-export function clearSearch() {
+export function clearSearch(shouldFocus = true) {
   const input = document.getElementById("search-input");
   const clearBtn = document.getElementById("search-clear");
   const results = document.getElementById("search-results");
   if (input) input.value = "";
   if (clearBtn) clearBtn.classList.add("u-hidden");
   if (results) results.innerHTML = "";
-  if (input) input.focus();
+  if (shouldFocus && input) input.focus();
+
+  if (isSelectMode) toggleSelectMode();
+  checkSearchActions(0);
 }
 
 export function openEdit(w) {
@@ -199,44 +202,40 @@ function toggleWordSelection(id, row) {
 }
 
 function updateBulkBar() {
-  const bar = document.getElementById("bulk-bar");
-  const countEl = document.getElementById("bulk-count");
+  const btnDelete = document.getElementById("btn-bulk-delete");
   const count = selectedWords.size;
 
   if (count > 0) {
-    bar.classList.add("open");
-    countEl.textContent = `${count} selected`;
+    btnDelete.classList.remove("u-hidden");
+    btnDelete.textContent = `Delete ${count}`;
   } else {
-    bar.classList.remove("open");
+    btnDelete.classList.add("u-hidden");
   }
+}
+
+function checkSearchActions(count) {
+  const actions = document.getElementById("search-actions");
+  if (!actions) return;
+  actions.classList.toggle("u-hidden", count === 0);
 }
 
 export function toggleSelectMode() {
   isSelectMode = !isSelectMode;
-  const btn = document.getElementById("btn-search-edit");
-  btn.textContent = isSelectMode ? "Cancel" : "Select";
-  btn.classList.toggle("btn-secondary", isSelectMode);
+  const btnSelect = document.getElementById("btn-select-mode");
+  btnSelect.textContent = isSelectMode ? "Cancel" : "Select";
+  btnSelect.classList.toggle("is-active", isSelectMode);
 
   if (!isSelectMode) {
     selectedWords.clear();
     updateBulkBar();
   }
 
-  // Refresh current view
-  const searchInput = document.getElementById("search-input");
   const results = document.getElementById("search-results");
-  if (searchInput.value) {
-    loadSearch(searchInput.value);
-  } else {
-    // If we're in a filtered view, we might need to store the current filter
-    // For now, let's just re-render what's already in the results
-    const rows = results.querySelectorAll(".word-row");
-    rows.forEach((r) => {
-      const id = parseInt(r.id.replace("wr-", ""));
-      r.classList.toggle("is-selecting", isSelectMode);
-      if (!isSelectMode) r.classList.remove("is-selected");
-    });
-  }
+  const rows = results.querySelectorAll(".word-row");
+  rows.forEach((r) => {
+    r.classList.toggle("is-selecting", isSelectMode);
+    if (!isSelectMode) r.classList.remove("is-selected");
+  });
 }
 
 export async function executeBulkDelete() {
@@ -255,9 +254,12 @@ export async function executeBulkDelete() {
 
         selectedWords.clear();
         updateBulkBar();
-        toggleSelectMode();
+        if (isSelectMode) toggleSelectMode();
         state.currentStats = null;
         UI.toast(`Deleted ${count} words`, "success");
+
+        // Hide actions if no words left in view
+        checkSearchActions(document.querySelectorAll(".word-row").length);
       } catch (e) {
         UI.toast(T.DELETE_FAIL, "error");
       }
@@ -300,6 +302,7 @@ export async function addWordWithAI(word, btn) {
       const results = document.getElementById("search-results");
       results.innerHTML = "";
       results.appendChild(createWordRow(added));
+      checkSearchActions(1);
 
       state.currentStats = null; // Trigger home stats refresh
     } else {
@@ -371,6 +374,7 @@ async function showByFilter(filter) {
   if (clearBtn) clearBtn.classList.add("u-hidden");
   if (results)
     results.innerHTML = `<div class="u-flex-center u-p24"><span class="spinner"></span></div>`;
+  checkSearchActions(0);
 
   try {
     const data = await API.get(`/api/words/search?filter=${filter}`);
@@ -383,8 +387,10 @@ async function showByFilter(filter) {
     data.result.words.forEach((w) => {
       results.appendChild(createWordRow(w));
     });
+    checkSearchActions(data.result.words.length);
   } catch (e) {
     results.innerHTML = `<div class="u-p32 u-text-center u-danger">Could not load words</div>`;
+    checkSearchActions(0);
   }
 }
 
@@ -437,6 +443,7 @@ async function loadSearch(q) {
   const el = document.getElementById("search-results");
   if (!el || q.length < 2) {
     if (el) el.innerHTML = "";
+    checkSearchActions(0);
     return;
   }
   try {
@@ -456,12 +463,14 @@ async function loadSearch(q) {
           </button>
         </div>
       `;
+      checkSearchActions(0);
       return;
     }
     el.innerHTML = "";
     data.result.words.forEach((w) => {
       el.appendChild(createWordRow(w, q));
     });
+    checkSearchActions(data.result.words.length);
   } catch (e) {
     UI.toast(T.SEARCH_FAIL, "error");
   }
