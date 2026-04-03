@@ -4,6 +4,7 @@ import { T } from "./toast.js";
 
 const tg = window.Telegram.WebApp;
 let searchTimer = null;
+let currentSearchId = 0;
 let editWordId = null;
 let isSelectMode = false;
 let selectedWords = new Set();
@@ -98,6 +99,8 @@ export function onSearchInput(val) {
 }
 
 export function clearSearch(shouldFocus = true) {
+  clearTimeout(searchTimer);
+  currentSearchId++;
   const input = document.getElementById("search-input");
   const clearBtn = document.getElementById("search-clear");
   const results = document.getElementById("search-results");
@@ -363,6 +366,7 @@ export async function saveEdit() {
 /** --- Filtered Views --- */
 
 async function showByFilter(filter) {
+  const reqId = ++currentSearchId;
   window.showScreen("search");
   if (isSelectMode) toggleSelectMode();
   const results = document.getElementById("search-results");
@@ -377,6 +381,8 @@ async function showByFilter(filter) {
 
   try {
     const data = await API.get(`/api/words/search?filter=${filter}`);
+    if (reqId !== currentSearchId) return;
+
     if (!data.result.words.length) {
       results.innerHTML = "";
       return;
@@ -388,6 +394,7 @@ async function showByFilter(filter) {
     });
     checkSearchActions(data.result.words.length);
   } catch (e) {
+    if (reqId !== currentSearchId) return;
     results.innerHTML = `<div class="u-p32 u-text-center u-danger">Could not load words</div>`;
     checkSearchActions(0);
   }
@@ -439,6 +446,7 @@ export async function shareWords() {
 /** --- Internal Async --- */
 
 async function loadSearch(q) {
+  const reqId = ++currentSearchId;
   const el = document.getElementById("search-results");
   if (!el || q.length < 2) {
     if (el) el.innerHTML = "";
@@ -447,6 +455,8 @@ async function loadSearch(q) {
   }
   try {
     const data = await API.get(`/api/words/search?q=${encodeURIComponent(q)}`);
+    if (reqId !== currentSearchId) return;
+
     if (data.result.words.length === 0) {
       el.innerHTML = `
         <div class="settings-row" style="padding: 12px 16px; gap: 12px;">
@@ -471,6 +481,7 @@ async function loadSearch(q) {
     });
     checkSearchActions(data.result.words.length);
   } catch (e) {
+    if (reqId !== currentSearchId) return;
     UI.toast(T.SEARCH_FAIL, "error");
   }
 }
