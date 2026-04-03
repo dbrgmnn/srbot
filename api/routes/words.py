@@ -216,6 +216,24 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         logger.info(f"User {telegram_id} deleted word {word_id}")
         return web.json_response({"ok": True})
 
+    async def delete_words_batch(request: web.Request) -> web.Response:
+        """Batch delete words for the current user."""
+        user_id = request["user_id"]
+        telegram_id = request["telegram_id"]
+        try:
+            body = await request.json()
+            ids = body.get("ids", [])
+        except Exception:
+            return web.json_response({"ok": False, "error": "invalid_json"}, status=400)
+
+        if not ids:
+            return web.json_response({"ok": True, "result": {"deleted": 0}})
+
+        word_repo = WordRepo(db)
+        await word_repo.delete_words_batch(user_id, ids)
+        logger.info(f"User {telegram_id} batch deleted {len(ids)} words.")
+        return web.json_response({"ok": True, "result": {"deleted": len(ids)}})
+
     async def search_words(request: web.Request) -> web.Response:
         """Search words by word or translation for the current user and language."""
         user_id = request["user_id"]
@@ -270,4 +288,5 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
     app.router.add_get("/api/words/export", export_words)
     app.router.add_get("/api/words/search", search_words)
     app.router.add_patch("/api/words/{word_id}", patch_word)
+    app.router.add_delete("/api/words/batch", delete_words_batch)
     app.router.add_delete("/api/words/{word_id}", delete_word)

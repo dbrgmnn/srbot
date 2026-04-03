@@ -9,12 +9,12 @@ import {
   shareWords,
   showTodayAdded,
   showTodayLearned,
-  deleteWord,
-  deleteCurrentWord,
   showQueue,
   showLearning,
   showKnown,
   showMastered,
+  toggleSelectMode,
+  executeBulkDelete,
 } from "./dictionary.js";
 import { exitPractice, playAudio, startPractice, undo } from "./practice.js";
 import {
@@ -80,8 +80,8 @@ window.showQueue = showQueue;
 window.showLearning = showLearning;
 window.showKnown = showKnown;
 window.showMastered = showMastered;
-window.deleteWord = deleteWord;
-window.deleteCurrentWord = deleteCurrentWord;
+window.toggleSelectMode = toggleSelectMode;
+window.executeBulkDelete = executeBulkDelete;
 
 // Settings
 window.openPicker = openPicker;

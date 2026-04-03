@@ -371,6 +371,13 @@
     <div id="screen-search" class="screen">
       <div class="header">
         <div class="header-title">Dictionary</div>
+        <button
+          class="header-action"
+          id="btn-search-edit"
+          onclick="toggleSelectMode()"
+        >
+          Select
+        </button>
       </div>
       <div class="search-wrapper">
         <input
@@ -608,16 +615,6 @@
         </button>
       </div>
 
-      <div class="card settings-group u-mt24">
-        <div class="settings-row" onclick="deleteCurrentWord()">
-          <div
-            class="settings-row-left"
-            style="justify-content: center; width: 100%"
-          >
-            <div class="settings-label-danger">Delete Word</div>
-          </div>
-        </div>
-      </div>
       <div class="u-mt40"></div>
     </div>
 
@@ -626,6 +623,17 @@
     <div id="picker-sheet" class="edit-sheet">
       <div class="edit-sheet-title" id="picker-title">Select</div>
       <div id="picker-list" class="picker-list"></div>
+    </div>
+
+    <!-- Bulk Action Bar -->
+    <div id="bulk-bar" class="bulk-bar">
+      <div class="bulk-bar-info" id="bulk-count">0 selected</div>
+      <div class="bulk-bar-actions">
+        <button class="bulk-btn bulk-btn-danger" onclick="executeBulkDelete()">
+          <svg class="u-svg-md"><use href="#icon-trash"></use></svg>
+          Delete
+        </button>
+      </div>
     </div>
 
     <canvas id="confetti-canvas" class="confetti-canvas"></canvas>

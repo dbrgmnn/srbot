@@ -5,6 +5,8 @@ import { T } from "./toast.js";
 const tg = window.Telegram.WebApp;
 let searchTimer = null;
 let editWordId = null;
+let isSelectMode = false;
+let selectedWords = new Set();
 
 /** --- Internal Helpers --- */
 
@@ -157,8 +159,16 @@ function highlightMatch(text, query) {
 function createWordRow(w, q = "") {
   const row = document.createElement("div");
   row.className = "word-row";
+  if (isSelectMode) {
+    row.classList.add("is-selecting");
+    if (selectedWords.has(w.id)) row.classList.add("is-selected");
+  }
   row.id = `wr-${w.id}`;
+
   row.innerHTML = `
+    <div class="word-row-checkbox">
+      <div class="checkbox-circle"></div>
+    </div>
     <div class="word-row-info">
       <div class="word-row-text">${highlightMatch(w.word, q)}</div>
       <div class="word-row-trans">${highlightMatch(w.translation, q)}</div>
@@ -166,30 +176,97 @@ function createWordRow(w, q = "") {
     ${w.level ? `<span class="word-row-level">${esc(w.level)}</span>` : ""}
   `;
 
-  row.onclick = () => openEdit(w);
+  row.onclick = () => {
+    if (isSelectMode) {
+      toggleWordSelection(w.id, row);
+    } else {
+      openEdit(w);
+    }
+  };
 
   return row;
 }
 
-export async function deleteCurrentWord() {
-  if (!editWordId) return;
+function toggleWordSelection(id, row) {
+  if (selectedWords.has(id)) {
+    selectedWords.delete(id);
+    row.classList.remove("is-selected");
+  } else {
+    selectedWords.add(id);
+    row.classList.add("is-selected");
+  }
+  updateBulkBar();
+}
 
-  const wordText = document.getElementById("edit-word").value;
+function updateBulkBar() {
+  const bar = document.getElementById("bulk-bar");
+  const countEl = document.getElementById("bulk-count");
+  const count = selectedWords.size;
+
+  if (count > 0) {
+    bar.classList.add("open");
+    countEl.textContent = `${count} selected`;
+  } else {
+    bar.classList.remove("open");
+  }
+}
+
+export function toggleSelectMode() {
+  isSelectMode = !isSelectMode;
+  const btn = document.getElementById("btn-search-edit");
+  btn.textContent = isSelectMode ? "Cancel" : "Select";
+  btn.classList.toggle("btn-secondary", isSelectMode);
+
+  if (!isSelectMode) {
+    selectedWords.clear();
+    updateBulkBar();
+  }
+
+  // Refresh current view
+  const searchInput = document.getElementById("search-input");
+  const results = document.getElementById("search-results");
+  if (searchInput.value) {
+    loadSearch(searchInput.value);
+  } else {
+    // If we're in a filtered view, we might need to store the current filter
+    // For now, let's just re-render what's already in the results
+    const rows = results.querySelectorAll(".word-row");
+    rows.forEach((r) => {
+      const id = parseInt(r.id.replace("wr-", ""));
+      r.classList.toggle("is-selecting", isSelectMode);
+      if (!isSelectMode) r.classList.remove("is-selected");
+    });
+  }
+}
+
+export async function executeBulkDelete() {
+  const count = selectedWords.size;
+  if (count === 0) return;
+
   const proceed = async (ok) => {
     if (ok) {
       try {
-        await deleteWord(editWordId);
-        closeEdit();
-        UI.toast("Deleted", "success");
+        const ids = Array.from(selectedWords);
+        await API.delete("/api/words/batch", { ids });
+
+        ids.forEach((id) => {
+          document.getElementById(`wr-${id}`)?.remove();
+        });
+
+        selectedWords.clear();
+        updateBulkBar();
+        toggleSelectMode();
+        state.currentStats = null;
+        UI.toast(`Deleted ${count} words`, "success");
       } catch (e) {
         UI.toast(T.DELETE_FAIL, "error");
       }
     }
   };
 
-  if (window.Telegram?.WebApp?.showConfirm) {
-    window.Telegram.WebApp.showConfirm(`Delete "${wordText}"?`, proceed);
-  } else if (confirm(`Delete "${wordText}"?`)) {
+  if (tg.showConfirm) {
+    tg.showConfirm(`Delete ${count} selected words?`, proceed);
+  } else if (confirm(`Delete ${count} selected words?`)) {
     proceed(true);
   }
 }
