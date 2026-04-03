@@ -1245,11 +1245,18 @@ body.keyboard-visible .edit-sheet {
 }
 
 /* ── Mark (search highlight) ── */
-mark {
+mark,
+.u-highlight {
   background: var(--mark-bg);
   color: var(--text);
   border-radius: var(--radius-sm);
   padding: 0 4px;
+}
+
+.u-highlight {
+  background: color-mix(in srgb, var(--accent), transparent 85%);
+  color: var(--accent);
+  font-weight: 600;
 }
 
 /* ── Picker ── */

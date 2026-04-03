@@ -146,14 +146,22 @@ export function closeEdit() {
 
 /** --- Word Row Builder --- */
 
-function createWordRow(w) {
+function highlightMatch(text, query) {
+  if (!query) return esc(text);
+  const escapedText = esc(text);
+  const search = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const regex = new RegExp(`(${search})`, "gi");
+  return escapedText.replace(regex, `<mark class="u-highlight">$1</mark>`);
+}
+
+function createWordRow(w, q = "") {
   const row = document.createElement("div");
   row.className = "word-row";
   row.id = `wr-${w.id}`;
   row.innerHTML = `
     <div class="word-row-info">
-      <div class="word-row-text">${esc(w.word)}</div>
-      <div class="word-row-trans">${esc(w.translation)}</div>
+      <div class="word-row-text">${highlightMatch(w.word, q)}</div>
+      <div class="word-row-trans">${highlightMatch(w.translation, q)}</div>
     </div>
     ${w.level ? `<span class="word-row-level">${esc(w.level)}</span>` : ""}
   `;
@@ -375,7 +383,7 @@ async function loadSearch(q) {
     }
     el.innerHTML = "";
     data.result.words.forEach((w) => {
-      el.appendChild(createWordRow(w));
+      el.appendChild(createWordRow(w, q));
     });
   } catch (e) {
     UI.toast(T.SEARCH_FAIL, "error");
