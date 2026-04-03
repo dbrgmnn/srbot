@@ -100,9 +100,9 @@ window.saveQuietHours = saveQuietHours;
 
 function initGlobalHaptics() {
   const selector =
-    "button, .nav-btn, .picker-item, .settings-row, .word-row-info, .capsule, .picker-trigger";
+    "button, .nav-btn, .picker-item, .settings-row, .word-row, .capsule, .picker-trigger, .stat-pill[onclick], .progress-legend-item";
   document.addEventListener(
-    "pointerdown",
+    "click",
     (e) => {
       if (e.target.closest(selector)) tg.HapticFeedback.impactOccurred("light");
     },

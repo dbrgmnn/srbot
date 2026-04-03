@@ -276,7 +276,7 @@ export async function deleteWord(id) {
 
 /** --- Filtered Views --- */
 
-async function showByFilter(filter, emptyMsg) {
+async function showByFilter(filter) {
   window.showScreen("search");
   const results = document.getElementById("search-results");
   const input = document.getElementById("search-input");
@@ -290,9 +290,7 @@ async function showByFilter(filter, emptyMsg) {
   try {
     const data = await API.get(`/api/words/search?filter=${filter}`);
     if (!data.result.words.length) {
-      results.innerHTML = `<div class="u-p32 u-text-center u-hint">${
-        emptyMsg || "No words found"
-      }</div>`;
+      results.innerHTML = "";
       return;
     }
 
@@ -306,27 +304,27 @@ async function showByFilter(filter, emptyMsg) {
 }
 
 export function showTodayAdded() {
-  showByFilter("today", T.EMPTY_TODAY_ADDED);
+  showByFilter("today");
 }
 
 export function showTodayLearned() {
-  showByFilter("reviewed", T.EMPTY_TODAY_LEARNED);
+  showByFilter("reviewed");
 }
 
 export function showQueue() {
-  showByFilter("new", T.EMPTY_QUEUE);
+  showByFilter("new");
 }
 
 export function showLearning() {
-  showByFilter("learning", T.EMPTY_LEARNING);
+  showByFilter("learning");
 }
 
 export function showKnown() {
-  showByFilter("known", T.EMPTY_KNOWN);
+  showByFilter("known");
 }
 
 export function showMastered() {
-  showByFilter("mastered", T.EMPTY_MASTERED);
+  showByFilter("mastered");
 }
 
 export async function shareWords() {
