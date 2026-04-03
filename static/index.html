@@ -388,21 +388,29 @@
           <svg class="u-svg-lg"><use href="#icon-close"></use></svg>
         </button>
       </div>
-      <div id="search-actions" class="search-actions u-hidden">
-        <button
-          id="btn-select-mode"
-          class="search-select-btn"
-          onclick="toggleSelectMode()"
-        >
-          Select
-        </button>
-        <button
-          id="btn-bulk-delete"
-          class="search-action-btn bulk-btn-danger u-hidden"
-          onclick="executeBulkDelete()"
-        >
-          Delete (0)
-        </button>
+      <div
+        id="search-actions"
+        class="card settings-row search-actions-plate u-hidden"
+      >
+        <div class="settings-row-left">
+          <div id="search-actions-label" class="settings-label">Dictionary</div>
+        </div>
+        <div class="search-actions-btns">
+          <button
+            id="btn-select-mode"
+            class="btn btn-sm btn-secondary"
+            onclick="toggleSelectMode()"
+          >
+            Select
+          </button>
+          <button
+            id="btn-bulk-delete"
+            class="btn btn-sm btn-danger u-hidden"
+            onclick="executeBulkDelete()"
+          >
+            Delete 0
+          </button>
+        </div>
       </div>
       <div id="search-results"></div>
     </div>

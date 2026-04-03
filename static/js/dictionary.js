@@ -203,7 +203,12 @@ function toggleWordSelection(id, row) {
 
 function updateBulkBar() {
   const btnDelete = document.getElementById("btn-bulk-delete");
+  const label = document.getElementById("search-actions-label");
   const count = selectedWords.size;
+
+  if (isSelectMode && label) {
+    label.textContent = `${count} Selected`;
+  }
 
   if (count > 0) {
     btnDelete.classList.remove("u-hidden");
@@ -222,10 +227,14 @@ function checkSearchActions(count) {
 export function toggleSelectMode() {
   isSelectMode = !isSelectMode;
   const btnSelect = document.getElementById("btn-select-mode");
-  btnSelect.textContent = isSelectMode ? "Cancel" : "Select";
-  btnSelect.classList.toggle("is-active", isSelectMode);
+  const label = document.getElementById("search-actions-label");
 
-  if (!isSelectMode) {
+  if (isSelectMode) {
+    btnSelect.textContent = "Cancel";
+    if (label) label.textContent = "0 Selected";
+  } else {
+    btnSelect.textContent = "Select";
+    if (label) label.textContent = "Dictionary";
     selectedWords.clear();
     updateBulkBar();
   }
@@ -267,8 +276,8 @@ export async function executeBulkDelete() {
   };
 
   if (tg.showConfirm) {
-    tg.showConfirm(`Delete ${count} selected words?`, proceed);
-  } else if (confirm(`Delete ${count} selected words?`)) {
+    tg.showConfirm("Delete selected words?", proceed);
+  } else if (confirm("Delete selected words?")) {
     proceed(true);
   }
 }
