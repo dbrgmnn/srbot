@@ -981,6 +981,11 @@ body.no-nav {
     var(--color-danger),
     transparent 88%
   ) !important;
+  border-color: color-mix(
+    in srgb,
+    var(--color-danger),
+    transparent 70%
+  ) !important;
   color: var(--color-danger) !important;
 }
 
