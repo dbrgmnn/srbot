@@ -31,7 +31,7 @@
   background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
-  z-index: 300;
+  z-index: var(--z-overlay);
 }
 
 .edit-overlay.open {
@@ -48,7 +48,7 @@
   border-top-right-radius: 24px;
   padding: 24px 16px;
   padding-bottom: calc(env(safe-area-inset-bottom) + 32px);
-  z-index: 301;
+  z-index: var(--z-modal);
   max-height: 92vh;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;

@@ -80,4 +80,11 @@
 
   /* ── Shared Definitions ── */
   --glass-base: var(--glass) var(--blur);
+
+  /* ── Z-Index System ── */
+  --z-nav: 100;
+  --z-overlay: 300;
+  --z-modal: 301;
+  --z-effect: 2000;
+  --z-toast: 9999;
 }

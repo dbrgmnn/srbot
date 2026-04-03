@@ -178,7 +178,7 @@ body.theme-light .word-card.swipe-up::before {
   position: fixed;
   inset: 0;
   pointer-events: none;
-  z-index: 2000;
+  z-index: var(--z-effect);
 }
 
 .u-mt8 {
