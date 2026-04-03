@@ -264,7 +264,19 @@ export async function saveEdit() {
   }
 }
 
-export async function showTodayAdded() {
+export async function deleteWord(id) {
+  try {
+    await API.delete(`/api/words/${id}`);
+    document.getElementById(`wr-${id}`)?.remove();
+    state.currentStats = null;
+  } catch (e) {
+    UI.toast(T.DELETE_FAIL, "error");
+  }
+}
+
+/** --- Filtered Views --- */
+
+async function showByFilter(filter, emptyMsg) {
   window.showScreen("search");
   const results = document.getElementById("search-results");
   const input = document.getElementById("search-input");
@@ -276,9 +288,11 @@ export async function showTodayAdded() {
     results.innerHTML = `<div class="u-flex-center u-p24"><span class="spinner"></span></div>`;
 
   try {
-    const data = await API.get("/api/words/search?filter=today");
+    const data = await API.get(`/api/words/search?filter=${filter}`);
     if (!data.result.words.length) {
-      results.innerHTML = `<div class="u-p32 u-text-center u-hint">No words added today yet</div>`;
+      results.innerHTML = `<div class="u-p32 u-text-center u-hint">${
+        emptyMsg || "No words found"
+      }</div>`;
       return;
     }
 
@@ -287,8 +301,32 @@ export async function showTodayAdded() {
       results.appendChild(createWordRow(w));
     });
   } catch (e) {
-    UI.toast(T.SEARCH_FAIL, "error");
+    results.innerHTML = `<div class="u-p32 u-text-center u-danger">Could not load words</div>`;
   }
+}
+
+export function showTodayAdded() {
+  showByFilter("today", T.EMPTY_TODAY_ADDED);
+}
+
+export function showTodayLearned() {
+  showByFilter("reviewed", T.EMPTY_TODAY_LEARNED);
+}
+
+export function showQueue() {
+  showByFilter("new", T.EMPTY_QUEUE);
+}
+
+export function showLearning() {
+  showByFilter("learning", T.EMPTY_LEARNING);
+}
+
+export function showKnown() {
+  showByFilter("known", T.EMPTY_KNOWN);
+}
+
+export function showMastered() {
+  showByFilter("mastered", T.EMPTY_MASTERED);
 }
 
 export async function shareWords() {
@@ -343,43 +381,6 @@ async function loadSearch(q) {
     });
   } catch (e) {
     UI.toast(T.SEARCH_FAIL, "error");
-  }
-}
-
-export async function deleteWord(id) {
-  try {
-    await API.delete(`/api/words/${id}`);
-    document.getElementById(`wr-${id}`)?.remove();
-    state.currentStats = null;
-  } catch (e) {
-    UI.toast(T.DELETE_FAIL, "error");
-  }
-}
-
-export async function showTodayLearned() {
-  window.showScreen("search");
-  const results = document.getElementById("search-results");
-  const input = document.getElementById("search-input");
-  const clearBtn = document.getElementById("search-clear");
-
-  if (input) input.value = "";
-  if (clearBtn) clearBtn.classList.add("u-hidden");
-  if (results)
-    results.innerHTML = `<div class="u-flex-center u-p24"><span class="spinner"></span></div>`;
-
-  try {
-    const data = await API.get("/api/words/search?filter=reviewed");
-    if (!data.result.words.length) {
-      results.innerHTML = `<div class="u-p32 u-text-center u-hint">No words learned today yet</div>`;
-      return;
-    }
-
-    results.innerHTML = "";
-    data.result.words.forEach((w) => {
-      results.appendChild(createWordRow(w));
-    });
-  } catch (e) {
-    results.innerHTML = `<div class="u-p32 u-text-center u-danger">Could not load words</div>`;
   }
 }
 

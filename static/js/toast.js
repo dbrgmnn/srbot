@@ -45,4 +45,12 @@ export const T = {
   SESSION_FAIL: _fail("load session"),
   GRADE_FAIL: _fail("save progress"),
   UNDO_FAIL: "Reverted",
+
+  // Filters
+  EMPTY_QUEUE: "Your queue is empty",
+  EMPTY_LEARNING: "No words in learning status",
+  EMPTY_KNOWN: "No known words yet",
+  EMPTY_MASTERED: "No mastered words yet",
+  EMPTY_TODAY_ADDED: "No words added today yet",
+  EMPTY_TODAY_LEARNED: "No words learned today yet",
 };

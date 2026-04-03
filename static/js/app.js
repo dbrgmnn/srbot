@@ -11,6 +11,10 @@ import {
   showTodayLearned,
   deleteWord,
   deleteCurrentWord,
+  showQueue,
+  showLearning,
+  showKnown,
+  showMastered,
 } from "./dictionary.js";
 import { exitPractice, playAudio, startPractice, undo } from "./practice.js";
 import {
@@ -74,6 +78,10 @@ window.shareWords = shareWords;
 window.openEdit = openEdit;
 window.showTodayAdded = showTodayAdded;
 window.showTodayLearned = showTodayLearned;
+window.showQueue = showQueue;
+window.showLearning = showLearning;
+window.showKnown = showKnown;
+window.showMastered = showMastered;
 window.deleteWord = deleteWord;
 window.deleteCurrentWord = deleteCurrentWord;
 

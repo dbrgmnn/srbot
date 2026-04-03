@@ -335,6 +335,16 @@ body.no-nav {
   margin-bottom: 0;
 }
 
+.stat-pill[onclick] {
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.stat-pill[onclick]:active {
+  transform: scale(0.96);
+  background: var(--glass-shine);
+}
+
 .stat-pill-left {
   display: flex;
   flex-direction: column;
@@ -405,6 +415,13 @@ body.no-nav {
   padding: 12px 8px;
   border-radius: var(--radius-md);
   gap: 4px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.progress-legend-item:active {
+  transform: scale(0.95);
+  background: var(--glass-shine);
 }
 
 .progress-legend-lbl {

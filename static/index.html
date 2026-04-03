@@ -272,21 +272,21 @@
       <div>
         <div class="skeleton skeleton-bar-h30"></div>
         <div class="progress-legend">
-          <div class="progress-legend-item">
+          <div class="progress-legend-item" onclick="showQueue()">
             <b class="progress-legend-num text-new" id="count-new">0</b>
             <span class="progress-legend-lbl">QUEUE</span>
           </div>
-          <div class="progress-legend-item">
+          <div class="progress-legend-item" onclick="showLearning()">
             <b class="progress-legend-num text-learning" id="count-learning"
               >0</b
             >
             <span class="progress-legend-lbl">LEARNING</span>
           </div>
-          <div class="progress-legend-item">
+          <div class="progress-legend-item" onclick="showKnown()">
             <b class="progress-legend-num text-known" id="count-known">0</b>
             <span class="progress-legend-lbl">KNOWN</span>
           </div>
-          <div class="progress-legend-item">
+          <div class="progress-legend-item" onclick="showMastered()">
             <b class="progress-legend-num text-mastered" id="count-mastered"
               >0</b
             >

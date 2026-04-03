@@ -235,7 +235,9 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
 
         word_repo = WordRepo(db)
 
-        if filter_type == "today":
+        if filter_type in ("new", "learning", "known", "mastered"):
+            words = await word_repo.get_words_by_status(user_id, lang, filter_type)
+        elif filter_type == "today":
             # Need timezone from user_settings for correctness
             user_repo = UserRepo(db)
             settings = await user_repo.get_user_settings(request["telegram_id"], lang)

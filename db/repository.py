@@ -489,6 +489,29 @@ class WordRepo:
         rows = await cursor.fetchall()
         return [dict(row) for row in rows]
 
+    async def get_words_by_status(self, user_id: int, language: str, status: str) -> list[dict]:
+        """Get words filtered by learning status (new, learning, known, mastered)."""
+        where_clause = ""
+        if status == "new":
+            where_clause = "AND started_at IS NULL"
+        elif status == "learning":
+            where_clause = "AND started_at IS NOT NULL AND interval < 5"
+        elif status == "known":
+            where_clause = "AND interval >= 5 AND interval < 30"
+        elif status == "mastered":
+            where_clause = "AND interval >= 30"
+        else:
+            return []
+
+        cursor = await self.db.execute(
+            f"""SELECT id, word, translation, example, level FROM words
+                WHERE user_id = ? AND language = ? {where_clause}
+                ORDER BY word ASC LIMIT 500""",
+            (user_id, language),
+        )
+        rows = await cursor.fetchall()
+        return [dict(row) for row in rows]
+
     async def get_today_added_words(
         self, user_id: int, language: str, tz_name: str = "UTC", fallback_tz: str = "UTC"
     ) -> list[dict]:
