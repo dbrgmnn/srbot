@@ -290,7 +290,9 @@ export async function addWordWithAI(word, btn) {
         UI.toast(`Added: ${added.word}`, "success");
       }
 
-      // Clear input and hide the clear button
+      // Clear input and pending requests
+      clearTimeout(searchTimer);
+      currentSearchId++;
       const input = document.getElementById("search-input");
       const clearBtn = document.getElementById("search-clear");
       if (input) input.value = "";
@@ -366,8 +368,9 @@ export async function saveEdit() {
 /** --- Filtered Views --- */
 
 async function showByFilter(filter) {
-  const reqId = ++currentSearchId;
   window.showScreen("search");
+  clearTimeout(searchTimer);
+  const reqId = ++currentSearchId;
   if (isSelectMode) toggleSelectMode();
   const results = document.getElementById("search-results");
   const input = document.getElementById("search-input");
