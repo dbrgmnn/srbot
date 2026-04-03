@@ -19,12 +19,10 @@ import {
 import { exitPractice, playAudio, startPractice, undo } from "./practice.js";
 import {
   closeApiAccessSheet,
-  closeDeleteAllSheet,
   closePicker,
   closeQuietHoursSheet,
   loadSettings,
   openApiAccessSheet,
-  openDeleteAllSheet,
   openPicker,
   openQuietHoursSheet,
   saveQuietHours,
@@ -88,8 +86,6 @@ window.deleteCurrentWord = deleteCurrentWord;
 // Settings
 window.openPicker = openPicker;
 window.closePicker = closePicker;
-window.openDeleteAllSheet = openDeleteAllSheet;
-window.closeDeleteAllSheet = closeDeleteAllSheet;
 window.openApiAccessSheet = openApiAccessSheet;
 window.closeApiAccessSheet = closeApiAccessSheet;
 window.openQuietHoursSheet = openQuietHoursSheet;

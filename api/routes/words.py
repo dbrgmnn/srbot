@@ -203,16 +203,6 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
             return web.json_response({"ok": False, "error": "duplicate"}, status=409)
         return web.json_response({"ok": True})
 
-    async def delete_all_words(request: web.Request) -> web.Response:
-        """Delete all words for the user's current language."""
-        user_id = request["user_id"]
-        telegram_id = request["telegram_id"]
-        lang = request["language"]
-        word_repo = WordRepo(db)
-        await word_repo.delete_all_words(user_id, lang)
-        logger.info(f"User {telegram_id} deleted ALL words for language '{lang}'")
-        return web.json_response({"ok": True})
-
     async def delete_word(request: web.Request) -> web.Response:
         """Delete a specific word by its ID."""
         user_id = request["user_id"]
@@ -279,6 +269,5 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
     app.router.add_post("/api/external/words", add_word_external)
     app.router.add_get("/api/words/export", export_words)
     app.router.add_get("/api/words/search", search_words)
-    app.router.add_delete("/api/words/all", delete_all_words)
     app.router.add_patch("/api/words/{word_id}", patch_word)
     app.router.add_delete("/api/words/{word_id}", delete_word)

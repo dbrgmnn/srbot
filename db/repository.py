@@ -457,17 +457,6 @@ class WordRepo:
         await self.db.commit()
         return cursor.rowcount > 0
 
-    async def delete_all_words(self, user_id: int, language: str = None):
-        """Delete all words for a user, optionally filtered by language."""
-        if language:
-            await self.db.execute(
-                "DELETE FROM words WHERE user_id = ? AND language = ?",
-                (user_id, language),
-            )
-        else:
-            await self.db.execute("DELETE FROM words WHERE user_id = ?", (user_id,))
-        await self.db.commit()
-
     async def delete_word(self, word_id: int, user_id: int):
         """Delete a specific word for a user."""
         await self.db.execute(

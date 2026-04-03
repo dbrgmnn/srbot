@@ -787,9 +787,13 @@ body.no-nav {
 .nav-btn,
 .capsule,
 .btn-round,
-.row-btn {
+.row-btn,
+.stat-pill,
+.progress-legend-item,
+.picker-item {
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
+  -webkit-user-select: none;
   user-select: none;
   transition: var(--transition);
 }

@@ -493,15 +493,6 @@
         </div>
       </div>
 
-      <div class="u-mt40" style="display: flex; justify-content: center">
-        <button
-          class="btn btn-quiet-danger btn-sm"
-          onclick="openDeleteAllSheet()"
-        >
-          Clear Dictionary
-        </button>
-      </div>
-
       <input
         type="file"
         id="csv-input"
@@ -635,37 +626,6 @@
     <div id="picker-sheet" class="edit-sheet">
       <div class="edit-sheet-title" id="picker-title">Select</div>
       <div id="picker-list" class="picker-list"></div>
-    </div>
-
-    <!-- Delete All Confirmation Sheet -->
-    <div
-      id="delete-all-overlay"
-      class="edit-overlay"
-      onclick="closeDeleteAllSheet()"
-    ></div>
-    <div id="delete-all-sheet" class="edit-sheet">
-      <div class="edit-sheet-title"></div>
-      <div id="delete-all-info" class="sheet-text u-mb20">
-        All words and progress will be lost.
-      </div>
-      <input
-        type="text"
-        id="delete-confirm-input"
-        class="form-input"
-        placeholder="Type to delete..."
-        oninput="onDeleteAllInput(this.value)"
-        autocomplete="off"
-      />
-      <button
-        id="btn-delete-all-confirm"
-        class="btn btn-destructive is-disabled"
-        onclick="executeDeleteAll()"
-      >
-        Delete
-      </button>
-      <button class="btn btn-secondary" onclick="closeDeleteAllSheet()">
-        Cancel
-      </button>
     </div>
 
     <canvas id="confetti-canvas" class="confetti-canvas"></canvas>
