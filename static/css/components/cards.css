@@ -1,0 +1,153 @@
+/* ── Cards ── */
+.card,
+.settings-group {
+  background: none;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  margin-bottom: 24px;
+}
+
+/* ── Stats grid ── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.stat-pill {
+  padding: 18px 20px;
+  justify-content: space-between;
+  margin-bottom: 0;
+}
+
+.stat-pill[onclick] {
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.stat-pill[onclick]:active {
+  transform: scale(0.96);
+  background: var(--glass-shine);
+}
+
+.stat-pill-left {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-val {
+  font-size: var(--font-lg);
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.2px;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-val.is-timer {
+  font-size: calc(var(--font-sm) + 1px);
+  font-weight: var(--weight-bold);
+  color: var(--text-secondary);
+  opacity: 0.5;
+}
+
+.stat-pill-icon {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+}
+
+.stat-pill-icon svg {
+  width: 24px;
+  height: 24px;
+  stroke: currentColor;
+  stroke-width: var(--icon-weight);
+}
+
+.stat-pill-label {
+  font-size: var(--font-xs);
+  color: var(--hint);
+  font-weight: var(--weight-bold);
+  margin-top: 4px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  opacity: 0.5;
+}
+
+.stat-pill-icon-review,
+.stat-pill-icon-added {
+  color: var(--color-review);
+}
+
+.stat-pill-icon-new {
+  color: var(--color-known);
+}
+
+.stat-pill-icon-learned {
+  color: var(--color-mastered);
+}
+
+/* ── Progress block ── */
+.progress-legend {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-top: 24px;
+  margin-bottom: 24px;
+}
+
+.progress-legend-item {
+  flex-direction: column;
+  padding: 12px 8px;
+  border-radius: var(--radius-md);
+  gap: 4px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.progress-legend-item:active {
+  transform: scale(0.95);
+  background: var(--glass-shine);
+}
+
+.progress-legend-lbl {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--hint);
+  font-weight: 700;
+  opacity: 0.5;
+}
+
+.progress-legend-num {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  margin-bottom: 2px;
+}
+
+/* ── Week activity grid ── */
+.card-sep {
+  height: 1px;
+  background: var(--row-divider);
+  margin: 16px 0;
+}
+
+.text-new {
+  color: var(--color-new);
+}
+
+.text-learning {
+  color: var(--color-learning);
+}
+
+.text-known {
+  color: var(--color-known);
+}
+
+.text-mastered {
+  color: var(--color-mastered);
+}

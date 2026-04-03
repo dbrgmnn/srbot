@@ -1,0 +1,62 @@
+/* ── Screens ── */
+.screen {
+  display: none;
+  padding: 0 16px 16px;
+}
+
+.screen.active {
+  display: block;
+}
+
+#screen-practice {
+  padding: 0;
+  position: fixed;
+  inset: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* ── Header ── */
+.header {
+  padding: calc(env(safe-area-inset-top) + 12px) 16px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(env(safe-area-inset-top) + 56px);
+  position: relative;
+}
+
+.header-title {
+  font-size: var(--font-xl);
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+
+.header-action {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--accent);
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    opacity 0.2s,
+    transform 0.2s;
+}
+
+.header-action:active {
+  opacity: 0.5;
+  transform: translateY(-50%) scale(0.9);
+}
+
+.header-centered {
+  justify-content: center;
+}

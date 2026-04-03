@@ -1,0 +1,127 @@
+/* ── Design System: Foundation ── */
+.nav,
+.u-glass,
+.u-glass-mid,
+.stat-pill,
+.form-input,
+.word-card::before,
+.settings-row,
+.word-row,
+.word-row-level,
+.picker-trigger,
+.progress-legend-item,
+.capsule,
+.btn-round,
+.row-btn {
+  background: var(--glass-mid);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+  border: 1px solid var(--glass-border);
+  box-shadow:
+    var(--shadow-mid),
+    inset 0 1px 0 var(--glass-shine);
+}
+
+.csv-preview,
+.picker-list-mini {
+  background: var(--cell-bg);
+  border-radius: var(--radius-md);
+}
+
+.csv-preview {
+  padding: var(--space-md);
+  margin-top: var(--space-md);
+  font-size: var(--font-xs);
+  color: var(--text-secondary);
+  overflow-x: auto;
+  white-space: pre;
+}
+
+.form-input {
+  background: var(--bg2) !important;
+}
+
+.card,
+.settings-group,
+.stat-pill,
+.btn,
+.btn-round,
+.picker-list-mini,
+.csv-preview,
+.form-input,
+.word-card,
+.word-card::before,
+.settings-row,
+.word-row,
+.progress-legend-item,
+.u-glass,
+.row-btn {
+  border-radius: var(--radius-md);
+}
+
+.stat-pill,
+.stat-pill-icon,
+.progress-legend-item,
+.capsule,
+.word-face,
+.btn-round,
+.settings-icon,
+.row-btn,
+.search-clear,
+.picker-item,
+.u-flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Design System: SVG Utilities ── */
+svg {
+  stroke-width: var(--icon-weight);
+  flex-shrink: 0;
+}
+
+.u-svg-xs {
+  width: 14px;
+  height: 14px;
+}
+
+.u-svg-md {
+  width: 18px;
+  height: 18px;
+}
+
+.u-svg-lg {
+  width: 24px;
+  height: 24px;
+}
+
+/* ── Custom Scrollbars ── */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--glass-shine);
+  border-radius: var(--radius-pill);
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI",
+    sans-serif;
+  font-size: 17px;
+  min-height: 100vh;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: calc(110px + env(safe-area-inset-bottom));
+}
+
+body.no-nav {
+  padding-bottom: env(safe-area-inset-bottom);
+}

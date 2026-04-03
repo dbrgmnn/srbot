@@ -1,0 +1,38 @@
+/* ── Add Form ── */
+.add-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.form-input {
+  display: block;
+  width: 100%;
+  background: var(--bg2);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  color: var(--text);
+  font-size: 17px;
+  outline: none;
+  margin-bottom: 8px;
+  touch-action: manipulation;
+  transition: var(--transition);
+}
+
+.form-input:focus {
+  border-color: var(--accent);
+}
+
+.form-input:last-child {
+  margin-bottom: 0;
+}
+
+.form-input::placeholder {
+  color: var(--hint);
+}
+
+#file-input {
+  display: none;
+}

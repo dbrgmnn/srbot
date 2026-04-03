@@ -1,0 +1,65 @@
+/* ── Skeletons ── */
+@keyframes skeleton-pulse {
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+
+  50% {
+    opacity: 0.3;
+  }
+}
+
+.skeleton {
+  background: var(--glass-mid);
+  border-radius: var(--radius-md);
+  animation: skeleton-pulse 1.5s var(--ease-standard) infinite;
+  display: inline-block;
+  pointer-events: none;
+}
+
+.skeleton-val {
+  width: 40px;
+  height: 28px;
+}
+
+.skeleton-bar {
+  width: 100%;
+  height: 6px;
+  margin-bottom: 14px;
+}
+
+.skeleton-cell {
+  width: 100%;
+  aspect-ratio: 1;
+}
+
+.skeleton-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-pill);
+}
+
+.skeleton-bar-h30 {
+  width: 100%;
+  height: 30px;
+}
+
+/* Hide real content when loading */
+.loading .stat-val,
+.loading .stat-pill-icon,
+.loading .progress-legend,
+.loading .today-stats {
+  display: none;
+}
+
+.not-loading .skeleton {
+  display: none;
+}
+
+.today-stats {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin: 0 0 24px 0;
+}

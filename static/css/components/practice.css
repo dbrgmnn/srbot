@@ -1,0 +1,193 @@
+/* ── Practice ── */
+.practice-screen-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: calc(env(safe-area-inset-top) + 48px) 16px
+    calc(env(safe-area-inset-bottom) + 32px);
+  box-sizing: border-box;
+  align-items: center;
+}
+
+.practice-badge,
+.word-level-badge,
+.word-row-level {
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  text-transform: uppercase;
+  font-weight: var(--weight-bold);
+  font-size: var(--font-xs);
+  letter-spacing: 0.05em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.practice-badge-new {
+  background: color-mix(in srgb, var(--color-known), transparent 88%);
+  color: var(--color-known);
+}
+
+.practice-badge-review {
+  background: color-mix(in srgb, var(--color-info), transparent 88%);
+  color: var(--color-info);
+}
+
+.practice-badge-info {
+  background: var(--glass);
+  color: var(--hint);
+}
+
+/* Badge positioning inside cards */
+.word-face .practice-badge,
+.word-face .word-level-badge {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}
+
+.word-row-level {
+  color: var(--hint);
+  padding: 4px 12px;
+}
+
+.word-card-container {
+  margin: auto 0;
+  width: 100%;
+  max-width: 320px;
+  height: 400px;
+  perspective: 1200px;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.word-card {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  border-radius: var(--radius-lg);
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+  cursor: pointer;
+  touch-action: none;
+}
+
+/* Glass effect via ::before to avoid breaking preserve-3d */
+.word-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-lg);
+  background: var(--glass);
+  box-shadow:
+    var(--shadow-high),
+    inset 0 1px 0 var(--glass-shine);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.word-card.swiping {
+  transition: none !important;
+}
+
+.word-card.flipped {
+  transform: rotateY(180deg);
+}
+
+.word-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  text-align: center;
+  z-index: 1;
+}
+
+.word-back {
+  transform: rotateY(180deg);
+}
+
+.word-main {
+  font-size: var(--font-xl);
+  font-weight: var(--weight-heavy);
+  color: var(--text);
+  letter-spacing: -0.5px;
+}
+
+.word-trans {
+  font-size: var(--font-xl);
+  color: var(--text-secondary);
+  font-weight: var(--weight-semibold);
+}
+
+.word-example {
+  font-size: 14px;
+  color: var(--hint);
+  margin-top: 20px;
+  line-height: 1.5;
+}
+
+.word-card.swipe-left::before {
+  --swipe-color: var(--color-danger);
+}
+
+.word-card.swipe-right::before {
+  --swipe-color: var(--color-known);
+}
+
+.word-card.swipe-up::before {
+  --swipe-color: var(--color-warning);
+}
+
+.word-card[class*="swipe-"]::before {
+  background: color-mix(
+    in srgb,
+    var(--swipe-color),
+    transparent 88%
+  ) !important;
+  border-color: var(--swipe-color) !important;
+}
+
+.practice-footer {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  flex-shrink: 0;
+}
+
+.practice-info-row {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  flex-shrink: 0;
+}
+
+.practice-footer-row {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  max-width: 320px;
+}
+
+#btn-undo {
+  visibility: hidden;
+}
+
+.btn-round {
+  flex: 1;
+  height: 50px;
+  color: var(--text-secondary);
+}
+
+.btn-round svg {
+  stroke: var(--text-secondary);
+}

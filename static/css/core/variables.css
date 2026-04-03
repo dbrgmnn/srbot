@@ -1,0 +1,83 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg: var(--tg-theme-bg-color, #111113);
+  --bg2: var(--tg-theme-secondary-bg-color, #1c1c1f);
+  --text: var(--tg-theme-text-color, #f0f0f5);
+  --hint: var(--tg-theme-hint-color, #7a7a8a);
+  --accent: var(--tg-theme-button-color, #0a84ff);
+  --btn-text: var(--tg-theme-button-text-color, #ffffff);
+
+  /* ── Status Colors ── */
+  --color-new: #8e8e93;
+  --color-learning: #ff9f0a;
+  --color-known: #30d158;
+  --color-mastered: #bf5af2;
+  --color-review: #ff9f0a;
+  --color-danger: #ff453a;
+  --color-info: #0a84ff;
+  --color-warning: #ffd60a;
+
+  /* ── Design System ── */
+  --glass: rgba(255, 255, 255, 0.07);
+  --glass-mid: rgba(255, 255, 255, 0.11);
+  --glass-border: rgba(255, 255, 255, 0.11);
+  --glass-shine: rgba(255, 255, 255, 0.14);
+  --blur: blur(28px) saturate(1.8);
+
+  --radius-sm: 10px;
+  --radius-md: 20px;
+  --radius-lg: 24px;
+  --radius-pill: 100px;
+
+  --shadow-low: 0 4px 16px rgba(0, 0, 0, 0.15);
+  --shadow-mid: 0 8px 24px rgba(0, 0, 0, 0.25);
+  --shadow-high: 0 16px 40px rgba(0, 0, 0, 0.4);
+
+  --icon-weight: 2.5;
+
+  --row-divider: rgba(255, 255, 255, 0.08);
+  --text-muted: rgba(255, 255, 255, 0.45);
+  --text-secondary: rgba(255, 255, 255, 0.7);
+  --text-faint: rgba(255, 255, 255, 0.5);
+  --text-subtle: rgba(255, 255, 255, 0.65);
+  --icon-stroke: rgba(255, 255, 255, 0.65);
+  --cell-bg: rgba(255, 255, 255, 0.05);
+  --mark-bg: rgba(255, 255, 255, 0.15);
+  --sheet-bg: rgba(20, 20, 24, 0.96);
+
+  /* ── Spacing System ── */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 20px;
+  --space-xl: 32px;
+  --gap: var(--space-lg);
+
+  /* ── Typography System ── */
+  --font-xs: 10px;
+  --font-sm: 12px;
+  --font-md: 15px;
+  --font-base: 17px;
+  --font-lg: 18px;
+  --font-xl: 22px;
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+  --weight-heavy: 800;
+
+  /* ── Animation System ── */
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+  --ease-out: cubic-bezier(0.19, 1, 0.22, 1);
+  --transition: 0.2s var(--ease);
+  --transition-slow: 0.4s var(--ease-out);
+
+  /* ── Shared Definitions ── */
+  --glass-base: var(--glass) var(--blur);
+}

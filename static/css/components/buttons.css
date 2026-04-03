@@ -1,0 +1,102 @@
+/* ── Buttons ── */
+.btn {
+  width: 100%;
+  padding: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: var(--btn-text);
+  font-size: var(--font-base);
+  font-weight: var(--weight-bold);
+  cursor: pointer;
+  margin-bottom: 24px;
+  letter-spacing: 0.01em;
+  box-shadow: var(--shadow-low);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn:active {
+  transform: scale(0.98);
+  opacity: 0.9;
+}
+
+.btn:not(:disabled):active {
+  box-shadow: var(--shadow-mid);
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: var(--glass-mid);
+  border-color: var(--glass-border);
+  color: var(--text-muted);
+  box-shadow: none;
+}
+
+.btn-secondary {
+  background: var(--glass-mid);
+  color: var(--text);
+  border-color: var(--glass-border);
+  box-shadow: none;
+}
+
+.btn-destructive {
+  background: var(--color-danger);
+  border-color: var(--color-danger);
+  color: #ffffff;
+}
+
+.btn-quiet-danger {
+  background: transparent;
+  color: var(--color-danger);
+  border: 1px solid color-mix(in srgb, var(--color-danger), transparent 80%);
+}
+
+.btn-sm {
+  padding: 8px 16px;
+  font-size: 13px;
+  width: auto;
+  min-width: 120px;
+}
+
+.btn-destructive.is-disabled,
+.btn-quiet-danger.is-disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* ── Capsule ── */
+.capsule-wrapper {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 24px 0 24px;
+}
+
+.capsule {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-radius: var(--radius-pill);
+  color: var(--text-faint);
+  font-size: 14px;
+  font-weight: var(--weight-semibold);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.capsule:active {
+  opacity: 0.6;
+  transform: scale(0.95);
+}
+
+.capsule-danger {
+  color: var(--color-danger);
+  border-color: rgba(255, 69, 58, 0.2);
+}
