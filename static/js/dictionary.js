@@ -18,19 +18,6 @@ function esc(str) {
     .replace(/"/g, "&quot;");
 }
 
-function highlight(text, query) {
-  if (!query || query.length < 2) return esc(text);
-  const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const parts = text.split(new RegExp(`(${escapedQuery})`, "gi"));
-  return parts
-    .map((p) =>
-      p.toLowerCase() === query.toLowerCase()
-        ? `<mark>${esc(p)}</mark>`
-        : esc(p),
-    )
-    .join("");
-}
-
 function parseCSVLine(line) {
   const fields = [];
   let current = "",
@@ -203,12 +190,7 @@ function toggleWordSelection(id, row) {
 
 function updateBulkBar() {
   const btnDelete = document.getElementById("btn-bulk-delete");
-  const label = document.getElementById("search-actions-label");
   const count = selectedWords.size;
-
-  if (isSelectMode && label) {
-    label.textContent = `${count} Selected`;
-  }
 
   if (count > 0) {
     btnDelete.classList.remove("u-hidden");
@@ -227,14 +209,11 @@ function checkSearchActions(count) {
 export function toggleSelectMode() {
   isSelectMode = !isSelectMode;
   const btnSelect = document.getElementById("btn-select-mode");
-  const label = document.getElementById("search-actions-label");
 
   if (isSelectMode) {
     btnSelect.textContent = "Cancel";
-    if (label) label.textContent = "0 Selected";
   } else {
     btnSelect.textContent = "Select";
-    if (label) label.textContent = "Dictionary";
     selectedWords.clear();
     updateBulkBar();
   }
@@ -358,16 +337,6 @@ export async function saveEdit() {
     );
   } finally {
     isSubmitting = false;
-  }
-}
-
-export async function deleteWord(id) {
-  try {
-    await API.delete(`/api/words/${id}`);
-    document.getElementById(`wr-${id}`)?.remove();
-    state.currentStats = null;
-  } catch (e) {
-    UI.toast(T.DELETE_FAIL, "error");
   }
 }
 
