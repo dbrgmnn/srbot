@@ -140,10 +140,15 @@ export function closeEdit() {
 
 function highlightMatch(text, query) {
   if (!query) return esc(text);
-  const escapedText = esc(text);
   const search = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const regex = new RegExp(`(${search})`, "gi");
-  return escapedText.replace(regex, `<mark class="u-highlight">$1</mark>`);
+  const parts = String(text).split(regex);
+  return parts
+    .map((part, i) => {
+      if (i % 2 === 1) return `<mark class="u-highlight">${esc(part)}</mark>`;
+      return esc(part);
+    })
+    .join("");
 }
 
 function createWordRow(w, q = "") {
@@ -212,8 +217,10 @@ export function toggleSelectMode() {
 
   if (isSelectMode) {
     btnSelect.textContent = "Cancel";
+    btnSelect.classList.remove("btn-secondary");
   } else {
     btnSelect.textContent = "Select";
+    btnSelect.classList.add("btn-secondary");
     selectedWords.clear();
     updateBulkBar();
   }
@@ -325,10 +332,23 @@ export async function saveEdit() {
     UI.toast(T.WORD_SAVED, "success");
     state.currentStats = null;
 
-    // Refresh search results to show the updated word
+    // Update the row in the DOM directly for immediate feedback
     const searchInput = document.getElementById("search-input");
-    if (searchInput && searchInput.value) {
-      loadSearch(searchInput.value);
+    const q = searchInput ? searchInput.value : "";
+    const existingRow = document.getElementById(`wr-${editWordId}`);
+    if (existingRow) {
+      existingRow.replaceWith(
+        createWordRow(
+          {
+            id: editWordId,
+            word,
+            translation: trans,
+            example: ex,
+            level,
+          },
+          q,
+        ),
+      );
     }
   } catch (e) {
     UI.toast(
@@ -344,6 +364,7 @@ export async function saveEdit() {
 
 async function showByFilter(filter) {
   window.showScreen("search");
+  if (isSelectMode) toggleSelectMode();
   const results = document.getElementById("search-results");
   const input = document.getElementById("search-input");
   const clearBtn = document.getElementById("search-clear");
