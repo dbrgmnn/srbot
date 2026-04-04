@@ -315,7 +315,7 @@
         type="file"
         id="csv-input"
         accept=".csv"
-        style="display: none"
+        class="u-hidden"
         onchange="handleFileUpload(this)"
       />
     </div>
@@ -329,7 +329,7 @@
     <div id="api-sheet" class="edit-sheet">
       <div class="edit-sheet-title"></div>
       <div class="sheet-text">Use this token to connect external apps.</div>
-      <div class="card settings-group card-sm u-mb24">
+      <div class="u-mb24">
         <div id="api-token-display" class="token-box">—</div>
       </div>
       <button class="btn" onclick="copyToken()">Copy Token</button>
@@ -384,40 +384,38 @@
 
     <!-- Edit Sheet -->
     <div id="edit-overlay" class="edit-overlay" onclick="closeEdit()"></div>
-    <div id="edit-sheet" class="edit-sheet" style="padding-bottom: 80px">
+    <div id="edit-sheet" class="edit-sheet sheet-edit-word">
       <div class="edit-sheet-title">Edit Word</div>
-      <div class="card settings-group">
-        <div class="add-form">
-          <input
-            type="text"
-            id="edit-word"
-            class="form-input"
-            placeholder="Word"
-          />
-          <input
-            type="text"
-            id="edit-translation"
-            class="form-input"
-            placeholder="Translate"
-          />
-          <input
-            type="text"
-            id="edit-example"
-            class="form-input"
-            placeholder="Example"
-          />
-          <div
-            id="edit-level-trigger"
-            class="form-input picker-trigger"
-            onclick="openPicker('level', 'edit')"
+      <div class="add-form">
+        <input
+          type="text"
+          id="edit-word"
+          class="form-input"
+          placeholder="Word"
+        />
+        <input
+          type="text"
+          id="edit-translation"
+          class="form-input"
+          placeholder="Translate"
+        />
+        <input
+          type="text"
+          id="edit-example"
+          class="form-input"
+          placeholder="Example"
+        />
+        <div
+          id="edit-level-trigger"
+          class="form-input picker-trigger"
+          onclick="openPicker('level', 'edit')"
+        >
+          <span id="edit-level-display" class="picker-trigger-placeholder"
+            >Level</span
           >
-            <span id="edit-level-display" class="picker-trigger-placeholder"
-              >Level</span
-            >
-            <span class="picker-trigger-arrow">›</span>
-          </div>
-          <input type="hidden" id="edit-level" value="" />
+          <span class="picker-trigger-arrow">›</span>
         </div>
+        <input type="hidden" id="edit-level" value="" />
       </div>
       <div class="settings-row-split u-mt24">
         <button class="btn btn-secondary" onclick="closeEdit()">Cancel</button>

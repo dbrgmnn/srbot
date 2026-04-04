@@ -66,6 +66,10 @@ body.keyboard-visible .edit-sheet {
   transform: translateY(0);
 }
 
+.sheet-edit-word {
+  padding-bottom: 80px;
+}
+
 /* ── Picker ── */
 .picker-trigger {
   display: flex;

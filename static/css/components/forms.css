@@ -33,6 +33,10 @@
   color: var(--hint);
 }
 
+.u-hidden {
+  display: none !important;
+}
+
 #file-input {
   display: none;
 }
