@@ -47,11 +47,6 @@
   right: 20px;
 }
 
-.word-row-level {
-  color: var(--hint);
-  padding: 4px 12px;
-}
-
 .word-card-container {
   margin: auto 0;
   width: 100%;
@@ -128,7 +123,7 @@
 }
 
 .word-example {
-  font-size: 14px;
+  font-size: var(--font-sm);
   color: var(--hint);
   margin-top: 20px;
   line-height: 1.5;
@@ -190,4 +185,23 @@
 
 .btn-round svg {
   stroke: var(--text-secondary);
+}
+
+/* ── Light theme overrides ── */
+body.theme-light .word-card::before {
+  box-shadow:
+    0 24px 48px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 var(--glass-shine);
+}
+
+body.theme-light .word-card.swipe-left::before {
+  background: rgba(255, 69, 58, 0.1) !important;
+}
+
+body.theme-light .word-card.swipe-right::before {
+  background: rgba(48, 209, 88, 0.1) !important;
+}
+
+body.theme-light .word-card.swipe-up::before {
+  background: rgba(255, 214, 10, 0.1) !important;
 }

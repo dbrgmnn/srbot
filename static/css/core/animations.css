@@ -49,8 +49,7 @@
 /* Hide real content when loading */
 .loading .stat-val,
 .loading .stat-pill-icon,
-.loading .progress-legend,
-.loading .today-stats {
+.loading .progress-legend {
   display: none;
 }
 
