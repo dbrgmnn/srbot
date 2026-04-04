@@ -297,6 +297,7 @@ export function playAudio(e) {
   const msg = new SpeechSynthesisUtterance(text);
   msg.lang = state.ttsCode || "de-DE";
   msg.rate = 0.85;
+  tg.HapticFeedback.impactOccurred("light");
   synth.speak(msg);
 }
 

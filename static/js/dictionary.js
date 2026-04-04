@@ -175,6 +175,7 @@ function createWordRow(w, q = "") {
   `;
 
   row.onclick = () => {
+    tg.HapticFeedback.selectionChanged();
     if (isSelectMode) {
       toggleWordSelection(w.id, row);
     } else {
@@ -215,6 +216,7 @@ function checkSearchActions(count) {
 }
 
 export function toggleSelectMode() {
+  tg.HapticFeedback.selectionChanged();
   isSelectMode = !isSelectMode;
   const btnSelect = document.getElementById("btn-select-mode");
 

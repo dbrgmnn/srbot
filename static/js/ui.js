@@ -19,6 +19,7 @@ export function showScreen(name) {
   }
 
   state.currentScreen = name;
+  tg.HapticFeedback.selectionChanged();
 
   document
     .querySelectorAll(".screen")
