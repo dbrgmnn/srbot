@@ -22,19 +22,9 @@
     inset 0 1px 0 var(--glass-shine);
 }
 
-.csv-preview,
 .picker-list-mini {
   background: var(--cell-bg);
   border-radius: var(--radius-md);
-}
-
-.csv-preview {
-  padding: var(--space-md);
-  margin-top: var(--space-md);
-  font-size: var(--font-xs);
-  color: var(--text-secondary);
-  overflow-x: auto;
-  white-space: pre;
 }
 
 .form-input {

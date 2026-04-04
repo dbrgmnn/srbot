@@ -56,7 +56,3 @@
   opacity: 0.5;
   transform: translateY(-50%) scale(0.9);
 }
-
-.header-centered {
-  justify-content: center;
-}

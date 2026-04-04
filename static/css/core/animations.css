@@ -13,7 +13,7 @@
 .skeleton {
   background: var(--glass-mid);
   border-radius: var(--radius-md);
-  animation: skeleton-pulse 1.5s var(--ease-standard) infinite;
+  animation: skeleton-pulse 1.5s var(--ease) infinite;
   display: inline-block;
   pointer-events: none;
 }
@@ -43,6 +43,7 @@
 .skeleton-bar-h30 {
   width: 100%;
   height: 30px;
+  border-radius: var(--radius-sm);
 }
 
 /* Hide real content when loading */
@@ -55,11 +56,4 @@
 
 .not-loading .skeleton {
   display: none;
-}
-
-.today-stats {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
-  margin: 0 0 24px 0;
 }

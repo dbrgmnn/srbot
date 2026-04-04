@@ -13,14 +13,6 @@ mark,
   font-weight: 600;
 }
 
-/* ── Info footer ── */
-.info-footer {
-  margin-top: 24px;
-  text-align: center;
-  color: var(--hint);
-  font-size: 12px;
-}
-
 /* ── Light theme overrides ── */
 body.theme-light {
   --bg: var(--tg-theme-bg-color, #f2f2f7);
@@ -151,12 +143,6 @@ body.theme-light .word-card.swipe-up::before {
   padding: 16px !important;
 }
 
-.skeleton-bar-h30 {
-  height: 30px !important;
-  width: 100% !important;
-  border-radius: var(--radius-sm) !important;
-}
-
 .sheet-text {
   text-align: center;
   color: var(--text-secondary);
@@ -181,6 +167,25 @@ body.theme-light .word-card.swipe-up::before {
   z-index: var(--z-effect);
 }
 
+/* ── Spinner ── */
+@keyframes spinner-rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--glass-border);
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: spinner-rotate 0.6s linear infinite;
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+
 .u-mt8 {
   margin-top: 8px;
 }
@@ -189,16 +194,25 @@ body.theme-light .word-card.swipe-up::before {
   margin-top: 40px;
 }
 
-.u-m0 {
-  margin: 0;
-}
-
-.u-mb20 {
-  margin-bottom: 20px;
-}
-
 .u-mb24 {
   margin-bottom: 24px;
+}
+
+/* ── Pinpoint inline utils ── */
+.u-p24 {
+  padding: 24px;
+}
+
+.u-p32 {
+  padding: 32px;
+}
+
+.u-text-center {
+  text-align: center;
+}
+
+.u-danger {
+  color: var(--color-danger);
 }
 
 .u-hidden {

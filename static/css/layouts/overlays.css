@@ -29,8 +29,8 @@
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
   z-index: var(--z-overlay);
 }
 
@@ -44,8 +44,7 @@
   left: 0;
   right: 0;
   background: var(--bg);
-  border-top-left-radius: 24px;
-  border-top-right-radius: 24px;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   padding: 24px 16px;
   padding-bottom: calc(env(safe-area-inset-bottom) + 32px);
   z-index: var(--z-modal);
@@ -53,7 +52,7 @@
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   transform: translateY(100%);
-  transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+  transition: transform var(--transition-slow);
   box-shadow:
     var(--shadow-high),
     inset 0 1px 0 var(--glass-shine);

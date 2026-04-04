@@ -34,8 +34,7 @@
   transition: var(--transition);
 }
 
-.settings-row,
-.word-row {
+.settings-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -45,7 +44,6 @@
   border-radius: var(--radius-md);
   margin-bottom: 8px;
   cursor: pointer;
-  transition: var(--transition);
 }
 
 .settings-row-split {
@@ -81,22 +79,7 @@
   color: var(--hint);
 }
 
-/* Neutral icons (Default) */
-.settings-icon-lang,
-.settings-icon-mode,
-.settings-icon-limit,
-.settings-icon-notify,
-.settings-icon-quiet,
-.settings-icon-export,
-.settings-icon-api,
-.settings-icon-delete {
-  color: var(--hint);
-  filter: none;
-}
-
-.settings-row:active,
-.word-card-face:active,
-.word-row:active {
+.settings-row:active {
   opacity: 0.6;
   transform: scale(0.985);
 }
@@ -249,8 +232,6 @@
     opacity 0.1s;
   position: relative;
   overflow: hidden;
-  -webkit-user-select: none;
-  user-select: none;
   -webkit-touch-callout: none;
 }
 
@@ -292,7 +273,7 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-weight: 600;
-  background: var(--glass-shade);
+  background: var(--glass-mid);
   border: 1px solid var(--glass-border);
   margin-left: 12px;
   flex-shrink: 0;

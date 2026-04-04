@@ -130,11 +130,6 @@
 }
 
 /* ── Week activity grid ── */
-.card-sep {
-  height: 1px;
-  background: var(--row-divider);
-  margin: 16px 0;
-}
 
 .text-new {
   color: var(--color-new);
