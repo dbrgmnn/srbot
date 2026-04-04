@@ -40,6 +40,7 @@
   margin-bottom: var(--space-md);
   cursor: pointer;
 }
+
 .settings-row-split {
   display: flex;
   gap: 8px;

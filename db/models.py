@@ -61,6 +61,7 @@ async def init_db(db_path: str = "srbot.db") -> aiosqlite.Connection:
     """)
 
     # Indexes for common queries
+    await db.execute("CREATE INDEX IF NOT EXISTS idx_user_settings_user_id ON user_settings (user_id)")
     await db.execute("CREATE INDEX IF NOT EXISTS idx_words_user_lang_review ON words (user_id, language, next_review)")
     await db.execute("CREATE INDEX IF NOT EXISTS idx_words_user_lang_rep ON words (user_id, language, repetitions)")
     await db.execute("CREATE INDEX IF NOT EXISTS idx_words_user_lang ON words (user_id, language)")
