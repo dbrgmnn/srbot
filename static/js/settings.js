@@ -1,8 +1,10 @@
-import { API, UI, lockScroll, unlockScroll } from "./utils.js";
+import { API, UI } from "./utils.js";
+import { UIHelpers } from "./ui.js";
 import { state, setLanguage } from "./state.js";
 import { T } from "./toast.js";
 
 const tg = window.Telegram.WebApp;
+const { openOverlay, closeOverlay } = UIHelpers;
 
 /** --- Languages from State --- */
 
@@ -172,9 +174,8 @@ function _showPickerSheet(title, options, currentValue, onSelect) {
     };
   });
 
-  document.getElementById("picker-overlay").classList.add("open");
-  document.getElementById("picker-sheet").classList.add("open");
-  lockScroll();
+  openOverlay("picker-overlay");
+  openOverlay("picker-sheet");
 
   setTimeout(() => {
     const selected = list.querySelector(".picker-item.selected");
@@ -183,9 +184,8 @@ function _showPickerSheet(title, options, currentValue, onSelect) {
 }
 
 export function closePicker() {
-  document.getElementById("picker-overlay").classList.remove("open");
-  document.getElementById("picker-sheet").classList.remove("open");
-  unlockScroll();
+  closeOverlay("picker-overlay");
+  closeOverlay("picker-sheet");
 }
 
 /** --- Quiet Hours Sheet --- */
@@ -240,15 +240,13 @@ export function openQuietHoursSheet() {
     document.getElementById("set-quiet-end").value = val;
   });
 
-  document.getElementById("quiet-hours-overlay").classList.add("open");
-  document.getElementById("quiet-hours-sheet").classList.add("open");
-  lockScroll();
+  openOverlay("quiet-hours-overlay");
+  openOverlay("quiet-hours-sheet");
 }
 
 export function closeQuietHoursSheet() {
-  document.getElementById("quiet-hours-overlay").classList.remove("open");
-  document.getElementById("quiet-hours-sheet").classList.remove("open");
-  unlockScroll();
+  closeOverlay("quiet-hours-overlay");
+  closeOverlay("quiet-hours-sheet");
 }
 
 export async function saveQuietHours() {
@@ -265,15 +263,13 @@ export function openApiAccessSheet() {
   const display = document.getElementById("api-token-display");
   display.textContent = currentToken || "—";
 
-  document.getElementById("api-overlay").classList.add("open");
-  document.getElementById("api-sheet").classList.add("open");
-  lockScroll();
+  openOverlay("api-overlay");
+  openOverlay("api-sheet");
 }
 
 export function closeApiAccessSheet() {
-  document.getElementById("api-overlay").classList.remove("open");
-  document.getElementById("api-sheet").classList.remove("open");
-  unlockScroll();
+  closeOverlay("api-overlay");
+  closeOverlay("api-sheet");
 }
 
 /** --- Settings Load / Save --- */

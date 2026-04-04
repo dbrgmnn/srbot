@@ -56,6 +56,23 @@ export function showScreen(name) {
 
 let countdownInterval = null;
 
+export const UIHelpers = {
+  openOverlay(id) {
+    const el = document.getElementById(id);
+    if (el) {
+      el.classList.add("open");
+      document.body.style.overflow = "hidden";
+    }
+  },
+  closeOverlay(id) {
+    const el = document.getElementById(id);
+    if (el) {
+      el.classList.remove("open");
+      document.body.style.overflow = "";
+    }
+  },
+};
+
 function formatTimeLeft(targetDate) {
   if (!targetDate) return null;
   const diff = new Date(targetDate) - new Date();
