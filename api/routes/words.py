@@ -13,9 +13,6 @@ from db import UserRepo, WordRepo
 logger = logging.getLogger(__name__)
 
 
-# --- Helpers ---
-
-
 def _clean_words(raw: list) -> list:
     """Clean and validate a list of raw word dictionaries."""
     result = []
@@ -32,9 +29,6 @@ def _clean_words(raw: list) -> list:
                 }
             )
     return result
-
-
-# --- Routes ---
 
 
 def setup_routes_words(app: web.Application, db: aiosqlite.Connection):

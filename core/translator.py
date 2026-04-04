@@ -100,12 +100,10 @@ Translate words from word:{lang_name} into translation:Russian or translation:Ru
 Rules:
 - word: the input word itself in its base {lang_name} form, {article_rule}
 Ensure the translated 'word' matches the Part of Speech of the input.
-
 - translation: MOST common Russian translation in lowercase.
 - level: CEFR level (A1-C2).
 - example: natural {lang_name} sentence. Complexity MUST match the level.
 - is_valid: false if input is gibberish, else true.
-
 Return JSON: {{"word": "", "translation": "", "example": "", "level": "", "is_valid": true}}"""
 
         user_prompt = f'Translate "{text}"'

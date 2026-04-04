@@ -10,8 +10,6 @@ from db import UserRepo, WordRepo
 
 logger = logging.getLogger(__name__)
 
-# --- Helpers ---
-
 
 def _is_valid_time(value: str) -> bool:
     """Validate time format (HH:MM)."""
@@ -23,9 +21,6 @@ def _is_valid_time(value: str) -> bool:
         return 0 <= h <= 23 and 0 <= m <= 59
     except (TypeError, ValueError):
         return False
-
-
-# --- Routes ---
 
 
 def setup_routes_settings(app: web.Application, db: aiosqlite.Connection):

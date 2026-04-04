@@ -9,8 +9,6 @@ from db import UserRepo, WordRepo
 
 logger = logging.getLogger(__name__)
 
-# --- Routes ---
-
 
 def setup_routes_practice(app: web.Application, db: aiosqlite.Connection):
     """Register practice-related routes."""

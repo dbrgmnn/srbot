@@ -9,8 +9,6 @@ from db import UserRepo, WordRepo
 
 logger = logging.getLogger(__name__)
 
-# --- Routes ---
-
 
 def setup_routes_init(app: web.Application, db: aiosqlite.Connection):
     """Register user initialization routes."""
