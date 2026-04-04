@@ -28,7 +28,7 @@ from api.routes.words import setup_routes_words
 from config import Config
 from core.languages import LANGUAGES
 from core.translator import Translator
-from db.repository import UserRepo
+from db import UserRepo
 
 logger = logging.getLogger(__name__)
 

@@ -10,8 +10,8 @@ from config import load_config
 from core.bot_handlers import setup_handlers
 from core.logger import setup_logging
 from core.scheduler import setup_scheduler
+from db import UserRepo
 from db.models import init_db
-from db.repository import UserRepo
 
 setup_logging()
 logger = logging.getLogger(__name__)

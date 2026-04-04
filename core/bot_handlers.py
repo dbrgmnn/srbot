@@ -3,7 +3,7 @@ import logging
 
 from aiogram import Dispatcher, filters, types
 
-from db.repository import UserRepo
+from db import UserRepo
 
 logger = logging.getLogger(__name__)
 

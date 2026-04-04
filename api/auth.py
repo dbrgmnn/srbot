@@ -5,7 +5,7 @@ import time
 from urllib.parse import parse_qsl
 
 from api.app_keys import CONFIG_KEY
-from db.repository import UserRepo
+from db import UserRepo
 
 logger = logging.getLogger(__name__)
 

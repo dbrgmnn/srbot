@@ -5,7 +5,7 @@ from aiohttp import web
 
 from api.app_keys import CONFIG_KEY
 from core.languages import LANGUAGES
-from db.repository import UserRepo, WordRepo
+from db import UserRepo, WordRepo
 
 logger = logging.getLogger(__name__)
 
