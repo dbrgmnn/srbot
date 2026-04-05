@@ -14,12 +14,16 @@ logger = logging.getLogger(__name__)
 def setup_handlers(dp: Dispatcher, user_repo: UserRepo, config):
     """Register all Telegram bot command handlers."""
 
+    def is_admin(user_id: int) -> bool:
+        return user_id == int(config.allowed_users[0])
+
+    def is_authorized(user_id: int) -> bool:
+        return user_id in config.allowed_users
+
     @dp.message(filters.Command("backup"))
     async def cmd_backup(message: types.Message):
-        """Create and send a database backup to the admin."""
-
-        admin_id = int(config.allowed_users[0])
-        if message.from_user.id != admin_id:
+        """Create and send a database backup."""
+        if not is_admin(message.from_user.id):
             return
 
         base_dir = os.path.dirname(config.db_path)
@@ -31,11 +35,9 @@ def setup_handlers(dp: Dispatcher, user_repo: UserRepo, config):
             with tarfile.open(archive_path, "w:gz") as tar:
                 tar.add(backup_path, arcname="srbot.db")
 
-            doc = types.FSInputFile(archive_path)
-            await message.answer_document(doc, caption="Database backup")
+            await message.answer_document(types.FSInputFile(archive_path))
         except Exception as e:
-            logger.error(f"Backup failed: {e}")
-            await message.answer("❌ Backup failed.")
+            logger.error(f"Backup error: {e}")
         finally:
             if os.path.exists(backup_path):
                 os.remove(backup_path)
@@ -44,20 +46,16 @@ def setup_handlers(dp: Dispatcher, user_repo: UserRepo, config):
 
     @dp.message(filters.Command("start"))
     async def cmd_start(message: types.Message):
-        """Start the bot and show the WebApp button with auto-deletion."""
-        if message.from_user.id not in config.allowed_users:
-            logger.warning(f"Unauthorized access attempt by user {message.from_user.id}")
+        """Show WebApp start button."""
+        if not is_authorized(message.from_user.id):
             return
-
-        logger.info(f"User {message.from_user.id} requested /start")
 
         kb = types.InlineKeyboardMarkup(
             inline_keyboard=[
-                [types.InlineKeyboardButton(text="🚀 Open App", web_app=types.WebAppInfo(url=config.webapp_url))]
+                [types.InlineKeyboardButton(text="Open App", web_app=types.WebAppInfo(url=config.webapp_url))]
             ]
         )
-
-        msg = await message.answer("Ready to study?", reply_markup=kb)
+        msg = await message.answer("SRbot", reply_markup=kb)
 
         await asyncio.sleep(30)
         try:
