@@ -18,7 +18,7 @@ def setup_handlers(dp: Dispatcher, user_repo: UserRepo, config):
     async def cmd_backup(message: types.Message):
         """Create and send a database backup to the admin."""
 
-        admin_id = int(config.allowed_users.split(",")[0].strip())
+        admin_id = int(config.allowed_users[0])
         if message.from_user.id != admin_id:
             return
 
