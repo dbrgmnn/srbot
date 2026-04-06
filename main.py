@@ -28,28 +28,21 @@ async def main():
     user_repo = UserRepo(db)
     setup_handlers(dp, user_repo, config)
 
-    logger.info("Initializing components...")
+    logger.info("Initializing system...")
     scheduler = await setup_scheduler(bot, db, config)
     scheduler.start()
-    logger.info("Scheduler started")
-
-    # Start API server in the background
     api_runner = await start_api_server(config, db, scheduler)
-    logger.info("API Server started")
-    logger.info("--- SRBOT STARTUP SUCCESSFUL ---")
+    logger.info("System ready.")
 
     try:
-        logger.info("Starting bot polling...")
         await dp.start_polling(bot)
     except Exception as e:
-        logger.error(f"Error during execution: {e}")
+        logger.error("Bot polling error: %s", e)
     finally:
-        logger.info("--- SRBOT SHUTDOWN INITIATED ---")
+        logger.info("Shutting down...")
         if api_runner:
-            logger.info("Cleaning up API server...")
             await api_runner.cleanup()
         if scheduler:
-            logger.info("Shutting down scheduler...")
             scheduler.shutdown(wait=False)
 
         await db.close()
@@ -61,7 +54,7 @@ async def main():
         if pending:
             await asyncio.gather(*pending, return_exceptions=True)
 
-        logger.info("--- SRBOT SHUTDOWN COMPLETE ---")
+        logger.info("Shutdown complete.")
 
 
 if __name__ == "__main__":
