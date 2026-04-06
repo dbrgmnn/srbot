@@ -30,10 +30,9 @@ import {
   saveQuietHours,
 } from "./settings.js";
 import { T } from "./toast.js";
-import { UI } from "./utils.js";
+import { UI, tg } from "./utils.js";
 import { loadHome, showScreen } from "./ui.js";
 
-const tg = window.Telegram.WebApp;
 tg.ready();
 tg.expand();
 tg.isVerticalSwipesEnabled = false;
