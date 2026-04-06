@@ -11,6 +11,16 @@ from db.utils import backup_db
 logger = logging.getLogger(__name__)
 
 
+async def cleanup_messages(messages: list[types.Message], delay: int = 30):
+    """Wait and delete a list of messages."""
+    await asyncio.sleep(delay)
+    for msg in messages:
+        try:
+            await msg.delete()
+        except Exception:
+            pass
+
+
 def setup_handlers(dp: Dispatcher, user_repo: UserRepo, config):
     """Register all Telegram bot command handlers."""
 
@@ -38,7 +48,8 @@ def setup_handlers(dp: Dispatcher, user_repo: UserRepo, config):
             with tarfile.open(archive_path, "w:gz") as tar:
                 tar.add(backup_path, arcname="srbot.db")
 
-            await message.answer_document(types.FSInputFile(archive_path))
+            sent_msg = await message.answer_document(types.FSInputFile(archive_path))
+            asyncio.create_task(cleanup_messages([message, sent_msg]))
             logger.info("Backup successfully sent to admin %d", user_id)
         except Exception as e:
             logger.error("Backup error for admin %d: %s", user_id, e)
@@ -63,10 +74,4 @@ def setup_handlers(dp: Dispatcher, user_repo: UserRepo, config):
             ]
         )
         msg = await message.answer("SRbot", reply_markup=kb)
-
-        await asyncio.sleep(30)
-        try:
-            await msg.delete()
-            await message.delete()
-        except Exception:
-            pass
+        asyncio.create_task(cleanup_messages([message, msg]))
