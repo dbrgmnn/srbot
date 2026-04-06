@@ -33,14 +33,12 @@ class ColorFormatter(logging.Formatter):
 def setup_logging():
     """Configures global logging for the entire application."""
 
-    in_systemd = os.environ.get("INVOCATION_ID") is not None
-    use_color = not in_systemd and sys.stdout.isatty()
-
-    # Standard format for all cases
-    fmt = "[%(asctime)s] [%(levelname)s] [%(name)s] [%(funcName)s:%(lineno)d] - %(message)s"
+    # Concise format for both systemd and terminal:
+    # [LEVEL] [Module:Line] - Message
+    fmt = "[%(levelname)s] [%(name)s:%(lineno)d] - %(message)s"
 
     handler = logging.StreamHandler(sys.stdout)
-    handler.setFormatter(ColorFormatter(use_color=use_color, fmt=fmt))
+    handler.setFormatter(ColorFormatter(use_color=sys.stdout.isatty(), fmt=fmt))
 
     root_logger = logging.getLogger()
     # Support DEBUG level if environment variable is set
