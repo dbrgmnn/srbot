@@ -31,6 +31,7 @@ class UserRepo:
         # Initialize settings
         await self._create_settings(user_id, language, tz_name, config)
         await self.db.commit()
+        logger.info("User %d (telegram: %d) created/verified in %s", user_id, telegram_id, language)
         return user_id
 
     async def _create_settings(self, user_id: int, language: str, tz_name: str, config=None):
@@ -38,12 +39,14 @@ class UserRepo:
         limit = config.max_daily_limit // 2 if config else 20
         interval = config.max_notify_interval // 2 if config else 240
 
-        await self.db.execute(
+        cursor = await self.db.execute(
             """INSERT OR IGNORE INTO user_settings
                (user_id, language, timezone, daily_limit, notification_interval_minutes)
                VALUES (?, ?, ?, ?, ?)""",
             (user_id, language, tz_name, limit, interval),
         )
+        if cursor.rowcount > 0:
+            logger.info("Created settings for user %d in %s", user_id, language)
 
     async def set_last_notified_at(self, telegram_id: int, language: str):
         """Update the timestamp of the last notification sent to the user."""
@@ -55,6 +58,7 @@ class UserRepo:
             (now, telegram_id, language),
         )
         await self.db.commit()
+        logger.debug("Updated last_notified_at for user %d in %s", telegram_id, language)
 
     async def get_user_settings(self, telegram_id: int, language: str, config=None) -> dict:
         """Retrieve user settings for a specific language, with defaults if not found."""
@@ -93,6 +97,7 @@ class UserRepo:
             (telegram_id, language, value),
         )
         await self.db.commit()
+        logger.info("Updated setting '%s' to '%s' for telegram_id %d in %s", field, value, telegram_id, language)
 
     async def update_timezone(self, telegram_id: int, tz_name: str, language: str):
         """Update the user's timezone for a specific language."""
@@ -123,6 +128,9 @@ class UserRepo:
             (*fields.values(), telegram_id, language),
         )
         await self.db.commit()
+        logger.info(
+            "Updated quiet hours for user %d in %s: start=%s, end=%s", telegram_id, language, quiet_start, quiet_end
+        )
 
     async def update_practice_mode(self, telegram_id: int, mode: str, language: str):
         """Update the practice mode for a specific language."""
@@ -157,6 +165,7 @@ class UserRepo:
         new_token = secrets.token_hex(16)
         await self.db.execute("UPDATE users SET api_token = ? WHERE telegram_id = ?", (new_token, telegram_id))
         await self.db.commit()
+        logger.info("Generated new API token for user %d", telegram_id)
         return new_token
 
     async def get_user_by_token(self, token: str) -> tuple[int, int] | None:

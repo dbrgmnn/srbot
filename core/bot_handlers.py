@@ -23,9 +23,12 @@ def setup_handlers(dp: Dispatcher, user_repo: UserRepo, config):
     @dp.message(filters.Command("backup"))
     async def cmd_backup(message: types.Message):
         """Create and send a database backup."""
-        if not is_admin(message.from_user.id):
+        user_id = message.from_user.id
+        if not is_admin(user_id):
+            logger.warning("Unauthorized backup attempt by user %d", user_id)
             return
 
+        logger.info("Backup initiated by admin %d", user_id)
         base_dir = os.path.dirname(config.db_path)
         backup_path = os.path.join(base_dir, "srbot_backup.sqlite")
         archive_path = os.path.join(base_dir, "srbot_backup.tar.gz")
@@ -36,8 +39,9 @@ def setup_handlers(dp: Dispatcher, user_repo: UserRepo, config):
                 tar.add(backup_path, arcname="srbot.db")
 
             await message.answer_document(types.FSInputFile(archive_path))
+            logger.info("Backup successfully sent to admin %d", user_id)
         except Exception as e:
-            logger.error(f"Backup error: {e}")
+            logger.error("Backup error for admin %d: %s", user_id, e)
         finally:
             if os.path.exists(backup_path):
                 os.remove(backup_path)
@@ -47,9 +51,12 @@ def setup_handlers(dp: Dispatcher, user_repo: UserRepo, config):
     @dp.message(filters.Command("start"))
     async def cmd_start(message: types.Message):
         """Show WebApp start button."""
-        if not is_authorized(message.from_user.id):
+        user_id = message.from_user.id
+        if not is_authorized(user_id):
+            logger.warning("Unauthorized access attempt by user %d", user_id)
             return
 
+        logger.info("Command /start received from user %d", user_id)
         kb = types.InlineKeyboardMarkup(
             inline_keyboard=[
                 [types.InlineKeyboardButton(text="Open App", web_app=types.WebAppInfo(url=config.webapp_url))]

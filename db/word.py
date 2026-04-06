@@ -1,8 +1,11 @@
+import logging
 from datetime import UTC, datetime, timedelta
 
 import aiosqlite
 
 from .utils import _safe_zoneinfo
+
+logger = logging.getLogger(__name__)
 
 
 class WordRepo:
@@ -35,6 +38,7 @@ class WordRepo:
             data,
         )
         await self.db.commit()
+        logger.info("Added %d words for user %d in %s", cursor.rowcount, user_id, language)
         return cursor.rowcount
 
     async def add_single_word(
@@ -49,7 +53,10 @@ class WordRepo:
             (user_id, word, translation, language, example, level, now, now),
         )
         await self.db.commit()
-        return cursor.lastrowid if cursor.rowcount > 0 else None
+        word_id = cursor.lastrowid if cursor.rowcount > 0 else None
+        if word_id:
+            logger.info("Added word ID %d for user %d", word_id, user_id)
+        return word_id
 
     async def get_session_words(self, user_id: int, language: str, new_limit: int) -> list[dict]:
         """Get words for a practice session, including due reviews and new words."""
@@ -77,6 +84,7 @@ class WordRepo:
             )
             new_words = [dict(row) for row in await cursor.fetchall()]
 
+        logger.debug("Fetched session for user %d: %d due, %d new", user_id, len(due), len(new_words))
         return due + new_words
 
     async def update_word_after_review(
@@ -99,6 +107,13 @@ class WordRepo:
             (repetitions, easiness, interval, next_review.isoformat(), now, now, word_id, user_id),
         )
         await self.db.commit()
+        logger.info(
+            "Updated word ID %d for user %d: interval=%d, next_review=%s",
+            word_id,
+            user_id,
+            interval,
+            next_review.isoformat(),
+        )
 
     async def undo_word_review(
         self,
@@ -120,6 +135,7 @@ class WordRepo:
             (repetitions, easiness, interval, next_review, last_reviewed_at, started_at, word_id, user_id),
         )
         await self.db.commit()
+        logger.info("Undone review for word ID %d, user %d", word_id, user_id)
 
     async def get_full_stats(self, user_id: int, language: str, tz_name: str = "UTC", fallback_tz: str = "UTC") -> dict:
         """Get comprehensive statistics about the user's learning progress."""
@@ -208,6 +224,8 @@ class WordRepo:
             (word, translation, example, level, word_id, user_id),
         )
         await self.db.commit()
+        if cursor.rowcount > 0:
+            logger.info("Updated word ID %d for user %d", word_id, user_id)
         return cursor.rowcount > 0
 
     async def delete_word(self, word_id: int, user_id: int):
@@ -217,6 +235,7 @@ class WordRepo:
             (word_id, user_id),
         )
         await self.db.commit()
+        logger.info("Deleted word ID %d for user %d", word_id, user_id)
 
     async def delete_words_batch(self, user_id: int, word_ids: list[int]):
         """Delete multiple words for a user in one go."""
@@ -228,6 +247,7 @@ class WordRepo:
             (*word_ids, user_id),
         )
         await self.db.commit()
+        logger.info("Deleted %d words for user %d", len(word_ids), user_id)
 
     async def search_words(self, user_id: int, language: str, query: str) -> list[dict]:
         """Search for words in the user's dictionary by word or translation."""
