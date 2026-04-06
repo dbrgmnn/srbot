@@ -8,8 +8,9 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 
 from core.scheduler_utils import build_notification_text, is_quiet_time
-from db import UserRepo, _safe_zoneinfo
+from db import UserRepo
 from db.models import apply_pragmas
+from db.utils import _safe_zoneinfo
 
 logger = logging.getLogger(__name__)
 

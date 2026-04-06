@@ -1,8 +1,7 @@
-import { API, UI, lockScroll, unlockScroll } from "./utils.js";
+import { API, UI, lockScroll, unlockScroll, tg } from "./utils.js";
 import { state } from "./state.js";
 import { T } from "./toast.js";
 
-const tg = window.Telegram.WebApp;
 let searchTimer = null;
 let currentSearchId = 0;
 let editWordId = null;
@@ -64,6 +63,16 @@ function parseText(text) {
 /** --- Public Functions --- */
 
 let isSubmitting = false;
+let isEditing = false;
+
+function _resetSearchInput() {
+  clearTimeout(searchTimer);
+  currentSearchId++;
+  const input = document.getElementById("search-input");
+  const clearBtn = document.getElementById("search-clear");
+  if (input) input.value = "";
+  if (clearBtn) clearBtn.classList.add("u-hidden");
+}
 
 export async function handleFileUpload(input) {
   const file = input.files[0];
@@ -99,13 +108,9 @@ export function onSearchInput(val) {
 }
 
 export function clearSearch(shouldFocus = true) {
-  clearTimeout(searchTimer);
-  currentSearchId++;
+  _resetSearchInput();
   const input = document.getElementById("search-input");
-  const clearBtn = document.getElementById("search-clear");
   const results = document.getElementById("search-results");
-  if (input) input.value = "";
-  if (clearBtn) clearBtn.classList.add("u-hidden");
   if (results) results.innerHTML = "";
   if (shouldFocus && input) input.focus();
 
@@ -292,15 +297,8 @@ export async function addWordWithAI(word, btn) {
         UI.toast(`Added: ${added.word}`, "success");
       }
 
-      // Clear input and pending requests
-      clearTimeout(searchTimer);
-      currentSearchId++;
-      const input = document.getElementById("search-input");
-      const clearBtn = document.getElementById("search-clear");
-      if (input) input.value = "";
-      if (clearBtn) clearBtn.classList.add("u-hidden");
-
       // Show the newly added word as the sole result
+      _resetSearchInput();
       const results = document.getElementById("search-results");
       results.innerHTML = "";
       results.appendChild(createWordRow(added));
@@ -321,13 +319,13 @@ export async function addWordWithAI(word, btn) {
 }
 
 export async function saveEdit() {
-  if (isSubmitting) return;
+  if (isEditing) return;
   const word = document.getElementById("edit-word").value.trim();
   const trans = document.getElementById("edit-translation").value.trim();
   const ex = document.getElementById("edit-example").value.trim();
   const level = document.getElementById("edit-level").value.trim();
 
-  isSubmitting = true;
+  isEditing = true;
   try {
     await API.patch(`/api/words/${editWordId}`, {
       word,
@@ -363,7 +361,7 @@ export async function saveEdit() {
       "error",
     );
   } finally {
-    isSubmitting = false;
+    isEditing = false;
   }
 }
 
@@ -371,17 +369,11 @@ export async function saveEdit() {
 
 async function showByFilter(filter) {
   window.showScreen("search");
-  clearTimeout(searchTimer);
-  const reqId = ++currentSearchId;
+  _resetSearchInput();
+  const reqId = currentSearchId;
   if (isSelectMode) toggleSelectMode();
   const results = document.getElementById("search-results");
-  const input = document.getElementById("search-input");
-  const clearBtn = document.getElementById("search-clear");
-
-  if (input) input.value = "";
-  if (clearBtn) clearBtn.classList.add("u-hidden");
-  if (results)
-    results.innerHTML = `<div class="u-flex-center u-p24"><span class="spinner"></span></div>`;
+  results.innerHTML = `<div class="u-flex-center u-p24"><span class="spinner"></span></div>`;
   checkSearchActions(0);
 
   try {

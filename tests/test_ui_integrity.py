@@ -97,9 +97,8 @@ def test_static_files_existence():
     with open(html_path, encoding="utf-8") as f:
         html_content = f.read()
 
-    # Find static refs: src="static/js/..." or href="static/css/..."
-    # Note: adjust prefix if your serving logic is different
-    refs = re.findall(r'(?:src|href)=["\']static/([^"\']+)["\']', html_content)
+    # Find static refs: src="/static/js/..." or href="/static/css/..."
+    refs = re.findall(r'(?:src|href)=["\']/?static/([^"\']+)["\']', html_content)
 
     missing_files = []
     for ref in refs:

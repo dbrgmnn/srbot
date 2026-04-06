@@ -1,6 +1,6 @@
 import { state } from "./state.js";
 
-const tg = window.Telegram.WebApp;
+export const tg = window.Telegram.WebApp;
 
 /** ── Scroll Management ── */
 export function lockScroll() {

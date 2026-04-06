@@ -21,10 +21,12 @@ import {
   closeApiAccessSheet,
   closePicker,
   closeQuietHoursSheet,
+  copyToken,
   loadSettings,
   openApiAccessSheet,
   openPicker,
   openQuietHoursSheet,
+  revokeToken,
   saveQuietHours,
 } from "./settings.js";
 import { T } from "./toast.js";
@@ -91,6 +93,8 @@ window.closeApiAccessSheet = closeApiAccessSheet;
 window.openQuietHoursSheet = openQuietHoursSheet;
 window.closeQuietHoursSheet = closeQuietHoursSheet;
 window.saveQuietHours = saveQuietHours;
+window.copyToken = copyToken;
+window.revokeToken = revokeToken;
 
 // --- Haptics ---
 

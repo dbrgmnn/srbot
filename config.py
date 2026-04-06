@@ -40,11 +40,15 @@ def load_config() -> Config:
     if not allowed_users:
         raise ValueError("ALLOWED_USERS is not set or empty")
 
+    db_path = os.getenv("DB_PATH")
+    if not db_path:
+        raise ValueError("DB_PATH environment variable is not set")
+
     return Config(
         bot_token=token,
         webapp_url=os.getenv("WEBAPP_URL", ""),
         allowed_users=allowed_users,
-        db_path=os.getenv("DB_PATH"),
+        db_path=db_path,
         api_port=int(os.getenv("API_PORT", "8080")),
         gemini_api_key=os.getenv("GEMINI_API_KEY"),
         gemini_model=os.getenv("GEMINI_MODEL", "gemini-2.5-flash-lite"),

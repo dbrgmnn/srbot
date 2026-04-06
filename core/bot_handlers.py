@@ -5,7 +5,6 @@ import tarfile
 
 from aiogram import Dispatcher, filters, types
 
-from db import UserRepo
 from db.utils import backup_db
 
 logger = logging.getLogger(__name__)
@@ -21,7 +20,7 @@ async def cleanup_messages(messages: list[types.Message], delay: int = 30):
             pass
 
 
-def setup_handlers(dp: Dispatcher, user_repo: UserRepo, config):
+def setup_handlers(dp: Dispatcher, config):
     """Register all Telegram bot command handlers."""
 
     def is_admin(user_id: int) -> bool:

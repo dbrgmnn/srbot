@@ -158,7 +158,7 @@ class WordRepo:
                     COUNT(CASE WHEN started_at IS NULL THEN 1 END) as st_new,
                     COUNT(CASE WHEN started_at IS NOT NULL AND interval < 5 THEN 1 END) as st_learning,
                     COUNT(CASE WHEN interval >= 5 AND interval < 30 THEN 1 END) as st_known,
-                    COUNT(CASE WHEN interval >= 30 THEN 1 END) as st_mastered,
+                    COUNT(CASE WHEN started_at IS NOT NULL AND interval >= 30 THEN 1 END) as st_mastered,
                     MIN(CASE WHEN started_at IS NOT NULL AND next_review > ? THEN next_review END) as next_due_at,
                     (SELECT daily_limit FROM user_settings WHERE user_id = ? AND language = ?) as daily_limit
                 FROM words WHERE user_id = ? AND language = ?""",

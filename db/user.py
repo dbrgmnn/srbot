@@ -1,4 +1,5 @@
 import logging
+import secrets
 from datetime import UTC, datetime
 
 import aiosqlite
@@ -160,8 +161,6 @@ class UserRepo:
 
     async def generate_api_token(self, telegram_id: int) -> str:
         """Generate and save a new API token for a user."""
-        import secrets
-
         new_token = secrets.token_hex(16)
         await self.db.execute("UPDATE users SET api_token = ? WHERE telegram_id = ?", (new_token, telegram_id))
         await self.db.commit()

@@ -44,5 +44,5 @@ export const T = {
   // Practice
   SESSION_FAIL: _fail("load session"),
   GRADE_FAIL: _fail("save progress"),
-  UNDO_FAIL: "Reverted",
+  UNDO_FAIL: _fail("undo"),
 };

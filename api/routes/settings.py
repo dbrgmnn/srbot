@@ -66,13 +66,14 @@ def setup_routes_settings(app: web.Application, db: aiosqlite.Connection):
         telegram_id = request["telegram_id"]
         lang = request["language"]
         body = await request.json()
+        config = request.app[CONFIG_KEY]
         user_repo = UserRepo(db)
 
         # Update language first so subsequent settings target the correct row
         if "language" in body:
             new_lang = body["language"]
             if new_lang in LANGUAGES:
-                await user_repo.update_language(telegram_id, new_lang, request.app[CONFIG_KEY])
+                await user_repo.update_language(telegram_id, new_lang, config)
                 lang = new_lang  # Use new lang for subsequent updates in this request
 
         if "timezone" in body:
@@ -87,7 +88,6 @@ def setup_routes_settings(app: web.Application, db: aiosqlite.Connection):
                     status=400,
                 )
 
-            config = request.app[CONFIG_KEY]
             if config.min_daily_limit <= limit <= config.max_daily_limit:
                 await user_repo.update_daily_limit(telegram_id, limit, lang)
             else:
@@ -102,7 +102,6 @@ def setup_routes_settings(app: web.Application, db: aiosqlite.Connection):
                     status=400,
                 )
 
-            config = request.app[CONFIG_KEY]
             if config.min_notify_interval <= interval <= config.max_notify_interval:
                 await user_repo.update_notification_interval(telegram_id, interval, lang)
                 scheduler = request.app[SCHEDULER_KEY]

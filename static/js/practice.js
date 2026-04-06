@@ -1,9 +1,7 @@
-import { API, UI } from "./utils.js";
+import { API, UI, tg } from "./utils.js";
 import { state } from "./state.js";
 import { T } from "./toast.js";
 import { showScreen } from "./ui.js";
-
-const tg = window.Telegram.WebApp;
 
 /** --- State --- */
 

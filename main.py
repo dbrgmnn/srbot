@@ -10,7 +10,6 @@ from config import load_config
 from core.bot_handlers import setup_handlers
 from core.logger import setup_logging
 from core.scheduler import setup_scheduler
-from db import UserRepo
 from db.models import init_db
 
 setup_logging()
@@ -25,8 +24,7 @@ async def main():
     bot = Bot(token=config.bot_token)
     dp = Dispatcher()
 
-    user_repo = UserRepo(db)
-    setup_handlers(dp, user_repo, config)
+    setup_handlers(dp, config)
 
     logger.info("Initializing system...")
     scheduler = await setup_scheduler(bot, db, config)

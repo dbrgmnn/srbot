@@ -6,7 +6,6 @@ import sys
 class ColorFormatter(logging.Formatter):
     """Custom formatter with ANSI color support for terminal output."""
 
-    # Custom formatter with ANSI color support for terminal output.
     COLORS = {
         logging.DEBUG: "\x1b[38;20m",
         logging.INFO: "\x1b[34;20m",

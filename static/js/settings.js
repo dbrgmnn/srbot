@@ -1,9 +1,8 @@
-import { API, UI } from "./utils.js";
+import { API, UI, tg } from "./utils.js";
 import { UIHelpers } from "./ui.js";
 import { state, setLanguage } from "./state.js";
 import { T } from "./toast.js";
 
-const tg = window.Telegram.WebApp;
 const { openOverlay, closeOverlay } = UIHelpers;
 
 /** --- Languages from State --- */
@@ -310,7 +309,7 @@ function _fillSettingsFromState() {
 
 let currentToken = "";
 
-window.copyToken = async () => {
+export async function copyToken() {
   if (!currentToken) return;
   tg.HapticFeedback.selectionChanged();
   try {
@@ -321,9 +320,9 @@ window.copyToken = async () => {
     console.error("Copy failed:", err);
     UI.toast(T.COPY_FAIL, "error");
   }
-};
+}
 
-window.revokeToken = () => {
+export function revokeToken() {
   tg.showConfirm(
     "Are you sure you want to revoke the current API token? All apps using it will lose access.",
     async (ok) => {
@@ -345,7 +344,7 @@ window.revokeToken = () => {
       }
     },
   );
-};
+}
 
 export async function loadSettings() {
   initSubscriptions();

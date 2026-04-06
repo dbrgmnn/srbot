@@ -1,7 +1,5 @@
-import { API, UI } from "./utils.js";
+import { API, tg } from "./utils.js";
 import { state } from "./state.js";
-
-const tg = window.Telegram.WebApp;
 
 /** --- Screen Switching --- */
 
