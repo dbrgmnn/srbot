@@ -3,7 +3,7 @@ from datetime import UTC, datetime, timedelta
 
 import aiosqlite
 
-from .utils import _safe_zoneinfo
+from .utils import today_start_utc
 
 logger = logging.getLogger(__name__)
 
@@ -140,11 +140,8 @@ class WordRepo:
     async def get_full_stats(self, user_id: int, language: str, tz_name: str = "UTC", fallback_tz: str = "UTC") -> dict:
         """Get comprehensive statistics about the user's learning progress."""
         now_utc = datetime.now(tz=UTC)
-        tz = _safe_zoneinfo(tz_name, fallback_tz)
-        local_now = now_utc.astimezone(tz)
-        today_start_local = local_now.replace(hour=0, minute=0, second=0, microsecond=0)
-        today_start_utc = today_start_local.astimezone(UTC)
-        next_day_start_utc = (today_start_local + timedelta(days=1)).astimezone(UTC)
+        today_start = today_start_utc(tz_name, fallback_tz)
+        next_day_start = today_start + timedelta(days=1)
 
         cursor = await self.db.execute(
             """SELECT
@@ -157,16 +154,16 @@ class WordRepo:
                     COUNT(CASE WHEN last_reviewed_at >= ? THEN 1 END) as today_reviewed,
                     COUNT(CASE WHEN started_at IS NULL THEN 1 END) as st_new,
                     COUNT(CASE WHEN started_at IS NOT NULL AND interval < 5 THEN 1 END) as st_learning,
-                    COUNT(CASE WHEN interval >= 5 AND interval < 30 THEN 1 END) as st_known,
+                    COUNT(CASE WHEN started_at IS NOT NULL AND interval >= 5 AND interval < 30 THEN 1 END) as st_known,
                     COUNT(CASE WHEN started_at IS NOT NULL AND interval >= 30 THEN 1 END) as st_mastered,
                     MIN(CASE WHEN started_at IS NOT NULL AND next_review > ? THEN next_review END) as next_due_at,
                     (SELECT daily_limit FROM user_settings WHERE user_id = ? AND language = ?) as daily_limit
                 FROM words WHERE user_id = ? AND language = ?""",
             (
                 now_utc.isoformat(),
-                today_start_utc.isoformat(),
-                today_start_utc.isoformat(),
-                today_start_utc.isoformat(),
+                today_start.isoformat(),
+                today_start.isoformat(),
+                today_start.isoformat(),
                 now_utc.isoformat(),
                 user_id,
                 language,
@@ -190,7 +187,7 @@ class WordRepo:
             "st_mastered": 0,
             "next_due_at": None,
             "session_total": 0,
-            "next_day_start_utc": next_day_start_utc.isoformat(),
+            "next_day_start_utc": next_day_start.isoformat(),
         }
         if row:
             data = dict(row)
@@ -204,7 +201,7 @@ class WordRepo:
             data["session_total"] = due_count + available_new
 
             res = {**defaults, **{k: v for k, v in data.items() if v is not None}}
-            res["next_day_start_utc"] = next_day_start_utc.isoformat()
+            res["next_day_start_utc"] = next_day_start.isoformat()
             return res
         return defaults
 
@@ -270,9 +267,9 @@ class WordRepo:
         elif status == "learning":
             where_clause = "AND started_at IS NOT NULL AND interval < 5"
         elif status == "known":
-            where_clause = "AND interval >= 5 AND interval < 30"
+            where_clause = "AND started_at IS NOT NULL AND interval >= 5 AND interval < 30"
         elif status == "mastered":
-            where_clause = "AND interval >= 30"
+            where_clause = "AND started_at IS NOT NULL AND interval >= 30"
         else:
             return []
 
@@ -289,16 +286,13 @@ class WordRepo:
         self, user_id: int, language: str, tz_name: str = "UTC", fallback_tz: str = "UTC"
     ) -> list[dict]:
         """Get all words added by the user today in their local timezone."""
-        now_utc = datetime.now(tz=UTC)
-        tz = _safe_zoneinfo(tz_name, fallback_tz)
-        local_now = now_utc.astimezone(tz)
-        today_start_utc = local_now.replace(hour=0, minute=0, second=0, microsecond=0).astimezone(UTC)
+        start = today_start_utc(tz_name, fallback_tz)
 
         cursor = await self.db.execute(
             """SELECT id, word, translation, example, level FROM words
                WHERE user_id = ? AND language = ? AND created_at >= ?
                ORDER BY created_at DESC""",
-            (user_id, language, today_start_utc.isoformat()),
+            (user_id, language, start.isoformat()),
         )
         rows = await cursor.fetchall()
         return [dict(row) for row in rows]
@@ -307,16 +301,13 @@ class WordRepo:
         self, user_id: int, language: str, tz_name: str = "UTC", fallback_tz: str = "UTC"
     ) -> list[dict]:
         """Get all words practiced by the user today in their local timezone."""
-        now_utc = datetime.now(tz=UTC)
-        tz = _safe_zoneinfo(tz_name, fallback_tz)
-        local_now = now_utc.astimezone(tz)
-        today_start_utc = local_now.replace(hour=0, minute=0, second=0, microsecond=0).astimezone(UTC)
+        start = today_start_utc(tz_name, fallback_tz)
 
         cursor = await self.db.execute(
             """SELECT id, word, translation, example, level FROM words
                WHERE user_id = ? AND language = ? AND last_reviewed_at >= ?
                ORDER BY last_reviewed_at DESC""",
-            (user_id, language, today_start_utc.isoformat()),
+            (user_id, language, start.isoformat()),
         )
         rows = await cursor.fetchall()
         return [dict(row) for row in rows]

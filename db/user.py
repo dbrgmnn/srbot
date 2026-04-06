@@ -4,7 +4,7 @@ from datetime import UTC, datetime
 
 import aiosqlite
 
-from .utils import _safe_zoneinfo
+from .utils import safe_zoneinfo, today_start_utc
 
 logger = logging.getLogger(__name__)
 
@@ -186,13 +186,10 @@ class UserRepo:
         self, user_id: int, language: str, tz_name: str = "UTC", fallback_tz: str = "UTC"
     ) -> int:
         """Count how many new words the user has started learning today."""
-        tz = _safe_zoneinfo(tz_name, fallback_tz)
-        now_utc = datetime.now(tz=UTC)
-        local_now = now_utc.astimezone(tz)
-        today_start_utc = local_now.replace(hour=0, minute=0, second=0, microsecond=0).astimezone(UTC)
+        start = today_start_utc(tz_name, fallback_tz)
         cursor = await self.db.execute(
             "SELECT COUNT(*) as cnt FROM words WHERE user_id = ? AND language = ? AND started_at >= ?",
-            (user_id, language, today_start_utc.isoformat()),
+            (user_id, language, start.isoformat()),
         )
         row = await cursor.fetchone()
         return int(row["cnt"]) if row else 0
@@ -228,7 +225,7 @@ class UserRepo:
             tz_groups.setdefault(tz_name, []).append(c)
 
         for tz_name, group in tz_groups.items():
-            tz_info = _safe_zoneinfo(tz_name, default_tz)
+            tz_info = safe_zoneinfo(tz_name, default_tz)
             local_now = now.astimezone(tz_info)
             today_start_utc = local_now.replace(hour=0, minute=0, second=0, microsecond=0).astimezone(UTC).isoformat()
 

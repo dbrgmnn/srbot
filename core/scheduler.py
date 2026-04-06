@@ -10,7 +10,7 @@ from apscheduler.triggers.interval import IntervalTrigger
 from core.scheduler_utils import build_notification_text, is_quiet_time
 from db import UserRepo
 from db.models import apply_pragmas
-from db.utils import _safe_zoneinfo
+from db.utils import safe_zoneinfo
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +34,7 @@ async def check_and_send_notifications(bot: Bot, db_path: str, config):
             async with sem:
                 telegram_id = row["telegram_id"]
                 user_tz_name = row.get("timezone", config.default_timezone)
-                user_tz = _safe_zoneinfo(user_tz_name, config.default_timezone)
+                user_tz = safe_zoneinfo(user_tz_name, config.default_timezone)
 
                 due_count = row.get("due_count", 0)
                 new_count = row.get("new_count", 0)

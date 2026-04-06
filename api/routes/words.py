@@ -5,7 +5,7 @@ import logging
 import aiosqlite
 from aiohttp import web
 
-from api.app_keys import TRANSLATOR_KEY
+from api.app_keys import CONFIG_KEY, TRANSLATOR_KEY
 from api.auth import verify_bearer_token
 from core.languages import LANGUAGES
 from db import UserRepo, WordRepo
@@ -240,8 +240,9 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         if filter_type in ("new", "learning", "known", "mastered"):
             words = await word_repo.get_words_by_status(user_id, lang, filter_type)
         elif filter_type in ("today", "reviewed"):
+            config = request.app[CONFIG_KEY]
             user_repo = UserRepo(db)
-            settings = await user_repo.get_user_settings(request["telegram_id"], lang)
+            settings = await user_repo.get_user_settings(request["telegram_id"], lang, config)
             tz_name = settings.get("timezone", "UTC")
             if filter_type == "today":
                 words = await word_repo.get_today_added_words(user_id, lang, tz_name)
