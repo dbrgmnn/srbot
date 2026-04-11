@@ -31,7 +31,12 @@ import {
 } from "./settings.js";
 import { T } from "./toast.js";
 import { UI, tg } from "./utils.js";
-import { loadHome, showScreen, registerScreenCallback } from "./ui.js";
+import {
+  loadHome,
+  showScreen,
+  registerScreenCallback,
+  cycleLanguage,
+} from "./ui.js";
 
 tg.ready();
 tg.expand();
@@ -57,6 +62,7 @@ applyTheme();
 // UI
 registerScreenCallback("settings", loadSettings);
 window.showScreen = showScreen;
+window.cycleLanguage = cycleLanguage;
 
 // Practice
 window.startPractice = startPractice;

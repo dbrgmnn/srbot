@@ -167,9 +167,20 @@ function initSubscriptions() {
   });
 }
 
+function renderHeaderLang() {
+  const el = document.getElementById("header-lang");
+  if (!el) return;
+  const meta = (state.languages || {})[state.currentLang];
+  el.textContent = meta
+    ? `${meta.flag} ${meta.name}`
+    : state.currentLang.toUpperCase();
+}
+
 function renderStats() {
   const stats = state.currentStats;
   if (!stats) return;
+
+  renderHeaderLang();
 
   const st_new = stats.st_new || 0;
   const st_learning = stats.st_learning || 0;
@@ -190,6 +201,17 @@ function renderStats() {
 
   const statTodayAdded = document.getElementById("stat-today-added");
   if (statTodayAdded) statTodayAdded.textContent = stats.today_added || 0;
+}
+
+/** --- Language Cycle --- */
+
+export async function cycleLanguage() {
+  const langs = Object.keys(state.languages || {});
+  if (langs.length <= 1) return;
+  const next = langs[(langs.indexOf(state.currentLang) + 1) % langs.length];
+  tg.HapticFeedback.selectionChanged();
+  state.currentLang = next; // triggers currentLang subscription → loadHome()
+  await API.post("/api/settings", { language: next });
 }
 
 /** --- Home Screen --- */
