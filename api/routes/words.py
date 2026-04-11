@@ -143,39 +143,28 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
 
     async def add_word(request: web.Request) -> web.Response:
         """Internal App: Instant AI-powered word addition via session."""
-        user_id = request["user_id"]
-        lang = request["language"]
-        telegram_id = request["telegram_id"]
-
-        try:
-            body = await request.json()
-        except Exception:
-            return web.json_response({"ok": False, "error": "invalid_json"}, status=400)
-
-        raw_word = (body.get("word") or "").strip()
-        if not raw_word:
-            return web.json_response({"ok": False, "error": "word_missing"}, status=400)
-
-        return await _process_add_ai_word(request, user_id, lang, raw_word, telegram_id)
+        return await _process_add_ai_word(
+            request,
+            request["user_id"],
+            request["language"],
+            (await request.json()).get("word", "").strip(),
+            request["telegram_id"],
+        )
 
     async def add_words_batch(request: web.Request) -> web.Response:
         """Batch add words for the current user and language."""
-        user_id = request["user_id"]
-        lang = request["language"]
         body = await request.json()
         words_data = _clean_words(body.get("words", []))
         if not words_data:
             return web.json_response({"ok": False, "error": "no_valid_words"}, status=400)
 
         word_repo = WordRepo(db)
-        added_count = await word_repo.add_words_batch(user_id, lang, words_data)
-        logger.info("User %s batch added %d words (lang: %s)", request["telegram_id"], added_count, lang)
+        added_count = await word_repo.add_words_batch(request["user_id"], request["language"], words_data)
+        logger.info("User %s batch added %d words (lang: %s)", request["telegram_id"], added_count, request["language"])
         return web.json_response({"ok": True, "result": {"added": added_count}})
 
     async def patch_word(request: web.Request) -> web.Response:
         """Update an existing word's text, translation, example, or level."""
-        user_id = request["user_id"]
-        telegram_id = request["telegram_id"]
         try:
             word_id = int(request.match_info["word_id"])
         except ValueError:
@@ -185,90 +174,78 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         translation = (body.get("translation") or "").strip()
         if not word or not translation:
             return web.json_response({"ok": False, "error": "missing_fields"}, status=400)
-        example = (body.get("example") or "").strip() or None
-        level = (body.get("level") or "").strip() or None
+
         word_repo = WordRepo(db)
         try:
-            success = await word_repo.update_word_text(word_id, user_id, word, translation, example, level)
+            success = await word_repo.update_word_text(
+                word_id,
+                request["user_id"],
+                word,
+                translation,
+                (body.get("example") or "").strip() or None,
+                (body.get("level") or "").strip() or None,
+            )
             if not success:
                 return web.json_response({"ok": False, "error": "not_found"}, status=404)
-            logger.info("User %s updated word %d: '%s'", telegram_id, word_id, word)
+            logger.info("User %s updated word %d: '%s'", request["telegram_id"], word_id, word)
         except aiosqlite.IntegrityError:
             return web.json_response({"ok": False, "error": "duplicate"}, status=409)
         return web.json_response({"ok": True})
 
     async def delete_word(request: web.Request) -> web.Response:
         """Delete a specific word by its ID."""
-        user_id = request["user_id"]
-        telegram_id = request["telegram_id"]
         try:
             word_id = int(request.match_info["word_id"])
         except ValueError:
             return web.json_response({"ok": False, "error": "invalid_id"}, status=400)
-        word_repo = WordRepo(db)
-        await word_repo.delete_word(word_id, user_id)
-        logger.info("User %s deleted word %d", telegram_id, word_id)
+        await WordRepo(db).delete_word(word_id, request["user_id"])
+        logger.info("User %s deleted word %d", request["telegram_id"], word_id)
         return web.json_response({"ok": True})
 
     async def delete_words_batch(request: web.Request) -> web.Response:
         """Batch delete words for the current user."""
-        user_id = request["user_id"]
-        telegram_id = request["telegram_id"]
         try:
-            body = await request.json()
-            ids = body.get("ids", [])
+            ids = (await request.json()).get("ids", [])
         except Exception:
             return web.json_response({"ok": False, "error": "invalid_json"}, status=400)
 
         if not ids:
             return web.json_response({"ok": True, "result": {"deleted": 0}})
 
-        word_repo = WordRepo(db)
-        await word_repo.delete_words_batch(user_id, ids)
-        logger.info("User %s batch deleted %d words.", telegram_id, len(ids))
+        await WordRepo(db).delete_words_batch(request["user_id"], ids)
+        logger.info("User %s batch deleted %d words.", request["telegram_id"], len(ids))
         return web.json_response({"ok": True, "result": {"deleted": len(ids)}})
 
     async def search_words(request: web.Request) -> web.Response:
         """Search words by word or translation for the current user and language."""
         user_id = request["user_id"]
         lang = request["language"]
-        query = request.query.get("q", "")
         filter_type = request.query.get("filter", "")
-
         word_repo = WordRepo(db)
 
         if filter_type in ("new", "learning", "known", "mastered"):
             words = await word_repo.get_words_by_status(user_id, lang, filter_type)
         elif filter_type in ("today", "reviewed"):
             config = request.app[CONFIG_KEY]
-            user_repo = UserRepo(db)
-            settings = await user_repo.get_user_settings(request["telegram_id"], lang, config)
-            tz_name = settings.get("timezone", "UTC")
+            settings = await UserRepo(db).get_user_settings(request["telegram_id"], lang, config)
             field = "created_at" if filter_type == "today" else "last_reviewed_at"
-            words = await word_repo.get_today_words(user_id, lang, field=field, tz_name=tz_name)
+            words = await word_repo.get_today_words(user_id, lang, field=field, tz_name=settings.get("timezone", "UTC"))
         else:
-            words = await word_repo.search_words(user_id, lang, query)
+            words = await word_repo.search_words(user_id, lang, request.query.get("q", ""))
 
         return web.json_response({"ok": True, "result": {"words": words}})
 
     async def export_words(request: web.Request) -> web.Response:
         """Export all words for the current user and language to a CSV file."""
-        user_id = request["user_id"]
-        lang = request["language"]
-        word_repo = WordRepo(db)
-        words = await word_repo.get_all_words(user_id, lang)
-
+        words = await WordRepo(db).get_all_words(request["user_id"], request["language"])
         output = io.StringIO()
         writer = csv.writer(output)
-
-        # Headers match load_csv_words expected format
         writer.writerow(["word", "translation", "example", "level"])
-
         for w in words:
             writer.writerow([w["word"], w["translation"], w.get("example") or "", w.get("level") or ""])
 
         response = web.Response(text=output.getvalue(), content_type="text/csv")
-        response.headers["Content-Disposition"] = f'attachment; filename="words_{lang}.csv"'
+        response.headers["Content-Disposition"] = f'attachment; filename="words_{request["language"]}.csv"'
         return response
 
     # specific routes must be registered before parameterized ones

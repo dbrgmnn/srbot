@@ -19,14 +19,13 @@ def setup_routes_practice(app: web.Application, db: aiosqlite.Connection):
         telegram_id = request["telegram_id"]
         lang = request["language"]
 
-        user_repo = UserRepo(db)
         word_repo = WordRepo(db)
         config = request.app[CONFIG_KEY]
-        settings = await user_repo.get_user_settings(telegram_id, lang, config)
+        # Fetching settings directly
+        settings = await UserRepo(db).get_user_settings(telegram_id, lang, config)
 
-        # Remaining new words for today in user's timezone
         tz_name = settings.get("timezone", config.default_timezone)
-        today_done = await user_repo.get_today_new_count(user_id, lang, tz_name)
+        today_done = await UserRepo(db).get_today_new_count(user_id, lang, tz_name)
         daily_limit = settings.get("daily_limit", config.max_daily_limit // 2)
         remaining = max(0, daily_limit - today_done)
 
@@ -60,8 +59,6 @@ def setup_routes_practice(app: web.Application, db: aiosqlite.Connection):
         except (ValueError, TypeError):
             return web.json_response({"ok": False, "error": "invalid_grade"}, status=400)
 
-        is_new = word["started_at"] is None
-
         await word_repo.update_word_after_review(
             user_id=user_id,
             word_id=word_id,
@@ -70,7 +67,7 @@ def setup_routes_practice(app: web.Application, db: aiosqlite.Connection):
             interval=result.interval,
             next_review=result.next_review,
         )
-        logger.info("User %s graded word %d with quality %s (new: %s)", telegram_id, word_id, quality, is_new)
+        logger.info("User %s graded word %d with quality %s", telegram_id, word_id, quality)
         return web.json_response({"ok": True, "result": {"next_review": result.next_review.isoformat()}})
 
     async def undo_grade(request: web.Request) -> web.Response:
@@ -85,10 +82,7 @@ def setup_routes_practice(app: web.Application, db: aiosqlite.Connection):
             return web.json_response({"ok": False, "error": "missing_fields"}, status=400)
 
         word_repo = WordRepo(db)
-
-        # Fetch current state to determine language and is_new flag
-        word = await word_repo.get_word(word_id, user_id)
-        if not word:
+        if not await word_repo.get_word(word_id, user_id):
             return web.json_response({"ok": False, "error": "not_found"}, status=404)
 
         await word_repo.undo_word_review(
