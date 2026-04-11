@@ -196,6 +196,7 @@ function renderStats() {
 
 export async function loadHome() {
   initSubscriptions();
+  document.body.classList.add("app-loading");
   try {
     const resp = await API.get("/api/init");
     const init = resp.result;
@@ -223,5 +224,7 @@ export async function loadHome() {
     }
   } catch (e) {
     console.error("LoadHome failed", e);
+  } finally {
+    document.body.classList.remove("app-loading");
   }
 }

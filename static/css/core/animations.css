@@ -40,19 +40,25 @@
   border-radius: var(--radius-pill);
 }
 
-.skeleton-bar-h30 {
+.skeleton-legend-card {
   width: 100%;
-  height: 30px;
-  border-radius: var(--radius-sm);
+  height: 54px;
 }
 
 /* Hide real content when loading */
 .loading .stat-val,
 .loading .stat-pill-icon,
-.loading .progress-legend {
+.loading .progress-legend-real {
   display: none;
 }
 
-.not-loading .skeleton {
+.not-loading .skeleton,
+.not-loading .progress-legend-sk {
   display: none;
+}
+
+/* Block all interactive elements during initial data fetch */
+body.app-loading button,
+body.app-loading [onclick] {
+  pointer-events: none;
 }
