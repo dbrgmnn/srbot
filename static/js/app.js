@@ -110,6 +110,7 @@ function initGlobalHaptics() {
 // --- Initialization ---
 
 async function init() {
+  if (!tg.initData) return;
   try {
     initGlobalHaptics();
     await loadHome();
