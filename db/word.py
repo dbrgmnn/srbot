@@ -137,17 +137,16 @@ class WordRepo:
         await self.db.commit()
         logger.info("Undone review for word ID %d, user %d", word_id, user_id)
 
-    async def get_full_stats(self, user_id: int, language: str, tz_name: str = "UTC", fallback_tz: str = "UTC") -> dict:
+    async def get_full_stats(self, user_id: int, language: str, daily_limit: int = 20, tz_name: str = "UTC") -> dict:
         """Get comprehensive statistics about the user's learning progress."""
         now_utc = datetime.now(tz=UTC)
-        today_start = today_start_utc(tz_name, fallback_tz)
+        today_start = today_start_utc(tz_name)
         next_day_start = today_start + timedelta(days=1)
 
         cursor = await self.db.execute(
             """SELECT
                     COUNT(*) as total,
                     SUM(CASE WHEN started_at IS NOT NULL THEN 1 ELSE 0 END) as learned,
-                    SUM(CASE WHEN started_at IS NULL THEN 1 ELSE 0 END) as new,
                     SUM(CASE WHEN started_at IS NOT NULL AND next_review <= ? THEN 1 ELSE 0 END) as due,
                     COUNT(CASE WHEN started_at >= ? THEN 1 END) as today_new,
                     COUNT(CASE WHEN created_at >= ? THEN 1 END) as today_added,
@@ -156,8 +155,7 @@ class WordRepo:
                     COUNT(CASE WHEN started_at IS NOT NULL AND interval < 5 THEN 1 END) as st_learning,
                     COUNT(CASE WHEN started_at IS NOT NULL AND interval >= 5 AND interval < 30 THEN 1 END) as st_known,
                     COUNT(CASE WHEN started_at IS NOT NULL AND interval >= 30 THEN 1 END) as st_mastered,
-                    MIN(CASE WHEN started_at IS NOT NULL AND next_review > ? THEN next_review END) as next_due_at,
-                    (SELECT daily_limit FROM user_settings WHERE user_id = ? AND language = ?) as daily_limit
+                    MIN(CASE WHEN started_at IS NOT NULL AND next_review > ? THEN next_review END) as next_due_at
                 FROM words WHERE user_id = ? AND language = ?""",
             (
                 now_utc.isoformat(),
@@ -167,8 +165,6 @@ class WordRepo:
                 now_utc.isoformat(),
                 user_id,
                 language,
-                user_id,
-                language,
             ),
         )
         row = await cursor.fetchone()
@@ -176,7 +172,6 @@ class WordRepo:
         defaults = {
             "total": 0,
             "learned": 0,
-            "new": 0,
             "due": 0,
             "today_new": 0,
             "today_added": 0,
@@ -195,7 +190,7 @@ class WordRepo:
             due_count = data.get("due") or 0
             new_count = data.get("st_new") or 0
             today_done = data.get("today_new") or 0
-            limit = data.get("daily_limit") or 20
+            limit = daily_limit or 20
 
             available_new = max(0, min(new_count, limit - today_done))
             data["session_total"] = due_count + available_new
@@ -282,31 +277,18 @@ class WordRepo:
         rows = await cursor.fetchall()
         return [dict(row) for row in rows]
 
-    async def get_today_added_words(
-        self, user_id: int, language: str, tz_name: str = "UTC", fallback_tz: str = "UTC"
+    async def get_today_words(
+        self, user_id: int, language: str, field: str = "created_at", tz_name: str = "UTC"
     ) -> list[dict]:
-        """Get all words added by the user today in their local timezone."""
-        start = today_start_utc(tz_name, fallback_tz)
-
+        """Get words filtered by date field (created_at or last_reviewed_at) for today in user's timezone."""
+        _allowed = {"created_at", "last_reviewed_at"}
+        if field not in _allowed:
+            raise ValueError("Invalid date field: %s" % field)
+        start = today_start_utc(tz_name)
         cursor = await self.db.execute(
-            """SELECT id, word, translation, example, level FROM words
-               WHERE user_id = ? AND language = ? AND created_at >= ?
-               ORDER BY created_at DESC""",
-            (user_id, language, start.isoformat()),
-        )
-        rows = await cursor.fetchall()
-        return [dict(row) for row in rows]
-
-    async def get_today_reviewed_words(
-        self, user_id: int, language: str, tz_name: str = "UTC", fallback_tz: str = "UTC"
-    ) -> list[dict]:
-        """Get all words practiced by the user today in their local timezone."""
-        start = today_start_utc(tz_name, fallback_tz)
-
-        cursor = await self.db.execute(
-            """SELECT id, word, translation, example, level FROM words
-               WHERE user_id = ? AND language = ? AND last_reviewed_at >= ?
-               ORDER BY last_reviewed_at DESC""",
+            f"""SELECT id, word, translation, example, level FROM words
+               WHERE user_id = ? AND language = ? AND {field} >= ?
+               ORDER BY {field} DESC""",
             (user_id, language, start.isoformat()),
         )
         rows = await cursor.fetchall()

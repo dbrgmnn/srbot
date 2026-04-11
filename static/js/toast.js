@@ -8,7 +8,6 @@ const _added = (n) => `Added ${n} words`;
 export const T = {
   // Dictionary — Add
   WORD_REQUIRED: "Fill in word and translation",
-  WORD_ADDED: (w) => `Added: ${w}`,
   WORD_ADD_FAIL: _fail("add word"),
 
   // Dictionary — CSV Upload
@@ -23,8 +22,6 @@ export const T = {
   DELETE_FAIL: _fail("delete"),
 
   // Dictionary — Clear / Export / Search
-  CLEARED: "Dictionary cleared",
-  CLEAR_FAIL: _fail("clear"),
   COPIED: "Copied to clipboard",
   COPY_FAIL: "Please copy the token manually",
   EXPORT_FAIL: _fail("export"),

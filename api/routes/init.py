@@ -25,14 +25,15 @@ def setup_routes_init(app: web.Application, db: aiosqlite.Connection):
         config = request.app[CONFIG_KEY]
         settings = await user_repo.get_user_settings(telegram_id, lang, config)
         tz = settings.get("timezone", "UTC")
-        stats = await word_repo.get_full_stats(user_id, lang, tz_name=tz)
+        daily_limit = settings.get("daily_limit", config.max_daily_limit // 2)
+        stats = await word_repo.get_full_stats(user_id, lang, daily_limit=daily_limit, tz_name=tz)
 
         lang_meta = LANGUAGES.get(lang, {})
         tts_code = lang_meta.get("tts", "en-US")
 
         languages = {code: {**meta} for code, meta in LANGUAGES.items()}
 
-        logger.info(f"User {telegram_id} initialized WebApp (lang: {lang})")
+        logger.info("User %d initialized WebApp (lang: %s)", telegram_id, lang)
 
         return web.json_response(
             {

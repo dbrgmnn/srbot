@@ -293,7 +293,8 @@ export function playAudio(e) {
   const synth = window.speechSynthesis;
   synth.cancel();
   const msg = new SpeechSynthesisUtterance(text);
-  msg.lang = state.ttsCode || "de-DE";
+  msg.lang =
+    state.ttsCode || state.languages?.[state.currentLang]?.tts || "en-US";
   msg.rate = 0.85;
   tg.HapticFeedback.impactOccurred("light");
   synth.speak(msg);

@@ -31,7 +31,7 @@ import {
 } from "./settings.js";
 import { T } from "./toast.js";
 import { UI, tg } from "./utils.js";
-import { loadHome, showScreen } from "./ui.js";
+import { loadHome, showScreen, registerScreenCallback } from "./ui.js";
 
 tg.ready();
 tg.expand();
@@ -55,10 +55,8 @@ applyTheme();
 // --- Window Bindings (HTML onclick attributes) ---
 
 // UI
-window.showScreen = (name) => {
-  showScreen(name);
-  if (name === "settings") loadSettings();
-};
+registerScreenCallback("settings", loadSettings);
+window.showScreen = showScreen;
 
 // Practice
 window.startPractice = startPractice;

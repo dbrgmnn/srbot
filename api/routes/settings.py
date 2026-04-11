@@ -43,7 +43,12 @@ def setup_routes_settings(app: web.Application, db: aiosqlite.Connection):
         word_repo = WordRepo(db)
         config = request.app[CONFIG_KEY]
         settings = await user_repo.get_user_settings(telegram_id, lang, config)
-        stats = await word_repo.get_full_stats(user_id, lang, tz_name=settings.get("timezone", "UTC"))
+        stats = await word_repo.get_full_stats(
+            user_id,
+            lang,
+            daily_limit=settings.get("daily_limit", 20),
+            tz_name=settings.get("timezone", "UTC"),
+        )
 
         return web.json_response(
             {
@@ -138,7 +143,7 @@ def setup_routes_settings(app: web.Application, db: aiosqlite.Connection):
             await user_repo.update_quiet_hours(telegram_id, lang, quiet_start=quiet_start, quiet_end=quiet_end)
 
         settings = await user_repo.get_user_settings(telegram_id, lang, config)
-        logger.info(f"User {telegram_id} updated settings for language '{lang}'")
+        logger.info("User %d updated settings for language '%s'", telegram_id, lang)
         return web.json_response({"ok": True, "result": settings})
 
     async def get_api_token(request: web.Request) -> web.Response:
@@ -148,7 +153,7 @@ def setup_routes_settings(app: web.Application, db: aiosqlite.Connection):
         token = await user_repo.get_api_token(telegram_id)
         if not token:
             token = await user_repo.generate_api_token(telegram_id)
-            logger.info(f"User {telegram_id} generated initial API token")
+            logger.info("User %d generated initial API token", telegram_id)
         return web.json_response({"ok": True, "result": {"token": token}})
 
     async def revoke_api_token(request: web.Request) -> web.Response:
@@ -156,7 +161,7 @@ def setup_routes_settings(app: web.Application, db: aiosqlite.Connection):
         telegram_id = request["telegram_id"]
         user_repo = UserRepo(db)
         token = await user_repo.generate_api_token(telegram_id)
-        logger.info(f"User {telegram_id} revoked and regenerated API token")
+        logger.info("User %d revoked and regenerated API token", telegram_id)
         return web.json_response({"ok": True, "result": {"token": token}})
 
     app.router.add_get("/api/settings/languages", get_languages_list)

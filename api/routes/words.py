@@ -43,7 +43,7 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         # 1. Quick duplicate check (raw input)
         match = await word_repo.get_word_by_text(user_id, lang, raw_word)
         if match:
-            logger.info(f"AI Add: Word '{raw_word}' for user {telegram_id} is a direct duplicate.")
+            logger.info("AI Add: Word '%s' for user %s is a direct duplicate.", raw_word, telegram_id)
             return web.json_response(
                 {
                     "ok": True,
@@ -67,7 +67,7 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         try:
             ai_data = await translator.translate_and_enrich(raw_word, lang)
         except Exception as e:
-            logger.error(f"AI translation failed: {e}")
+            logger.error("AI translation failed: %s", e)
             return web.json_response({"ok": False, "error": "ai_service_unavailable"}, status=503)
 
         if not ai_data or not ai_data.get("is_valid", True):
@@ -81,7 +81,7 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
         # 3. Final duplicate check (after AI normalization)
         match = await word_repo.get_word_by_text(user_id, lang, word)
         if match:
-            logger.info(f"AI Add: AI-normalized word '{word}' for user {telegram_id} is a duplicate.")
+            logger.info("AI Add: AI-normalized word '%s' for user %s is a duplicate.", word, telegram_id)
             return web.json_response(
                 {
                     "ok": True,
@@ -103,7 +103,7 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
             # Already checked duplicate, but guard nonetheless
             return web.json_response({"ok": False, "error": "duplicate"}, status=409)
 
-        logger.info(f"AI Add: User {telegram_id} added '{word}' (lang: {lang})")
+        logger.info("AI Add: User %s added '%s' (lang: %s)", telegram_id, word, lang)
 
         return web.json_response(
             {
@@ -169,7 +169,7 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
 
         word_repo = WordRepo(db)
         added_count = await word_repo.add_words_batch(user_id, lang, words_data)
-        logger.info(f"User {request['telegram_id']} batch added {added_count} words (lang: {lang})")
+        logger.info("User %s batch added %d words (lang: %s)", request["telegram_id"], added_count, lang)
         return web.json_response({"ok": True, "result": {"added": added_count}})
 
     async def patch_word(request: web.Request) -> web.Response:
@@ -192,7 +192,7 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
             success = await word_repo.update_word_text(word_id, user_id, word, translation, example, level)
             if not success:
                 return web.json_response({"ok": False, "error": "not_found"}, status=404)
-            logger.info(f"User {telegram_id} updated word {word_id}: '{word}'")
+            logger.info("User %s updated word %d: '%s'", telegram_id, word_id, word)
         except aiosqlite.IntegrityError:
             return web.json_response({"ok": False, "error": "duplicate"}, status=409)
         return web.json_response({"ok": True})
@@ -207,7 +207,7 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
             return web.json_response({"ok": False, "error": "invalid_id"}, status=400)
         word_repo = WordRepo(db)
         await word_repo.delete_word(word_id, user_id)
-        logger.info(f"User {telegram_id} deleted word {word_id}")
+        logger.info("User %s deleted word %d", telegram_id, word_id)
         return web.json_response({"ok": True})
 
     async def delete_words_batch(request: web.Request) -> web.Response:
@@ -225,7 +225,7 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
 
         word_repo = WordRepo(db)
         await word_repo.delete_words_batch(user_id, ids)
-        logger.info(f"User {telegram_id} batch deleted {len(ids)} words.")
+        logger.info("User %s batch deleted %d words.", telegram_id, len(ids))
         return web.json_response({"ok": True, "result": {"deleted": len(ids)}})
 
     async def search_words(request: web.Request) -> web.Response:
@@ -244,10 +244,8 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
             user_repo = UserRepo(db)
             settings = await user_repo.get_user_settings(request["telegram_id"], lang, config)
             tz_name = settings.get("timezone", "UTC")
-            if filter_type == "today":
-                words = await word_repo.get_today_added_words(user_id, lang, tz_name)
-            else:
-                words = await word_repo.get_today_reviewed_words(user_id, lang, tz_name)
+            field = "created_at" if filter_type == "today" else "last_reviewed_at"
+            words = await word_repo.get_today_words(user_id, lang, field=field, tz_name=tz_name)
         else:
             words = await word_repo.search_words(user_id, lang, query)
 

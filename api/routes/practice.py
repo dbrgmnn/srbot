@@ -31,7 +31,7 @@ def setup_routes_practice(app: web.Application, db: aiosqlite.Connection):
         remaining = max(0, daily_limit - today_done)
 
         words = await word_repo.get_session_words(user_id, lang, new_limit=remaining)
-        logger.info(f"User {telegram_id} started practice session: {len(words)} words (lang: {lang})")
+        logger.info("User %s started practice session: %d words (lang: %s)", telegram_id, len(words), lang)
         return web.json_response({"ok": True, "result": {"words": words}})
 
     async def grade_word(request: web.Request) -> web.Response:
@@ -70,7 +70,7 @@ def setup_routes_practice(app: web.Application, db: aiosqlite.Connection):
             interval=result.interval,
             next_review=result.next_review,
         )
-        logger.info(f"User {telegram_id} graded word {word_id} with quality {quality} (new: {is_new})")
+        logger.info("User %s graded word %d with quality %s (new: %s)", telegram_id, word_id, quality, is_new)
         return web.json_response({"ok": True, "result": {"next_review": result.next_review.isoformat()}})
 
     async def undo_grade(request: web.Request) -> web.Response:
@@ -101,7 +101,7 @@ def setup_routes_practice(app: web.Application, db: aiosqlite.Connection):
             last_reviewed_at=old_state.get("last_reviewed_at"),
             started_at=old_state.get("started_at"),
         )
-        logger.info(f"User {telegram_id} undid grading for word {word_id}")
+        logger.info("User %s undid grading for word %d", telegram_id, word_id)
         return web.json_response({"ok": True})
 
     app.router.add_get("/api/session", get_session)

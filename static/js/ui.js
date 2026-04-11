@@ -1,5 +1,12 @@
-import { API, tg } from "./utils.js";
+import { API, lockScroll, unlockScroll, tg } from "./utils.js";
 import { state } from "./state.js";
+
+/** --- Screen Callbacks --- */
+const _screenCallbacks = {};
+
+export function registerScreenCallback(name, fn) {
+  _screenCallbacks[name] = fn;
+}
 
 /** --- Screen Switching --- */
 
@@ -34,20 +41,18 @@ export function showScreen(name) {
     window.clearSearch(false);
   }
 
-  if (name === "home") {
-    if (tg.enableVerticalSwipe) tg.enableVerticalSwipe();
-  } else {
-    if (name !== "practice" && tg.enableVerticalSwipe) tg.enableVerticalSwipe();
-  }
-
-  if (name === "practice") {
+  const isPractice = name === "practice";
+  if (isPractice) {
     if (tg.disableVerticalSwipe) tg.disableVerticalSwipe();
     document.querySelector(".nav").style.display = "none";
     document.body.classList.add("no-nav");
   } else {
+    if (tg.enableVerticalSwipe) tg.enableVerticalSwipe();
     document.querySelector(".nav").style.display = "";
     document.body.classList.remove("no-nav");
   }
+
+  if (_screenCallbacks[name]) _screenCallbacks[name]();
 }
 
 /** --- Countdown Helpers --- */
@@ -59,14 +64,14 @@ export const UIHelpers = {
     const el = document.getElementById(id);
     if (el) {
       el.classList.add("open");
-      document.body.style.overflow = "hidden";
+      lockScroll();
     }
   },
   closeOverlay(id) {
     const el = document.getElementById(id);
     if (el) {
       el.classList.remove("open");
-      document.body.style.overflow = "";
+      unlockScroll();
     }
   },
 };

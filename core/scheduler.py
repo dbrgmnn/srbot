@@ -26,7 +26,7 @@ async def check_and_send_notifications(bot: Bot, db_path: str, config):
         now = datetime.now(tz=UTC)
         user_repo = UserRepo(db)
         candidates = await user_repo.get_users_with_due_words(default_tz=config.default_timezone)
-        logger.info(f"[scheduler] tick — candidates: {len(candidates)}")
+        logger.info("[scheduler] tick — candidates: %d", len(candidates))
 
         sem = asyncio.Semaphore(20)
 
@@ -47,11 +47,15 @@ async def check_and_send_notifications(bot: Bot, db_path: str, config):
                     return
 
                 logger.info(
-                    f"[scheduler] checking {telegram_id} ({row['language']}) — due={due_count} new_left={new_to_show}"
+                    "[scheduler] checking %d (%s) — due=%d new_left=%d",
+                    telegram_id,
+                    row["language"],
+                    due_count,
+                    new_to_show,
                 )
 
                 if is_quiet_time(now, row["quiet_start"], row["quiet_end"], user_tz):
-                    logger.info(f"[scheduler] {telegram_id} — quiet time, skip")
+                    logger.info("[scheduler] %d — quiet time, skip", telegram_id)
                     return
 
                 last_notified_raw = row["last_notified_at"]
@@ -69,9 +73,9 @@ async def check_and_send_notifications(bot: Bot, db_path: str, config):
                 try:
                     await bot.send_message(chat_id=telegram_id, text=text)
                     await user_repo.set_last_notified_at(telegram_id, language=row["language"])
-                    logger.info(f"[scheduler] Notified {telegram_id} ({row['language']}): {text!r}")
+                    logger.info("[scheduler] Notified %d (%s): %r", telegram_id, row["language"], text)
                 except Exception as e:
-                    logger.warning(f"[scheduler] Notification failed for {telegram_id}: {e}")
+                    logger.warning("[scheduler] Notification failed for %d: %s", telegram_id, e)
 
         tasks = [_process_user(row) for row in candidates]
         if tasks:
@@ -83,7 +87,7 @@ async def reschedule(scheduler: AsyncIOScheduler, db: aiosqlite.Connection, conf
     user_repo = UserRepo(db)
     interval = await user_repo.get_min_notification_interval(config)
     scheduler.reschedule_job(JOB_ID, trigger=IntervalTrigger(minutes=interval))
-    logger.info(f"Scheduler rescheduled — interval: {interval} min")
+    logger.info("Scheduler rescheduled — interval: %s min", interval)
 
 
 async def setup_scheduler(bot: Bot, db: aiosqlite.Connection, config) -> AsyncIOScheduler:

@@ -47,7 +47,11 @@ class Translator:
                         if resp.status == 429 or resp.status >= 500:
                             err_text = await resp.text()
                             logger.warning(
-                                f"Gemini API error {resp.status} (attempt {attempt + 1}/{max_retries}): {err_text}"
+                                "Gemini API error %d (attempt %d/%d): %s",
+                                resp.status,
+                                attempt + 1,
+                                max_retries,
+                                err_text,
                             )
                             if attempt < max_retries - 1:
                                 await asyncio.sleep(base_delay * (2**attempt))
@@ -56,13 +60,13 @@ class Translator:
 
                         if resp.status != 200:
                             err_text = await resp.text()
-                            logger.error(f"Gemini API error {resp.status}: {err_text}")
+                            logger.error("Gemini API error %d: %s", resp.status, err_text)
                             return None
 
                         result = await resp.json()
 
                         if "candidates" not in result or not result["candidates"]:
-                            logger.error(f"Gemini returned empty candidates: {result}")
+                            logger.error("Gemini returned empty candidates: %s", result)
                             return None
 
                         content_text = result["candidates"][0]["content"]["parts"][0]["text"].strip()
@@ -78,13 +82,13 @@ class Translator:
 
                         return json.loads(content_text)
             except (TimeoutError, aiohttp.ClientError) as e:
-                logger.warning(f"Gemini call network error (attempt {attempt + 1}/{max_retries}): {e}")
+                logger.warning("Gemini call network error (attempt %d/%d): %s", attempt + 1, max_retries, e)
                 if attempt < max_retries - 1:
                     await asyncio.sleep(base_delay * (2**attempt))
                     continue
                 return None
             except Exception as e:
-                logger.error(f"Gemini call failed: {e}. Raw content: {content_text[:200]}")
+                logger.error("Gemini call failed: %s. Raw content: %s", e, content_text[:200])
                 return None
 
         return None

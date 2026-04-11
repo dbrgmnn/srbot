@@ -440,6 +440,24 @@ export async function shareWords() {
   }
 }
 
+/** --- Search Suggestion Builder --- */
+
+function _buildAddSuggestion(q) {
+  return `
+    <div class="settings-row" style="padding: 12px 16px; gap: 12px;">
+      <div class="settings-row-left" style="min-width: 0; flex: 1;">
+        <div class="settings-label" style="font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+          "${esc(q)}"
+        </div>
+      </div>
+      <button class="btn btn-sm" style="width: auto; margin: 0; padding: 10px 24px; flex-shrink: 0;"
+        onclick="addWordWithAI('${esc(q)}', this)">
+        Add
+      </button>
+    </div>
+  `;
+}
+
 /** --- Internal Async --- */
 
 async function loadSearch(q) {
@@ -455,20 +473,7 @@ async function loadSearch(q) {
     if (reqId !== currentSearchId) return;
 
     if (data.result.words.length === 0) {
-      el.innerHTML = `
-        <div class="settings-row" style="padding: 12px 16px; gap: 12px;">
-          <div class="settings-row-left" style="min-width: 0; flex: 1;">
-            <div class="settings-label" style="font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-              "${esc(q)}"
-            </div>
-          </div>
-          <button class="btn btn-sm" style="width: auto; margin: 0; padding: 10px 24px; flex-shrink: 0;" onclick="addWordWithAI('${esc(
-            q,
-          )}', this)">
-            Add
-          </button>
-        </div>
-      `;
+      el.innerHTML = _buildAddSuggestion(q);
       checkSearchActions(0);
       return;
     }

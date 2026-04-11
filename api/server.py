@@ -156,5 +156,5 @@ async def start_api_server(config: Config, db: aiosqlite.Connection, scheduler=N
     await runner.setup()
     site = web.TCPSite(runner, "0.0.0.0", config.api_port)
     await site.start()
-    logger.info(f"API server started on port {config.api_port}")
+    logger.info("API server started on port %d", config.api_port)
     return runner

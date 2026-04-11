@@ -182,11 +182,9 @@ class UserRepo:
         rows = await cursor.fetchall()
         return {row["language"]: row["cnt"] for row in rows}
 
-    async def get_today_new_count(
-        self, user_id: int, language: str, tz_name: str = "UTC", fallback_tz: str = "UTC"
-    ) -> int:
+    async def get_today_new_count(self, user_id: int, language: str, tz_name: str = "UTC") -> int:
         """Count how many new words the user has started learning today."""
-        start = today_start_utc(tz_name, fallback_tz)
+        start = today_start_utc(tz_name)
         cursor = await self.db.execute(
             "SELECT COUNT(*) as cnt FROM words WHERE user_id = ? AND language = ? AND started_at >= ?",
             (user_id, language, start.isoformat()),
@@ -227,13 +225,13 @@ class UserRepo:
         for tz_name, group in tz_groups.items():
             tz_info = safe_zoneinfo(tz_name, default_tz)
             local_now = now.astimezone(tz_info)
-            today_start_utc = local_now.replace(hour=0, minute=0, second=0, microsecond=0).astimezone(UTC).isoformat()
+            today_start_str = local_now.replace(hour=0, minute=0, second=0, microsecond=0).astimezone(UTC).isoformat()
 
             chunk_size = 400
             for i in range(0, len(group), chunk_size):
                 chunk = group[i : i + chunk_size]
                 conditions = " OR ".join(["(user_id = ? AND language = ?)"] * len(chunk))
-                params = [today_start_utc]
+                params = [today_start_str]
                 for c in chunk:
                     params.extend([c["user_id"], c["language"]])
 

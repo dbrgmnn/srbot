@@ -26,7 +26,7 @@ def verify_init_data(init_data: str, bot_token: str, expires_in: int) -> dict | 
         logger.warning("Invalid auth_date format")
         return None
     if time.time() - auth_date > expires_in:
-        logger.warning(f"init_data expired: {time.time() - auth_date}s > {expires_in}s")
+        logger.warning("init_data expired: %.1fs > %ds", time.time() - auth_date, expires_in)
         return None
 
     # Build data-check-string per Telegram spec
