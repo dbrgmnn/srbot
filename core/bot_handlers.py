@@ -1,7 +1,6 @@
 import asyncio
 import logging
 import os
-import tarfile
 
 from aiogram import Dispatcher, filters, types
 
@@ -38,25 +37,14 @@ def setup_handlers(dp: Dispatcher, config):
             return
 
         logger.info("Backup initiated by admin %d", user_id)
-        base_dir = os.path.dirname(config.db_path)
-        backup_path = os.path.join(base_dir, "srbot_backup.sqlite")
-        archive_path = os.path.join(base_dir, "srbot_backup.tar.gz")
+        backup_dir = os.path.join(os.path.dirname(os.path.abspath(config.db_path)), "backups")
 
         try:
-            await backup_db(config.db_path, backup_path)
-            with tarfile.open(archive_path, "w:gz") as tar:
-                tar.add(backup_path, arcname="srbot.db")
-
-            sent_msg = await message.answer_document(types.FSInputFile(archive_path))
-            asyncio.create_task(cleanup_messages([message, sent_msg]))
-            logger.info("Backup successfully sent to admin %d", user_id)
+            archive_path = await backup_db(config.db_path, backup_dir)
+            await message.answer_document(types.FSInputFile(archive_path))
+            logger.info("Backup sent to admin %d: %s", user_id, archive_path)
         except Exception as e:
             logger.error("Backup error for admin %d: %s", user_id, e)
-        finally:
-            if os.path.exists(backup_path):
-                os.remove(backup_path)
-            if os.path.exists(archive_path):
-                os.remove(archive_path)
 
     @dp.message(filters.Command("start"))
     async def cmd_start(message: types.Message):

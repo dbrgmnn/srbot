@@ -1,20 +1,32 @@
 import asyncio
 import logging
+import os
 from datetime import UTC, datetime
 
 import aiosqlite
 from aiogram import Bot
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.triggers.cron import CronTrigger
 from apscheduler.triggers.interval import IntervalTrigger
 
 from core.scheduler_utils import build_notification_text, is_quiet_time
 from db import UserRepo
 from db.models import apply_pragmas
-from db.utils import safe_zoneinfo
+from db.utils import backup_db, safe_zoneinfo
 
 logger = logging.getLogger(__name__)
 
 JOB_ID = "check_notifications"
+BACKUP_JOB_ID = "daily_backup"
+
+
+async def run_scheduled_backup(db_path: str, backup_dir: str):
+    """Daily backup job — saves archive locally, rotates to keep last 3."""
+    try:
+        archive_path = await backup_db(db_path, backup_dir)
+        logger.info("[scheduler] Daily backup saved: %s", archive_path)
+    except Exception as e:
+        logger.error("[scheduler] Daily backup failed: %s", e)
 
 
 async def check_and_send_notifications(bot: Bot, db_path: str, config):
@@ -91,7 +103,7 @@ async def reschedule(scheduler: AsyncIOScheduler, db: aiosqlite.Connection, conf
 
 
 async def setup_scheduler(bot: Bot, db: aiosqlite.Connection, config) -> AsyncIOScheduler:
-    """Initialize APScheduler and add notification job."""
+    """Initialize APScheduler and add notification and backup jobs."""
     scheduler = AsyncIOScheduler(timezone=UTC)
     user_repo = UserRepo(db)
     interval = await user_repo.get_min_notification_interval(config)
@@ -100,6 +112,14 @@ async def setup_scheduler(bot: Bot, db: aiosqlite.Connection, config) -> AsyncIO
         trigger=IntervalTrigger(minutes=interval),
         kwargs={"bot": bot, "db_path": config.db_path, "config": config},
         id=JOB_ID,
+        replace_existing=True,
+    )
+    backup_dir = os.path.join(os.path.dirname(os.path.abspath(config.db_path)), "backups")
+    scheduler.add_job(
+        run_scheduled_backup,
+        trigger=CronTrigger(hour=3, minute=0, timezone=UTC),
+        kwargs={"db_path": config.db_path, "backup_dir": backup_dir},
+        id=BACKUP_JOB_ID,
         replace_existing=True,
     )
     return scheduler
