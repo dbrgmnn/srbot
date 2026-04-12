@@ -66,7 +66,10 @@ def setup_routes_settings(app: web.Application, db: aiosqlite.Connection):
         """Update user settings (language, timezone, daily limit, etc.)."""
         telegram_id = request["telegram_id"]
         lang = request["language"]
-        body = await request.json()
+        try:
+            body = await request.json()
+        except Exception:
+            return web.json_response({"ok": False, "error": "invalid_json"}, status=400)
         config = request.app[CONFIG_KEY]
         user_repo = UserRepo(db)
 

@@ -357,7 +357,7 @@ export async function saveEdit() {
     }
   } catch (e) {
     UI.toast(
-      e.message === "409" ? T.WORD_DUPLICATE : T.WORD_SAVE_FAIL,
+      e.message === "duplicate" ? T.WORD_DUPLICATE : T.WORD_SAVE_FAIL,
       "error",
     );
   } finally {

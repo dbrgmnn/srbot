@@ -271,7 +271,9 @@ export async function undo() {
     });
   } catch (e) {
     console.error("Undo failed", e);
+    practiceHistory.push(last); // restore history entry on API failure
     UI.toast(T.UNDO_FAIL, "error");
+    return;
   }
 
   sessionIdx = last.sessionIdx;

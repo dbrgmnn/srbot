@@ -258,7 +258,15 @@ export async function saveQuietHours() {
 
 /** --- API Access Sheet --- */
 
-export function openApiAccessSheet() {
+export async function openApiAccessSheet() {
+  if (!currentToken) {
+    try {
+      const resp = await API.get("/api/settings/token");
+      currentToken = resp.result.token;
+    } catch (e) {
+      console.error("Failed to load token", e);
+    }
+  }
   const display = document.getElementById("api-token-display");
   display.textContent = currentToken || "—";
 

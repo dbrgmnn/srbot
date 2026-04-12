@@ -8,7 +8,7 @@ async def apply_pragmas(db: aiosqlite.Connection):
     await db.execute("PRAGMA foreign_keys=ON")
 
 
-async def init_db(db_path: str = "srbot.db") -> aiosqlite.Connection:
+async def init_db(db_path: str) -> aiosqlite.Connection:
     """Create all tables and indexes if they do not exist; return open connection."""
     db = await aiosqlite.connect(db_path)
     db.row_factory = aiosqlite.Row

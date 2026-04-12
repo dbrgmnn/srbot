@@ -37,7 +37,10 @@ def setup_routes_practice(app: web.Application, db: aiosqlite.Connection):
         """Process word grading using SM-2 algorithm."""
         user_id = request["user_id"]
         telegram_id = request["telegram_id"]
-        body = await request.json()
+        try:
+            body = await request.json()
+        except Exception:
+            return web.json_response({"ok": False, "error": "invalid_json"}, status=400)
         word_id = body.get("word_id")
         quality = body.get("quality")
 
@@ -74,7 +77,10 @@ def setup_routes_practice(app: web.Application, db: aiosqlite.Connection):
         """Revert the last grading action for a word."""
         user_id = request["user_id"]
         telegram_id = request["telegram_id"]
-        body = await request.json()
+        try:
+            body = await request.json()
+        except Exception:
+            return web.json_response({"ok": False, "error": "invalid_json"}, status=400)
         word_id = body.get("word_id")
         old_state = body.get("old_state")
 

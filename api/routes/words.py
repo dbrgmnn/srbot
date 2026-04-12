@@ -143,17 +143,24 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
 
     async def add_word(request: web.Request) -> web.Response:
         """Internal App: Instant AI-powered word addition via session."""
+        try:
+            body = await request.json()
+        except Exception:
+            return web.json_response({"ok": False, "error": "invalid_json"}, status=400)
         return await _process_add_ai_word(
             request,
             request["user_id"],
             request["language"],
-            (await request.json()).get("word", "").strip(),
+            body.get("word", "").strip(),
             request["telegram_id"],
         )
 
     async def add_words_batch(request: web.Request) -> web.Response:
         """Batch add words for the current user and language."""
-        body = await request.json()
+        try:
+            body = await request.json()
+        except Exception:
+            return web.json_response({"ok": False, "error": "invalid_json"}, status=400)
         words_data = _clean_words(body.get("words", []))
         if not words_data:
             return web.json_response({"ok": False, "error": "no_valid_words"}, status=400)
@@ -169,7 +176,10 @@ def setup_routes_words(app: web.Application, db: aiosqlite.Connection):
             word_id = int(request.match_info["word_id"])
         except ValueError:
             return web.json_response({"ok": False, "error": "invalid_id"}, status=400)
-        body = await request.json()
+        try:
+            body = await request.json()
+        except Exception:
+            return web.json_response({"ok": False, "error": "invalid_json"}, status=400)
         word = (body.get("word") or "").strip()
         translation = (body.get("translation") or "").strip()
         if not word or not translation:
