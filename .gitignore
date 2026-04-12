@@ -2,6 +2,7 @@
 *.db
 venv/
 
+.claude/
 .DS_Store
 .idea
 .cache/
