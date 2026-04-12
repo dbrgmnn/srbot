@@ -3,6 +3,7 @@
 venv/
 
 .DS_Store
+.idea
 .cache/
 __pycache__/
 .pytest_cache/
