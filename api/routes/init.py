@@ -1,16 +1,14 @@
 import logging
 
-import aiosqlite
 from aiohttp import web
 
 from api.app_keys import CONFIG_KEY
 from core.languages import LANGUAGES
-from db import UserRepo, WordRepo
 
 logger = logging.getLogger(__name__)
 
 
-def setup_routes_init(app: web.Application, db: aiosqlite.Connection):
+def setup_routes_init(app: web.Application):
     """Register user initialization routes."""
 
     async def init_user(request: web.Request) -> web.Response:
@@ -19,8 +17,8 @@ def setup_routes_init(app: web.Application, db: aiosqlite.Connection):
         user_id = request["user_id"]
         lang = request["language"]
 
-        user_repo = UserRepo(db)
-        word_repo = WordRepo(db)
+        user_repo = request["user_repo"]
+        word_repo = request["word_repo"]
 
         config = request.app[CONFIG_KEY]
         settings = await user_repo.get_user_settings(telegram_id, lang, config)

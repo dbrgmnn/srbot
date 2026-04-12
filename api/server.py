@@ -21,6 +21,7 @@ from api.app_keys import (
     USER_CACHE_KEY,
 )
 from api.auth import verify_init_data
+from api.middlewares import repository_middleware
 from api.routes.init import setup_routes_init
 from api.routes.practice import setup_routes_practice
 from api.routes.settings import setup_routes_settings
@@ -28,7 +29,6 @@ from api.routes.words import setup_routes_words
 from config import Config
 from core.languages import LANGUAGES
 from core.translator import Translator
-from db import UserRepo
 
 logger = logging.getLogger(__name__)
 
@@ -86,8 +86,7 @@ async def create_app(config: Config, db: aiosqlite.Connection, scheduler=None) -
             request.app[USER_CACHE_KEY].move_to_end(cache_key)
         else:
             tz = request.headers.get("X-Timezone", config.default_timezone)
-            user_repo = UserRepo(db)
-            user_id = await user_repo.get_or_create(telegram_id, lang, tz, config)
+            user_id = await request["user_repo"].get_or_create(telegram_id, lang, tz, config)
             request.app[USER_CACHE_KEY][cache_key] = user_id
 
             # Simple LRU logic to prevent memory leaks
@@ -99,7 +98,7 @@ async def create_app(config: Config, db: aiosqlite.Connection, scheduler=None) -
         request["language"] = lang
         return await handler(request)
 
-    app = web.Application(middlewares=[cors_middleware, auth_middleware])
+    app = web.Application(middlewares=[cors_middleware, repository_middleware, auth_middleware])
     app[CONFIG_KEY] = config
     app[DB_KEY] = db
     app[SCHEDULER_KEY] = scheduler
@@ -116,10 +115,10 @@ async def create_app(config: Config, db: aiosqlite.Connection, scheduler=None) -
 
     app.on_shutdown.append(on_shutdown)
 
-    setup_routes_init(app, db)
-    setup_routes_words(app, db)
-    setup_routes_practice(app, db)
-    setup_routes_settings(app, db)
+    setup_routes_init(app)
+    setup_routes_words(app)
+    setup_routes_practice(app)
+    setup_routes_settings(app)
 
     # --- Static files ---
 

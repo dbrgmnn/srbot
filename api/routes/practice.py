@@ -1,16 +1,14 @@
 import logging
 
-import aiosqlite
 from aiohttp import web
 
 from api.app_keys import CONFIG_KEY
 from core.srs import sm2
-from db import UserRepo, WordRepo
 
 logger = logging.getLogger(__name__)
 
 
-def setup_routes_practice(app: web.Application, db: aiosqlite.Connection):
+def setup_routes_practice(app: web.Application):
     """Register practice-related routes."""
 
     async def get_session(request: web.Request) -> web.Response:
@@ -19,13 +17,14 @@ def setup_routes_practice(app: web.Application, db: aiosqlite.Connection):
         telegram_id = request["telegram_id"]
         lang = request["language"]
 
-        word_repo = WordRepo(db)
+        user_repo = request["user_repo"]
+        word_repo = request["word_repo"]
         config = request.app[CONFIG_KEY]
-        # Fetching settings directly
-        settings = await UserRepo(db).get_user_settings(telegram_id, lang, config)
+
+        settings = await user_repo.get_user_settings(telegram_id, lang, config)
 
         tz_name = settings.get("timezone", config.default_timezone)
-        today_done = await UserRepo(db).get_today_new_count(user_id, lang, tz_name)
+        today_done = await user_repo.get_today_new_count(user_id, lang, tz_name)
         daily_limit = settings.get("daily_limit", config.max_daily_limit // 2)
         remaining = max(0, daily_limit - today_done)
 
@@ -47,7 +46,7 @@ def setup_routes_practice(app: web.Application, db: aiosqlite.Connection):
         if word_id is None or quality is None:
             return web.json_response({"ok": False, "error": "missing_fields"}, status=400)
 
-        word_repo = WordRepo(db)
+        word_repo = request["word_repo"]
         word = await word_repo.get_word(word_id, user_id)
         if not word:
             return web.json_response({"ok": False, "error": "not_found"}, status=404)
@@ -87,7 +86,7 @@ def setup_routes_practice(app: web.Application, db: aiosqlite.Connection):
         if word_id is None or old_state is None:
             return web.json_response({"ok": False, "error": "missing_fields"}, status=400)
 
-        word_repo = WordRepo(db)
+        word_repo = request["word_repo"]
         if not await word_repo.get_word(word_id, user_id):
             return web.json_response({"ok": False, "error": "not_found"}, status=404)
 
