@@ -10,6 +10,17 @@ from db.utils import safe_zoneinfo, today_start_utc
 
 logger = logging.getLogger(__name__)
 
+_ALLOWED_SETTINGS_FIELDS = frozenset(
+    {
+        "timezone",
+        "daily_limit",
+        "notification_interval_minutes",
+        "practice_mode",
+        "quiet_start",
+        "quiet_end",
+    }
+)
+
 
 class UserRepo:
     """Repository for managing user-related data and settings."""
@@ -28,7 +39,7 @@ class UserRepo:
         cursor = await self.db.execute("SELECT id FROM users WHERE telegram_id = ?", (telegram_id,))
         row = await cursor.fetchone()
         if not row:
-            return None
+            raise RuntimeError(f"Failed to create or fetch user for telegram_id={telegram_id}")
         user_id = row["id"]
 
         # Initialize settings
@@ -93,6 +104,8 @@ class UserRepo:
 
     async def _update_setting(self, field: str, value: Any, telegram_id: int, language: str) -> None:
         """Generic method to update a single user setting field."""
+        if field not in _ALLOWED_SETTINGS_FIELDS:
+            raise ValueError(f"Invalid settings field: {field!r}")
         await self.db.execute(
             f"""INSERT INTO user_settings (user_id, language, {field})
                VALUES ((SELECT id FROM users WHERE telegram_id = ?), ?, ?)

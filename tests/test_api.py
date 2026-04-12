@@ -89,6 +89,21 @@ async def client(test_config: Config) -> AsyncGenerator[TestClient[Request, Appl
 
 
 # ---------------------------------------------------------------------------
+# Health
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_health_endpoint(client: TestClient):
+    """/health must return 200 without auth."""
+    resp = await client.get("/health")
+    assert resp.status == 200
+    data = await resp.json()
+    assert data["ok"] is True
+    assert data["status"] == "healthy"
+
+
+# ---------------------------------------------------------------------------
 # Auth
 # ---------------------------------------------------------------------------
 

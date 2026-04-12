@@ -130,6 +130,13 @@ async def create_app(
     setup_routes_practice(app)
     setup_routes_settings(app)
 
+    # --- Health check ---
+
+    async def health(request: web.Request) -> web.Response:
+        return web.json_response({"ok": True, "status": "healthy"})
+
+    app.router.add_get("/health", health)
+
     # --- Static files ---
 
     async def index(request: web.Request) -> web.Response:
