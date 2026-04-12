@@ -22,6 +22,25 @@ _ALLOWED_SETTINGS_FIELDS = frozenset(
 )
 
 
+def _default_limit_and_interval(config: Config | None) -> tuple[int, int]:
+    default_limit = config.max_daily_limit // 2 if config else 20
+    default_interval = config.max_notify_interval // 2 if config else 240
+    return default_limit, default_interval
+
+
+def _default_settings(language: str, config: Config | None) -> dict:
+    default_limit, default_interval = _default_limit_and_interval(config)
+    return {
+        "quiet_start": "23:00",
+        "quiet_end": "08:00",
+        "daily_limit": default_limit,
+        "notification_interval_minutes": default_interval,
+        "language": language,
+        "practice_mode": "word_to_translation",
+        "timezone": "UTC",
+    }
+
+
 class UserRepo:
     """Repository for managing user-related data and settings."""
 
@@ -50,8 +69,7 @@ class UserRepo:
 
     async def _create_settings(self, user_id: int, language: str, tz_name: str, config: Config | None = None) -> None:
         """Create default settings for a user and language if they don't exist."""
-        limit = config.max_daily_limit // 2 if config else 20
-        interval = config.max_notify_interval // 2 if config else 240
+        limit, interval = _default_limit_and_interval(config)
 
         cursor = await self.db.execute(
             """INSERT OR IGNORE INTO user_settings
@@ -84,17 +102,7 @@ class UserRepo:
         )
         row = await cursor.fetchone()
 
-        default_limit = config.max_daily_limit // 2 if config else 20
-        default_interval = config.max_notify_interval // 2 if config else 240
-        defaults = {
-            "quiet_start": "23:00",
-            "quiet_end": "08:00",
-            "daily_limit": default_limit,
-            "notification_interval_minutes": default_interval,
-            "language": language,
-            "practice_mode": "word_to_translation",
-            "timezone": "UTC",
-        }
+        defaults = _default_settings(language, config)
 
         if row:
             data = dict(row)

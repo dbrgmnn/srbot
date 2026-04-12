@@ -3,6 +3,7 @@ import logging
 from aiohttp import web
 
 from api.app_keys import CONFIG_KEY
+from api.routes.helpers import build_limits_payload
 from core.languages import LANGUAGES
 
 logger = logging.getLogger(__name__)
@@ -43,12 +44,7 @@ def setup_routes_init(app: web.Application) -> None:
                     "tts_code": tts_code,
                     "lang_flag": lang_meta.get("flag", ""),
                     "lang_name": lang_meta.get("name", lang.upper()),
-                    "limits": {
-                        "min_daily_limit": config.min_daily_limit,
-                        "max_daily_limit": config.max_daily_limit,
-                        "min_notify_interval": config.min_notify_interval,
-                        "max_notify_interval": config.max_notify_interval,
-                    },
+                    "limits": build_limits_payload(config),
                     "languages": languages,
                 },
             }

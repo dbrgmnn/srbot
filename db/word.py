@@ -235,17 +235,19 @@ class WordRepo:
         await self.db.commit()
         logger.info("Deleted word ID %d for user %d", word_id, user_id)
 
-    async def delete_words_batch(self, user_id: int, word_ids: list[int]) -> None:
-        """Delete multiple words for a user in one go."""
+    async def delete_words_batch(self, user_id: int, word_ids: list[int]) -> int:
+        """Delete multiple words for a user in one go and return deleted count."""
         if not word_ids:
-            return
+            return 0
         placeholders = ",".join(["?"] * len(word_ids))
-        await self.db.execute(
+        cursor = await self.db.execute(
             f"DELETE FROM words WHERE id IN ({placeholders}) AND user_id = ?",
             (*word_ids, user_id),
         )
         await self.db.commit()
-        logger.info("Deleted %d words for user %d", len(word_ids), user_id)
+        deleted_count = cursor.rowcount
+        logger.info("Deleted %d words for user %d", deleted_count, user_id)
+        return deleted_count
 
     async def search_words(self, user_id: int, language: str, query: str) -> list[dict]:
         """Search for words in the user's dictionary by word or translation."""

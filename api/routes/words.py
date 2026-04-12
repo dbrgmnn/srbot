@@ -31,6 +31,25 @@ def _clean_words(raw: list[dict]) -> list[dict]:
     return result
 
 
+def _duplicate_word_response(match: dict, lang: str) -> web.Response:
+    """Build a shared successful duplicate response payload."""
+    return web.json_response(
+        {
+            "ok": True,
+            "result": {
+                "added": 0,
+                "status": "duplicate",
+                "id": match.get("id"),
+                "word": match["word"],
+                "translation": match["translation"],
+                "example": match.get("example"),
+                "level": match.get("level"),
+                "language": lang,
+            },
+        }
+    )
+
+
 def setup_routes_words(app: web.Application) -> None:
     """Register word management routes."""
 
@@ -42,20 +61,7 @@ def setup_routes_words(app: web.Application) -> None:
         match = await word_repo.get_word_by_text(user_id, lang, raw_word)
         if match:
             logger.info("AI Add: Word '%s' for user %s is a direct duplicate.", raw_word, telegram_id)
-            return web.json_response(
-                {
-                    "ok": True,
-                    "result": {
-                        "added": 0,
-                        "status": "duplicate",
-                        "word": match["word"],
-                        "translation": match["translation"],
-                        "example": match.get("example"),
-                        "level": match.get("level"),
-                        "language": lang,
-                    },
-                }
-            )
+            return _duplicate_word_response(match, lang)
 
         # 2. Call Gemini
         translator = request.app.get(TRANSLATOR_KEY)
@@ -80,20 +86,7 @@ def setup_routes_words(app: web.Application) -> None:
         match = await word_repo.get_word_by_text(user_id, lang, word)
         if match:
             logger.info("AI Add: AI-normalized word '%s' for user %s is a duplicate.", word, telegram_id)
-            return web.json_response(
-                {
-                    "ok": True,
-                    "result": {
-                        "added": 0,
-                        "status": "duplicate",
-                        "word": match["word"],
-                        "translation": match["translation"],
-                        "example": match.get("example"),
-                        "level": match.get("level"),
-                        "language": lang,
-                    },
-                }
-            )
+            return _duplicate_word_response(match, lang)
 
         # 4. Save
         new_id = await word_repo.add_single_word(user_id, lang, word, trans, example, level)
@@ -148,11 +141,14 @@ def setup_routes_words(app: web.Application) -> None:
             body = await request.json()
         except Exception:
             return web.json_response({"ok": False, "error": "invalid_json"}, status=400)
+        raw_word = (body.get("word") or "").strip()
+        if not raw_word:
+            return web.json_response({"ok": False, "error": "word_missing"}, status=400)
         return await _process_add_ai_word(
             request,
             request["user_id"],
             request["language"],
-            body.get("word", "").strip(),
+            raw_word,
             request["telegram_id"],
             request["word_repo"],
         )
@@ -222,9 +218,9 @@ def setup_routes_words(app: web.Application) -> None:
         if not ids:
             return web.json_response({"ok": True, "result": {"deleted": 0}})
 
-        await request["word_repo"].delete_words_batch(request["user_id"], ids)
-        logger.info("User %s batch deleted %d words.", request["telegram_id"], len(ids))
-        return web.json_response({"ok": True, "result": {"deleted": len(ids)}})
+        deleted = await request["word_repo"].delete_words_batch(request["user_id"], ids)
+        logger.info("User %s batch deleted %d words.", request["telegram_id"], deleted)
+        return web.json_response({"ok": True, "result": {"deleted": deleted}})
 
     async def search_words(request: web.Request) -> web.Response:
         """Search words by word or translation for the current user and language."""

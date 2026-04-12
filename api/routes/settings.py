@@ -3,6 +3,7 @@ import logging
 from aiohttp import web
 
 from api.app_keys import CONFIG_KEY, DB_KEY, SCHEDULER_KEY
+from api.routes.helpers import build_limits_payload
 from core.languages import LANGUAGES
 from core.scheduler import reschedule
 
@@ -50,12 +51,7 @@ def setup_routes_settings(app: web.Application) -> None:
                 "result": {
                     **settings,
                     "total_words": stats["total"],
-                    "limits": {
-                        "min_daily_limit": config.min_daily_limit,
-                        "max_daily_limit": config.max_daily_limit,
-                        "min_notify_interval": config.min_notify_interval,
-                        "max_notify_interval": config.max_notify_interval,
-                    },
+                    "limits": build_limits_payload(config),
                 },
             }
         )
@@ -77,6 +73,8 @@ def setup_routes_settings(app: web.Application) -> None:
             if new_lang in LANGUAGES:
                 await user_repo.update_language(telegram_id, new_lang, config)
                 lang = new_lang
+            else:
+                return web.json_response({"ok": False, "error": "invalid_language"}, status=400)
 
         if "timezone" in body:
             await user_repo.update_timezone(telegram_id, body["timezone"], lang)
