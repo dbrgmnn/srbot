@@ -4,6 +4,9 @@ import logging
 import time
 from urllib.parse import parse_qsl
 
+import aiosqlite
+from aiohttp import web
+
 from api.app_keys import CONFIG_KEY
 from db import UserRepo
 
@@ -42,7 +45,7 @@ def verify_init_data(init_data: str, bot_token: str, expires_in: int) -> dict | 
     return params
 
 
-async def verify_bearer_token(request, db) -> int | None:
+async def verify_bearer_token(request: web.Request, db: aiosqlite.Connection) -> int | None:
     """Extract Bearer token and return user_id if valid and in allowed list."""
     auth_header = request.headers.get("Authorization")
     if not auth_header or not auth_header.startswith("Bearer "):

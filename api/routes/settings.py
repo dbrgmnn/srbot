@@ -21,7 +21,7 @@ def _is_valid_time(value: str) -> bool:
         return False
 
 
-def setup_routes_settings(app: web.Application):
+def setup_routes_settings(app: web.Application) -> None:
     """Register user settings routes."""
 
     async def get_languages_list(request: web.Request) -> web.Response:

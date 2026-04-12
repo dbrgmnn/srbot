@@ -1,7 +1,7 @@
 import aiosqlite
 
 
-async def apply_pragmas(db: aiosqlite.Connection):
+async def apply_pragmas(db: aiosqlite.Connection) -> None:
     """Apply standard PRAGMAs to every new connection (WAL mode and NORMAL sync)."""
     await db.execute("PRAGMA journal_mode=WAL")
     await db.execute("PRAGMA synchronous=NORMAL")
@@ -9,7 +9,7 @@ async def apply_pragmas(db: aiosqlite.Connection):
 
 
 async def init_db(db_path: str) -> aiosqlite.Connection:
-    """Create all tables and indexes if they do not exist; return open connection."""
+    """Create all tables and indexes if they do not exist; return the open connection."""
     db = await aiosqlite.connect(db_path)
     db.row_factory = aiosqlite.Row
     await apply_pragmas(db)

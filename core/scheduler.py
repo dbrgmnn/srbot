@@ -9,6 +9,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 from apscheduler.triggers.interval import IntervalTrigger
 
+from config import Config
 from core.scheduler_utils import build_notification_text, is_quiet_time
 from db import UserRepo
 from db.utils import backup_db, safe_zoneinfo
@@ -19,7 +20,7 @@ JOB_ID = "check_notifications"
 BACKUP_JOB_ID = "daily_backup"
 
 
-async def run_scheduled_backup(db_path: str, backup_dir: str):
+async def run_scheduled_backup(db_path: str, backup_dir: str) -> None:
     """Daily backup job — saves archive locally, rotates to keep last 3."""
     try:
         archive_path = await backup_db(db_path, backup_dir)
@@ -28,7 +29,7 @@ async def run_scheduled_backup(db_path: str, backup_dir: str):
         logger.error("[scheduler] Daily backup failed: %s", e)
 
 
-async def check_and_send_notifications(bot: Bot, db: aiosqlite.Connection, config):
+async def check_and_send_notifications(bot: Bot, db: aiosqlite.Connection, config: Config) -> None:
     """Periodic job to check for due words and send notifications."""
     now = datetime.now(tz=UTC)
     user_repo = UserRepo(db)
@@ -37,7 +38,7 @@ async def check_and_send_notifications(bot: Bot, db: aiosqlite.Connection, confi
 
     sem = asyncio.Semaphore(20)
 
-    async def _process_user(row):
+    async def _process_user(row: dict) -> None:
         async with sem:
             telegram_id = row["telegram_id"]
             user_tz_name = row.get("timezone", config.default_timezone)
@@ -89,7 +90,7 @@ async def check_and_send_notifications(bot: Bot, db: aiosqlite.Connection, confi
         await asyncio.gather(*tasks)
 
 
-async def reschedule(scheduler: AsyncIOScheduler, db: aiosqlite.Connection, config=None):
+async def reschedule(scheduler: AsyncIOScheduler, db: aiosqlite.Connection, config: Config | None = None) -> None:
     """Reschedule the notification job with current minimum interval."""
     user_repo = UserRepo(db)
     interval = await user_repo.get_min_notification_interval(config)
@@ -97,7 +98,7 @@ async def reschedule(scheduler: AsyncIOScheduler, db: aiosqlite.Connection, conf
     logger.info("Scheduler rescheduled — interval: %s min", interval)
 
 
-async def setup_scheduler(bot: Bot, db: aiosqlite.Connection, config) -> AsyncIOScheduler:
+async def setup_scheduler(bot: Bot, db: aiosqlite.Connection, config: Config) -> AsyncIOScheduler:
     """Initialize APScheduler and add notification and backup jobs."""
     scheduler = AsyncIOScheduler(timezone=UTC)
     user_repo = UserRepo(db)

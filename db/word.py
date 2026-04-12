@@ -42,7 +42,13 @@ class WordRepo:
         return cursor.rowcount
 
     async def add_single_word(
-        self, user_id: int, language: str, word: str, translation: str, example: str = None, level: str = None
+        self,
+        user_id: int,
+        language: str,
+        word: str,
+        translation: str,
+        example: str | None = None,
+        level: str | None = None,
     ) -> int | None:
         """Add a single word and return its database ID."""
         now = datetime.now(tz=UTC).isoformat()
@@ -95,7 +101,7 @@ class WordRepo:
         easiness: float,
         interval: int,
         next_review: datetime,
-    ):
+    ) -> None:
         """Update word statistics after a review session."""
         now = datetime.now(tz=UTC).isoformat()
         await self.db.execute(
@@ -125,7 +131,7 @@ class WordRepo:
         next_review: str,
         last_reviewed_at: str | None,
         started_at: str | None,
-    ):
+    ) -> None:
         """Revert word statistics to a previous state."""
         await self.db.execute(
             """UPDATE words
@@ -220,7 +226,7 @@ class WordRepo:
             logger.info("Updated word ID %d for user %d", word_id, user_id)
         return cursor.rowcount > 0
 
-    async def delete_word(self, word_id: int, user_id: int):
+    async def delete_word(self, word_id: int, user_id: int) -> None:
         """Delete a specific word for a user."""
         await self.db.execute(
             "DELETE FROM words WHERE id = ? AND user_id = ?",
@@ -229,7 +235,7 @@ class WordRepo:
         await self.db.commit()
         logger.info("Deleted word ID %d for user %d", word_id, user_id)
 
-    async def delete_words_batch(self, user_id: int, word_ids: list[int]):
+    async def delete_words_batch(self, user_id: int, word_ids: list[int]) -> None:
         """Delete multiple words for a user in one go."""
         if not word_ids:
             return

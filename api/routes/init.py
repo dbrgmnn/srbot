@@ -8,7 +8,7 @@ from core.languages import LANGUAGES
 logger = logging.getLogger(__name__)
 
 
-def setup_routes_init(app: web.Application):
+def setup_routes_init(app: web.Application) -> None:
     """Register user initialization routes."""
 
     async def init_user(request: web.Request) -> web.Response:

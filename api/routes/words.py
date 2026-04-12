@@ -13,7 +13,7 @@ from db import WordRepo
 logger = logging.getLogger(__name__)
 
 
-def _clean_words(raw: list) -> list:
+def _clean_words(raw: list[dict]) -> list[dict]:
     """Clean and validate a list of raw word dictionaries."""
     result = []
     for w in raw:
@@ -31,7 +31,7 @@ def _clean_words(raw: list) -> list:
     return result
 
 
-def setup_routes_words(app: web.Application):
+def setup_routes_words(app: web.Application) -> None:
     """Register word management routes."""
 
     async def _process_add_ai_word(

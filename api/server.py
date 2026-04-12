@@ -6,11 +6,13 @@ Uses aiohttp to serve the web application and API endpoints.
 import json
 import logging
 from collections import OrderedDict
+from collections.abc import Awaitable, Callable
 from pathlib import Path
 
 import aiohttp
 import aiosqlite
 from aiohttp import web
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from api.app_keys import (
     CONFIG_KEY,
@@ -35,11 +37,16 @@ logger = logging.getLogger(__name__)
 WEBAPP_DIR = Path(__file__).parent.parent / "static"
 
 
-async def create_app(config: Config, db: aiosqlite.Connection, scheduler=None) -> web.Application:
+async def create_app(
+    config: Config, db: aiosqlite.Connection, scheduler: AsyncIOScheduler | None = None
+) -> web.Application:
     """Create and configure the aiohttp web application."""
 
     @web.middleware
-    async def cors_middleware(request: web.Request, handler):
+    async def cors_middleware(
+        request: web.Request,
+        handler: Callable[[web.Request], Awaitable[web.Response]],
+    ) -> web.Response:
         cors_headers = {
             "Access-Control-Allow-Origin": "*",
             "Access-Control-Allow-Headers": "Content-Type, X-Init-Data, X-Language, X-Timezone, Authorization",
@@ -55,7 +62,10 @@ async def create_app(config: Config, db: aiosqlite.Connection, scheduler=None) -
         return response
 
     @web.middleware
-    async def auth_middleware(request: web.Request, handler):
+    async def auth_middleware(
+        request: web.Request,
+        handler: Callable[[web.Request], Awaitable[web.Response]],
+    ) -> web.Response:
         # Skip auth for static files, root, and external api endpoints
         if not request.path.startswith("/api/") or request.path.startswith("/api/external/"):
             return await handler(request)
@@ -109,7 +119,7 @@ async def create_app(config: Config, db: aiosqlite.Connection, scheduler=None) -
     if config.gemini_api_key:
         app[TRANSLATOR_KEY] = Translator(config.gemini_api_key, config.gemini_model, app[HTTP_SESSION_KEY])
 
-    async def on_shutdown(app: web.Application):
+    async def on_shutdown(app: web.Application) -> None:
         if HTTP_SESSION_KEY in app:
             await app[HTTP_SESSION_KEY].close()
 
@@ -148,7 +158,9 @@ async def create_app(config: Config, db: aiosqlite.Connection, scheduler=None) -
     return app
 
 
-async def start_api_server(config: Config, db: aiosqlite.Connection, scheduler=None) -> web.AppRunner:
+async def start_api_server(
+    config: Config, db: aiosqlite.Connection, scheduler: AsyncIOScheduler | None = None
+) -> web.AppRunner:
     """Initialize and start the API server."""
     app = await create_app(config, db, scheduler)
     runner = web.AppRunner(app)

@@ -8,7 +8,7 @@ from core.srs import sm2
 logger = logging.getLogger(__name__)
 
 
-def setup_routes_practice(app: web.Application):
+def setup_routes_practice(app: web.Application) -> None:
     """Register practice-related routes."""
 
     async def get_session(request: web.Request) -> web.Response:

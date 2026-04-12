@@ -1,10 +1,12 @@
 import logging
 import secrets
 from datetime import UTC, datetime
+from typing import Any
 
 import aiosqlite
 
-from .utils import safe_zoneinfo, today_start_utc
+from config import Config
+from db.utils import safe_zoneinfo, today_start_utc
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +18,7 @@ class UserRepo:
         """Initialize the UserRepo with a database connection."""
         self.db = db
 
-    async def get_or_create(self, telegram_id: int, language: str, tz_name: str, config=None) -> int:
+    async def get_or_create(self, telegram_id: int, language: str, tz_name: str, config: Config | None = None) -> int:
         """Get an existing user's ID or create a new user record with default settings."""
         await self.db.execute(
             "INSERT INTO users (telegram_id) VALUES (?) ON CONFLICT(telegram_id) DO NOTHING",
@@ -35,7 +37,7 @@ class UserRepo:
         logger.info("User %d (telegram: %d) created/verified in %s", user_id, telegram_id, language)
         return user_id
 
-    async def _create_settings(self, user_id: int, language: str, tz_name: str, config=None):
+    async def _create_settings(self, user_id: int, language: str, tz_name: str, config: Config | None = None) -> None:
         """Create default settings for a user and language if they don't exist."""
         limit = config.max_daily_limit // 2 if config else 20
         interval = config.max_notify_interval // 2 if config else 240
@@ -49,7 +51,7 @@ class UserRepo:
         if cursor.rowcount > 0:
             logger.info("Created settings for user %d in %s", user_id, language)
 
-    async def set_last_notified_at(self, telegram_id: int, language: str):
+    async def set_last_notified_at(self, telegram_id: int, language: str) -> None:
         """Update the timestamp of the last notification sent to the user."""
         now = datetime.now(tz=UTC).isoformat()
         await self.db.execute(
@@ -61,7 +63,7 @@ class UserRepo:
         await self.db.commit()
         logger.debug("Updated last_notified_at for user %d in %s", telegram_id, language)
 
-    async def get_user_settings(self, telegram_id: int, language: str, config=None) -> dict:
+    async def get_user_settings(self, telegram_id: int, language: str, config: Config | None = None) -> dict:
         """Retrieve user settings for a specific language, with defaults if not found."""
         cursor = await self.db.execute(
             """SELECT s.* FROM user_settings s
@@ -89,7 +91,7 @@ class UserRepo:
 
         return defaults
 
-    async def _update_setting(self, field: str, value, telegram_id: int, language: str):
+    async def _update_setting(self, field: str, value: Any, telegram_id: int, language: str) -> None:
         """Generic method to update a single user setting field."""
         await self.db.execute(
             f"""INSERT INTO user_settings (user_id, language, {field})
@@ -112,7 +114,9 @@ class UserRepo:
         """Update the notification interval for a specific language."""
         await self._update_setting("notification_interval_minutes", minutes, telegram_id, language)
 
-    async def update_quiet_hours(self, telegram_id: int, language: str, quiet_start: str = None, quiet_end: str = None):
+    async def update_quiet_hours(
+        self, telegram_id: int, language: str, quiet_start: str | None = None, quiet_end: str | None = None
+    ) -> None:
         """Update the quiet hours during which notifications are suppressed."""
         fields = {}
         if quiet_start is not None:
@@ -137,7 +141,7 @@ class UserRepo:
         """Update the practice mode for a specific language."""
         await self._update_setting("practice_mode", mode, telegram_id, language)
 
-    async def update_language(self, telegram_id: int, new_language: str, config=None):
+    async def update_language(self, telegram_id: int, new_language: str, config: Config | None = None) -> None:
         """Initialize settings for a new language for the user."""
         user_id_cur = await self.db.execute("SELECT id FROM users WHERE telegram_id = ?", (telegram_id,))
         row = await user_id_cur.fetchone()
@@ -146,7 +150,7 @@ class UserRepo:
         await self._create_settings(row["id"], new_language, "UTC", config)
         await self.db.commit()
 
-    async def get_min_notification_interval(self, config=None) -> float:
+    async def get_min_notification_interval(self, config: Config | None = None) -> float:
         """Get the minimum notification interval across all users."""
         cursor = await self.db.execute("SELECT MIN(notification_interval_minutes) as min_interval FROM user_settings")
         row = await cursor.fetchone()
@@ -173,7 +177,7 @@ class UserRepo:
         row = await cursor.fetchone()
         return (row["id"], row["telegram_id"]) if row else None
 
-    async def get_words_count_per_language(self, user_id: int) -> dict:
+    async def get_words_count_per_language(self, user_id: int) -> dict[str, int]:
         """Get the number of words learned by a user per language."""
         cursor = await self.db.execute(
             "SELECT language, COUNT(*) as cnt FROM words WHERE user_id = ? GROUP BY language",

@@ -15,12 +15,12 @@ class ColorFormatter(logging.Formatter):
     }
     RESET = "\x1b[0m"
 
-    def __init__(self, use_color: bool = True, fmt: str = None):
+    def __init__(self, use_color: bool = True, fmt: str | None = None) -> None:
         super().__init__()
         self.use_color = use_color
         self.fmt = fmt or "[%(asctime)s] [%(levelname)s] [%(name)s] [%(funcName)s:%(lineno)d] - %(message)s"
 
-    def format(self, record):
+    def format(self, record: logging.LogRecord) -> str:
         log_fmt = self.fmt
         if self.use_color:
             color = self.COLORS.get(record.levelno, self.RESET)
@@ -29,7 +29,7 @@ class ColorFormatter(logging.Formatter):
         return formatter.format(record)
 
 
-def setup_logging():
+def setup_logging() -> None:
     """Configures global logging for the entire application."""
 
     # Concise format for both systemd and terminal:

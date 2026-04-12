@@ -16,7 +16,7 @@ setup_logging()
 logger = logging.getLogger(__name__)
 
 
-async def main():
+async def main() -> None:
     """Initialize and start all system components."""
     config = load_config()
 
