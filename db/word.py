@@ -3,7 +3,7 @@ from datetime import UTC, datetime, timedelta
 
 import aiosqlite
 
-from .utils import today_start_utc
+from db.utils import today_start_utc
 
 logger = logging.getLogger(__name__)
 
