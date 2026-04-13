@@ -46,7 +46,7 @@ def verify_init_data(init_data: str, bot_token: str, expires_in: int) -> dict | 
 
 
 async def verify_bearer_token(request: web.Request, db: aiosqlite.Connection) -> int | None:
-    """Extract Bearer token and return user_id if valid and in allowed list."""
+    """Extract Bearer token and return user_id if valid and in the allowed list."""
     auth_header = request.headers.get("Authorization")
     if not auth_header or not auth_header.startswith("Bearer "):
         return None

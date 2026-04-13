@@ -33,7 +33,7 @@ def setup_routes_practice(app: web.Application) -> None:
         return web.json_response({"ok": True, "result": {"words": words}})
 
     async def grade_word(request: web.Request) -> web.Response:
-        """Process word grading using SM-2 algorithm."""
+        """Process word grading using the SM-2 algorithm."""
         user_id = request["user_id"]
         telegram_id = request["telegram_id"]
         try:

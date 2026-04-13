@@ -149,7 +149,7 @@ async def create_app(
 
     async def static_handler(request: web.Request) -> web.Response:
         """Serve static files with no-cache headers."""
-        # No-cache so browser always fetches fresh version after deploy
+        # No-cache so browser always fetches fresh version after deployment
         rel = request.match_info["path"]
         file_path = WEBAPP_DIR / rel
         if not file_path.exists() or not file_path.is_file():

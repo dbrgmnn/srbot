@@ -12,7 +12,7 @@ def setup_routes_init(app: web.Application) -> None:
     """Register user initialization routes."""
 
     async def init_user(request: web.Request) -> web.Response:
-        """Initialize user session, return settings, stats, and language metadata."""
+        """Initialize the user session, return settings, stats, and language metadata."""
         telegram_id = request["telegram_id"]
         user_id = request["user_id"]
         lang = request["language"]

@@ -2,7 +2,7 @@ from core.srs import sm2
 
 
 def test_sm2_first_review_perfect():
-    """First perfect review should set interval to 1 and increase easiness."""
+    """The first perfect review should set an interval to 1 and increase easiness."""
     # initial state: repetitions=0, easiness=2.5, interval=0
     result = sm2(quality=5, repetitions=0, easiness=2.5, interval=0)
 
@@ -12,7 +12,7 @@ def test_sm2_first_review_perfect():
 
 
 def test_sm2_second_review_perfect():
-    """Second perfect review should set interval to 6."""
+    """The second perfect review should set an interval to 6."""
     # state after 1st review: repetitions=1, easiness=2.6, interval=1
     result = sm2(quality=5, repetitions=1, easiness=2.6, interval=1)
 
@@ -22,7 +22,7 @@ def test_sm2_second_review_perfect():
 
 
 def test_sm2_third_review_perfect():
-    """Third perfect review should multiply interval by easiness."""
+    """Third perfect review should multiply an interval by easiness."""
     # state after 2nd review: repetitions=2, easiness=2.7, interval=6
     result = sm2(quality=5, repetitions=2, easiness=2.7, interval=6)
 
@@ -54,7 +54,7 @@ def test_sm2_minimum_easiness():
 
 
 def test_sm2_hard_review():
-    """Quality 3 (Hard) should increase interval but decrease easiness."""
+    """Quality 3 (Hard) should increase an interval but decrease easiness."""
     # repetitions=2, easiness=2.5, interval=6
     result = sm2(quality=3, repetitions=2, easiness=2.5, interval=6)
 

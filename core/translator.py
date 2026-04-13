@@ -21,7 +21,7 @@ class Translator:
     async def _call_gemini(
         self, system_prompt: str, user_prompt: str, temperature: float = 0.1, max_tokens: int = 256
     ) -> dict | None:
-        """Call Gemini API and return literal JSON response."""
+        """Call Gemini API and return a literal JSON response."""
         payload = {
             "system_instruction": {"parts": [{"text": system_prompt}]},
             "contents": [{"parts": [{"text": user_prompt}]}],
@@ -94,7 +94,7 @@ class Translator:
         return None
 
     async def translate_and_enrich(self, text: str, source_lang: str) -> dict | None:
-        """Translate word and generate example + CEFR level via Gemini."""
+        """Translate word and generate example and CEFR level via Gemini."""
         lang_config = LANGUAGES.get(source_lang, {})
         lang_name = lang_config.get("name", source_lang)
         article_rule = lang_config.get("lex_rules", "lowercase.")

@@ -5,7 +5,7 @@ from core.scheduler_utils import build_notification_text, is_quiet_time
 
 
 def test_build_notification_text_both():
-    """Text should contain both review and new counts with flag."""
+    """Text should contain both review and new counts with a flag."""
     text = build_notification_text(due=5, new=3, lang="de")
     assert "🇩🇪" in text
     assert "5 review" in text
@@ -55,7 +55,7 @@ def test_is_quiet_time_crossing_midnight():
 
 
 def test_is_quiet_time_different_timezone():
-    """Test that it correctly handles user's local time based on their timezone."""
+    """Test that it correctly handles a user's local time based on their timezone."""
     # User is in Tokyo (UTC+9)
     tz_tokyo = ZoneInfo("Asia/Tokyo")
     q_start = "23:00"

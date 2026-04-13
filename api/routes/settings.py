@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 def _is_valid_time(value: str) -> bool:
-    """Validate time format (HH:MM)."""
+    """Validate a time format (HH:MM)."""
     try:
         parts = value.split(":")
         if len(parts) != 2:
@@ -66,7 +66,7 @@ def setup_routes_settings(app: web.Application) -> None:
         config = request.app[CONFIG_KEY]
         user_repo = request["user_repo"]
 
-        # Update language first so subsequent settings target the correct row
+        # Update language first so later settings target the correct row
         if "language" in body:
             new_lang = body["language"]
             if new_lang in LANGUAGES:
@@ -134,7 +134,7 @@ def setup_routes_settings(app: web.Application) -> None:
         return web.json_response({"ok": True, "result": {"token": token}})
 
     async def revoke_api_token(request: web.Request) -> web.Response:
-        """Revoke old token and generate a new one."""
+        """Revoke an old token and generate a new one."""
         user_repo = request["user_repo"]
         token = await user_repo.generate_api_token(request["telegram_id"])
         logger.info("User %d revoked and regenerated API token", request["telegram_id"])

@@ -44,7 +44,8 @@ async def main() -> None:
             scheduler.shutdown(wait=False)
 
         await db.close()
-        await bot.session.close()
+        if bot.session:
+            await bot.session.close()
 
         pending = [t for t in asyncio.all_tasks() if t is not asyncio.current_task()]
         for task in pending:

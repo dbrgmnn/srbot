@@ -16,7 +16,7 @@ class WordRepo:
         self.db = db
 
     async def add_words_batch(self, user_id: int, language: str, words: list[dict]) -> int:
-        """Add a batch of words to the user's dictionary and return count of successfully added items."""
+        """Add a batch of words to the user's dictionary and return a count of successfully added items."""
         now = datetime.now(tz=UTC).isoformat()
         data = [
             (
@@ -201,8 +201,11 @@ class WordRepo:
             available_new = max(0, min(new_count, limit - today_done))
             data["session_total"] = due_count + available_new
 
-            res = {**defaults, **{k: v for k, v in data.items() if v is not None}}
-            res["next_day_start_utc"] = next_day_start.isoformat()
+            res = {
+                **defaults,
+                **{k: v for k, v in data.items() if v is not None},
+                "next_day_start_utc": next_day_start.isoformat(),
+            }
             return res
         return defaults
 
@@ -236,7 +239,7 @@ class WordRepo:
         logger.info("Deleted word ID %d for user %d", word_id, user_id)
 
     async def delete_words_batch(self, user_id: int, word_ids: list[int]) -> int:
-        """Delete multiple words for a user in one go and return deleted count."""
+        """Delete multiple words for a user in one go and return the deleted count."""
         if not word_ids:
             return 0
         placeholders = ",".join(["?"] * len(word_ids))
@@ -288,7 +291,7 @@ class WordRepo:
     async def get_today_words(
         self, user_id: int, language: str, field: str = "created_at", tz_name: str = "UTC"
     ) -> list[dict]:
-        """Get words filtered by date field (created_at or last_reviewed_at) for today in user's timezone."""
+        """Get words filtered by the date field (created_at or last_reviewed_at) for today in the user's timezone."""
         _allowed = {"created_at", "last_reviewed_at"}
         if field not in _allowed:
             raise ValueError("Invalid date field: %s" % field)
