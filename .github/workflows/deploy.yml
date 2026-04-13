@@ -1,4 +1,4 @@
-name: Deploy SRBot via Tailscale
+name: Deploy SRbot via Tailscale
 
 on:
   push:
