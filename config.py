@@ -27,6 +27,15 @@ class Config:
     default_lang: str
     default_timezone: str
 
+    @property
+    def limits(self) -> dict:
+        return {
+            "min_daily_limit": self.min_daily_limit,
+            "max_daily_limit": self.max_daily_limit,
+            "min_notify_interval": self.min_notify_interval,
+            "max_notify_interval": self.max_notify_interval,
+        }
+
 
 def load_config() -> Config:
     """Load configuration from environment variables."""

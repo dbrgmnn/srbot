@@ -3,7 +3,6 @@ import logging
 from aiohttp import web
 
 from api.app_keys import CONFIG_KEY, DB_KEY, SCHEDULER_KEY
-from api.routes.helpers import build_limits_payload
 from core.languages import LANGUAGES
 from core.scheduler import reschedule
 
@@ -51,7 +50,7 @@ def setup_routes_settings(app: web.Application) -> None:
                 "result": {
                     **settings,
                     "total_words": stats["total"],
-                    "limits": build_limits_payload(config),
+                    "limits": config.limits,
                 },
             }
         )
