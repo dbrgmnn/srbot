@@ -8,7 +8,7 @@ import aiosqlite
 from aiohttp import web
 
 from api.app_keys import CONFIG_KEY
-from db import UserRepo
+from db.user import UserRepo
 
 logger = logging.getLogger(__name__)
 

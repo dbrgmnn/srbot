@@ -11,7 +11,7 @@ from apscheduler.triggers.interval import IntervalTrigger
 
 from config import Config
 from core.scheduler_utils import build_notification_text, is_quiet_time
-from db import UserRepo
+from db.user import UserRepo
 from db.utils import backup_db, safe_zoneinfo
 
 logger = logging.getLogger(__name__)

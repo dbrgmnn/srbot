@@ -3,7 +3,8 @@ from collections.abc import Awaitable, Callable
 from aiohttp import web
 
 from api.app_keys import DB_KEY
-from db import UserRepo, WordRepo
+from db.user import UserRepo
+from db.word import WordRepo
 
 
 @web.middleware

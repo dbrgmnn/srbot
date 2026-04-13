@@ -8,7 +8,7 @@ from aiohttp import web
 from api.app_keys import CONFIG_KEY, DB_KEY, TRANSLATOR_KEY
 from api.auth import verify_bearer_token
 from core.languages import LANGUAGES
-from db import WordRepo
+from db.word import WordRepo
 
 logger = logging.getLogger(__name__)
 
