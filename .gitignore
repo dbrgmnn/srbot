@@ -1,18 +1,43 @@
+# Environment
 .env
-*.db
-venv/
+.env.*
+!.env.example
 
-.claude/
-.DS_Store
-.idea
-.cache/
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Python
+venv/
+.venv/
 __pycache__/
-.pytest_cache/
-.ruff_cache/
-.npm-cache/
-.pre-commit-cache/
-.mypy_cache/
 *.py[cod]
 *$py.class
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+*.egg
+*.whl
 
-GEMINI.md
+# Caches
+.cache/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.npm-cache/
+.pre-commit-cache/
+
+# Editors / IDEs
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Misc
+.claude/
+logs/
+*.log
