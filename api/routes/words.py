@@ -137,8 +137,6 @@ def setup_routes_words(app: web.Application) -> None:
             return web.json_response({"ok": False, "error": "invalid_language"}, status=400)
         if not raw_word:
             return web.json_response({"ok": False, "error": "word_missing"}, status=400)
-        if len(raw_word.split()) > 1:
-            return web.json_response({"ok": False, "error": "single_word_only"}, status=400)
 
         # External uses WordRepo(db) directly
         return await _process_add_ai_word(
