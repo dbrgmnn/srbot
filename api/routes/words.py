@@ -76,6 +76,7 @@ def setup_routes_words(app: web.Application) -> None:
 
         if (
             not ai_data
+            or not isinstance(ai_data, dict)
             or not ai_data.get("is_valid", True)
             or not ai_data.get("word")
             or not ai_data.get("translation")
