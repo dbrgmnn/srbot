@@ -74,7 +74,12 @@ def setup_routes_words(app: web.Application) -> None:
             logger.error("AI translation failed: %s", e)
             return web.json_response({"ok": False, "error": "ai_service_unavailable"}, status=503)
 
-        if not ai_data or not ai_data.get("is_valid", True):
+        if (
+            not ai_data
+            or not ai_data.get("is_valid", True)
+            or not ai_data.get("word")
+            or not ai_data.get("translation")
+        ):
             return web.json_response({"ok": False, "error": "word_not_recognized"}, status=422)
 
         word = ai_data["word"]
