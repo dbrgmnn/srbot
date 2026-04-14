@@ -122,13 +122,18 @@ def setup_routes_words(app: web.Application) -> None:
         except Exception:
             return web.json_response({"ok": False, "error": "invalid_json"}, status=400)
 
-        raw_word = (body.get("word") or "").strip()
+        if not isinstance(body.get("word"), str):
+            return web.json_response({"ok": False, "error": "word_must_be_string"}, status=400)
+
+        raw_word = body["word"].strip()
         lang = (body.get("language") or "").lower()
 
         if not lang or lang not in LANGUAGES:
             return web.json_response({"ok": False, "error": "invalid_language"}, status=400)
         if not raw_word:
             return web.json_response({"ok": False, "error": "word_missing"}, status=400)
+        if len(raw_word.split()) > 1:
+            return web.json_response({"ok": False, "error": "single_word_only"}, status=400)
 
         # External uses WordRepo(db) directly
         return await _process_add_ai_word(
