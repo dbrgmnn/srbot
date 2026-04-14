@@ -100,14 +100,14 @@ class Translator:
         article_rule = lang_config.get("lex_rules", "lowercase.")
 
         system_prompt = f"""You are an expert lexicographer.
-Translate words or phrases from word:{lang_name} into translation:Russian or translation:Russian to word:{lang_name}.
+Translate a single word or phrase from {lang_name} into Russian, or from Russian into {lang_name}.
 Rules:
 - word: the input word or phrase in its base {lang_name} form, {article_rule}
 - translation: MOST common Russian translation in lowercase.
 - level: CEFR level (A1-C2).
 - example: natural {lang_name} sentence. Complexity MUST match the level.
 - is_valid: false if input is gibberish or not a real word/phrase, else true.
-Return JSON: {{"word": "", "translation": "", "example": "", "level": "", "is_valid": true}}"""
+Return a single JSON object: {{"word": "", "translation": "", "example": "", "level": "", "is_valid": true}}"""
 
         user_prompt = f'Translate "{text}"'
-        return await self._call_gemini(system_prompt, user_prompt, max_tokens=256)
+        return await self._call_gemini(system_prompt, user_prompt, max_tokens=512)
