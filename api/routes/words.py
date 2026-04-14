@@ -85,8 +85,8 @@ def setup_routes_words(app: web.Application) -> None:
 
         word = ai_data["word"]
         trans = ai_data["translation"]
-        example = ai_data["example"]
-        level = ai_data["level"]
+        example = ai_data.get("example")
+        level = ai_data.get("level")
 
         # 3. Final duplicate check (after AI normalization)
         match = await word_repo.get_word_by_text(user_id, lang, word)

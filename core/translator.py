@@ -102,10 +102,10 @@ class Translator:
         system_prompt = f"""You are an expert lexicographer.
 Translate a single word or phrase from {lang_name} into Russian, or from Russian into {lang_name}.
 Rules:
-- word: the input word or phrase in its base {lang_name} form, {article_rule}
+- word: the input word or phrase exactly as provided, without normalization. {article_rule}
 - translation: MOST common Russian translation in lowercase.
 - level: CEFR level (A1-C2).
-- example: natural {lang_name} sentence. Complexity MUST match the level.
+- example: natural {lang_name} sentence using the exact input form. Complexity MUST match the level.
 - is_valid: false if input is gibberish or not a real word/phrase, else true.
 Return a single JSON object: {{"word": "", "translation": "", "example": "", "level": "", "is_valid": true}}"""
 
