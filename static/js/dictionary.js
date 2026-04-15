@@ -487,13 +487,3 @@ async function loadSearch(q) {
     UI.toast(T.SEARCH_FAIL, "error");
   }
 }
-
-/** --- Keyboard Support --- */
-document.addEventListener("focusin", (e) => {
-  if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") {
-    document.body.classList.add("keyboard-visible");
-  }
-});
-document.addEventListener("focusout", (e) => {
-  document.body.classList.remove("keyboard-visible");
-});

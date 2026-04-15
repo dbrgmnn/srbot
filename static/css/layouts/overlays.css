@@ -58,10 +58,6 @@
     inset 0 1px 0 var(--glass-shine);
 }
 
-body.keyboard-visible .edit-sheet {
-  padding-bottom: 320px; /* Extra content space allows to scroll everything above keyboard */
-}
-
 .edit-sheet.open {
   transform: translateY(0);
 }

@@ -21,6 +21,11 @@
   transition: var(--transition);
 }
 
+.form-textarea {
+  height: 100px;
+  resize: vertical;
+}
+
 .form-input:focus {
   border-color: var(--accent);
 }
