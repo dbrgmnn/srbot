@@ -100,13 +100,14 @@ class Translator:
         article_rule = lang_config.get("lex_rules", "lowercase.")
 
         system_prompt = f"""You are an expert lexicographer.
-Translate a single word or phrase from {lang_name} into Russian, or from Russian into {lang_name}.
+Translate words from word:{lang_name} into translation:Russian or translation:Russian to word:{lang_name}.
 Rules:
-- word: the input word or phrase exactly as provided, without normalization. {article_rule}
+- word: the input word/phrase itself in its base {lang_name} form, {article_rule}
+Ensure the translated 'word' matches the Part of Speech of the input.
 - translation: MOST common Russian translation in lowercase.
 - level: CEFR level (A1-C2).
-- example: natural {lang_name} sentence using the exact input form. Complexity MUST match the level.
-- is_valid: false if input is gibberish or not a real word/phrase, else true.
+- example: natural {lang_name} sentence. Complexity MUST match the level.
+- is_valid: false if input is gibberish, else true.
 Return a single JSON object: {{"word": "", "translation": "", "example": "", "level": "", "is_valid": true}}"""
 
         user_prompt = f'Translate "{text}"'
