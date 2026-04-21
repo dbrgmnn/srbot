@@ -69,6 +69,8 @@
   touch-action: none;
   -webkit-user-select: none;
   user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* Glass effect via ::before to avoid breaking preserve-3d */
@@ -105,6 +107,9 @@
   padding: 32px;
   text-align: center;
   z-index: 1;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
 }
 
 .word-back {

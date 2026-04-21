@@ -136,7 +136,6 @@ function handleEnd(x, y) {
 function initSwipe() {
   const card = document.getElementById("word-card");
   if (!card) return;
-
   card.onpointerdown = (e) => {
     card.setPointerCapture(e.pointerId);
     handleStart(e.clientX, e.clientY);
