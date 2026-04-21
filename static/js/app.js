@@ -1,5 +1,4 @@
 import {
-  addWordWithAI,
   clearSearch,
   closeEdit,
   handleFileUpload,
@@ -76,8 +75,6 @@ window.onSearchInput = onSearchInput;
 window.clearSearch = clearSearch;
 window.saveEdit = saveEdit;
 window.closeEdit = closeEdit;
-window.addWordWithAI = addWordWithAI;
-window.shareWords = shareWords;
 window.openEdit = openEdit;
 window.showTodayAdded = showTodayAdded;
 window.showTodayLearned = showTodayLearned;

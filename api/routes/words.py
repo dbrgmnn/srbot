@@ -144,23 +144,30 @@ def setup_routes_words(app: web.Application) -> None:
             request, user_id, lang, raw_word, f"ext_{user_id}", WordRepo(request.app[DB_KEY])
         )
 
-    async def add_word(request: web.Request) -> web.Response:
-        """Internal App: Instant AI-powered word addition via session."""
+    async def create_word(request: web.Request) -> web.Response:
+        """Internal App: Manually create a word without AI."""
         try:
             body = await request.json()
         except Exception:
             return web.json_response({"ok": False, "error": "invalid_json"}, status=400)
-        raw_word = (body.get("word") or "").strip()
-        if not raw_word:
-            return web.json_response({"ok": False, "error": "word_missing"}, status=400)
-        return await _process_add_ai_word(
-            request,
-            request["user_id"],
-            request["language"],
-            raw_word,
-            request["telegram_id"],
-            request["word_repo"],
-        )
+
+        word = (body.get("word") or "").strip()
+        translation = (body.get("translation") or "").strip()
+        example = (body.get("example") or "").strip() or None
+        level = (body.get("level") or "").strip() or None
+
+        if not word or not translation:
+            return web.json_response({"ok": False, "error": "missing_fields"}, status=400)
+
+        try:
+            new_id = await request["word_repo"].add_single_word(
+                request["user_id"], request["language"], word, translation, example, level
+            )
+            if not new_id:
+                return web.json_response({"ok": False, "error": "duplicate"}, status=409)
+            return web.json_response({"ok": True, "result": {"id": new_id}})
+        except aiosqlite.IntegrityError:
+            return web.json_response({"ok": False, "error": "duplicate"}, status=409)
 
     async def add_words_batch(request: web.Request) -> web.Response:
         """Batch add words for the current user and language."""
@@ -265,7 +272,7 @@ def setup_routes_words(app: web.Application) -> None:
 
     # specific routes must be registered before parameterized ones
     app.router.add_post("/api/words/batch", add_words_batch)
-    app.router.add_post("/api/words", add_word)
+    app.router.add_post("/api/words", create_word)
     app.router.add_post("/api/external/words", add_word_external)
     app.router.add_get("/api/words/export", export_words)
     app.router.add_get("/api/words/search", search_words)

@@ -118,13 +118,20 @@ export function clearSearch(shouldFocus = true) {
   checkSearchActions(0);
 }
 
-export function openEdit(w) {
-  editWordId = w.id;
-  document.getElementById("edit-word").value = w.word;
-  document.getElementById("edit-translation").value = w.translation;
-  document.getElementById("edit-example").value = w.example || "";
+export function openEdit(w = null) {
+  const isNew = !w;
+  editWordId = isNew ? null : w.id;
 
-  const levelVal = w.level || "";
+  const title = document.querySelector(".edit-sheet-title");
+  if (title) title.textContent = isNew ? "Add Word" : "Edit Word";
+
+  document.getElementById("edit-word").value = isNew ? "" : w.word;
+  document.getElementById("edit-translation").value = isNew
+    ? ""
+    : w.translation;
+  document.getElementById("edit-example").value = isNew ? "" : w.example || "";
+
+  const levelVal = isNew ? "" : w.level || "";
   const levelInput = document.getElementById("edit-level");
   const levelDisp = document.getElementById("edit-level-display");
   if (levelInput) levelInput.value = levelVal;
@@ -278,82 +285,40 @@ export async function executeBulkDelete() {
   }
 }
 
-export async function addWordWithAI(word, btn) {
-  if (isSubmitting || !word) return;
-  isSubmitting = true;
-
-  const originalContent = btn.innerHTML;
-  btn.classList.add("is-loading");
-  btn.disabled = true;
-  btn.innerHTML = `<span class="spinner"></span> Generating...`;
-
-  try {
-    const res = await API.post("/api/words", { word });
-    if (res.ok && res.result) {
-      const added = res.result;
-      if (added.added === 0) {
-        UI.toast(T.WORD_DUPLICATE, "info");
-      } else {
-        UI.toast(`Added: ${added.word}`, "success");
-      }
-
-      // Show the newly added word as the sole result
-      _resetSearchInput();
-      const results = document.getElementById("search-results");
-      results.innerHTML = "";
-      results.appendChild(createWordRow(added));
-      checkSearchActions(1);
-
-      state.currentStats = null; // Trigger home stats refresh
-    } else {
-      UI.toast(T.WORD_ADD_FAIL, "error");
-    }
-  } catch (e) {
-    UI.toast(T.WORD_ADD_FAIL, "error");
-  } finally {
-    isSubmitting = false;
-    btn.classList.remove("is-loading");
-    btn.disabled = false;
-    btn.innerHTML = originalContent;
-  }
-}
-
 export async function saveEdit() {
   if (isEditing) return;
   const word = document.getElementById("edit-word").value.trim();
-  const trans = document.getElementById("edit-translation").value.trim();
-  const ex = document.getElementById("edit-example").value.trim();
+  const translation = document.getElementById("edit-translation").value.trim();
+  const example = document.getElementById("edit-example").value.trim();
   const level = document.getElementById("edit-level").value.trim();
+
+  if (!word || !translation) {
+    UI.toast("Word and translation are required", "error");
+    return;
+  }
 
   isEditing = true;
   try {
-    await API.patch(`/api/words/${editWordId}`, {
-      word,
-      translation: trans,
-      example: ex,
-      level,
-    });
+    if (editWordId) {
+      await API.patch(`/api/words/${editWordId}`, {
+        word,
+        translation,
+        example,
+        level,
+      });
+      UI.toast(T.WORD_SAVED, "success");
+    } else {
+      await API.post("/api/words", { word, translation, example, level });
+      UI.toast("Word added", "success");
+    }
+
     closeEdit();
-    UI.toast(T.WORD_SAVED, "success");
     state.currentStats = null;
 
-    // Update the row in the DOM directly for immediate feedback
-    const searchInput = document.getElementById("search-input");
-    const q = searchInput ? searchInput.value : "";
-    const existingRow = document.getElementById(`wr-${editWordId}`);
-    if (existingRow) {
-      existingRow.replaceWith(
-        createWordRow(
-          {
-            id: editWordId,
-            word,
-            translation: trans,
-            example: ex,
-            level,
-          },
-          q,
-        ),
-      );
+    // Refresh search results if we are on the search screen
+    if (document.getElementById("screen-search").classList.contains("active")) {
+      const q = document.getElementById("search-input")?.value || "";
+      if (q) onSearchInput(q);
     }
   } catch (e) {
     UI.toast(
@@ -451,7 +416,7 @@ function _buildAddSuggestion(q) {
         </div>
       </div>
       <button class="btn btn-sm" style="width: auto; margin: 0; padding: 10px 24px; flex-shrink: 0;"
-        onclick="addWordWithAI('${esc(q)}', this)">
+        onclick="openEdit({word: '${esc(q)}', translation: ''})">
         Add
       </button>
     </div>

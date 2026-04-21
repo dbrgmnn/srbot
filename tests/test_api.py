@@ -215,11 +215,11 @@ async def test_delete_word(client: TestClient):
 
 
 @pytest.mark.asyncio
-async def test_add_word_ai_unavailable(client: TestClient):
-    """POST /api/words must return 503 when Gemini translator is not configured."""
+async def test_add_word_manual_invalid(client: TestClient):
+    """POST /api/words must return 400 when manual fields are missing."""
     resp = await client.post("/api/words", json={"word": "tree"}, headers=_headers())
-    assert resp.status == 503
-    assert (await resp.json())["error"] == "ai_service_unavailable"
+    assert resp.status == 400
+    assert (await resp.json())["error"] == "missing_fields"
 
 
 # ---------------------------------------------------------------------------
